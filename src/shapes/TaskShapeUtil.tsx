@@ -245,3 +245,73 @@ export function seedMockTasks(editor: Editor) {
     editor.zoomToFit({ animation: { duration: 200 } });
   }
 }
+
+export interface ParsedMarkdownTask {
+  title: string;
+  completed: boolean;
+}
+
+export function parseTasksMarkdown(markdown: string): ParsedMarkdownTask[] {
+  const lines = markdown.split(/\r?\n/);
+  const tasks: ParsedMarkdownTask[] = [];
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    // Detect tasks in format "- [ ]" or "- [x]" or "- [X]" (and support "* [ ]" lists)
+    const match = trimmed.match(/^[-*]\s*\[([ xX])\]\s*(.+)$/);
+    if (match) {
+      const isCompleted = match[1].toLowerCase() === 'x';
+      const title = match[2].trim();
+      if (title.length > 0) {
+        tasks.push({
+          title,
+          completed: isCompleted,
+        });
+      }
+    }
+  }
+
+  return tasks;
+}
+
+export function loadTasksFromMarkdown(editor: Editor, markdown: string): number {
+  const parsedTasks = parseTasksMarkdown(markdown);
+  if (parsedTasks.length === 0) return 0;
+
+  // Clear existing task shapes on canvas
+  const existingShapes = editor
+    .getCurrentPageShapes()
+    .filter((s) => (s as any).type === 'task');
+
+  if (existingShapes.length > 0) {
+    editor.deleteShapes(existingShapes.map((s) => s.id));
+  }
+
+  const cols = 3;
+  const cardWidth = 320;
+  const cardHeight = 110;
+  const gapX = 40;
+  const gapY = 30;
+
+  const shapesToCreate = parsedTasks.map((task, index) => {
+    const col = index % cols;
+    const row = Math.floor(index / cols);
+    return {
+      id: createShapeId(),
+      type: 'task' as const,
+      x: 80 + col * (cardWidth + gapX),
+      y: 80 + row * (cardHeight + gapY),
+      props: {
+        w: cardWidth,
+        h: cardHeight,
+        title: task.title,
+        completed: task.completed,
+        priority: 'P1' as const,
+      },
+    };
+  });
+
+  (editor.createShapes as any)(shapesToCreate);
+  editor.zoomToFit({ animation: { duration: 250 } });
+  return parsedTasks.length;
+}
