@@ -1,0 +1,6 @@
+{
+  "name": "AnTaskCanvas",
+  "description": "Infinite canvas task planner by AnAppWiLos for developers with draggable task cards.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
