@@ -171,78 +171,93 @@ export class TaskShapeUtil extends ShapeUtil<any> {
   }
 }
 
-export const INITIAL_MOCK_TASKS: Array<{
-  id: string;
-  x: number;
-  y: number;
+export type GroupShapeProps = {
+  w: number;
+  h: number;
   title: string;
-  priority: TaskPriority;
-  completed: boolean;
-}> = [
-  {
-    id: 'task-1',
-    x: 80,
-    y: 80,
-    title: 'Setup Render Web Service & build pipeline',
-    priority: 'P0',
-    completed: false,
-  },
-  {
-    id: 'task-2',
-    x: 440,
-    y: 80,
-    title: 'Configure TypeScript strict paths & tsconfig aliases',
-    priority: 'P1',
-    completed: true,
-  },
-  {
-    id: 'task-3',
-    x: 800,
-    y: 80,
-    title: 'Implement infinite canvas spatial viewport coordinates',
-    priority: 'P0',
-    completed: false,
-  },
-  {
-    id: 'task-4',
-    x: 260,
-    y: 230,
-    title: 'Optimize shape bounding box collision & hit-testing',
-    priority: 'P2',
-    completed: false,
-  },
-  {
-    id: 'task-5',
-    x: 620,
-    y: 230,
-    title: 'Refactor developer hotkeys & quick action palette',
-    priority: 'P3',
-    completed: false,
-  },
-];
+  count: number;
+  completedCount: number;
+};
 
-export function seedMockTasks(editor: Editor) {
-  const existingTaskShapes = editor
-    .getCurrentPageShapes()
-    .filter((s) => (s as any).type === 'task');
+export type ITaskGroupShape = TLBaseShape<'task-group', GroupShapeProps>;
 
-  if (existingTaskShapes.length === 0) {
-    const shapesToCreate = INITIAL_MOCK_TASKS.map((task) => ({
-      id: createShapeId(task.id),
-      type: 'task' as const,
-      x: task.x,
-      y: task.y,
-      props: {
-        w: 320,
-        h: 110,
-        title: task.title,
-        completed: task.completed,
-        priority: task.priority,
-      },
-    }));
+export class TaskGroupShapeUtil extends ShapeUtil<any> {
+  static override type = 'task-group' as const;
 
-    (editor.createShapes as any)(shapesToCreate);
-    editor.zoomToFit({ animation: { duration: 200 } });
+  static override props: RecordProps<any> = {
+    w: T.number,
+    h: T.number,
+    title: T.string,
+    count: T.number,
+    completedCount: T.number,
+  };
+
+  getDefaultProps(): GroupShapeProps {
+    return {
+      w: 360,
+      h: 300,
+      title: 'Section',
+      count: 0,
+      completedCount: 0,
+    };
+  }
+
+  getGeometry(shape: ITaskGroupShape) {
+    return new Rectangle2d({
+      width: shape.props.w,
+      height: shape.props.h,
+      isFilled: true,
+    });
+  }
+
+  getIndicatorPath(shape: ITaskGroupShape) {
+    if (typeof Path2D !== 'undefined') {
+      const path = new Path2D();
+      if (typeof path.roundRect === 'function') {
+        path.roundRect(0, 0, shape.props.w, shape.props.h, 16);
+      } else {
+        path.rect(0, 0, shape.props.w, shape.props.h);
+      }
+      return path;
+    }
+    return undefined;
+  }
+
+  component(shape: ITaskGroupShape) {
+    const { title, count, completedCount, w, h } = shape.props;
+
+    return (
+      <HTMLContainer
+        id={shape.id}
+        style={{
+          width: w,
+          height: h,
+          pointerEvents: 'none',
+        }}
+      >
+        <div className="w-full h-full rounded-2xl bg-zinc-900/40 border border-zinc-800/80 p-4 flex flex-col justify-between select-none shadow-sm backdrop-blur-xs transition-colors">
+          {/* Header */}
+          <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
+            <div className="flex items-center gap-2">
+              <span className="text-emerald-500 font-mono text-xs font-bold">##</span>
+              <h2 className="text-sm font-semibold text-zinc-100 font-mono tracking-tight truncate max-w-[220px]">
+                {title}
+              </h2>
+            </div>
+            {count > 0 && (
+              <span className="text-[11px] font-mono text-zinc-500 tabular-nums">
+                {completedCount > 0
+                  ? `${completedCount}/${count} done`
+                  : `${count} ${count === 1 ? 'task' : 'tasks'}`}
+              </span>
+            )}
+          </div>
+
+          {/* Guide background area */}
+          <div className="flex-1 w-full rounded-xl border border-dashed border-zinc-800/30 mt-3" />
+        </div>
+      </HTMLContainer>
+    );
   }
 }
 
@@ -251,19 +266,63 @@ export interface ParsedMarkdownTask {
   completed: boolean;
 }
 
-export function parseTasksMarkdown(markdown: string): ParsedMarkdownTask[] {
+export interface ParsedGroup {
+  title: string;
+  tasks: ParsedMarkdownTask[];
+}
+
+export const INITIAL_MOCK_GROUPS: ParsedGroup[] = [
+  {
+    title: 'Infraestructura & Setup',
+    tasks: [
+      { title: 'Setup Render Web Service & build pipeline', completed: false },
+      { title: 'Configure TypeScript strict paths & tsconfig aliases', completed: true },
+    ],
+  },
+  {
+    title: 'Canvas & Interacción',
+    tasks: [
+      { title: 'Implement infinite canvas spatial viewport coordinates', completed: false },
+      { title: 'Optimize shape bounding box collision & hit-testing', completed: false },
+      { title: 'Refactor developer hotkeys & quick action palette', completed: false },
+    ],
+  },
+];
+
+export function parseTasksMarkdown(markdown: string): ParsedGroup[] {
   const lines = markdown.split(/\r?\n/);
-  const tasks: ParsedMarkdownTask[] = [];
+  const groups: ParsedGroup[] = [];
+  let currentGroup: ParsedGroup | null = null;
 
   for (const line of lines) {
     const trimmed = line.trim();
+
+    // Detect "## Heading"
+    const headingMatch = trimmed.match(/^##\s+(.+)$/);
+    if (headingMatch) {
+      if (currentGroup) {
+        groups.push(currentGroup);
+      }
+      currentGroup = {
+        title: headingMatch[1].trim(),
+        tasks: [],
+      };
+      continue;
+    }
+
     // Detect tasks in format "- [ ]" or "- [x]" or "- [X]" (and support "* [ ]" lists)
-    const match = trimmed.match(/^[-*]\s*\[([ xX])\]\s*(.+)$/);
-    if (match) {
-      const isCompleted = match[1].toLowerCase() === 'x';
-      const title = match[2].trim();
+    const taskMatch = trimmed.match(/^[-*]\s*\[([ xX])\]\s*(.+)$/);
+    if (taskMatch) {
+      const isCompleted = taskMatch[1].toLowerCase() === 'x';
+      const title = taskMatch[2].trim();
       if (title.length > 0) {
-        tasks.push({
+        if (!currentGroup) {
+          currentGroup = {
+            title: 'General',
+            tasks: [],
+          };
+        }
+        currentGroup.tasks.push({
           title,
           completed: isCompleted,
         });
@@ -271,47 +330,120 @@ export function parseTasksMarkdown(markdown: string): ParsedMarkdownTask[] {
     }
   }
 
-  return tasks;
+  if (currentGroup) {
+    groups.push(currentGroup);
+  }
+
+  return groups;
 }
 
-export function loadTasksFromMarkdown(editor: Editor, markdown: string): number {
-  const parsedTasks = parseTasksMarkdown(markdown);
-  if (parsedTasks.length === 0) return 0;
-
-  // Clear existing task shapes on canvas
+export function populateCanvasWithGroups(editor: Editor, groups: ParsedGroup[]): { taskCount: number; groupCount: number } {
+  // Clear existing task and group shapes on canvas
   const existingShapes = editor
     .getCurrentPageShapes()
-    .filter((s) => (s as any).type === 'task');
+    .filter((s) => (s as any).type === 'task' || (s as any).type === 'task-group');
 
   if (existingShapes.length > 0) {
     editor.deleteShapes(existingShapes.map((s) => s.id));
   }
 
-  const cols = 3;
   const cardWidth = 320;
   const cardHeight = 110;
-  const gapX = 40;
-  const gapY = 30;
+  const cardGap = 14;
+  const groupPaddingX = 20;
+  const groupHeaderHeight = 56;
+  const groupPaddingTop = 16;
+  const groupPaddingBottom = 20;
 
-  const shapesToCreate = parsedTasks.map((task, index) => {
-    const col = index % cols;
-    const row = Math.floor(index / cols);
-    return {
+  const groupWidth = cardWidth + groupPaddingX * 2; // 360px
+  const groupSpacingX = groupWidth + 40; // 400px
+
+  const groupShapesToCreate: any[] = [];
+  const taskShapesToCreate: any[] = [];
+
+  let totalTasks = 0;
+
+  groups.forEach((group, groupIndex) => {
+    const taskCount = group.tasks.length;
+    totalTasks += taskCount;
+    const completedCount = group.tasks.filter((t) => t.completed).length;
+
+    const calculatedHeight = Math.max(
+      160,
+      groupHeaderHeight +
+        groupPaddingTop +
+        taskCount * cardHeight +
+        Math.max(0, taskCount - 1) * cardGap +
+        groupPaddingBottom
+    );
+
+    const groupX = 80 + groupIndex * groupSpacingX;
+    const groupY = 80;
+
+    // Create Group container shape
+    groupShapesToCreate.push({
       id: createShapeId(),
-      type: 'task' as const,
-      x: 80 + col * (cardWidth + gapX),
-      y: 80 + row * (cardHeight + gapY),
+      type: 'task-group' as const,
+      x: groupX,
+      y: groupY,
       props: {
-        w: cardWidth,
-        h: cardHeight,
-        title: task.title,
-        completed: task.completed,
-        priority: 'P1' as const,
+        w: groupWidth,
+        h: calculatedHeight,
+        title: group.title,
+        count: taskCount,
+        completedCount,
       },
-    };
+    });
+
+    // Create movable Task shapes inside the group's visual bounds
+    group.tasks.forEach((task, taskIndex) => {
+      const taskX = groupX + groupPaddingX;
+      const taskY =
+        groupY +
+        groupHeaderHeight +
+        groupPaddingTop +
+        taskIndex * (cardHeight + cardGap);
+
+      taskShapesToCreate.push({
+        id: createShapeId(),
+        type: 'task' as const,
+        x: taskX,
+        y: taskY,
+        props: {
+          w: cardWidth,
+          h: cardHeight,
+          title: task.title,
+          completed: task.completed,
+          priority: (taskIndex === 0 ? 'P0' : taskIndex === 1 ? 'P1' : 'P2') as TaskPriority,
+        },
+      });
+    });
   });
 
-  (editor.createShapes as any)(shapesToCreate);
+  // Create groups first so they render underneath, then task cards on top
+  if (groupShapesToCreate.length > 0) {
+    (editor.createShapes as any)(groupShapesToCreate);
+  }
+  if (taskShapesToCreate.length > 0) {
+    (editor.createShapes as any)(taskShapesToCreate);
+  }
+
   editor.zoomToFit({ animation: { duration: 250 } });
-  return parsedTasks.length;
+  return { taskCount: totalTasks, groupCount: groups.length };
+}
+
+export function seedMockTasks(editor: Editor) {
+  const existingShapes = editor
+    .getCurrentPageShapes()
+    .filter((s) => (s as any).type === 'task' || (s as any).type === 'task-group');
+
+  if (existingShapes.length === 0) {
+    populateCanvasWithGroups(editor, INITIAL_MOCK_GROUPS);
+  }
+}
+
+export function loadTasksFromMarkdown(editor: Editor, markdown: string): { taskCount: number; groupCount: number } {
+  const parsedGroups = parseTasksMarkdown(markdown);
+  if (parsedGroups.length === 0) return { taskCount: 0, groupCount: 0 };
+  return populateCanvasWithGroups(editor, parsedGroups);
 }

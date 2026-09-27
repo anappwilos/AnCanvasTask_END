@@ -4,14 +4,21 @@ import {
   loadTasksFromMarkdown,
   parseTasksMarkdown,
   seedMockTasks,
+  TaskGroupShapeUtil,
   TaskShapeUtil,
 } from './shapes/TaskShapeUtil';
 
 const SAMPLE_MARKDOWN = `# TASKS
 
+## Autenticación
+
 - [ ] Crear login
-- [x] Crear API
-- [ ] Añadir perfil`;
+- [ ] Añadir Google OAuth
+
+## Perfil
+
+- [ ] Crear pantalla de perfil
+- [x] Añadir avatar`;
 
 export default function App() {
   const [editor, setEditor] = useState<Editor | null>(null);
@@ -19,13 +26,13 @@ export default function App() {
   const [markdownInput, setMarkdownInput] = useState<string>(SAMPLE_MARKDOWN);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const customShapeUtils = useMemo(() => [TaskShapeUtil], []);
+  const customShapeUtils = useMemo(() => [TaskGroupShapeUtil, TaskShapeUtil], []);
 
   const handleMount = useCallback((editorInstance: Editor) => {
     setEditor(editorInstance);
     // Apply sleek dark mode preference
     editorInstance.user.updateUserPreferences({ colorScheme: 'dark' });
-    // Seed the initial movable mock task cards
+    // Seed the initial movable mock task cards organized by groups
     seedMockTasks(editorInstance);
   }, []);
 
@@ -37,13 +44,15 @@ export default function App() {
 
   const handleResetLayout = useCallback(() => {
     if (editor) {
-      // Remove current tasks and re-seed
-      const currentTasks = editor.getCurrentPageShapes().filter((s) => (s as any).type === 'task');
-      if (currentTasks.length > 0) {
-        editor.deleteShapes(currentTasks.map((s) => s.id));
+      // Remove current tasks and groups and re-seed
+      const currentShapes = editor
+        .getCurrentPageShapes()
+        .filter((s) => (s as any).type === 'task' || (s as any).type === 'task-group');
+      if (currentShapes.length > 0) {
+        editor.deleteShapes(currentShapes.map((s) => s.id));
       }
       seedMockTasks(editor);
-      showToast('Mock tasks reset');
+      showToast('Canvas reset to default groups');
     }
   }, [editor]);
 
@@ -54,18 +63,23 @@ export default function App() {
     }, 2500);
   };
 
-  const detectedTasksCount = useMemo(() => {
-    return parseTasksMarkdown(markdownInput).length;
+  const parsedStats = useMemo(() => {
+    const groups = parseTasksMarkdown(markdownInput);
+    const totalTasks = groups.reduce((acc, g) => acc + g.tasks.length, 0);
+    return {
+      groupCount: groups.length,
+      taskCount: totalTasks,
+    };
   }, [markdownInput]);
 
   const handleApplyMarkdown = useCallback(() => {
     if (!editor) return;
-    const count = loadTasksFromMarkdown(editor, markdownInput);
-    if (count > 0) {
+    const { taskCount, groupCount } = loadTasksFromMarkdown(editor, markdownInput);
+    if (taskCount > 0 || groupCount > 0) {
       setIsImportModalOpen(false);
-      showToast(`${count} ${count === 1 ? 'task' : 'tasks'} imported from Markdown`);
+      showToast(`${taskCount} ${taskCount === 1 ? 'task' : 'tasks'} loaded across ${groupCount} ${groupCount === 1 ? 'group' : 'groups'}`);
     } else {
-      showToast('No tasks found (format: - [ ] or - [x])');
+      showToast('No tasks or headings found in Markdown');
     }
   }, [editor, markdownInput]);
 
@@ -85,9 +99,9 @@ export default function App() {
         <div className="hidden md:flex items-center gap-3 text-xs font-mono text-zinc-400">
           <span className="text-zinc-500">TASKS.md</span>
           <span aria-hidden="true" className="text-zinc-700">·</span>
-          <span>- [ ] / - [x] parser</span>
+          <span>## Headings as Groups</span>
           <span aria-hidden="true" className="text-zinc-700">·</span>
-          <span>Movable Cards</span>
+          <span>Movable Task Cards</span>
         </div>
 
         {/* Zone 3: Primary developer actions */}
@@ -151,7 +165,7 @@ export default function App() {
                   Import TASKS.md
                 </h2>
                 <p className="text-xs text-zinc-400 mt-0.5">
-                  Paste Markdown containing <code className="text-zinc-300">- [ ]</code> and <code className="text-zinc-300">- [x]</code> tasks
+                  <code className="text-emerald-400 font-bold">##</code> creates visual groups, and <code className="text-zinc-300">- [ ]</code> / <code className="text-zinc-300">- [x]</code> creates movable task cards
                 </p>
               </div>
               <button
@@ -191,23 +205,31 @@ export default function App() {
                     setIsImportModalOpen(false);
                   }
                 }}
-                rows={9}
-                placeholder={`# TASKS\n\n- [ ] Crear login\n- [x] Crear API\n- [ ] Añadir perfil`}
+                rows={11}
+                placeholder={`# TASKS\n\n## Autenticación\n- [ ] Crear login\n- [ ] Añadir Google OAuth\n\n## Perfil\n- [ ] Crear pantalla de perfil\n- [x] Añadir avatar`}
                 className="w-full bg-zinc-950 border border-zinc-800 focus:border-emerald-500 rounded-lg p-3 text-xs font-mono text-zinc-200 focus:outline-none resize-none leading-relaxed"
                 autoFocus
               />
 
               {/* Status info */}
               <div className="flex items-center justify-between text-xs font-mono text-zinc-400 pt-1">
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`inline-block w-2 h-2 rounded-full ${
-                      detectedTasksCount > 0 ? 'bg-emerald-400' : 'bg-zinc-600'
-                    }`}
-                  />
-                  <span>
-                    {detectedTasksCount} {detectedTasksCount === 1 ? 'task' : 'tasks'} detected
-                  </span>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1.5">
+                    <span
+                      className={`inline-block w-2 h-2 rounded-full ${
+                        parsedStats.groupCount > 0 ? 'bg-emerald-400' : 'bg-zinc-600'
+                      }`}
+                    />
+                    <span>
+                      {parsedStats.groupCount} {parsedStats.groupCount === 1 ? 'group' : 'groups'}
+                    </span>
+                  </div>
+                  <span className="text-zinc-700">·</span>
+                  <div className="flex items-center gap-1.5">
+                    <span>
+                      {parsedStats.taskCount} {parsedStats.taskCount === 1 ? 'task' : 'tasks'}
+                    </span>
+                  </div>
                 </div>
                 <span className="text-[11px] text-zinc-500">Press ⌘+Enter to import</span>
               </div>
@@ -225,14 +247,14 @@ export default function App() {
               <button
                 type="button"
                 onClick={handleApplyMarkdown}
-                disabled={detectedTasksCount === 0}
+                disabled={parsedStats.groupCount === 0 && parsedStats.taskCount === 0}
                 className={`px-4 py-1.5 text-xs font-mono font-medium rounded-md transition-colors cursor-pointer flex items-center gap-1.5 ${
-                  detectedTasksCount > 0
+                  parsedStats.taskCount > 0 || parsedStats.groupCount > 0
                     ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm'
                     : 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
                 }`}
               >
-                Load to Canvas ({detectedTasksCount})
+                Load to Canvas ({parsedStats.groupCount} {parsedStats.groupCount === 1 ? 'group' : 'groups'})
               </button>
             </div>
           </div>
