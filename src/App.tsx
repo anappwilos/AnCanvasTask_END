@@ -24,6 +24,7 @@ import {
   scanTaskBlocks,
   slugify,
   updateTaskInMarkdown,
+  validateMarkdownDocument,
 } from './utils/markdownSync';
 
 const SAMPLE_MARKDOWN = `# TASKS
@@ -68,6 +69,7 @@ export default function App() {
   const [isViewMarkdownOpen, setIsViewMarkdownOpen] = useState<boolean>(false);
   const [isSanityModalOpen, setIsSanityModalOpen] = useState<boolean>(false);
   const [isAutoLayoutConfirmOpen, setIsAutoLayoutConfirmOpen] = useState<boolean>(false);
+  const [isProblemsModalOpen, setIsProblemsModalOpen] = useState<boolean>(false);
   const [deleteWarningState, setDeleteWarningState] = useState<DeleteWarningInfo | null>(null);
 
   // New task form state
@@ -93,6 +95,12 @@ export default function App() {
   markdownRef.current = markdownInput;
 
   const customShapeUtils = useMemo(() => [TaskGroupShapeUtil, TaskShapeUtil], []);
+
+  // Validation Report computed reactively
+  const validationReport = useMemo(
+    () => validateMarkdownDocument(markdownInput),
+    [markdownInput]
+  );
 
   // Load initial Sanity configuration
   useEffect(() => {
@@ -338,6 +346,30 @@ export default function App() {
     }
   }, [editor, markdownInput, triggerDebouncedVisualSave]);
 
+  // Focus a specific task on the canvas
+  const handleFocusTaskOnCanvas = (targetTaskId?: string, targetTitle?: string) => {
+    if (!editor || !targetTaskId) return;
+
+    const shapes = editor.getCurrentPageShapes();
+    const taskShape = shapes.find((s) => {
+      if ((s as any).type !== 'task') return false;
+      const tProps = (s as any).props || {};
+      return (
+        tProps.taskId?.toLowerCase() === targetTaskId.toLowerCase() ||
+        tProps.title?.toLowerCase() === targetTitle?.toLowerCase()
+      );
+    });
+
+    if (taskShape) {
+      setIsProblemsModalOpen(false);
+      editor.select(taskShape.id);
+      editor.zoomToSelection({ animation: { duration: 300 } });
+      showToast(`Enfocado: "${(taskShape.props as any)?.title || targetTaskId}"`);
+    } else {
+      showToast(`No se encontró la tarjeta #${targetTaskId} en el canvas`);
+    }
+  };
+
   // Create New Task Handler
   const handleCreateTask = (e: React.FormEvent) => {
     e.preventDefault();
@@ -515,12 +547,43 @@ export default function App() {
           </h1>
         </div>
 
-        {/* Zone 2: Status indicator & Persistence Badge */}
+        {/* Zone 2: Status indicator, Issues Badge & Persistence Badge */}
         <div className="hidden md:flex items-center gap-3 text-xs font-mono text-zinc-400">
           <span className="text-zinc-500">TASKS.md</span>
           <span aria-hidden="true" className="text-zinc-700">·</span>
-          <span>Auto Layout (DAG)</span>
+
+          {/* Markdown Validation Issues Badge */}
+          {validationReport.issues.length > 0 ? (
+            <button
+              type="button"
+              onClick={() => setIsProblemsModalOpen(true)}
+              className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded-md border text-[11px] font-mono font-medium transition-all cursor-pointer ${
+                validationReport.hasErrors
+                  ? 'bg-rose-950/70 border-rose-700/80 text-rose-300 hover:bg-rose-900/80'
+                  : 'bg-amber-950/70 border-amber-700/80 text-amber-300 hover:bg-amber-900/80'
+              }`}
+              title="Abrir panel de problemas detectados en TASKS.md"
+            >
+              <span className="text-xs">⚠</span>
+              <span>
+                {validationReport.issues.length}{' '}
+                {validationReport.issues.length === 1 ? 'problema' : 'problemas'}
+              </span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setIsProblemsModalOpen(true)}
+              className="flex items-center gap-1 px-2 py-0.5 rounded bg-zinc-800/60 border border-zinc-700/60 hover:border-zinc-500 text-emerald-400 text-[11px] font-mono transition-colors cursor-pointer"
+              title="TASKS.md verificado sin advertencias"
+            >
+              <span>✔</span>
+              <span>Válido</span>
+            </button>
+          )}
+
           <span aria-hidden="true" className="text-zinc-700">·</span>
+
           {/* Visual Sync Badge */}
           <button
             type="button"
@@ -601,7 +664,7 @@ export default function App() {
           <button
             type="button"
             onClick={() => setIsImportModalOpen(true)}
-            className="px-3 py-1.5 text-xs font-mono font-medium text-zinc-300 bg-zinc-800 hover:bg-zinc-700 hover:text-zinc-100 border border-zinc-700/60 rounded-md transition-colors cursor-pointer flex items-center gap-1.5"
+            className="px-3 py-1.5 text-xs font-mono font-medium text-emerald-300 bg-emerald-950/60 hover:bg-emerald-900/70 border border-emerald-700/60 rounded-md transition-colors cursor-pointer flex items-center gap-1.5"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -642,6 +705,156 @@ export default function App() {
           </div>
         )}
       </main>
+
+      {/* Modal: Panel de Problemas del Documento */}
+      {isProblemsModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs">
+          <div
+            className="w-full max-w-2xl bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150 max-h-[85vh]"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="problems-modal-title"
+          >
+            <div className="px-5 py-4 border-b border-zinc-800 flex items-center justify-between">
+              <div>
+                <h2 id="problems-modal-title" className="text-sm font-semibold text-zinc-100 font-mono flex items-center gap-2">
+                  <span
+                    className={`w-2.5 h-2.5 rounded-full ${
+                      validationReport.hasErrors
+                        ? 'bg-rose-500'
+                        : validationReport.hasWarnings
+                        ? 'bg-amber-400'
+                        : 'bg-emerald-400'
+                    }`}
+                  />
+                  Panel de problemas — TASKS.md
+                </h2>
+                <p className="text-xs text-zinc-400 mt-0.5">
+                  Tolerancia a errores: la app sigue cargando el contenido sin bloquear ni modificar datos sin tu consentimiento.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsProblemsModalOpen(false)}
+                className="text-zinc-400 hover:text-zinc-200 p-1 rounded transition-colors cursor-pointer"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Summary statistics bar */}
+            <div className="px-5 py-2.5 bg-zinc-950 border-b border-zinc-800 flex items-center gap-4 text-xs font-mono">
+              <span className="text-zinc-400">
+                Total:{' '}
+                <strong className="text-zinc-200">{validationReport.issues.length}</strong>
+              </span>
+              <span className="text-zinc-700">·</span>
+              <span className="text-rose-400">
+                Errores: <strong>{validationReport.errorCount}</strong>
+              </span>
+              <span className="text-zinc-700">·</span>
+              <span className="text-amber-400">
+                Avisos: <strong>{validationReport.warningCount}</strong>
+              </span>
+              <span className="text-zinc-700">·</span>
+              <span className="text-cyan-400">
+                Información: <strong>{validationReport.infoCount}</strong>
+              </span>
+            </div>
+
+            {/* Issues list */}
+            <div className="p-5 overflow-auto max-h-[50vh] flex flex-col gap-2.5">
+              {validationReport.issues.length === 0 ? (
+                <div className="py-8 text-center flex flex-col items-center justify-center gap-2">
+                  <div className="w-10 h-10 rounded-full bg-emerald-950/80 border border-emerald-700 flex items-center justify-center text-emerald-400 text-lg">
+                    ✔
+                  </div>
+                  <div className="text-xs font-mono text-zinc-200 font-semibold">
+                    No se detectaron problemas
+                  </div>
+                  <div className="text-[11px] font-mono text-zinc-500 max-w-sm">
+                    El archivo TASKS.md tiene estructura coherente, IDs únicos, prioridades válidas y dependencias resueltas.
+                  </div>
+                </div>
+              ) : (
+                validationReport.issues.map((issue) => {
+                  const badgeColor = {
+                    error: 'text-rose-400 bg-rose-950/80 border-rose-800',
+                    warning: 'text-amber-400 bg-amber-950/80 border-amber-800',
+                    info: 'text-cyan-400 bg-cyan-950/80 border-cyan-800',
+                  }[issue.severity];
+
+                  const icon = {
+                    error: '✕',
+                    warning: '⚠',
+                    info: 'ℹ',
+                  }[issue.severity];
+
+                  return (
+                    <div
+                      key={issue.id}
+                      className="p-3 rounded-lg bg-zinc-950 border border-zinc-800 flex items-start justify-between gap-3 text-xs font-mono"
+                    >
+                      <div className="flex items-start gap-2.5 flex-1 min-w-0">
+                        <span
+                          className={`px-1.5 py-0.5 text-[10px] font-bold rounded border shrink-0 mt-0.5 ${badgeColor}`}
+                        >
+                          {icon} {issue.severity.toUpperCase()}
+                        </span>
+                        <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+                          <div className="text-zinc-200 font-medium leading-snug">
+                            {issue.message}
+                          </div>
+                          {issue.details && (
+                            <div className="text-[11px] text-zinc-500 leading-normal">
+                              {issue.details}
+                            </div>
+                          )}
+                          <div className="text-[10px] text-zinc-600 mt-0.5 flex items-center gap-2">
+                            {issue.groupTitle && <span>Sección: ## {issue.groupTitle}</span>}
+                            {issue.lineIndex !== undefined && (
+                              <span>Línea aprox: {issue.lineIndex + 1}</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {issue.taskId && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleFocusTaskOnCanvas(issue.taskId, issue.taskTitle)
+                          }
+                          className="px-2 py-1 text-[11px] font-mono text-zinc-300 bg-zinc-800 hover:bg-zinc-700 rounded border border-zinc-700 shrink-0 cursor-pointer transition-colors"
+                          title="Localizar tarjeta en el canvas"
+                        >
+                          Localizar
+                        </button>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="px-5 py-3.5 bg-zinc-950/60 border-t border-zinc-800 flex items-center justify-between">
+              <span className="text-[11px] font-mono text-zinc-500">
+                Los datos no estándar se preservan intactos
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsProblemsModalOpen(false)}
+                className="px-3.5 py-1.5 text-xs font-mono text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800 rounded-md transition-colors cursor-pointer"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal: Confirmación Auto Organizar */}
       {isAutoLayoutConfirmOpen && (
@@ -1197,7 +1410,7 @@ export default function App() {
                 <button
                   type="button"
                   onClick={() => setIsSanityModalOpen(false)}
-                  className="px-3 py-1.5 text-xs font-mono text-zinc-400 hover:text-zinc-200 cursor-pointer"
+                  className="px-3.5 py-1.5 text-xs font-mono text-zinc-400 hover:text-zinc-200 cursor-pointer"
                 >
                   Cancelar
                 </button>

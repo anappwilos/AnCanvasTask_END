@@ -1,0 +1,15 @@
+services:
+  # Static Site Deployment for Render
+  - type: web
+    name: antaskcanvas
+    env: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: SAMEORIGIN

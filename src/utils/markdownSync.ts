@@ -11,15 +11,55 @@ export interface TaskBlockInfo {
   endLineIndex: number;
   rawTaskLine: string;
   detectedId?: string;
+  temporaryId: string;
   detectedTitle: string;
   detectedPriority?: TaskPriority;
+  rawPriority?: string;
   detectedBlockedBy?: string;
+  unknownMetadata: Array<{ key: string; rawLine: string }>;
   groupTitle: string;
+  isOutsideHeading: boolean;
   indentation: string;
 }
 
+export type MarkdownIssueSeverity = 'warning' | 'error' | 'info';
+
+export type MarkdownIssueType =
+  | 'missing_id'
+  | 'duplicate_id'
+  | 'unresolved_blocker'
+  | 'invalid_priority'
+  | 'unknown_metadata'
+  | 'task_outside_heading'
+  | 'empty_heading';
+
+export interface MarkdownIssue {
+  id: string;
+  type: MarkdownIssueType;
+  severity: MarkdownIssueSeverity;
+  message: string;
+  taskId?: string;
+  taskTitle?: string;
+  groupTitle?: string;
+  lineIndex?: number;
+  details?: string;
+}
+
+export interface MarkdownValidationReport {
+  issues: MarkdownIssue[];
+  hasErrors: boolean;
+  hasWarnings: boolean;
+  errorCount: number;
+  warningCount: number;
+  infoCount: number;
+  duplicateIds: Set<string>;
+  missingIdTaskIds: Set<string>;
+  unresolvedBlockerMap: Map<string, string[]>; // taskId -> missing blocker IDs
+}
+
 /**
- * Parses all task blocks and their associated groups from a Markdown string.
+ * Parses all task blocks and their associated groups from a Markdown string,
+ * detecting unknown metadata, headings, and lines without modifying the document.
  */
 export function scanTaskBlocks(markdown: string): {
   taskBlocks: TaskBlockInfo[];
@@ -29,8 +69,9 @@ export function scanTaskBlocks(markdown: string): {
   const taskBlocks: TaskBlockInfo[] = [];
   const groupHeadings: Array<{ title: string; lineIndex: number }> = [];
 
-  let currentGroup = 'General';
+  let currentGroup = '';
   let currentBlock: TaskBlockInfo | null = null;
+  let taskCounter = 0;
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
@@ -56,35 +97,72 @@ export function scanTaskBlocks(markdown: string): {
         currentBlock.endLineIndex = i - 1;
         taskBlocks.push(currentBlock);
       }
+      taskCounter++;
       currentBlock = {
         taskLineIndex: i,
         endLineIndex: i,
         rawTaskLine: line,
+        temporaryId: `temp-task-${taskCounter}`,
         detectedTitle: taskMatch[4].trim(),
-        groupTitle: currentGroup,
+        unknownMetadata: [],
+        groupTitle: currentGroup || 'General',
+        isOutsideHeading: !currentGroup,
         indentation: taskMatch[1].match(/^\s*/)?.[0] || '',
       };
       continue;
     }
 
-    // Inside a task block: detect metadata
+    // Inside a task block: detect metadata or unknown metadata lines
     if (currentBlock) {
-      const idMatch = trimmed.match(/^(?:[-*]\s*)?ID\s*:\s*(.+)$/i);
-      if (idMatch) {
-        currentBlock.detectedId = idMatch[1].trim();
+      // Sub-bullet or key-value metadata under task
+      const isSubLine =
+        line.startsWith(' ') ||
+        line.startsWith('\t') ||
+        trimmed.startsWith('-') ||
+        trimmed.startsWith('*');
+
+      if (isSubLine && trimmed.length > 0) {
+        const idMatch = trimmed.match(/^(?:[-*]\s*)?ID\s*:\s*(.+)$/i);
+        if (idMatch) {
+          currentBlock.detectedId = idMatch[1].trim();
+          currentBlock.endLineIndex = i;
+          continue;
+        }
+
+        const priorityMatch = trimmed.match(/^(?:[-*]\s*)?Priority\s*:\s*(.+)$/i);
+        if (priorityMatch) {
+          const rawP = priorityMatch[1].trim();
+          currentBlock.rawPriority = rawP;
+          const upperP = rawP.toUpperCase();
+          if (['P0', 'P1', 'P2', 'P3'].includes(upperP)) {
+            currentBlock.detectedPriority = upperP as TaskPriority;
+          }
+          currentBlock.endLineIndex = i;
+          continue;
+        }
+
+        const blockedByMatch = trimmed.match(/^(?:[-*]\s*)?Blocked\s*(?:by|-by)?\s*:\s*(.+)$/i);
+        if (blockedByMatch) {
+          currentBlock.detectedBlockedBy = blockedByMatch[1].trim();
+          currentBlock.endLineIndex = i;
+          continue;
+        }
+
+        // Unknown metadata line (e.g. "Owner: Nicolas", "Estimate: 2h")
+        const genericMetaMatch = trimmed.match(/^(?:[-*]\s*)?([a-zA-Z0-9_-]+)\s*:\s*(.+)$/);
+        if (genericMetaMatch) {
+          currentBlock.unknownMetadata.push({
+            key: genericMetaMatch[1],
+            rawLine: line,
+          });
+          currentBlock.endLineIndex = i;
+          continue;
+        }
       }
 
-      const priorityMatch = trimmed.match(/^(?:[-*]\s*)?Priority\s*:\s*(P[0-3])$/i);
-      if (priorityMatch) {
-        currentBlock.detectedPriority = priorityMatch[1].toUpperCase() as TaskPriority;
+      if (trimmed.length > 0 && !trimmed.startsWith('#')) {
+        currentBlock.endLineIndex = i;
       }
-
-      const blockedByMatch = trimmed.match(/^(?:[-*]\s*)?Blocked\s*(?:by|-by)?\s*:\s*(.+)$/i);
-      if (blockedByMatch) {
-        currentBlock.detectedBlockedBy = blockedByMatch[1].trim();
-      }
-
-      currentBlock.endLineIndex = i;
     }
   }
 
@@ -93,6 +171,197 @@ export function scanTaskBlocks(markdown: string): {
   }
 
   return { taskBlocks, groupHeadings };
+}
+
+/**
+ * Validates a Markdown document for errors and warnings:
+ * - Tasks without ID
+ * - Duplicate IDs
+ * - Blocked by pointing to nonexistent IDs
+ * - Invalid priorities
+ * - Unknown metadata
+ * - Tasks outside headings
+ * - Empty headings
+ */
+export function validateMarkdownDocument(markdown: string): MarkdownValidationReport {
+  const { taskBlocks, groupHeadings } = scanTaskBlocks(markdown);
+  const issues: MarkdownIssue[] = [];
+
+  const duplicateIds = new Set<string>();
+  const missingIdTaskIds = new Set<string>();
+  const unresolvedBlockerMap = new Map<string, string[]>();
+
+  const idCounts = new Map<string, TaskBlockInfo[]>();
+  const allKnownIds = new Set<string>();
+
+  // 1. Index all detected IDs and check for missing IDs
+  taskBlocks.forEach((block, idx) => {
+    if (!block.detectedId) {
+      const tempId = block.temporaryId || `temp-${idx + 1}`;
+      missingIdTaskIds.add(tempId);
+      issues.push({
+        id: `missing-id-${idx}`,
+        type: 'missing_id',
+        severity: 'warning',
+        message: `Tarea sin ID: "${block.detectedTitle || 'Sin título'}"`,
+        taskId: tempId,
+        taskTitle: block.detectedTitle,
+        groupTitle: block.groupTitle,
+        lineIndex: block.taskLineIndex,
+        details: 'Se generó un ID temporal en el canvas. Edita la tarea para asignarle un ID permanente.',
+      });
+    } else {
+      const normalized = block.detectedId.toLowerCase();
+      allKnownIds.add(normalized);
+      if (!idCounts.has(normalized)) {
+        idCounts.set(normalized, []);
+      }
+      idCounts.get(normalized)!.push(block);
+    }
+  });
+
+  // 2. Check for Duplicate IDs
+  idCounts.forEach((blocks, id) => {
+    if (blocks.length > 1) {
+      duplicateIds.add(id);
+      blocks.forEach((block, i) => {
+        issues.push({
+          id: `dup-id-${id}-${i}`,
+          type: 'duplicate_id',
+          severity: 'error',
+          message: `ID duplicado #${id} en "${block.detectedTitle}"`,
+          taskId: block.detectedId,
+          taskTitle: block.detectedTitle,
+          groupTitle: block.groupTitle,
+          lineIndex: block.taskLineIndex,
+          details: `Hay ${blocks.length} tareas con el mismo ID #${id}. Cambia uno de los IDs para evitar conflictos.`,
+        });
+      });
+    }
+  });
+
+  // 3. Check for Unresolved Blockers (Blocked by pointing to nonexistent ID)
+  taskBlocks.forEach((block, idx) => {
+    if (block.detectedBlockedBy) {
+      const blockerIds = block.detectedBlockedBy
+        .split(',')
+        .map((b) => b.trim().toLowerCase())
+        .filter(Boolean);
+
+      const missingForThisTask: string[] = [];
+
+      blockerIds.forEach((bId) => {
+        if (!allKnownIds.has(bId)) {
+          missingForThisTask.push(bId);
+          issues.push({
+            id: `unresolved-blocker-${block.detectedId || idx}-${bId}`,
+            type: 'unresolved_blocker',
+            severity: 'warning',
+            message: `"${block.detectedTitle}" depende de un ID inexistente: #${bId}`,
+            taskId: block.detectedId || block.temporaryId,
+            taskTitle: block.detectedTitle,
+            groupTitle: block.groupTitle,
+            lineIndex: block.taskLineIndex,
+            details: `La tarea #${block.detectedId || 'sin-id'} tiene "Blocked by: ${bId}", pero no existe ninguna tarea con ese ID.`,
+          });
+        }
+      });
+
+      if (missingForThisTask.length > 0) {
+        unresolvedBlockerMap.set(
+          (block.detectedId || block.temporaryId).toLowerCase(),
+          missingForThisTask
+        );
+      }
+    }
+  });
+
+  // 4. Check for Invalid Priorities
+  taskBlocks.forEach((block, idx) => {
+    if (block.rawPriority && !block.detectedPriority) {
+      issues.push({
+        id: `invalid-prio-${block.detectedId || idx}`,
+        type: 'invalid_priority',
+        severity: 'warning',
+        message: `Prioridad desconocida "${block.rawPriority}" en "${block.detectedTitle}"`,
+        taskId: block.detectedId || block.temporaryId,
+        taskTitle: block.detectedTitle,
+        groupTitle: block.groupTitle,
+        lineIndex: block.taskLineIndex,
+        details: 'Valores válidos: P0 (crítica), P1 (alta), P2 (media), P3 (baja). Se usará P1 en el canvas.',
+      });
+    }
+  });
+
+  // 5. Check for Unknown Metadata (Preserved info)
+  taskBlocks.forEach((block, idx) => {
+    if (block.unknownMetadata.length > 0) {
+      block.unknownMetadata.forEach((meta, mIdx) => {
+        issues.push({
+          id: `unknown-meta-${block.detectedId || idx}-${mIdx}`,
+          type: 'unknown_metadata',
+          severity: 'info',
+          message: `Metadato no estándar en "${block.detectedTitle}": ${meta.key}`,
+          taskId: block.detectedId || block.temporaryId,
+          taskTitle: block.detectedTitle,
+          groupTitle: block.groupTitle,
+          lineIndex: block.taskLineIndex,
+          details: `Línea preservada: "${meta.rawLine.trim()}"`,
+        });
+      });
+    }
+  });
+
+  // 6. Check for Tasks outside headings
+  taskBlocks.forEach((block, idx) => {
+    if (block.isOutsideHeading) {
+      issues.push({
+        id: `outside-heading-${block.detectedId || idx}`,
+        type: 'task_outside_heading',
+        severity: 'info',
+        message: `Tarea fuera de sección: "${block.detectedTitle}"`,
+        taskId: block.detectedId || block.temporaryId,
+        taskTitle: block.detectedTitle,
+        groupTitle: 'General',
+        lineIndex: block.taskLineIndex,
+        details: 'Se ubicó visualmente en el grupo "General". Agrega un encabezado ## Sección para organizarla.',
+      });
+    }
+  });
+
+  // 7. Check for Empty Headings
+  groupHeadings.forEach((gh, idx) => {
+    const tasksInHeading = taskBlocks.filter(
+      (b) => b.groupTitle.toLowerCase() === gh.title.toLowerCase()
+    );
+    if (tasksInHeading.length === 0) {
+      issues.push({
+        id: `empty-heading-${idx}`,
+        type: 'empty_heading',
+        severity: 'info',
+        message: `Sección vacía: "## ${gh.title}"`,
+        groupTitle: gh.title,
+        lineIndex: gh.lineIndex,
+        details: 'Esta sección no contiene tareas actualmente.',
+      });
+    }
+  });
+
+  const errorCount = issues.filter((i) => i.severity === 'error').length;
+  const warningCount = issues.filter((i) => i.severity === 'warning').length;
+  const infoCount = issues.filter((i) => i.severity === 'info').length;
+
+  return {
+    issues,
+    hasErrors: errorCount > 0,
+    hasWarnings: warningCount > 0,
+    errorCount,
+    warningCount,
+    infoCount,
+    duplicateIds,
+    missingIdTaskIds,
+    unresolvedBlockerMap,
+  };
 }
 
 /**
@@ -152,7 +421,7 @@ export function findDependentTasks(
 
       if (blockers.includes(normalizedTargetId)) {
         dependents.push({
-          taskId: block.detectedId || `line-${block.taskLineIndex + 1}`,
+          taskId: block.detectedId || block.temporaryId,
           title: block.detectedTitle,
           groupTitle: block.groupTitle,
         });
@@ -164,7 +433,8 @@ export function findDependentTasks(
 }
 
 /**
- * Updates a specific task's title, completed status, or priority in a markdown string.
+ * Updates a specific task's title, completed status, or priority in a markdown string
+ * while preserving unknown metadata, surrounding text, comments, and structure.
  */
 export function updateTaskInMarkdown(
   markdown: string,
@@ -176,7 +446,9 @@ export function updateTaskInMarkdown(
   const { taskBlocks } = scanTaskBlocks(markdown);
 
   const targetBlock = taskBlocks.find(
-    (b) => b.detectedId && b.detectedId.toLowerCase() === normalizedTargetId
+    (b) =>
+      (b.detectedId && b.detectedId.toLowerCase() === normalizedTargetId) ||
+      b.temporaryId.toLowerCase() === normalizedTargetId
   );
 
   if (!targetBlock) {
@@ -206,13 +478,13 @@ export function updateTaskInMarkdown(
     resultLines[targetBlock.taskLineIndex] = `${prefix}${checkChar}${suffix}${titleContent}`;
   }
 
-  // 2. Update priority line
+  // 2. Update priority line or add one if changed
   if (updates.priority !== undefined) {
     let foundPriority = false;
     for (let i = targetBlock.taskLineIndex + 1; i <= targetBlock.endLineIndex; i++) {
-      if (resultLines[i].match(/^(?:[-*]\s*)?Priority\s*:\s*(P[0-3])/i)) {
+      if (resultLines[i].match(/^(?:[-*]\s*)?Priority\s*:\s*(.+)$/i)) {
         resultLines[i] = resultLines[i].replace(
-          /(Priority\s*:\s*)(P[0-3])/i,
+          /(Priority\s*:\s*)(.+)$/i,
           `$1${updates.priority}`
         );
         foundPriority = true;
@@ -262,7 +534,6 @@ export function addTaskToMarkdown(
   );
 
   if (existingGroupHeading) {
-    // Find insertion point: before the next heading or at the end of the file
     let insertLineIndex = lines.length;
     for (let i = existingGroupHeading.lineIndex + 1; i < lines.length; i++) {
       if (lines[i].trim().startsWith('## ')) {
@@ -271,18 +542,15 @@ export function addTaskToMarkdown(
       }
     }
 
-    // Insert task with empty line separation
     const beforeLines = lines.slice(0, insertLineIndex);
     const afterLines = lines.slice(insertLineIndex);
 
-    // Ensure clean spacing
     const updatedLines = [...beforeLines, '', taskBlockText, ...afterLines];
     return {
       updatedMarkdown: updatedLines.join('\n').replace(/\n{3,}/g, '\n\n'),
       taskId: finalId,
     };
   } else {
-    // Target group does not exist yet -> Append new section at end
     const newSection = `\n\n## ${cleanGroup}\n\n${taskBlockText}`;
     const updated = (markdown.trim() + newSection).trim();
     return {
@@ -301,24 +569,24 @@ export function deleteTaskFromMarkdown(markdown: string, taskId: string): string
   const { taskBlocks } = scanTaskBlocks(markdown);
 
   const targetBlock = taskBlocks.find(
-    (b) => b.detectedId && b.detectedId.toLowerCase() === normalizedTargetId
+    (b) =>
+      (b.detectedId && b.detectedId.toLowerCase() === normalizedTargetId) ||
+      b.temporaryId.toLowerCase() === normalizedTargetId
   );
 
   if (!targetBlock) {
     return markdown;
   }
 
-  // Remove lines from taskLineIndex to endLineIndex
   const countToRemove = targetBlock.endLineIndex - targetBlock.taskLineIndex + 1;
   lines.splice(targetBlock.taskLineIndex, countToRemove);
 
-  // Clean up potential consecutive blank lines
-  const cleaned = lines.join('\n').replace(/\n{3,}/g, '\n\n');
-  return cleaned;
+  return lines.join('\n').replace(/\n{3,}/g, '\n\n');
 }
 
 /**
- * Moves a task block from its current section to a target section in Markdown.
+ * Moves a task block from its current section to a target section in Markdown,
+ * preserving all existing attributes and unknown metadata lines.
  */
 export function moveTaskToGroupInMarkdown(
   markdown: string,
@@ -327,10 +595,12 @@ export function moveTaskToGroupInMarkdown(
 ): string {
   const normalizedTargetId = taskId.trim().toLowerCase();
   const cleanTargetGroup = targetGroupTitle.trim();
-  const { taskBlocks, groupHeadings } = scanTaskBlocks(markdown);
+  const { taskBlocks } = scanTaskBlocks(markdown);
 
   const targetBlock = taskBlocks.find(
-    (b) => b.detectedId && b.detectedId.toLowerCase() === normalizedTargetId
+    (b) =>
+      (b.detectedId && b.detectedId.toLowerCase() === normalizedTargetId) ||
+      b.temporaryId.toLowerCase() === normalizedTargetId
   );
 
   if (!targetBlock || targetBlock.groupTitle.toLowerCase() === cleanTargetGroup.toLowerCase()) {
@@ -339,16 +609,16 @@ export function moveTaskToGroupInMarkdown(
 
   const lines = markdown.split(/\r?\n/);
 
-  // 1. Extract the raw block lines
+  // Extract raw block lines
   const blockLines = lines.slice(
     targetBlock.taskLineIndex,
     targetBlock.endLineIndex + 1
   );
 
-  // 2. Delete the block from original position
+  // Delete from original position
   lines.splice(targetBlock.taskLineIndex, targetBlock.endLineIndex - targetBlock.taskLineIndex + 1);
 
-  // 3. Find target group insertion line
+  // Find target group
   const reScanned = scanTaskBlocks(lines.join('\n'));
   const targetHeading = reScanned.groupHeadings.find(
     (g) => g.title.toLowerCase() === cleanTargetGroup.toLowerCase()
@@ -365,7 +635,6 @@ export function moveTaskToGroupInMarkdown(
 
     lines.splice(insertLine, 0, '', ...blockLines);
   } else {
-    // Append new section
     lines.push('', `## ${cleanTargetGroup}`, '', ...blockLines);
   }
 
