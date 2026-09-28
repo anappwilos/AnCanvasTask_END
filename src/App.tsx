@@ -12,23 +12,25 @@ const SAMPLE_MARKDOWN = `# TASKS
 
 ## Autenticación
 
-- [ ] Crear login
-  - ID: login
+- [ ] Configurar OAuth
+  - ID: oauth
   - Priority: P0
 
-- [ ] Crear perfil
+- [ ] Persistir sesión
+  - ID: session
+  - Priority: P0
+  - Blocked by: oauth
+
+## Perfil
+
+- [ ] Crear pantalla de perfil
   - ID: profile
   - Priority: P2
 
-## Infraestructura
-
-- [x] Setup Render Web Service
-  - ID: infra-deploy
-  - Priority: P1
-
-- [ ] Implementar canvas infinito
-  - ID: canvas-coords
-  - Priority: P0`;
+- [x] Añadir avatar
+  - ID: avatar
+  - Priority: P3
+  - Blocked by: profile`;
 
 export default function App() {
   const [editor, setEditor] = useState<Editor | null>(null);
@@ -111,7 +113,9 @@ export default function App() {
           <span aria-hidden="true" className="text-zinc-700">·</span>
           <span>Groups (##)</span>
           <span aria-hidden="true" className="text-zinc-700">·</span>
-          <span>ID & Priority (P0–P3)</span>
+          <span>ID & Priority</span>
+          <span aria-hidden="true" className="text-zinc-700">·</span>
+          <span>Dependencies (Blocked by)</span>
         </div>
 
         {/* Zone 3: Primary developer actions */}

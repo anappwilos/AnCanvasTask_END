@@ -19,6 +19,7 @@ export type TaskShapeProps = {
   completed: boolean;
   priority: TaskPriority;
   taskId?: string;
+  blockedBy?: string;
 };
 
 export type ITaskShape = TLBaseShape<'task', TaskShapeProps>;
@@ -33,6 +34,7 @@ export class TaskShapeUtil extends ShapeUtil<any> {
     completed: T.boolean,
     priority: T.string,
     taskId: T.string.optional(),
+    blockedBy: T.string.optional(),
   };
 
   getDefaultProps(): TaskShapeProps {
@@ -68,7 +70,7 @@ export class TaskShapeUtil extends ShapeUtil<any> {
   }
 
   component(shape: ITaskShape) {
-    const { title, completed, priority, taskId, w, h } = shape.props;
+    const { title, completed, priority, taskId, blockedBy, w, h } = shape.props;
 
     const toggleCompleted = (e: React.MouseEvent | React.PointerEvent) => {
       e.stopPropagation();
@@ -164,18 +166,29 @@ export class TaskShapeUtil extends ShapeUtil<any> {
             </button>
           </div>
 
-          {/* Bottom Row: Discrete ID + Status */}
+          {/* Bottom Row: Discrete ID + Blocked badge + Status */}
           <div className="flex items-center justify-between text-xs font-mono text-zinc-500 pt-1.5 border-t border-zinc-800/60 mt-1">
-            {taskId ? (
-              <span className="text-zinc-400 font-mono text-[11px] truncate tracking-tight flex items-center gap-1 max-w-[200px]" title={`ID: ${taskId}`}>
-                <span className="text-zinc-600 font-normal">#</span>
-                <span>{taskId}</span>
-              </span>
-            ) : (
-              <span className="text-zinc-600 font-mono text-[11px] italic">no-id</span>
-            )}
+            <div className="flex items-center gap-2 truncate max-w-[210px]">
+              {taskId ? (
+                <span className="text-zinc-400 font-mono text-[11px] truncate tracking-tight flex items-center gap-1" title={`ID: ${taskId}`}>
+                  <span className="text-zinc-600 font-normal">#</span>
+                  <span>{taskId}</span>
+                </span>
+              ) : (
+                <span className="text-zinc-600 font-mono text-[11px] italic">no-id</span>
+              )}
 
-            <span className="text-[10px] font-mono text-zinc-500 tracking-wider">
+              {blockedBy && !completed && (
+                <span
+                  className="px-1.5 py-0.5 text-[10px] font-mono font-medium text-rose-300 bg-rose-950/80 border border-rose-800/80 rounded"
+                  title={`Blocked by #${blockedBy}`}
+                >
+                  Blocked
+                </span>
+              )}
+            </div>
+
+            <span className="text-[10px] font-mono text-zinc-500 tracking-wider shrink-0">
               {completed ? 'DONE' : 'OPEN'}
             </span>
           </div>
@@ -280,6 +293,7 @@ export interface ParsedMarkdownTask {
   completed: boolean;
   taskId?: string;
   priority: TaskPriority;
+  blockedBy?: string;
 }
 
 export interface ParsedGroup {
@@ -292,16 +306,17 @@ export const INITIAL_MOCK_GROUPS: ParsedGroup[] = [
     title: 'Autenticación',
     tasks: [
       {
-        title: 'Crear login',
+        title: 'Configurar OAuth',
         completed: false,
         priority: 'P0',
-        taskId: 'login',
+        taskId: 'oauth',
       },
       {
-        title: 'Crear perfil',
+        title: 'Persistir sesión',
         completed: false,
-        priority: 'P2',
-        taskId: 'profile',
+        priority: 'P0',
+        taskId: 'session',
+        blockedBy: 'oauth',
       },
     ],
   },
@@ -319,6 +334,7 @@ export const INITIAL_MOCK_GROUPS: ParsedGroup[] = [
         completed: false,
         priority: 'P0',
         taskId: 'canvas-coords',
+        blockedBy: 'infra-deploy',
       },
       {
         title: 'Optimize shape bounding box collision & hit-testing',
@@ -377,6 +393,7 @@ export function parseTasksMarkdown(markdown: string): ParsedGroup[] {
         completed: isCompleted,
         priority: 'P1',
         taskId: undefined,
+        blockedBy: undefined,
       };
       continue;
     }
@@ -384,6 +401,7 @@ export function parseTasksMarkdown(markdown: string): ParsedGroup[] {
     // If parsing a task, check for metadata attributes underneath:
     // e.g. "  - ID: login" or "ID: login"
     // e.g. "  - Priority: P0" or "Priority: P0"
+    // e.g. "  - Blocked by: oauth" or "Blocked by: oauth"
     if (currentTask) {
       const idMatch = trimmed.match(/^(?:[-*]\s*)?ID\s*:\s*(.+)$/i);
       if (idMatch) {
@@ -397,6 +415,12 @@ export function parseTasksMarkdown(markdown: string): ParsedGroup[] {
         if (['P0', 'P1', 'P2', 'P3'].includes(p)) {
           currentTask.priority = p;
         }
+        continue;
+      }
+
+      const blockedByMatch = trimmed.match(/^(?:[-*]\s*)?Blocked\s*(?:by|-by)?\s*:\s*(.+)$/i);
+      if (blockedByMatch) {
+        currentTask.blockedBy = blockedByMatch[1].trim();
         continue;
       }
     }
@@ -413,10 +437,15 @@ export function parseTasksMarkdown(markdown: string): ParsedGroup[] {
 }
 
 export function populateCanvasWithGroups(editor: Editor, groups: ParsedGroup[]): { taskCount: number; groupCount: number } {
-  // Clear existing task and group shapes on canvas
+  // Clear existing task, group, and arrow shapes on canvas
   const existingShapes = editor
     .getCurrentPageShapes()
-    .filter((s) => (s as any).type === 'task' || (s as any).type === 'task-group');
+    .filter(
+      (s) =>
+        (s as any).type === 'task' ||
+        (s as any).type === 'task-group' ||
+        (s as any).type === 'arrow'
+    );
 
   if (existingShapes.length > 0) {
     editor.deleteShapes(existingShapes.map((s) => s.id));
@@ -424,7 +453,7 @@ export function populateCanvasWithGroups(editor: Editor, groups: ParsedGroup[]):
 
   const cardWidth = 320;
   const cardHeight = 110;
-  const cardGap = 14;
+  const cardGap = 16;
   const groupPaddingX = 20;
   const groupHeaderHeight = 56;
   const groupPaddingTop = 16;
@@ -435,6 +464,15 @@ export function populateCanvasWithGroups(editor: Editor, groups: ParsedGroup[]):
 
   const groupShapesToCreate: any[] = [];
   const taskShapesToCreate: any[] = [];
+  const arrowShapesToCreate: any[] = [];
+  const bindingsToCreate: any[] = [];
+
+  // Map from normalized taskId -> shapeId for dependency resolution
+  const taskIdToShapeId = new Map<string, string>();
+  const tasksWithDependencies: Array<{
+    blockedShapeId: string;
+    blockedByStr: string;
+  }> = [];
 
   let totalTasks = 0;
 
@@ -479,8 +517,20 @@ export function populateCanvasWithGroups(editor: Editor, groups: ParsedGroup[]):
         groupPaddingTop +
         taskIndex * (cardHeight + cardGap);
 
+      const shapeId = createShapeId();
+      const resolvedTaskId = task.taskId || `task-${groupIndex + 1}-${taskIndex + 1}`;
+
+      taskIdToShapeId.set(resolvedTaskId.toLowerCase(), shapeId);
+
+      if (task.blockedBy) {
+        tasksWithDependencies.push({
+          blockedShapeId: shapeId,
+          blockedByStr: task.blockedBy,
+        });
+      }
+
       taskShapesToCreate.push({
-        id: createShapeId(),
+        id: shapeId,
         type: 'task' as const,
         x: taskX,
         y: taskY,
@@ -490,18 +540,80 @@ export function populateCanvasWithGroups(editor: Editor, groups: ParsedGroup[]):
           title: task.title,
           completed: task.completed,
           priority: task.priority || 'P1',
-          taskId: task.taskId || `task-${taskIndex + 1}`,
+          taskId: resolvedTaskId,
+          blockedBy: task.blockedBy,
         },
       });
     });
   });
 
-  // Create groups first so they render underneath, then task cards on top
+  // Create native arrows from blocker task -> blocked task
+  tasksWithDependencies.forEach(({ blockedShapeId, blockedByStr }) => {
+    // Support multiple comma-separated IDs if present (e.g. "oauth, session")
+    const blockerIds = blockedByStr
+      .split(',')
+      .map((id) => id.trim().toLowerCase())
+      .filter(Boolean);
+
+    blockerIds.forEach((blockerId) => {
+      const blockerShapeId = taskIdToShapeId.get(blockerId);
+      // Gracefully ignore if blocker ID does not exist or is self
+      if (blockerShapeId && blockerShapeId !== blockedShapeId) {
+        const arrowId = createShapeId();
+
+        arrowShapesToCreate.push({
+          id: arrowId,
+          type: 'arrow' as const,
+          props: {
+            color: 'grey',
+            size: 's',
+            arrowheadEnd: 'arrow',
+            arrowheadStart: 'none',
+            bend: 0,
+          },
+        });
+
+        // Bind start to bottom center of blocker task, and end to top center of blocked task
+        bindingsToCreate.push(
+          {
+            fromId: arrowId,
+            toId: blockerShapeId,
+            type: 'arrow',
+            props: {
+              terminal: 'start',
+              normalizedAnchor: { x: 0.5, y: 1 },
+              isExact: false,
+              isPrecise: false,
+            },
+          },
+          {
+            fromId: arrowId,
+            toId: blockedShapeId,
+            type: 'arrow',
+            props: {
+              terminal: 'end',
+              normalizedAnchor: { x: 0.5, y: 0 },
+              isExact: false,
+              isPrecise: false,
+            },
+          }
+        );
+      }
+    });
+  });
+
+  // Create groups first so they render underneath, then task cards, then arrows & bindings
   if (groupShapesToCreate.length > 0) {
     (editor.createShapes as any)(groupShapesToCreate);
   }
   if (taskShapesToCreate.length > 0) {
     (editor.createShapes as any)(taskShapesToCreate);
+  }
+  if (arrowShapesToCreate.length > 0) {
+    (editor.createShapes as any)(arrowShapesToCreate);
+  }
+  if (bindingsToCreate.length > 0) {
+    (editor.createBindings as any)(bindingsToCreate);
   }
 
   editor.zoomToFit({ animation: { duration: 250 } });
