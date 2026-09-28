@@ -13,12 +13,22 @@ const SAMPLE_MARKDOWN = `# TASKS
 ## Autenticación
 
 - [ ] Crear login
-- [ ] Añadir Google OAuth
+  - ID: login
+  - Priority: P0
 
-## Perfil
+- [ ] Crear perfil
+  - ID: profile
+  - Priority: P2
 
-- [ ] Crear pantalla de perfil
-- [x] Añadir avatar`;
+## Infraestructura
+
+- [x] Setup Render Web Service
+  - ID: infra-deploy
+  - Priority: P1
+
+- [ ] Implementar canvas infinito
+  - ID: canvas-coords
+  - Priority: P0`;
 
 export default function App() {
   const [editor, setEditor] = useState<Editor | null>(null);
@@ -99,9 +109,9 @@ export default function App() {
         <div className="hidden md:flex items-center gap-3 text-xs font-mono text-zinc-400">
           <span className="text-zinc-500">TASKS.md</span>
           <span aria-hidden="true" className="text-zinc-700">·</span>
-          <span>## Headings as Groups</span>
+          <span>Groups (##)</span>
           <span aria-hidden="true" className="text-zinc-700">·</span>
-          <span>Movable Task Cards</span>
+          <span>ID & Priority (P0–P3)</span>
         </div>
 
         {/* Zone 3: Primary developer actions */}

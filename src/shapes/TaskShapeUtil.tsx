@@ -18,6 +18,7 @@ export type TaskShapeProps = {
   title: string;
   completed: boolean;
   priority: TaskPriority;
+  taskId?: string;
 };
 
 export type ITaskShape = TLBaseShape<'task', TaskShapeProps>;
@@ -31,6 +32,7 @@ export class TaskShapeUtil extends ShapeUtil<any> {
     title: T.string,
     completed: T.boolean,
     priority: T.string,
+    taskId: T.string.optional(),
   };
 
   getDefaultProps(): TaskShapeProps {
@@ -40,6 +42,7 @@ export class TaskShapeUtil extends ShapeUtil<any> {
       title: 'New developer task',
       completed: false,
       priority: 'P1',
+      taskId: 'task',
     };
   }
 
@@ -65,7 +68,7 @@ export class TaskShapeUtil extends ShapeUtil<any> {
   }
 
   component(shape: ITaskShape) {
-    const { title, completed, priority, w, h } = shape.props;
+    const { title, completed, priority, taskId, w, h } = shape.props;
 
     const toggleCompleted = (e: React.MouseEvent | React.PointerEvent) => {
       e.stopPropagation();
@@ -110,58 +113,69 @@ export class TaskShapeUtil extends ShapeUtil<any> {
         }}
       >
         <div
-          className={`w-full h-full rounded-xl bg-zinc-900 border transition-all duration-150 select-none flex flex-col justify-between p-4 shadow-xl ${
+          className={`w-full h-full rounded-xl bg-zinc-900 border transition-all duration-150 select-none flex flex-col justify-between p-3.5 shadow-xl ${
             completed
               ? 'border-zinc-800/80 bg-zinc-950/90 opacity-75'
-              : 'border-zinc-700 hover:border-zinc-500 shadow-black/60'
+              : 'border-zinc-700/90 hover:border-zinc-500 shadow-black/60'
           }`}
         >
-          {/* Top Row: Checkbox + Title */}
-          <div className="flex items-start gap-3">
-            <button
-              type="button"
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={toggleCompleted}
-              aria-label={completed ? 'Mark task as incomplete' : 'Mark task as complete'}
-              className={`mt-0.5 flex-shrink-0 w-4 h-4 rounded border flex items-center justify-center transition-colors cursor-pointer ${
-                completed
-                  ? 'bg-emerald-600 border-emerald-500 text-white'
-                  : 'bg-zinc-800 border-zinc-600 hover:border-zinc-400'
-              }`}
-            >
-              {completed && (
-                <svg
-                  className="w-3 h-3 stroke-current stroke-[2.5]"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-              )}
-            </button>
+          {/* Top Row: Checkbox + Title + Priority badge */}
+          <div className="flex items-start justify-between gap-2.5">
+            <div className="flex items-start gap-2.5 flex-1 min-w-0">
+              <button
+                type="button"
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={toggleCompleted}
+                aria-label={completed ? 'Mark task as incomplete' : 'Mark task as complete'}
+                className={`mt-0.5 flex-shrink-0 w-4 h-4 rounded border flex items-center justify-center transition-colors cursor-pointer ${
+                  completed
+                    ? 'bg-emerald-600 border-emerald-500 text-white'
+                    : 'bg-zinc-800 border-zinc-600 hover:border-zinc-400'
+                }`}
+              >
+                {completed && (
+                  <svg
+                    className="w-3 h-3 stroke-current stroke-[2.5]"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                )}
+              </button>
 
-            <span
-              className={`text-sm font-medium leading-snug transition-colors line-clamp-2 ${
-                completed ? 'text-zinc-500 line-through' : 'text-zinc-100'
-              }`}
-            >
-              {title}
-            </span>
-          </div>
+              <span
+                className={`text-sm font-medium leading-snug transition-colors line-clamp-2 ${
+                  completed ? 'text-zinc-500 line-through' : 'text-zinc-100'
+                }`}
+              >
+                {title}
+              </span>
+            </div>
 
-          {/* Bottom Row: Priority & Meta */}
-          <div className="flex items-center justify-between pt-2 border-t border-zinc-800/80 mt-1">
             <button
               type="button"
               onPointerDown={(e) => e.stopPropagation()}
               onClick={cyclePriority}
               title="Click to cycle priority (P0-P3)"
-              className={`px-2 py-0.5 text-xs font-mono font-semibold rounded border cursor-pointer transition-transform hover:scale-105 ${currentPriority.text} ${currentPriority.bg} ${currentPriority.border}`}
+              className={`px-2 py-0.5 text-xs font-mono font-bold rounded border cursor-pointer shrink-0 transition-transform hover:scale-105 ${currentPriority.text} ${currentPriority.bg} ${currentPriority.border}`}
             >
               {priority}
             </button>
+          </div>
 
-            <span className="text-[11px] font-mono text-zinc-500 tracking-wider">
+          {/* Bottom Row: Discrete ID + Status */}
+          <div className="flex items-center justify-between text-xs font-mono text-zinc-500 pt-1.5 border-t border-zinc-800/60 mt-1">
+            {taskId ? (
+              <span className="text-zinc-400 font-mono text-[11px] truncate tracking-tight flex items-center gap-1 max-w-[200px]" title={`ID: ${taskId}`}>
+                <span className="text-zinc-600 font-normal">#</span>
+                <span>{taskId}</span>
+              </span>
+            ) : (
+              <span className="text-zinc-600 font-mono text-[11px] italic">no-id</span>
+            )}
+
+            <span className="text-[10px] font-mono text-zinc-500 tracking-wider">
               {completed ? 'DONE' : 'OPEN'}
             </span>
           </div>
@@ -264,6 +278,8 @@ export class TaskGroupShapeUtil extends ShapeUtil<any> {
 export interface ParsedMarkdownTask {
   title: string;
   completed: boolean;
+  taskId?: string;
+  priority: TaskPriority;
 }
 
 export interface ParsedGroup {
@@ -273,18 +289,43 @@ export interface ParsedGroup {
 
 export const INITIAL_MOCK_GROUPS: ParsedGroup[] = [
   {
-    title: 'Infraestructura & Setup',
+    title: 'Autenticación',
     tasks: [
-      { title: 'Setup Render Web Service & build pipeline', completed: false },
-      { title: 'Configure TypeScript strict paths & tsconfig aliases', completed: true },
+      {
+        title: 'Crear login',
+        completed: false,
+        priority: 'P0',
+        taskId: 'login',
+      },
+      {
+        title: 'Crear perfil',
+        completed: false,
+        priority: 'P2',
+        taskId: 'profile',
+      },
     ],
   },
   {
-    title: 'Canvas & Interacción',
+    title: 'Infraestructura',
     tasks: [
-      { title: 'Implement infinite canvas spatial viewport coordinates', completed: false },
-      { title: 'Optimize shape bounding box collision & hit-testing', completed: false },
-      { title: 'Refactor developer hotkeys & quick action palette', completed: false },
+      {
+        title: 'Setup Render Web Service & build pipeline',
+        completed: true,
+        priority: 'P1',
+        taskId: 'infra-deploy',
+      },
+      {
+        title: 'Implement infinite canvas spatial coordinates',
+        completed: false,
+        priority: 'P0',
+        taskId: 'canvas-coords',
+      },
+      {
+        title: 'Optimize shape bounding box collision & hit-testing',
+        completed: false,
+        priority: 'P3',
+        taskId: 'perf-collision',
+      },
     ],
   },
 ];
@@ -293,13 +334,19 @@ export function parseTasksMarkdown(markdown: string): ParsedGroup[] {
   const lines = markdown.split(/\r?\n/);
   const groups: ParsedGroup[] = [];
   let currentGroup: ParsedGroup | null = null;
+  let currentTask: ParsedMarkdownTask | null = null;
 
-  for (const line of lines) {
-    const trimmed = line.trim();
+  for (const rawLine of lines) {
+    const trimmed = rawLine.trim();
+    if (!trimmed) continue;
 
     // Detect "## Heading"
     const headingMatch = trimmed.match(/^##\s+(.+)$/);
     if (headingMatch) {
+      if (currentTask && currentGroup) {
+        currentGroup.tasks.push(currentTask);
+        currentTask = null;
+      }
       if (currentGroup) {
         groups.push(currentGroup);
       }
@@ -310,26 +357,54 @@ export function parseTasksMarkdown(markdown: string): ParsedGroup[] {
       continue;
     }
 
-    // Detect tasks in format "- [ ]" or "- [x]" or "- [X]" (and support "* [ ]" lists)
+    // Detect task: "- [ ] Title" or "- [x] Title"
     const taskMatch = trimmed.match(/^[-*]\s*\[([ xX])\]\s*(.+)$/);
     if (taskMatch) {
+      if (currentTask && currentGroup) {
+        currentGroup.tasks.push(currentTask);
+        currentTask = null;
+      }
+      if (!currentGroup) {
+        currentGroup = {
+          title: 'General',
+          tasks: [],
+        };
+      }
       const isCompleted = taskMatch[1].toLowerCase() === 'x';
       const title = taskMatch[2].trim();
-      if (title.length > 0) {
-        if (!currentGroup) {
-          currentGroup = {
-            title: 'General',
-            tasks: [],
-          };
+      currentTask = {
+        title,
+        completed: isCompleted,
+        priority: 'P1',
+        taskId: undefined,
+      };
+      continue;
+    }
+
+    // If parsing a task, check for metadata attributes underneath:
+    // e.g. "  - ID: login" or "ID: login"
+    // e.g. "  - Priority: P0" or "Priority: P0"
+    if (currentTask) {
+      const idMatch = trimmed.match(/^(?:[-*]\s*)?ID\s*:\s*(.+)$/i);
+      if (idMatch) {
+        currentTask.taskId = idMatch[1].trim();
+        continue;
+      }
+
+      const priorityMatch = trimmed.match(/^(?:[-*]\s*)?Priority\s*:\s*(P[0-3])$/i);
+      if (priorityMatch) {
+        const p = priorityMatch[1].toUpperCase() as TaskPriority;
+        if (['P0', 'P1', 'P2', 'P3'].includes(p)) {
+          currentTask.priority = p;
         }
-        currentGroup.tasks.push({
-          title,
-          completed: isCompleted,
-        });
+        continue;
       }
     }
   }
 
+  if (currentTask && currentGroup) {
+    currentGroup.tasks.push(currentTask);
+  }
   if (currentGroup) {
     groups.push(currentGroup);
   }
@@ -414,7 +489,8 @@ export function populateCanvasWithGroups(editor: Editor, groups: ParsedGroup[]):
           h: cardHeight,
           title: task.title,
           completed: task.completed,
-          priority: (taskIndex === 0 ? 'P0' : taskIndex === 1 ? 'P1' : 'P2') as TaskPriority,
+          priority: task.priority || 'P1',
+          taskId: task.taskId || `task-${taskIndex + 1}`,
         },
       });
     });
