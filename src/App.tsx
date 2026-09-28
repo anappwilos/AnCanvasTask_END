@@ -70,6 +70,7 @@ export default function App() {
   const [isSanityModalOpen, setIsSanityModalOpen] = useState<boolean>(false);
   const [isAutoLayoutConfirmOpen, setIsAutoLayoutConfirmOpen] = useState<boolean>(false);
   const [isProblemsModalOpen, setIsProblemsModalOpen] = useState<boolean>(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const [deleteWarningState, setDeleteWarningState] = useState<DeleteWarningInfo | null>(null);
 
   // New task form state
@@ -681,14 +682,14 @@ export default function App() {
         aria-hidden="true"
       />
 
-      {/* Top Bar: AnTaskCanvas — by AnAppWiLos */}
-      <header className="h-14 bg-zinc-900 border-b border-zinc-800 px-4 sm:px-5 flex items-center justify-between z-10 select-none flex-shrink-0 gap-3">
+      {/* Top Bar: AnTaskCanvas — Responsive Desktop & Mobile */}
+      <header className="h-14 bg-zinc-900 border-b border-zinc-800 px-3 sm:px-5 flex items-center justify-between z-20 select-none flex-shrink-0 gap-2 sm:gap-3">
         {/* Zone 1: Brand wordmark & Current File status */}
-        <div className="flex items-center gap-3 min-w-0">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <div className="flex items-center gap-2 flex-shrink-0">
             <div className="w-2.5 h-2.5 rounded-sm bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-            <h1 className="text-sm font-semibold tracking-tight text-zinc-100 font-mono hidden sm:inline-block">
-              AnTaskCanvas
+            <h1 className="text-sm font-semibold tracking-tight text-zinc-100 font-mono">
+              AnTask<span className="text-emerald-400">Canvas</span>
             </h1>
           </div>
 
@@ -696,21 +697,20 @@ export default function App() {
 
           {/* Current File and Unsaved Changes Indicator */}
           <div
-            className="flex items-center gap-2 px-2.5 py-1 rounded-md bg-zinc-950 border border-zinc-800 text-xs font-mono truncate shadow-xs"
+            className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-2.5 py-1 rounded-md bg-zinc-950 border border-zinc-800 text-[11px] sm:text-xs font-mono truncate shadow-xs max-w-[130px] sm:max-w-none"
             title={`Archivo actual: ${currentFileName}${hasUnsavedChanges ? ' (con cambios sin guardar)' : ' (guardado)'}`}
           >
-            <svg className="w-3.5 h-3.5 text-zinc-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-3.5 h-3.5 text-zinc-400 flex-shrink-0 hidden xs:block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
             <span className="font-semibold text-zinc-200 truncate">{currentFileName}</span>
             {hasUnsavedChanges ? (
-              <span className="flex items-center gap-1.5 text-amber-400 text-[11px] flex-shrink-0">
+              <span className="flex items-center gap-1 text-amber-400 text-[10px] sm:text-[11px] flex-shrink-0" title="Cambios pendientes de guardar">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                <span className="hidden md:inline">• cambios sin guardar</span>
-                <span className="md:hidden">• modificado</span>
+                <span className="hidden md:inline">• sin guardar</span>
               </span>
             ) : (
-              <span className="flex items-center gap-1 text-emerald-400 text-[11px] flex-shrink-0">
+              <span className="flex items-center gap-1 text-emerald-400 text-[10px] sm:text-[11px] flex-shrink-0" title="Archivo sincronizado">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                 <span className="hidden md:inline">• al día</span>
               </span>
@@ -718,7 +718,7 @@ export default function App() {
           </div>
         </div>
 
-        {/* Zone 2: Issues Badge & Persistence Badge */}
+        {/* Zone 2: Desktop Issues Badge & Persistence Badge */}
         <div className="hidden lg:flex items-center gap-3 text-xs font-mono text-zinc-400">
           {/* Markdown Validation Issues Badge */}
           {validationReport.issues.length > 0 ? (
@@ -780,26 +780,61 @@ export default function App() {
           </button>
         </div>
 
-        {/* Zone 3: Main Actions */}
-        <div className="flex items-center gap-2 flex-shrink-0">
+        {/* Zone 3: Main Actions (Desktop full bar & Mobile compact header actions) */}
+        <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+          {/* Mobile Quick Save Button */}
+          <button
+            type="button"
+            onClick={handleExportFile}
+            className={`sm:hidden px-2.5 py-1 text-[11px] font-mono font-semibold rounded-md transition-colors cursor-pointer flex items-center gap-1 ${
+              hasUnsavedChanges
+                ? 'text-emerald-100 bg-emerald-600 hover:bg-emerald-500 border border-emerald-400 shadow-sm animate-pulse'
+                : 'text-zinc-300 bg-zinc-800 border border-zinc-700'
+            }`}
+            title="Guardar TASKS.md"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+            </svg>
+            <span>Guardar</span>
+          </button>
+
+          {/* Mobile Issues Trigger (if any) */}
+          {validationReport.issues.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setIsProblemsModalOpen(true)}
+              className={`sm:hidden px-2 py-1 text-[11px] font-mono font-bold rounded-md border flex items-center gap-1 ${
+                validationReport.hasErrors
+                  ? 'bg-rose-950 text-rose-300 border-rose-800'
+                  : 'bg-amber-950 text-amber-300 border-amber-800'
+              }`}
+              title="Ver problemas detectados"
+            >
+              <span>⚠</span>
+              <span>{validationReport.issues.length}</span>
+            </button>
+          )}
+
+          {/* Desktop Only Buttons */}
           {/* Abrir TASKS.md Button */}
           <button
             type="button"
             onClick={handleOpenFilePicker}
-            className="px-3 py-1.5 text-xs font-mono font-medium text-zinc-200 bg-zinc-800 hover:bg-zinc-700 hover:text-white border border-zinc-700 rounded-md transition-colors cursor-pointer flex items-center gap-1.5 shadow-xs"
+            className="hidden sm:flex px-3 py-1.5 text-xs font-mono font-medium text-zinc-200 bg-zinc-800 hover:bg-zinc-700 hover:text-white border border-zinc-700 rounded-md transition-colors cursor-pointer items-center gap-1.5 shadow-xs"
             title="Abrir un archivo TASKS.md o Markdown desde tu equipo"
           >
             <svg className="w-3.5 h-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
             </svg>
-            <span className="hidden sm:inline">Abrir</span> TASKS.md
+            <span className="hidden md:inline">Abrir</span> TASKS.md
           </button>
 
-          {/* Guardar TASKS.md Button */}
+          {/* Desktop Guardar TASKS.md Button */}
           <button
             type="button"
             onClick={handleExportFile}
-            className={`px-3 py-1.5 text-xs font-mono font-medium rounded-md transition-colors cursor-pointer flex items-center gap-1.5 shadow-xs ${
+            className={`hidden sm:flex px-3 py-1.5 text-xs font-mono font-medium rounded-md transition-colors cursor-pointer items-center gap-1.5 shadow-xs ${
               hasUnsavedChanges
                 ? 'text-emerald-100 bg-emerald-600 hover:bg-emerald-500 border border-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.35)] animate-pulse'
                 : 'text-zinc-300 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700'
@@ -812,20 +847,20 @@ export default function App() {
             <span>Guardar {currentFileName.endsWith('.md') ? currentFileName : `${currentFileName}.md`}</span>
           </button>
 
-          {/* Auto Organizar Button */}
+          {/* Desktop Auto Organizar Button */}
           <button
             type="button"
             onClick={() => setIsAutoLayoutConfirmOpen(true)}
-            className="px-2.5 sm:px-3 py-1.5 text-xs font-mono font-medium text-emerald-300 bg-emerald-950/70 hover:bg-emerald-900/80 border border-emerald-700/70 rounded-md transition-colors cursor-pointer flex items-center gap-1.5 shadow-xs"
+            className="hidden sm:flex px-2.5 sm:px-3 py-1.5 text-xs font-mono font-medium text-emerald-300 bg-emerald-950/70 hover:bg-emerald-900/80 border border-emerald-700/70 rounded-md transition-colors cursor-pointer items-center gap-1.5 shadow-xs"
             title="Distribuir automáticamente las tareas y grupos según su jerarquía de dependencias"
           >
             <svg className="w-3.5 h-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
             </svg>
-            <span className="hidden sm:inline">Auto organizar</span>
+            <span>Auto organizar</span>
           </button>
 
-          {/* Create New Task Button */}
+          {/* Desktop Create New Task Button */}
           <button
             type="button"
             onClick={() => {
@@ -834,16 +869,16 @@ export default function App() {
               }
               setIsNewTaskModalOpen(true);
             }}
-            className="px-2.5 sm:px-3 py-1.5 text-xs font-mono font-semibold text-white bg-emerald-600 hover:bg-emerald-500 rounded-md transition-colors cursor-pointer flex items-center gap-1.5 shadow-sm"
+            className="hidden sm:flex px-2.5 sm:px-3 py-1.5 text-xs font-mono font-semibold text-white bg-emerald-600 hover:bg-emerald-500 rounded-md transition-colors cursor-pointer items-center gap-1.5 shadow-sm"
             title="Crear una nueva tarea en el canvas y en el documento Markdown"
           >
             <svg className="w-3.5 h-3.5 stroke-[2.5]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
             </svg>
-            <span className="hidden sm:inline">Nueva tarea</span>
+            <span>Nueva tarea</span>
           </button>
 
-          {/* View Markdown Button */}
+          {/* Desktop View Markdown Button */}
           <button
             type="button"
             onClick={() => setIsViewMarkdownOpen(true)}
@@ -857,7 +892,7 @@ export default function App() {
             Ver
           </button>
 
-          {/* Import / Paste Markdown Button */}
+          {/* Desktop Import / Paste Markdown Button */}
           <button
             type="button"
             onClick={() => setIsImportModalOpen(true)}
@@ -867,6 +902,7 @@ export default function App() {
             Pegar
           </button>
 
+          {/* Desktop Zoom button */}
           <button
             type="button"
             onClick={handleZoomToFit}
@@ -876,23 +912,111 @@ export default function App() {
             Zoom
           </button>
 
+          {/* Desktop Reset layout button */}
           <button
             type="button"
             onClick={handleResetLayout}
-            className="hidden sm:inline-block px-2.5 py-1.5 text-xs font-mono font-medium text-zinc-300 bg-zinc-800 hover:bg-zinc-700 hover:text-zinc-100 border border-zinc-700/60 rounded-md transition-colors cursor-pointer"
+            className="hidden lg:inline-block px-2.5 py-1.5 text-xs font-mono font-medium text-zinc-300 bg-zinc-800 hover:bg-zinc-700 hover:text-zinc-100 border border-zinc-700/60 rounded-md transition-colors cursor-pointer"
             title="Reiniciar canvas al ejemplo inicial"
           >
             Reset
+          </button>
+
+          {/* Mobile Menu Trigger Button */}
+          <button
+            type="button"
+            onClick={() => setIsMobileMenuOpen(true)}
+            className="sm:hidden min-w-[40px] min-h-[40px] flex items-center justify-center rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 cursor-pointer transition-colors active:scale-95"
+            aria-label="Abrir menú de opciones"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
           </button>
         </div>
       </header>
 
       {/* Infinite Canvas Container */}
-      <main className="flex-1 w-full h-[calc(100vh-3.5rem)] relative">
+      <main className="flex-1 w-full h-[calc(100vh-3.5rem)] relative pb-16 sm:pb-0">
         <Tldraw
           shapeUtils={customShapeUtils}
           onMount={handleMount}
         />
+
+        {/* Floating Bottom Quick-Action Bar for Mobile Touch Devices */}
+        <nav
+          aria-label="Acciones rápidas móviles"
+          className="sm:hidden fixed bottom-3 left-3 right-3 z-30 bg-zinc-900/95 backdrop-blur-md border border-zinc-800/90 rounded-2xl shadow-2xl p-1.5 flex items-center justify-between gap-1 pb-safe"
+        >
+          {/* 1. + Nueva Tarea (Primary CTA) */}
+          <button
+            type="button"
+            onClick={() => {
+              if (existingSections.length > 0 && !isCustomGroup) {
+                setNewTaskGroup(existingSections[0]);
+              }
+              setIsNewTaskModalOpen(true);
+            }}
+            className="flex-1 py-2 px-1 min-h-[44px] flex flex-col items-center justify-center rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-mono text-[10px] font-semibold active:scale-95 transition-transform shadow-xs cursor-pointer"
+          >
+            <svg className="w-4 h-4 stroke-[2.5]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            <span className="mt-0.5">+ Tarea</span>
+          </button>
+
+          {/* 2. Auto DAG Layout */}
+          <button
+            type="button"
+            onClick={() => setIsAutoLayoutConfirmOpen(true)}
+            className="flex-1 py-2 px-1 min-h-[44px] flex flex-col items-center justify-center rounded-xl bg-zinc-800/70 hover:bg-zinc-800 text-emerald-400 font-mono text-[10px] font-medium border border-zinc-700/50 active:scale-95 transition-transform cursor-pointer"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
+            </svg>
+            <span className="mt-0.5">Organizar</span>
+          </button>
+
+          {/* 3. Zoom to Fit */}
+          <button
+            type="button"
+            onClick={handleZoomToFit}
+            className="flex-1 py-2 px-1 min-h-[44px] flex flex-col items-center justify-center rounded-xl bg-zinc-800/70 hover:bg-zinc-800 text-zinc-300 font-mono text-[10px] font-medium border border-zinc-700/50 active:scale-95 transition-transform cursor-pointer"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+            </svg>
+            <span className="mt-0.5">Ajustar</span>
+          </button>
+
+          {/* 4. Ver Markdown */}
+          <button
+            type="button"
+            onClick={() => setIsViewMarkdownOpen(true)}
+            className="flex-1 py-2 px-1 min-h-[44px] flex flex-col items-center justify-center rounded-xl bg-zinc-800/70 hover:bg-zinc-800 text-zinc-300 font-mono text-[10px] font-medium border border-zinc-700/50 active:scale-95 transition-transform cursor-pointer"
+          >
+            <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+            <span className="mt-0.5">Ver .md</span>
+          </button>
+
+          {/* 5. Mobile Drawer Menu */}
+          <button
+            type="button"
+            onClick={() => setIsMobileMenuOpen(true)}
+            className="flex-1 py-2 px-1 min-h-[44px] flex flex-col items-center justify-center rounded-xl bg-zinc-800/70 hover:bg-zinc-800 text-zinc-300 font-mono text-[10px] font-medium border border-zinc-700/50 active:scale-95 transition-transform relative cursor-pointer"
+          >
+            {validationReport.issues.length > 0 && (
+              <span className="absolute top-1.5 right-2 w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+            )}
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
+            </svg>
+            <span className="mt-0.5">Más</span>
+          </button>
+        </nav>
 
         {/* Drag & Drop Discrete Overlay */}
         {isDraggingOver && (
@@ -918,25 +1042,224 @@ export default function App() {
           </div>
         )}
 
-        {/* Toast notification */}
+        {/* Toast notification (above mobile nav bar) */}
         {toastMessage && (
-          <div className="absolute bottom-6 right-6 z-50 px-4 py-2 bg-zinc-900 border border-zinc-700 text-xs font-mono text-zinc-200 rounded-lg shadow-2xl flex items-center gap-2 animate-fade-in">
-            <span className="w-2 h-2 rounded-full bg-emerald-400" />
-            {toastMessage}
+          <div className="fixed bottom-20 sm:bottom-6 right-4 sm:right-6 z-50 px-4 py-2.5 bg-zinc-900 border border-zinc-700 text-xs font-mono text-zinc-200 rounded-xl shadow-2xl flex items-center gap-2 animate-slide-up max-w-[90vw]">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0" />
+            <span className="truncate">{toastMessage}</span>
           </div>
         )}
       </main>
 
+      {/* Mobile Drawer Action Menu (Full Sheet for Smartphones) */}
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 backdrop-blur-xs sm:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        >
+          <div
+            className="w-full bg-zinc-900 border-t border-zinc-700 rounded-t-3xl shadow-2xl p-4 flex flex-col gap-4 animate-slide-up max-h-[85vh] overflow-y-auto pb-safe"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Opciones y herramientas"
+          >
+            {/* Grab handle indicator */}
+            <div className="w-10 h-1.5 bg-zinc-700 rounded-full mx-auto" />
+
+            <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+              <div>
+                <h2 className="text-sm font-semibold font-mono text-zinc-100">
+                  Menú de Opciones
+                </h2>
+                <p className="text-xs text-zinc-400 font-mono">
+                  {currentFileName} · {parsedStats.taskCount} tareas
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="p-1 text-zinc-400 hover:text-zinc-200"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Menu Sections */}
+            <div className="flex flex-col gap-2 font-mono text-xs">
+              <span className="text-[11px] text-zinc-500 font-semibold px-2 uppercase tracking-wider">
+                Archivo TASKS.md
+              </span>
+
+              {/* Abrir archivo */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  handleOpenFilePicker();
+                }}
+                className="w-full min-h-[44px] px-3 py-2.5 rounded-xl bg-zinc-950 hover:bg-zinc-800 border border-zinc-800 flex items-center justify-between text-zinc-200 active:scale-[0.98] transition-transform"
+              >
+                <div className="flex items-center gap-2.5">
+                  <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                  </svg>
+                  <span>Abrir TASKS.md desde equipo</span>
+                </div>
+                <span className="text-zinc-600">➔</span>
+              </button>
+
+              {/* Guardar archivo */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  handleExportFile();
+                }}
+                className={`w-full min-h-[44px] px-3 py-2.5 rounded-xl border flex items-center justify-between active:scale-[0.98] transition-transform ${
+                  hasUnsavedChanges
+                    ? 'bg-emerald-950/80 border-emerald-600 text-emerald-200 font-semibold'
+                    : 'bg-zinc-950 hover:bg-zinc-800 border-zinc-800 text-zinc-200'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                  </svg>
+                  <span>Guardar y descargar {currentFileName}</span>
+                </div>
+                {hasUnsavedChanges && (
+                  <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px]">
+                    Modificado
+                  </span>
+                )}
+              </button>
+
+              {/* Pegar / Importar Markdown */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  setIsImportModalOpen(true);
+                }}
+                className="w-full min-h-[44px] px-3 py-2.5 rounded-xl bg-zinc-950 hover:bg-zinc-800 border border-zinc-800 flex items-center justify-between text-zinc-200 active:scale-[0.98] transition-transform"
+              >
+                <div className="flex items-center gap-2.5">
+                  <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                  <span>Pegar texto Markdown</span>
+                </div>
+                <span className="text-zinc-600">➔</span>
+              </button>
+
+              {/* Copiar Markdown */}
+              <button
+                type="button"
+                onClick={() => {
+                  handleCopyMarkdown();
+                  showToast('Markdown copiado al portapapeles');
+                }}
+                className="w-full min-h-[44px] px-3 py-2.5 rounded-xl bg-zinc-950 hover:bg-zinc-800 border border-zinc-800 flex items-center justify-between text-zinc-200 active:scale-[0.98] transition-transform"
+              >
+                <div className="flex items-center gap-2.5">
+                  <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                  </svg>
+                  <span>Copiar Markdown completo</span>
+                </div>
+                {copiedMarkdown && <span className="text-emerald-400 text-[10px]">¡Copiado!</span>}
+              </button>
+
+              <span className="text-[11px] text-zinc-500 font-semibold px-2 uppercase tracking-wider mt-2">
+                Herramientas & Estado
+              </span>
+
+              {/* Panel de Problemas */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  setIsProblemsModalOpen(true);
+                }}
+                className="w-full min-h-[44px] px-3 py-2.5 rounded-xl bg-zinc-950 hover:bg-zinc-800 border border-zinc-800 flex items-center justify-between text-zinc-200 active:scale-[0.98] transition-transform"
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="text-amber-400">⚠</span>
+                  <span>Panel de problemas de TASKS.md</span>
+                </div>
+                <span
+                  className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                    validationReport.issues.length > 0
+                      ? 'bg-rose-950 text-rose-300 border border-rose-800'
+                      : 'bg-emerald-950 text-emerald-300 border border-emerald-800'
+                  }`}
+                >
+                  {validationReport.issues.length} {validationReport.issues.length === 1 ? 'aviso' : 'avisos'}
+                </span>
+              </button>
+
+              {/* Sanity Persistence */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  setIsSanityModalOpen(true);
+                }}
+                className="w-full min-h-[44px] px-3 py-2.5 rounded-xl bg-zinc-950 hover:bg-zinc-800 border border-zinc-800 flex items-center justify-between text-zinc-200 active:scale-[0.98] transition-transform"
+              >
+                <div className="flex items-center gap-2.5">
+                  <span
+                    className={`w-2 h-2 rounded-full ${
+                      syncStatus === 'synced' ? 'bg-emerald-400' : 'bg-cyan-400'
+                    }`}
+                  />
+                  <span>Persistencia visual (Sanity)</span>
+                </div>
+                <span className="text-[10px] text-zinc-400">{syncStatus}</span>
+              </button>
+
+              {/* Reiniciar Canvas */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  handleResetLayout();
+                }}
+                className="w-full min-h-[44px] px-3 py-2.5 rounded-xl bg-zinc-950 hover:bg-zinc-800 border border-zinc-800 flex items-center justify-between text-zinc-400 active:scale-[0.98] transition-transform mt-1"
+              >
+                <div className="flex items-center gap-2.5">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  <span>Reiniciar canvas a demo inicial</span>
+                </div>
+                <span className="text-zinc-600">↺</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Modal: Panel de Problemas del Documento */}
       {isProblemsModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs">
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-xs"
+          onClick={() => setIsProblemsModalOpen(false)}
+        >
           <div
-            className="w-full max-w-2xl bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150 max-h-[85vh]"
+            className="w-full sm:max-w-2xl bg-zinc-900 border-t sm:border border-zinc-700 rounded-t-3xl sm:rounded-xl shadow-2xl flex flex-col overflow-hidden animate-slide-up sm:animate-in sm:fade-in sm:zoom-in-95 duration-150 max-h-[90vh] sm:max-h-[85vh] pb-safe sm:pb-0"
             role="dialog"
             aria-modal="true"
             aria-labelledby="problems-modal-title"
+            onClick={(e) => e.stopPropagation()}
           >
-            <div className="px-5 py-4 border-b border-zinc-800 flex items-center justify-between">
+            {/* Grab handle indicator on mobile */}
+            <div className="w-10 h-1.5 bg-zinc-700 rounded-full mx-auto my-2.5 sm:hidden" />
+
+            <div className="px-5 py-3 sm:py-4 border-b border-zinc-800 flex items-center justify-between">
               <div>
                 <h2 id="problems-modal-title" className="text-sm font-semibold text-zinc-100 font-mono flex items-center gap-2">
                   <span
@@ -957,7 +1280,7 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => setIsProblemsModalOpen(false)}
-                className="text-zinc-400 hover:text-zinc-200 p-1 rounded transition-colors cursor-pointer"
+                className="text-zinc-400 hover:text-zinc-200 p-2 sm:p-1 rounded transition-colors cursor-pointer min-w-[36px] min-h-[36px] flex items-center justify-center"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -966,27 +1289,27 @@ export default function App() {
             </div>
 
             {/* Summary statistics bar */}
-            <div className="px-5 py-2.5 bg-zinc-950 border-b border-zinc-800 flex items-center gap-4 text-xs font-mono">
-              <span className="text-zinc-400">
+            <div className="px-5 py-2.5 bg-zinc-950 border-b border-zinc-800 flex items-center gap-4 text-xs font-mono overflow-x-auto">
+              <span className="text-zinc-400 shrink-0">
                 Total:{' '}
                 <strong className="text-zinc-200">{validationReport.issues.length}</strong>
               </span>
               <span className="text-zinc-700">·</span>
-              <span className="text-rose-400">
+              <span className="text-rose-400 shrink-0">
                 Errores: <strong>{validationReport.errorCount}</strong>
               </span>
               <span className="text-zinc-700">·</span>
-              <span className="text-amber-400">
+              <span className="text-amber-400 shrink-0">
                 Avisos: <strong>{validationReport.warningCount}</strong>
               </span>
               <span className="text-zinc-700">·</span>
-              <span className="text-cyan-400">
+              <span className="text-cyan-400 shrink-0">
                 Información: <strong>{validationReport.infoCount}</strong>
               </span>
             </div>
 
             {/* Issues list */}
-            <div className="p-5 overflow-auto max-h-[50vh] flex flex-col gap-2.5">
+            <div className="p-4 sm:p-5 overflow-auto max-h-[50vh] flex flex-col gap-2.5">
               {validationReport.issues.length === 0 ? (
                 <div className="py-8 text-center flex flex-col items-center justify-center gap-2">
                   <div className="w-10 h-10 rounded-full bg-emerald-950/80 border border-emerald-700 flex items-center justify-center text-emerald-400 text-lg">
@@ -1016,7 +1339,7 @@ export default function App() {
                   return (
                     <div
                       key={issue.id}
-                      className="p-3 rounded-lg bg-zinc-950 border border-zinc-800 flex items-start justify-between gap-3 text-xs font-mono"
+                      className="p-3 rounded-xl bg-zinc-950 border border-zinc-800 flex items-start justify-between gap-3 text-xs font-mono"
                     >
                       <div className="flex items-start gap-2.5 flex-1 min-w-0">
                         <span
@@ -1048,7 +1371,7 @@ export default function App() {
                           onClick={() =>
                             handleFocusTaskOnCanvas(issue.taskId, issue.taskTitle)
                           }
-                          className="px-2 py-1 text-[11px] font-mono text-zinc-300 bg-zinc-800 hover:bg-zinc-700 rounded border border-zinc-700 shrink-0 cursor-pointer transition-colors"
+                          className="min-h-[36px] px-2.5 py-1 text-[11px] font-mono text-zinc-300 bg-zinc-800 hover:bg-zinc-700 rounded-lg border border-zinc-700 shrink-0 cursor-pointer transition-colors active:scale-95"
                           title="Localizar tarjeta en el canvas"
                         >
                           Localizar
@@ -1068,7 +1391,7 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => setIsProblemsModalOpen(false)}
-                className="px-3.5 py-1.5 text-xs font-mono text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800 rounded-md transition-colors cursor-pointer"
+                className="min-h-[44px] sm:min-h-0 px-4 py-2 text-xs font-mono text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800 rounded-lg transition-colors cursor-pointer"
               >
                 Cerrar
               </button>
@@ -1079,13 +1402,20 @@ export default function App() {
 
       {/* Modal: Confirmación Auto Organizar */}
       {isAutoLayoutConfirmOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs">
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-xs"
+          onClick={() => setIsAutoLayoutConfirmOpen(false)}
+        >
           <div
-            className="w-full max-w-md bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+            className="w-full sm:max-w-md bg-zinc-900 border-t sm:border border-zinc-700 rounded-t-3xl sm:rounded-xl shadow-2xl flex flex-col overflow-hidden animate-slide-up sm:animate-in sm:fade-in sm:zoom-in-95 duration-150 pb-safe sm:pb-0"
             role="dialog"
             aria-modal="true"
             aria-labelledby="autolayout-modal-title"
+            onClick={(e) => e.stopPropagation()}
           >
+            {/* Grab handle indicator on mobile */}
+            <div className="w-10 h-1.5 bg-zinc-700 rounded-full mx-auto my-2.5 sm:hidden" />
+
             <div className="px-5 py-4 border-b border-zinc-800 flex items-center justify-between">
               <div>
                 <h2 id="autolayout-modal-title" className="text-sm font-semibold text-zinc-100 font-mono flex items-center gap-2">
@@ -1099,7 +1429,7 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => setIsAutoLayoutConfirmOpen(false)}
-                className="text-zinc-400 hover:text-zinc-200 p-1 rounded transition-colors cursor-pointer"
+                className="text-zinc-400 hover:text-zinc-200 p-2 sm:p-1 rounded transition-colors cursor-pointer min-w-[36px] min-h-[36px] flex items-center justify-center"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -1123,14 +1453,14 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => setIsAutoLayoutConfirmOpen(false)}
-                className="px-3.5 py-1.5 text-xs font-mono text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800 rounded-md transition-colors cursor-pointer"
+                className="min-h-[44px] sm:min-h-0 px-4 py-2 text-xs font-mono text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800 rounded-lg transition-colors cursor-pointer"
               >
                 Cancelar
               </button>
               <button
                 type="button"
                 onClick={handleExecuteAutoLayout}
-                className="px-4 py-1.5 text-xs font-mono font-medium text-white bg-emerald-600 hover:bg-emerald-500 rounded-md transition-colors cursor-pointer shadow-sm"
+                className="min-h-[44px] sm:min-h-0 px-5 py-2 text-xs font-mono font-medium text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg transition-colors cursor-pointer shadow-sm active:scale-95"
               >
                 Auto organizar
               </button>
@@ -1141,13 +1471,20 @@ export default function App() {
 
       {/* Modal: Nueva Tarea */}
       {isNewTaskModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs">
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-xs"
+          onClick={() => setIsNewTaskModalOpen(false)}
+        >
           <div
-            className="w-full max-w-md bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+            className="w-full sm:max-w-md bg-zinc-900 border-t sm:border border-zinc-700 rounded-t-3xl sm:rounded-xl shadow-2xl flex flex-col overflow-hidden animate-slide-up sm:animate-in sm:fade-in sm:zoom-in-95 duration-150 pb-safe sm:pb-0"
             role="dialog"
             aria-modal="true"
             aria-labelledby="new-task-modal-title"
+            onClick={(e) => e.stopPropagation()}
           >
+            {/* Grab handle indicator on mobile */}
+            <div className="w-10 h-1.5 bg-zinc-700 rounded-full mx-auto my-2.5 sm:hidden" />
+
             <div className="px-5 py-4 border-b border-zinc-800 flex items-center justify-between">
               <div>
                 <h2 id="new-task-modal-title" className="text-sm font-semibold text-zinc-100 font-mono flex items-center gap-2">
@@ -1161,7 +1498,7 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => setIsNewTaskModalOpen(false)}
-                className="text-zinc-400 hover:text-zinc-200 p-1 rounded transition-colors cursor-pointer"
+                className="text-zinc-400 hover:text-zinc-200 p-2 sm:p-1 rounded transition-colors cursor-pointer min-w-[36px] min-h-[36px] flex items-center justify-center"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -1169,7 +1506,7 @@ export default function App() {
               </button>
             </div>
 
-            <form onSubmit={handleCreateTask} className="p-5 flex flex-col gap-4">
+            <form onSubmit={handleCreateTask} className="p-4 sm:p-5 flex flex-col gap-4">
               {/* Task Title */}
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-mono text-zinc-300 flex items-center justify-between">
@@ -1183,7 +1520,7 @@ export default function App() {
                   value={newTaskTitle}
                   onChange={(e) => setNewTaskTitle(e.target.value)}
                   placeholder="ej. Crear recuperación de contraseña"
-                  className="w-full bg-zinc-950 border border-zinc-800 focus:border-emerald-500 rounded-md px-3 py-2 text-xs font-mono text-zinc-100 focus:outline-none"
+                  className="w-full bg-zinc-950 border border-zinc-800 focus:border-emerald-500 rounded-lg px-3 py-2.5 text-sm sm:text-xs font-mono text-zinc-100 focus:outline-none"
                 />
               </div>
 
@@ -1205,7 +1542,7 @@ export default function App() {
                         key={p}
                         type="button"
                         onClick={() => setNewTaskPriority(p)}
-                        className={`py-1.5 px-2 text-xs font-mono font-bold rounded-md border text-center transition-all cursor-pointer ${colors}`}
+                        className={`min-h-[40px] py-2 px-2 text-xs font-mono font-bold rounded-lg border text-center transition-all cursor-pointer ${colors}`}
                       >
                         {p}
                       </button>
@@ -1221,7 +1558,7 @@ export default function App() {
                   <button
                     type="button"
                     onClick={() => setIsCustomGroup(!isCustomGroup)}
-                    className="text-[11px] font-mono text-emerald-400 hover:underline cursor-pointer"
+                    className="text-[11px] font-mono text-emerald-400 hover:underline cursor-pointer py-1"
                   >
                     {isCustomGroup ? 'Elegir existente' : '+ Nueva sección'}
                   </button>
@@ -1233,13 +1570,13 @@ export default function App() {
                     value={customGroupInput}
                     onChange={(e) => setCustomGroupInput(e.target.value)}
                     placeholder="ej. Notificaciones"
-                    className="w-full bg-zinc-950 border border-zinc-800 focus:border-emerald-500 rounded-md px-3 py-2 text-xs font-mono text-zinc-100 focus:outline-none"
+                    className="w-full bg-zinc-950 border border-zinc-800 focus:border-emerald-500 rounded-lg px-3 py-2.5 text-sm sm:text-xs font-mono text-zinc-100 focus:outline-none"
                   />
                 ) : (
                   <select
                     value={newTaskGroup}
                     onChange={(e) => setNewTaskGroup(e.target.value)}
-                    className="w-full bg-zinc-950 border border-zinc-800 focus:border-emerald-500 rounded-md px-3 py-2 text-xs font-mono text-zinc-100 focus:outline-none cursor-pointer"
+                    className="w-full bg-zinc-950 border border-zinc-800 focus:border-emerald-500 rounded-lg px-3 py-2.5 text-sm sm:text-xs font-mono text-zinc-100 focus:outline-none cursor-pointer"
                   >
                     {existingSections.map((sec) => (
                       <option key={sec} value={sec}>
@@ -1259,20 +1596,20 @@ export default function App() {
               </div>
 
               {/* Footer buttons */}
-              <div className="pt-2 flex items-center justify-end gap-2 border-t border-zinc-800">
+              <div className="pt-3 flex items-center justify-end gap-2 border-t border-zinc-800">
                 <button
                   type="button"
                   onClick={() => setIsNewTaskModalOpen(false)}
-                  className="px-3.5 py-1.5 text-xs font-mono text-zinc-400 hover:text-zinc-200 cursor-pointer"
+                  className="min-h-[44px] sm:min-h-0 px-4 py-2 text-xs font-mono text-zinc-400 hover:text-zinc-200 cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={!newTaskTitle.trim()}
-                  className={`px-4 py-1.5 text-xs font-mono font-medium rounded-md transition-colors cursor-pointer ${
+                  className={`min-h-[44px] sm:min-h-0 px-5 py-2 text-xs font-mono font-medium rounded-lg transition-colors cursor-pointer ${
                     newTaskTitle.trim()
-                      ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm'
+                      ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm active:scale-95'
                       : 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
                   }`}
                 >
@@ -1286,13 +1623,20 @@ export default function App() {
 
       {/* Modal: Advertencia / Confirmación de Eliminación */}
       {deleteWarningState && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs">
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-xs"
+          onClick={() => setDeleteWarningState(null)}
+        >
           <div
-            className="w-full max-w-md bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+            className="w-full sm:max-w-md bg-zinc-900 border-t sm:border border-zinc-700 rounded-t-3xl sm:rounded-xl shadow-2xl flex flex-col overflow-hidden animate-slide-up sm:animate-in sm:fade-in sm:zoom-in-95 duration-150 pb-safe sm:pb-0"
             role="dialog"
             aria-modal="true"
             aria-labelledby="delete-warning-title"
+            onClick={(e) => e.stopPropagation()}
           >
+            {/* Grab handle indicator on mobile */}
+            <div className="w-10 h-1.5 bg-zinc-700 rounded-full mx-auto my-2.5 sm:hidden" />
+
             <div className="px-5 py-4 border-b border-zinc-800 flex items-center justify-between">
               <div>
                 <h2 id="delete-warning-title" className="text-sm font-semibold text-rose-400 font-mono flex items-center gap-2">
@@ -1310,7 +1654,7 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => setDeleteWarningState(null)}
-                className="text-zinc-400 hover:text-zinc-200 p-1 rounded transition-colors cursor-pointer"
+                className="text-zinc-400 hover:text-zinc-200 p-2 sm:p-1 rounded transition-colors cursor-pointer min-w-[36px] min-h-[36px] flex items-center justify-center"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -1347,14 +1691,14 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => setDeleteWarningState(null)}
-                className="px-3.5 py-1.5 text-xs font-mono text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800 rounded-md transition-colors cursor-pointer"
+                className="min-h-[44px] sm:min-h-0 px-4 py-2 text-xs font-mono text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800 rounded-lg transition-colors cursor-pointer"
               >
                 Cancelar
               </button>
               <button
                 type="button"
                 onClick={handleConfirmDeleteTask}
-                className="px-4 py-1.5 text-xs font-mono font-medium text-white bg-rose-600 hover:bg-rose-500 rounded-md transition-colors cursor-pointer shadow-sm"
+                className="min-h-[44px] sm:min-h-0 px-5 py-2 text-xs font-mono font-medium text-white bg-rose-600 hover:bg-rose-500 rounded-lg transition-colors cursor-pointer shadow-sm active:scale-95"
               >
                 {deleteWarningState.dependents.length > 0
                   ? 'Eliminar tarea de todas formas'
@@ -1367,27 +1711,34 @@ export default function App() {
 
       {/* Modal: Ver TASKS.md Sincronizado */}
       {isViewMarkdownOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs">
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-xs"
+          onClick={() => setIsViewMarkdownOpen(false)}
+        >
           <div
-            className="w-full max-w-2xl bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150 max-h-[85vh]"
+            className="w-full sm:max-w-2xl bg-zinc-900 border-t sm:border border-zinc-700 rounded-t-3xl sm:rounded-xl shadow-2xl flex flex-col overflow-hidden animate-slide-up sm:animate-in sm:fade-in sm:zoom-in-95 duration-150 max-h-[90vh] sm:max-h-[85vh] pb-safe sm:pb-0"
             role="dialog"
             aria-modal="true"
             aria-labelledby="view-markdown-title"
+            onClick={(e) => e.stopPropagation()}
           >
+            {/* Grab handle indicator on mobile */}
+            <div className="w-10 h-1.5 bg-zinc-700 rounded-full mx-auto my-2.5 sm:hidden" />
+
             <div className="px-5 py-4 border-b border-zinc-800 flex items-center justify-between">
               <div>
                 <h2 id="view-markdown-title" className="text-sm font-semibold text-zinc-100 font-mono flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                  TASKS.md — Sincronizado en tiempo real
+                  TASKS.md — Sincronizado en vivo
                 </h2>
                 <p className="text-xs text-zinc-400 mt-0.5">
-                  Refleja en vivo tareas creadas, eliminadas, editadas o movidas entre secciones.
+                  Refleja en tiempo real tareas creadas, eliminadas, editadas o movidas.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setIsViewMarkdownOpen(false)}
-                className="text-zinc-400 hover:text-zinc-200 p-1 rounded transition-colors cursor-pointer"
+                className="text-zinc-400 hover:text-zinc-200 p-2 sm:p-1 rounded transition-colors cursor-pointer min-w-[36px] min-h-[36px] flex items-center justify-center"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -1395,30 +1746,30 @@ export default function App() {
               </button>
             </div>
 
-            <div className="p-5 flex flex-col gap-3 overflow-hidden">
+            <div className="p-4 sm:p-5 flex flex-col gap-3 overflow-hidden">
               <div className="flex items-center justify-between text-xs font-mono text-zinc-400">
-                <span>Contenido Markdown actual:</span>
+                <span>Contenido Markdown:</span>
                 <span className="text-[11px] text-zinc-500">
                   {parsedStats.taskCount} tareas · {parsedStats.groupCount} secciones
                 </span>
               </div>
 
-              <div className="relative w-full rounded-lg bg-zinc-950 border border-zinc-800 overflow-hidden">
-                <pre className="p-4 text-xs font-mono text-zinc-200 overflow-auto max-h-[46vh] leading-relaxed select-text whitespace-pre-wrap">
+              <div className="relative w-full rounded-xl bg-zinc-950 border border-zinc-800 overflow-hidden">
+                <pre className="p-3.5 sm:p-4 text-xs font-mono text-zinc-200 overflow-auto max-h-[46vh] leading-relaxed select-text whitespace-pre-wrap">
                   {markdownInput}
                 </pre>
               </div>
             </div>
 
             <div className="px-5 py-3.5 bg-zinc-950/60 border-t border-zinc-800 flex items-center justify-between">
-              <span className="text-[11px] font-mono text-zinc-500">
+              <span className="text-[11px] font-mono text-zinc-500 hidden sm:inline">
                 Formato Markdown nativo preservado
               </span>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
                 <button
                   type="button"
                   onClick={handleCopyMarkdown}
-                  className="px-3.5 py-1.5 text-xs font-mono text-emerald-300 bg-emerald-950/70 hover:bg-emerald-900 border border-emerald-700/60 rounded-md transition-colors cursor-pointer flex items-center gap-1.5"
+                  className="min-h-[44px] sm:min-h-0 flex-1 sm:flex-initial px-4 py-2 text-xs font-mono text-emerald-300 bg-emerald-950/70 hover:bg-emerald-900 border border-emerald-700/60 rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-1.5 active:scale-95"
                 >
                   {copiedMarkdown ? (
                     <>
@@ -1439,7 +1790,7 @@ export default function App() {
                 <button
                   type="button"
                   onClick={() => setIsViewMarkdownOpen(false)}
-                  className="px-3.5 py-1.5 text-xs font-mono text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800 rounded-md transition-colors cursor-pointer"
+                  className="min-h-[44px] sm:min-h-0 px-4 py-2 text-xs font-mono text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800 rounded-lg transition-colors cursor-pointer"
                 >
                   Cerrar
                 </button>
@@ -1451,26 +1802,33 @@ export default function App() {
 
       {/* Modal: Importar TASKS.md */}
       {isImportModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs">
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-xs"
+          onClick={() => setIsImportModalOpen(false)}
+        >
           <div
-            className="w-full max-w-xl bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+            className="w-full sm:max-w-xl bg-zinc-900 border-t sm:border border-zinc-700 rounded-t-3xl sm:rounded-xl shadow-2xl flex flex-col overflow-hidden animate-slide-up sm:animate-in sm:fade-in sm:zoom-in-95 duration-150 pb-safe sm:pb-0"
             role="dialog"
             aria-modal="true"
             aria-labelledby="modal-title"
+            onClick={(e) => e.stopPropagation()}
           >
+            {/* Grab handle indicator on mobile */}
+            <div className="w-10 h-1.5 bg-zinc-700 rounded-full mx-auto my-2.5 sm:hidden" />
+
             <div className="px-5 py-4 border-b border-zinc-800 flex items-center justify-between">
               <div>
                 <h2 id="modal-title" className="text-sm font-semibold text-zinc-100 font-mono">
-                  Import TASKS.md
+                  Pegar TASKS.md
                 </h2>
                 <p className="text-xs text-zinc-400 mt-0.5">
-                  <code className="text-emerald-400 font-bold">##</code> crea secciones y <code className="text-zinc-300">- [ ]</code> / <code className="text-zinc-300">- [x]</code> crea tarjetas
+                  <code className="text-emerald-400 font-bold">##</code> crea secciones y <code className="text-zinc-300">- [ ]</code> crea tarjetas
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setIsImportModalOpen(false)}
-                className="text-zinc-400 hover:text-zinc-200 p-1 rounded transition-colors cursor-pointer"
+                className="text-zinc-400 hover:text-zinc-200 p-2 sm:p-1 rounded transition-colors cursor-pointer min-w-[36px] min-h-[36px] flex items-center justify-center"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -1478,15 +1836,15 @@ export default function App() {
               </button>
             </div>
 
-            <div className="p-5 flex flex-col gap-3">
+            <div className="p-4 sm:p-5 flex flex-col gap-3">
               <div className="flex items-center justify-between text-xs font-mono text-zinc-400">
-                <span>Markdown content:</span>
+                <span>Contenido Markdown:</span>
                 <button
                   type="button"
                   onClick={() => setMarkdownInput(SAMPLE_MARKDOWN)}
-                  className="text-emerald-400 hover:text-emerald-300 hover:underline cursor-pointer"
+                  className="text-emerald-400 hover:text-emerald-300 hover:underline cursor-pointer py-1"
                 >
-                  Load Example
+                  Cargar Ejemplo
                 </button>
               </div>
 
@@ -1502,8 +1860,8 @@ export default function App() {
                     setIsImportModalOpen(false);
                   }
                 }}
-                rows={11}
-                className="w-full bg-zinc-950 border border-zinc-800 focus:border-emerald-500 rounded-lg p-3 text-xs font-mono text-zinc-200 focus:outline-none resize-none leading-relaxed"
+                rows={9}
+                className="w-full bg-zinc-950 border border-zinc-800 focus:border-emerald-500 rounded-xl p-3 text-sm sm:text-xs font-mono text-zinc-200 focus:outline-none resize-none leading-relaxed"
                 autoFocus
               />
 
@@ -1526,7 +1884,7 @@ export default function App() {
                     </span>
                   </div>
                 </div>
-                <span className="text-[11px] text-zinc-500">Presiona ⌘+Enter para cargar</span>
+                <span className="text-[11px] text-zinc-500 hidden sm:inline">Presiona ⌘+Enter para cargar</span>
               </div>
             </div>
 
@@ -1534,7 +1892,7 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => setIsImportModalOpen(false)}
-                className="px-3.5 py-1.5 text-xs font-mono text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800 rounded-md transition-colors cursor-pointer"
+                className="min-h-[44px] sm:min-h-0 px-4 py-2 text-xs font-mono text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800 rounded-lg transition-colors cursor-pointer"
               >
                 Cancelar
               </button>
@@ -1542,9 +1900,9 @@ export default function App() {
                 type="button"
                 onClick={handleApplyMarkdown}
                 disabled={parsedStats.groupCount === 0 && parsedStats.taskCount === 0}
-                className={`px-4 py-1.5 text-xs font-mono font-medium rounded-md transition-colors cursor-pointer flex items-center gap-1.5 ${
+                className={`min-h-[44px] sm:min-h-0 px-5 py-2 text-xs font-mono font-medium rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${
                   parsedStats.taskCount > 0 || parsedStats.groupCount > 0
-                    ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm'
+                    ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm active:scale-95'
                     : 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
                 }`}
               >
@@ -1557,13 +1915,20 @@ export default function App() {
 
       {/* Modal: Configuración Sanity */}
       {isSanityModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs">
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-xs"
+          onClick={() => setIsSanityModalOpen(false)}
+        >
           <div
-            className="w-full max-w-md bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+            className="w-full sm:max-w-md bg-zinc-900 border-t sm:border border-zinc-700 rounded-t-3xl sm:rounded-xl shadow-2xl flex flex-col overflow-hidden animate-slide-up sm:animate-in sm:fade-in sm:zoom-in-95 duration-150 pb-safe sm:pb-0"
             role="dialog"
             aria-modal="true"
             aria-labelledby="sanity-modal-title"
+            onClick={(e) => e.stopPropagation()}
           >
+            {/* Grab handle indicator on mobile */}
+            <div className="w-10 h-1.5 bg-zinc-700 rounded-full mx-auto my-2.5 sm:hidden" />
+
             <div className="px-5 py-4 border-b border-zinc-800 flex items-center justify-between">
               <div>
                 <h2 id="sanity-modal-title" className="text-sm font-semibold text-zinc-100 font-mono flex items-center gap-2">
@@ -1571,13 +1936,13 @@ export default function App() {
                   Sanity Visual Persistence
                 </h2>
                 <p className="text-xs text-zinc-400 mt-0.5">
-                  Guarda únicamente coordenadas espaciales <code className="text-zinc-300">(taskId, x, y, w, h)</code>
+                  Guarda coordenadas espaciales <code className="text-zinc-300">(taskId, x, y, w, h)</code>
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setIsSanityModalOpen(false)}
-                className="text-zinc-400 hover:text-zinc-200 p-1 rounded transition-colors cursor-pointer"
+                className="text-zinc-400 hover:text-zinc-200 p-2 sm:p-1 rounded transition-colors cursor-pointer min-w-[36px] min-h-[36px] flex items-center justify-center"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -1585,10 +1950,10 @@ export default function App() {
               </button>
             </div>
 
-            <form onSubmit={handleSaveSanityConfig} className="p-5 flex flex-col gap-3.5">
+            <form onSubmit={handleSaveSanityConfig} className="p-4 sm:p-5 flex flex-col gap-3.5">
               <div className="p-3 rounded-lg bg-zinc-950 border border-zinc-800/80 text-[11px] font-mono text-zinc-400 leading-relaxed">
                 <span className="text-emerald-400 font-semibold">Single Source of Truth: </span>
-                TASKS.md define títulos, estados, IDs, prioridades y dependencias. Sanity solo almacena la posición de las tarjetas.
+                TASKS.md define títulos, estados, IDs y prioridades. Sanity solo almacena la posición en el canvas.
               </div>
 
               <div className="flex flex-col gap-1.5">
@@ -1598,7 +1963,7 @@ export default function App() {
                   value={sanityProjectId}
                   onChange={(e) => setSanityProjectId(e.target.value)}
                   placeholder="ej. 8k9abcde (opcional)"
-                  className="w-full bg-zinc-950 border border-zinc-800 focus:border-emerald-500 rounded-md px-3 py-1.5 text-xs font-mono text-zinc-100 focus:outline-none"
+                  className="w-full bg-zinc-950 border border-zinc-800 focus:border-emerald-500 rounded-lg px-3 py-2 text-sm sm:text-xs font-mono text-zinc-100 focus:outline-none"
                 />
               </div>
 
@@ -1609,7 +1974,7 @@ export default function App() {
                   value={sanityDataset}
                   onChange={(e) => setSanityDataset(e.target.value)}
                   placeholder="production"
-                  className="w-full bg-zinc-950 border border-zinc-800 focus:border-emerald-500 rounded-md px-3 py-1.5 text-xs font-mono text-zinc-100 focus:outline-none"
+                  className="w-full bg-zinc-950 border border-zinc-800 focus:border-emerald-500 rounded-lg px-3 py-2 text-sm sm:text-xs font-mono text-zinc-100 focus:outline-none"
                 />
               </div>
 
@@ -1620,10 +1985,10 @@ export default function App() {
                   value={sanityToken}
                   onChange={(e) => setSanityToken(e.target.value)}
                   placeholder="sk..."
-                  className="w-full bg-zinc-950 border border-zinc-800 focus:border-emerald-500 rounded-md px-3 py-1.5 text-xs font-mono text-zinc-100 focus:outline-none"
+                  className="w-full bg-zinc-950 border border-zinc-800 focus:border-emerald-500 rounded-lg px-3 py-2 text-sm sm:text-xs font-mono text-zinc-100 focus:outline-none"
                 />
                 <span className="text-[10px] text-zinc-500 font-mono">
-                  Dejar vacío para usar caché local de persistencia
+                  Dejar vacío para usar caché local
                 </span>
               </div>
 
@@ -1631,13 +1996,13 @@ export default function App() {
                 <button
                   type="button"
                   onClick={() => setIsSanityModalOpen(false)}
-                  className="px-3.5 py-1.5 text-xs font-mono text-zinc-400 hover:text-zinc-200 cursor-pointer"
+                  className="min-h-[44px] sm:min-h-0 px-4 py-2 text-xs font-mono text-zinc-400 hover:text-zinc-200 cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-1.5 text-xs font-mono font-medium text-white bg-emerald-600 hover:bg-emerald-500 rounded-md transition-colors cursor-pointer"
+                  className="min-h-[44px] sm:min-h-0 px-5 py-2 text-xs font-mono font-medium text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg transition-colors cursor-pointer shadow-sm active:scale-95"
                 >
                   Guardar Configuración
                 </button>

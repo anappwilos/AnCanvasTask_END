@@ -124,27 +124,32 @@ function TaskCardComponent({
       >
         {/* Top Row: Checkbox + Title / Inline Edit + Priority badge */}
         <div className="flex items-start justify-between gap-2.5">
-          <div className="flex items-start gap-2.5 flex-1 min-w-0">
+          <div className="flex items-start gap-2 flex-1 min-w-0">
+            {/* Checkbox with generous touch hitbox for mobile */}
             <button
               type="button"
               onPointerDown={(e) => e.stopPropagation()}
               onClick={toggleCompleted}
               aria-label={completed ? 'Mark task as incomplete' : 'Mark task as complete'}
-              className={`mt-0.5 flex-shrink-0 w-4 h-4 rounded border flex items-center justify-center transition-colors cursor-pointer ${
-                completed
-                  ? 'bg-emerald-600 border-emerald-500 text-white'
-                  : 'bg-zinc-800 border-zinc-600 hover:border-zinc-400'
-              }`}
+              className="p-1.5 -m-1.5 mt-0 flex-shrink-0 flex items-center justify-center cursor-pointer rounded-md focus:outline-none"
             >
-              {completed && (
-                <svg
-                  className="w-3 h-3 stroke-current stroke-[2.5]"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-              )}
+              <span
+                className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
+                  completed
+                    ? 'bg-emerald-600 border-emerald-500 text-white'
+                    : 'bg-zinc-800 border-zinc-600 hover:border-zinc-400'
+                }`}
+              >
+                {completed && (
+                  <svg
+                    className="w-3 h-3 stroke-current stroke-[2.5]"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                )}
+              </span>
             </button>
 
             {isEditingTitle ? (
@@ -164,7 +169,7 @@ function TaskCardComponent({
                     setEditedTitle(title);
                   }
                 }}
-                className="w-full text-sm font-medium bg-zinc-950 border border-emerald-500 rounded px-1.5 py-0.5 text-zinc-100 focus:outline-none -mt-0.5"
+                className="w-full text-sm font-medium bg-zinc-950 border border-emerald-500 rounded px-2 py-1 text-zinc-100 focus:outline-none -mt-0.5"
               />
             ) : (
               <div
@@ -172,7 +177,7 @@ function TaskCardComponent({
                   e.stopPropagation();
                   setIsEditingTitle(true);
                 }}
-                title="Doble clic para editar título"
+                title="Doble clic o toca el lápiz para editar título"
                 className="group/title flex items-start gap-1 flex-1 cursor-text"
               >
                 <span
@@ -189,10 +194,10 @@ function TaskCardComponent({
                     e.stopPropagation();
                     setIsEditingTitle(true);
                   }}
-                  className="opacity-0 group-hover/title:opacity-100 transition-opacity text-zinc-400 hover:text-zinc-200 p-0.5 shrink-0 cursor-pointer"
+                  className="opacity-70 sm:opacity-0 group-hover/title:opacity-100 transition-opacity text-zinc-400 hover:text-zinc-200 p-1 -m-1 shrink-0 cursor-pointer"
                   title="Editar título"
                 >
-                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                   </svg>
                 </button>
@@ -204,8 +209,8 @@ function TaskCardComponent({
             type="button"
             onPointerDown={(e) => e.stopPropagation()}
             onClick={cyclePriority}
-            title="Clic para ciclar prioridad (P0-P3)"
-            className={`px-2 py-0.5 text-xs font-mono font-bold rounded border cursor-pointer shrink-0 transition-transform hover:scale-105 ${currentPriority.text} ${currentPriority.bg} ${currentPriority.border}`}
+            title="Clic o toque para cambiar prioridad (P0-P3)"
+            className={`min-h-[26px] min-w-[32px] px-2 py-0.5 text-xs font-mono font-bold rounded border cursor-pointer shrink-0 transition-transform active:scale-95 ${currentPriority.text} ${currentPriority.bg} ${currentPriority.border}`}
           >
             {priority}
           </button>
@@ -276,10 +281,10 @@ function TaskCardComponent({
                   })
                 );
               }}
-              className="text-zinc-600 hover:text-rose-400 p-0.5 rounded cursor-pointer transition-colors"
+              className="text-zinc-500 hover:text-rose-400 p-1.5 -m-1.5 rounded-md cursor-pointer transition-colors active:scale-90"
               title="Eliminar tarea"
             >
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
               </svg>
             </button>
