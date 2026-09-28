@@ -14,6 +14,7 @@ import {
   TaskGroupShapeUtil,
   TaskShapeUtil,
 } from './shapes/TaskShapeUtil';
+import { updateTaskInMarkdown } from './utils/markdownSync';
 
 const SAMPLE_MARKDOWN = `# TASKS
 
@@ -44,8 +45,10 @@ type SyncStatus = 'idle' | 'loading' | 'saving' | 'synced' | 'local';
 export default function App() {
   const [editor, setEditor] = useState<Editor | null>(null);
   const [isImportModalOpen, setIsImportModalOpen] = useState<boolean>(false);
+  const [isViewMarkdownOpen, setIsViewMarkdownOpen] = useState<boolean>(false);
   const [isSanityModalOpen, setIsSanityModalOpen] = useState<boolean>(false);
   const [markdownInput, setMarkdownInput] = useState<string>(SAMPLE_MARKDOWN);
+  const [copiedMarkdown, setCopiedMarkdown] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [syncStatus, setSyncStatus] = useState<SyncStatus>('idle');
 
@@ -102,7 +105,7 @@ export default function App() {
 
       initVisualState();
 
-      // Set up store listener to auto-persist visual positions on movement/resize end
+      // Set up store listener to sync task content edits and auto-persist visual positions
       const unsubscribe = editorInstance.store.listen((entry) => {
         let hasVisualChange = false;
         const changes = entry.changes as any;
@@ -112,7 +115,28 @@ export default function App() {
             const [from, to] = changes.updated[id] || [];
             if (to?.typeName === 'shape' || from?.typeName === 'shape') {
               hasVisualChange = true;
-              break;
+
+              // Detect task attribute changes (title, completed, priority)
+              if (to?.type === 'task' && from?.type === 'task') {
+                const toProps = to.props || {};
+                const fromProps = from.props || {};
+                const isTitleChanged = toProps.title !== fromProps.title;
+                const isCompletedChanged = toProps.completed !== fromProps.completed;
+                const isPriorityChanged = toProps.priority !== fromProps.priority;
+
+                if (isTitleChanged || isCompletedChanged || isPriorityChanged) {
+                  const taskId = toProps.taskId || fromProps.taskId;
+                  if (taskId) {
+                    setMarkdownInput((currentMd) =>
+                      updateTaskInMarkdown(currentMd, taskId, {
+                        title: toProps.title,
+                        completed: toProps.completed,
+                        priority: toProps.priority,
+                      })
+                    );
+                  }
+                }
+              }
             }
           }
         }
@@ -223,6 +247,12 @@ export default function App() {
     }
   };
 
+  const handleCopyMarkdown = () => {
+    navigator.clipboard.writeText(markdownInput);
+    setCopiedMarkdown(true);
+    setTimeout(() => setCopiedMarkdown(false), 2000);
+  };
+
   return (
     <div className="flex flex-col w-screen h-screen bg-zinc-950 text-zinc-100 overflow-hidden font-sans">
       {/* Top Bar: AnTaskCanvas — by AnAppWiLos */}
@@ -239,9 +269,7 @@ export default function App() {
         <div className="hidden md:flex items-center gap-3 text-xs font-mono text-zinc-400">
           <span className="text-zinc-500">TASKS.md</span>
           <span aria-hidden="true" className="text-zinc-700">·</span>
-          <span>Groups (##)</span>
-          <span aria-hidden="true" className="text-zinc-700">·</span>
-          <span>Blocked by</span>
+          <span>Live Canvas Edit</span>
           <span aria-hidden="true" className="text-zinc-700">·</span>
           {/* Visual Sync Badge */}
           <button
@@ -274,6 +302,21 @@ export default function App() {
 
         {/* Zone 3: Primary developer actions */}
         <div className="flex items-center gap-2">
+          {/* View Markdown Button */}
+          <button
+            type="button"
+            onClick={() => setIsViewMarkdownOpen(true)}
+            className="px-3 py-1.5 text-xs font-mono font-medium text-zinc-300 bg-zinc-800 hover:bg-zinc-700 hover:text-zinc-100 border border-zinc-700/60 rounded-md transition-colors cursor-pointer flex items-center gap-1.5"
+            title="Ver TASKS.md actualizado en tiempo real"
+          >
+            <svg className="w-3.5 h-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+            Ver Markdown
+          </button>
+
+          {/* Import / Paste Markdown Button */}
           <button
             type="button"
             onClick={() => setIsImportModalOpen(true)}
@@ -284,6 +327,7 @@ export default function App() {
             </svg>
             Paste Markdown
           </button>
+
           <button
             type="button"
             onClick={handleZoomToFit}
@@ -291,6 +335,7 @@ export default function App() {
           >
             Zoom to Fit
           </button>
+
           <button
             type="button"
             onClick={handleResetLayout}
@@ -316,6 +361,93 @@ export default function App() {
           </div>
         )}
       </main>
+
+      {/* View Live Synchronized Markdown Modal */}
+      {isViewMarkdownOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs">
+          <div
+            className="w-full max-w-2xl bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150 max-h-[85vh]"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="view-markdown-title"
+          >
+            <div className="px-5 py-4 border-b border-zinc-800 flex items-center justify-between">
+              <div>
+                <h2 id="view-markdown-title" className="text-sm font-semibold text-zinc-100 font-mono flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                  TASKS.md — Sincronizado en tiempo real
+                </h2>
+                <p className="text-xs text-zinc-400 mt-0.5">
+                  Los cambios realizados en las tarjetas (título, checkboxes, prioridades) actualizan este documento automáticamente.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsViewMarkdownOpen(false)}
+                className="text-zinc-400 hover:text-zinc-200 p-1 rounded transition-colors cursor-pointer"
+                aria-label="Cerrar modal"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Markdown Code Viewer */}
+            <div className="p-5 flex flex-col gap-3 overflow-hidden">
+              <div className="flex items-center justify-between text-xs font-mono text-zinc-400">
+                <span>Contenido Markdown actual:</span>
+                <span className="text-[11px] text-zinc-500">
+                  {parsedStats.taskCount} tareas · {parsedStats.groupCount} secciones
+                </span>
+              </div>
+
+              <div className="relative w-full rounded-lg bg-zinc-950 border border-zinc-800 overflow-hidden">
+                <pre className="p-4 text-xs font-mono text-zinc-200 overflow-auto max-h-[46vh] leading-relaxed select-text whitespace-pre-wrap">
+                  {markdownInput}
+                </pre>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-5 py-3.5 bg-zinc-950/60 border-t border-zinc-800 flex items-center justify-between">
+              <span className="text-[11px] font-mono text-zinc-500">
+                Formato Markdown nativo preservado
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleCopyMarkdown}
+                  className="px-3.5 py-1.5 text-xs font-mono text-emerald-300 bg-emerald-950/70 hover:bg-emerald-900 border border-emerald-700/60 rounded-md transition-colors cursor-pointer flex items-center gap-1.5"
+                >
+                  {copiedMarkdown ? (
+                    <>
+                      <svg className="w-3.5 h-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      ¡Copiado!
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                      </svg>
+                      Copiar Markdown
+                    </>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsViewMarkdownOpen(false)}
+                  className="px-3.5 py-1.5 text-xs font-mono text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800 rounded-md transition-colors cursor-pointer"
+                >
+                  Cerrar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Markdown Import Modal */}
       {isImportModalOpen && (

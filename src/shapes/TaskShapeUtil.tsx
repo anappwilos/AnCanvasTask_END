@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   createShapeId,
   Editor,
@@ -23,6 +23,206 @@ export type TaskShapeProps = {
 };
 
 export type ITaskShape = TLBaseShape<'task', TaskShapeProps>;
+
+function TaskCardComponent({
+  shape,
+  editor,
+}: {
+  shape: ITaskShape;
+  editor: Editor;
+}) {
+  const { title, completed, priority, taskId, blockedBy, w, h } = shape.props;
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [editedTitle, setEditedTitle] = useState(title);
+
+  useEffect(() => {
+    setEditedTitle(title);
+  }, [title]);
+
+  const toggleCompleted = (e: React.MouseEvent | React.PointerEvent) => {
+    e.stopPropagation();
+    editor.updateShape({
+      id: shape.id,
+      type: 'task',
+      props: {
+        completed: !completed,
+      },
+    } as any);
+  };
+
+  const cyclePriority = (e: React.MouseEvent | React.PointerEvent) => {
+    e.stopPropagation();
+    const priorities: TaskPriority[] = ['P0', 'P1', 'P2', 'P3'];
+    const nextIndex = (priorities.indexOf(priority) + 1) % priorities.length;
+    editor.updateShape({
+      id: shape.id,
+      type: 'task',
+      props: {
+        priority: priorities[nextIndex],
+      },
+    } as any);
+  };
+
+  const commitTitle = () => {
+    setIsEditingTitle(false);
+    const cleanTitle = editedTitle.trim();
+    if (cleanTitle && cleanTitle !== title) {
+      editor.updateShape({
+        id: shape.id,
+        type: 'task',
+        props: {
+          title: cleanTitle,
+        },
+      } as any);
+    } else {
+      setEditedTitle(title);
+    }
+  };
+
+  const priorityColors: Record<TaskPriority, { text: string; bg: string; border: string }> = {
+    P0: { text: 'text-red-400', bg: 'bg-red-950/70', border: 'border-red-800' },
+    P1: { text: 'text-amber-400', bg: 'bg-amber-950/70', border: 'border-amber-800' },
+    P2: { text: 'text-blue-400', bg: 'bg-blue-950/70', border: 'border-blue-800' },
+    P3: { text: 'text-zinc-400', bg: 'bg-zinc-800/80', border: 'border-zinc-700' },
+  };
+
+  const currentPriority = priorityColors[priority] || priorityColors.P1;
+
+  return (
+    <HTMLContainer
+      id={shape.id}
+      style={{
+        width: w,
+        height: h,
+        pointerEvents: 'all',
+      }}
+    >
+      <div
+        className={`w-full h-full rounded-xl bg-zinc-900 border transition-all duration-150 select-none flex flex-col justify-between p-3.5 shadow-xl ${
+          completed
+            ? 'border-zinc-800/80 bg-zinc-950/90 opacity-75'
+            : 'border-zinc-700/90 hover:border-zinc-500 shadow-black/60'
+        }`}
+      >
+        {/* Top Row: Checkbox + Title / Inline Edit + Priority badge */}
+        <div className="flex items-start justify-between gap-2.5">
+          <div className="flex items-start gap-2.5 flex-1 min-w-0">
+            <button
+              type="button"
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={toggleCompleted}
+              aria-label={completed ? 'Mark task as incomplete' : 'Mark task as complete'}
+              className={`mt-0.5 flex-shrink-0 w-4 h-4 rounded border flex items-center justify-center transition-colors cursor-pointer ${
+                completed
+                  ? 'bg-emerald-600 border-emerald-500 text-white'
+                  : 'bg-zinc-800 border-zinc-600 hover:border-zinc-400'
+              }`}
+            >
+              {completed && (
+                <svg
+                  className="w-3 h-3 stroke-current stroke-[2.5]"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              )}
+            </button>
+
+            {isEditingTitle ? (
+              <input
+                type="text"
+                autoFocus
+                value={editedTitle}
+                onPointerDown={(e) => e.stopPropagation()}
+                onChange={(e) => setEditedTitle(e.target.value)}
+                onBlur={commitTitle}
+                onKeyDown={(e) => {
+                  e.stopPropagation();
+                  if (e.key === 'Enter') {
+                    commitTitle();
+                  } else if (e.key === 'Escape') {
+                    setIsEditingTitle(false);
+                    setEditedTitle(title);
+                  }
+                }}
+                className="w-full text-sm font-medium bg-zinc-950 border border-emerald-500 rounded px-1.5 py-0.5 text-zinc-100 focus:outline-none -mt-0.5"
+              />
+            ) : (
+              <div
+                onDoubleClick={(e) => {
+                  e.stopPropagation();
+                  setIsEditingTitle(true);
+                }}
+                title="Double-click to edit title"
+                className="group/title flex items-start gap-1 flex-1 cursor-text"
+              >
+                <span
+                  className={`text-sm font-medium leading-snug transition-colors line-clamp-2 ${
+                    completed ? 'text-zinc-500 line-through' : 'text-zinc-100'
+                  }`}
+                >
+                  {title}
+                </span>
+                <button
+                  type="button"
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsEditingTitle(true);
+                  }}
+                  className="opacity-0 group-hover/title:opacity-100 transition-opacity text-zinc-400 hover:text-zinc-200 p-0.5 shrink-0 cursor-pointer"
+                  title="Edit title"
+                >
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                </button>
+              </div>
+            )}
+          </div>
+
+          <button
+            type="button"
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={cyclePriority}
+            title="Click to cycle priority (P0-P3)"
+            className={`px-2 py-0.5 text-xs font-mono font-bold rounded border cursor-pointer shrink-0 transition-transform hover:scale-105 ${currentPriority.text} ${currentPriority.bg} ${currentPriority.border}`}
+          >
+            {priority}
+          </button>
+        </div>
+
+        {/* Bottom Row: Discrete ID + Blocked badge + Status */}
+        <div className="flex items-center justify-between text-xs font-mono text-zinc-500 pt-1.5 border-t border-zinc-800/60 mt-1">
+          <div className="flex items-center gap-2 truncate max-w-[210px]">
+            {taskId ? (
+              <span className="text-zinc-400 font-mono text-[11px] truncate tracking-tight flex items-center gap-1" title={`ID: ${taskId}`}>
+                <span className="text-zinc-600 font-normal">#</span>
+                <span>{taskId}</span>
+              </span>
+            ) : (
+              <span className="text-zinc-600 font-mono text-[11px] italic">no-id</span>
+            )}
+
+            {blockedBy && !completed && (
+              <span
+                className="px-1.5 py-0.5 text-[10px] font-mono font-medium text-rose-300 bg-rose-950/80 border border-rose-800/80 rounded"
+                title={`Blocked by #${blockedBy}`}
+              >
+                Blocked
+              </span>
+            )}
+          </div>
+
+          <span className="text-[10px] font-mono text-zinc-500 tracking-wider shrink-0">
+            {completed ? 'DONE' : 'OPEN'}
+          </span>
+        </div>
+      </div>
+    </HTMLContainer>
+  );
+}
 
 export class TaskShapeUtil extends ShapeUtil<any> {
   static override type = 'task' as const;
@@ -70,131 +270,7 @@ export class TaskShapeUtil extends ShapeUtil<any> {
   }
 
   component(shape: ITaskShape) {
-    const { title, completed, priority, taskId, blockedBy, w, h } = shape.props;
-
-    const toggleCompleted = (e: React.MouseEvent | React.PointerEvent) => {
-      e.stopPropagation();
-      this.editor.updateShape({
-        id: shape.id,
-        type: 'task',
-        props: {
-          completed: !completed,
-        },
-      } as any);
-    };
-
-    const cyclePriority = (e: React.MouseEvent | React.PointerEvent) => {
-      e.stopPropagation();
-      const priorities: TaskPriority[] = ['P0', 'P1', 'P2', 'P3'];
-      const nextIndex = (priorities.indexOf(priority) + 1) % priorities.length;
-      this.editor.updateShape({
-        id: shape.id,
-        type: 'task',
-        props: {
-          priority: priorities[nextIndex],
-        },
-      } as any);
-    };
-
-    const priorityColors: Record<TaskPriority, { text: string; bg: string; border: string }> = {
-      P0: { text: 'text-red-400', bg: 'bg-red-950/70', border: 'border-red-800' },
-      P1: { text: 'text-amber-400', bg: 'bg-amber-950/70', border: 'border-amber-800' },
-      P2: { text: 'text-blue-400', bg: 'bg-blue-950/70', border: 'border-blue-800' },
-      P3: { text: 'text-zinc-400', bg: 'bg-zinc-800/80', border: 'border-zinc-700' },
-    };
-
-    const currentPriority = priorityColors[priority] || priorityColors.P1;
-
-    return (
-      <HTMLContainer
-        id={shape.id}
-        style={{
-          width: w,
-          height: h,
-          pointerEvents: 'all',
-        }}
-      >
-        <div
-          className={`w-full h-full rounded-xl bg-zinc-900 border transition-all duration-150 select-none flex flex-col justify-between p-3.5 shadow-xl ${
-            completed
-              ? 'border-zinc-800/80 bg-zinc-950/90 opacity-75'
-              : 'border-zinc-700/90 hover:border-zinc-500 shadow-black/60'
-          }`}
-        >
-          {/* Top Row: Checkbox + Title + Priority badge */}
-          <div className="flex items-start justify-between gap-2.5">
-            <div className="flex items-start gap-2.5 flex-1 min-w-0">
-              <button
-                type="button"
-                onPointerDown={(e) => e.stopPropagation()}
-                onClick={toggleCompleted}
-                aria-label={completed ? 'Mark task as incomplete' : 'Mark task as complete'}
-                className={`mt-0.5 flex-shrink-0 w-4 h-4 rounded border flex items-center justify-center transition-colors cursor-pointer ${
-                  completed
-                    ? 'bg-emerald-600 border-emerald-500 text-white'
-                    : 'bg-zinc-800 border-zinc-600 hover:border-zinc-400'
-                }`}
-              >
-                {completed && (
-                  <svg
-                    className="w-3 h-3 stroke-current stroke-[2.5]"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                )}
-              </button>
-
-              <span
-                className={`text-sm font-medium leading-snug transition-colors line-clamp-2 ${
-                  completed ? 'text-zinc-500 line-through' : 'text-zinc-100'
-                }`}
-              >
-                {title}
-              </span>
-            </div>
-
-            <button
-              type="button"
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={cyclePriority}
-              title="Click to cycle priority (P0-P3)"
-              className={`px-2 py-0.5 text-xs font-mono font-bold rounded border cursor-pointer shrink-0 transition-transform hover:scale-105 ${currentPriority.text} ${currentPriority.bg} ${currentPriority.border}`}
-            >
-              {priority}
-            </button>
-          </div>
-
-          {/* Bottom Row: Discrete ID + Blocked badge + Status */}
-          <div className="flex items-center justify-between text-xs font-mono text-zinc-500 pt-1.5 border-t border-zinc-800/60 mt-1">
-            <div className="flex items-center gap-2 truncate max-w-[210px]">
-              {taskId ? (
-                <span className="text-zinc-400 font-mono text-[11px] truncate tracking-tight flex items-center gap-1" title={`ID: ${taskId}`}>
-                  <span className="text-zinc-600 font-normal">#</span>
-                  <span>{taskId}</span>
-                </span>
-              ) : (
-                <span className="text-zinc-600 font-mono text-[11px] italic">no-id</span>
-              )}
-
-              {blockedBy && !completed && (
-                <span
-                  className="px-1.5 py-0.5 text-[10px] font-mono font-medium text-rose-300 bg-rose-950/80 border border-rose-800/80 rounded"
-                  title={`Blocked by #${blockedBy}`}
-                >
-                  Blocked
-                </span>
-              )}
-            </div>
-
-            <span className="text-[10px] font-mono text-zinc-500 tracking-wider shrink-0">
-              {completed ? 'DONE' : 'OPEN'}
-            </span>
-          </div>
-        </div>
-      </HTMLContainer>
-    );
+    return <TaskCardComponent shape={shape} editor={this.editor} />;
   }
 }
 
