@@ -80,10 +80,16 @@ export default function App() {
   const [isCustomGroup, setIsCustomGroup] = useState<boolean>(false);
 
   // Markdown and sync
+  const [currentFileName, setCurrentFileName] = useState<string>('TASKS.md');
   const [markdownInput, setMarkdownInput] = useState<string>(SAMPLE_MARKDOWN);
+  const [lastSavedMarkdown, setLastSavedMarkdown] = useState<string>(SAMPLE_MARKDOWN);
+  const [isDraggingOver, setIsDraggingOver] = useState<boolean>(false);
   const [copiedMarkdown, setCopiedMarkdown] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [syncStatus, setSyncStatus] = useState<SyncStatus>('idle');
+
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const dragCounterRef = useRef<number>(0);
 
   // Sanity settings form state
   const [sanityProjectId, setSanityProjectId] = useState<string>('');
@@ -327,6 +333,127 @@ export default function App() {
     };
   }, [markdownInput]);
 
+  const hasUnsavedChanges = useMemo(
+    () => markdownInput !== lastSavedMarkdown,
+    [markdownInput, lastSavedMarkdown]
+  );
+
+  // File Import Processor (via File Input or Drag & Drop)
+  const processLoadedFile = useCallback(
+    async (file: File) => {
+      const lowerName = file.name.toLowerCase();
+      const isMd =
+        lowerName.endsWith('.md') ||
+        lowerName.endsWith('.markdown') ||
+        lowerName.endsWith('.txt') ||
+        file.type.includes('markdown') ||
+        file.type.includes('text/plain');
+
+      if (!isMd) {
+        showToast('Por favor selecciona o arrastra un archivo Markdown válido (.md)');
+        return;
+      }
+
+      try {
+        const text = await file.text();
+        setCurrentFileName(file.name);
+        setMarkdownInput(text);
+        setLastSavedMarkdown(text);
+
+        if (editor) {
+          const savedVisualState = await loadCanvasVisualState();
+          const { taskCount, groupCount } = loadTasksFromMarkdown(
+            editor,
+            text,
+            savedVisualState
+          );
+          if (taskCount > 0 || groupCount > 0) {
+            triggerDebouncedVisualSave(editor);
+            showToast(`"${file.name}" cargado (${taskCount} tareas en ${groupCount} secciones)`);
+          } else {
+            showToast(`"${file.name}" cargado, pero no contiene tareas válidas (- [ ] ...)`);
+          }
+        } else {
+          showToast(`"${file.name}" cargado en memoria`);
+        }
+      } catch (err) {
+        showToast(`Error al leer "${file.name}"`);
+      }
+    },
+    [editor, triggerDebouncedVisualSave]
+  );
+
+  const handleOpenFilePicker = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      processLoadedFile(files[0]);
+    }
+  };
+
+  // Export / Save Markdown File to Local Disk
+  const handleExportFile = useCallback(() => {
+    try {
+      const blob = new Blob([markdownInput], { type: 'text/markdown;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.href = url;
+      downloadAnchor.download = currentFileName || 'TASKS.md';
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      document.body.removeChild(downloadAnchor);
+      URL.revokeObjectURL(url);
+
+      setLastSavedMarkdown(markdownInput);
+      showToast(`Archivo "${currentFileName || 'TASKS.md'}" guardado con éxito`);
+    } catch (err) {
+      showToast('Error al exportar archivo');
+    }
+  }, [markdownInput, currentFileName]);
+
+  // Drag & Drop Handlers for .md files
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounterRef.current += 1;
+    if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
+      setIsDraggingOver(true);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounterRef.current -= 1;
+    if (dragCounterRef.current <= 0) {
+      setIsDraggingOver(false);
+      dragCounterRef.current = 0;
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingOver(false);
+    dragCounterRef.current = 0;
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const file = e.dataTransfer.files[0];
+      processLoadedFile(file);
+    }
+  };
+
   const handleApplyMarkdown = useCallback(async () => {
     if (!editor) return;
     const savedVisualState = await loadCanvasVisualState();
@@ -337,6 +464,7 @@ export default function App() {
     );
     if (taskCount > 0 || groupCount > 0) {
       setIsImportModalOpen(false);
+      setLastSavedMarkdown(markdownInput);
       showToast(
         `${taskCount} ${taskCount === 1 ? 'task' : 'tasks'} loaded with Sanity visual positions`
       );
@@ -536,22 +664,62 @@ export default function App() {
   };
 
   return (
-    <div className="flex flex-col w-screen h-screen bg-zinc-950 text-zinc-100 overflow-hidden font-sans">
+    <div
+      onDragEnter={handleDragEnter}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+      className="flex flex-col w-screen h-screen bg-zinc-950 text-zinc-100 overflow-hidden font-sans relative"
+    >
+      {/* Hidden file picker input */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileInputChange}
+        accept=".md,.markdown,.txt,text/markdown,text/plain"
+        className="hidden"
+        aria-hidden="true"
+      />
+
       {/* Top Bar: AnTaskCanvas — by AnAppWiLos */}
-      <header className="h-14 bg-zinc-900 border-b border-zinc-800 px-5 flex items-center justify-between z-10 select-none flex-shrink-0">
-        {/* Zone 1: Brand wordmark */}
-        <div className="flex items-center gap-3">
-          <div className="w-2.5 h-2.5 rounded-sm bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-          <h1 className="text-sm font-semibold tracking-tight text-zinc-100 font-mono">
-            AnTaskCanvas — by AnAppWiLos
-          </h1>
+      <header className="h-14 bg-zinc-900 border-b border-zinc-800 px-4 sm:px-5 flex items-center justify-between z-10 select-none flex-shrink-0 gap-3">
+        {/* Zone 1: Brand wordmark & Current File status */}
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="w-2.5 h-2.5 rounded-sm bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+            <h1 className="text-sm font-semibold tracking-tight text-zinc-100 font-mono hidden sm:inline-block">
+              AnTaskCanvas
+            </h1>
+          </div>
+
+          <span aria-hidden="true" className="text-zinc-700 hidden sm:inline">|</span>
+
+          {/* Current File and Unsaved Changes Indicator */}
+          <div
+            className="flex items-center gap-2 px-2.5 py-1 rounded-md bg-zinc-950 border border-zinc-800 text-xs font-mono truncate shadow-xs"
+            title={`Archivo actual: ${currentFileName}${hasUnsavedChanges ? ' (con cambios sin guardar)' : ' (guardado)'}`}
+          >
+            <svg className="w-3.5 h-3.5 text-zinc-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <span className="font-semibold text-zinc-200 truncate">{currentFileName}</span>
+            {hasUnsavedChanges ? (
+              <span className="flex items-center gap-1.5 text-amber-400 text-[11px] flex-shrink-0">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                <span className="hidden md:inline">• cambios sin guardar</span>
+                <span className="md:hidden">• modificado</span>
+              </span>
+            ) : (
+              <span className="flex items-center gap-1 text-emerald-400 text-[11px] flex-shrink-0">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                <span className="hidden md:inline">• al día</span>
+              </span>
+            )}
+          </div>
         </div>
 
-        {/* Zone 2: Status indicator, Issues Badge & Persistence Badge */}
-        <div className="hidden md:flex items-center gap-3 text-xs font-mono text-zinc-400">
-          <span className="text-zinc-500">TASKS.md</span>
-          <span aria-hidden="true" className="text-zinc-700">·</span>
-
+        {/* Zone 2: Issues Badge & Persistence Badge */}
+        <div className="hidden lg:flex items-center gap-3 text-xs font-mono text-zinc-400">
           {/* Markdown Validation Issues Badge */}
           {validationReport.issues.length > 0 ? (
             <button
@@ -601,31 +769,60 @@ export default function App() {
               }`}
             />
             <span className="text-[11px]">
-              Sanity:{' '}
               {syncStatus === 'saving'
                 ? 'Saving...'
                 : syncStatus === 'loading'
                 ? 'Loading...'
                 : syncStatus === 'synced'
-                ? 'Remote Synced'
-                : 'Visual Cache'}
+                ? 'Sanity Sync'
+                : 'Caché local'}
             </span>
           </button>
         </div>
 
-        {/* Zone 3: Actions */}
-        <div className="flex items-center gap-2">
+        {/* Zone 3: Main Actions */}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {/* Abrir TASKS.md Button */}
+          <button
+            type="button"
+            onClick={handleOpenFilePicker}
+            className="px-3 py-1.5 text-xs font-mono font-medium text-zinc-200 bg-zinc-800 hover:bg-zinc-700 hover:text-white border border-zinc-700 rounded-md transition-colors cursor-pointer flex items-center gap-1.5 shadow-xs"
+            title="Abrir un archivo TASKS.md o Markdown desde tu equipo"
+          >
+            <svg className="w-3.5 h-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            </svg>
+            <span className="hidden sm:inline">Abrir</span> TASKS.md
+          </button>
+
+          {/* Guardar TASKS.md Button */}
+          <button
+            type="button"
+            onClick={handleExportFile}
+            className={`px-3 py-1.5 text-xs font-mono font-medium rounded-md transition-colors cursor-pointer flex items-center gap-1.5 shadow-xs ${
+              hasUnsavedChanges
+                ? 'text-emerald-100 bg-emerald-600 hover:bg-emerald-500 border border-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.35)] animate-pulse'
+                : 'text-zinc-300 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700'
+            }`}
+            title={`Guardar y exportar ${currentFileName} a tu equipo`}
+          >
+            <svg className="w-3.5 h-3.5 text-emerald-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            <span>Guardar {currentFileName.endsWith('.md') ? currentFileName : `${currentFileName}.md`}</span>
+          </button>
+
           {/* Auto Organizar Button */}
           <button
             type="button"
             onClick={() => setIsAutoLayoutConfirmOpen(true)}
-            className="px-3 py-1.5 text-xs font-mono font-medium text-emerald-300 bg-emerald-950/70 hover:bg-emerald-900/80 border border-emerald-700/70 rounded-md transition-colors cursor-pointer flex items-center gap-1.5 shadow-xs"
+            className="px-2.5 sm:px-3 py-1.5 text-xs font-mono font-medium text-emerald-300 bg-emerald-950/70 hover:bg-emerald-900/80 border border-emerald-700/70 rounded-md transition-colors cursor-pointer flex items-center gap-1.5 shadow-xs"
             title="Distribuir automáticamente las tareas y grupos según su jerarquía de dependencias"
           >
             <svg className="w-3.5 h-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
             </svg>
-            Auto organizar
+            <span className="hidden sm:inline">Auto organizar</span>
           </button>
 
           {/* Create New Task Button */}
@@ -637,45 +834,44 @@ export default function App() {
               }
               setIsNewTaskModalOpen(true);
             }}
-            className="px-3 py-1.5 text-xs font-mono font-semibold text-white bg-emerald-600 hover:bg-emerald-500 rounded-md transition-colors cursor-pointer flex items-center gap-1.5 shadow-sm"
-            title="Crear una nueva tarea en el canvas y en TASKS.md"
+            className="px-2.5 sm:px-3 py-1.5 text-xs font-mono font-semibold text-white bg-emerald-600 hover:bg-emerald-500 rounded-md transition-colors cursor-pointer flex items-center gap-1.5 shadow-sm"
+            title="Crear una nueva tarea en el canvas y en el documento Markdown"
           >
             <svg className="w-3.5 h-3.5 stroke-[2.5]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
             </svg>
-            Nueva tarea
+            <span className="hidden sm:inline">Nueva tarea</span>
           </button>
 
           {/* View Markdown Button */}
           <button
             type="button"
             onClick={() => setIsViewMarkdownOpen(true)}
-            className="px-3 py-1.5 text-xs font-mono font-medium text-zinc-300 bg-zinc-800 hover:bg-zinc-700 hover:text-zinc-100 border border-zinc-700/60 rounded-md transition-colors cursor-pointer flex items-center gap-1.5"
-            title="Ver TASKS.md actualizado en tiempo real"
+            className="hidden md:flex px-2.5 sm:px-3 py-1.5 text-xs font-mono font-medium text-zinc-300 bg-zinc-800 hover:bg-zinc-700 hover:text-zinc-100 border border-zinc-700/60 rounded-md transition-colors cursor-pointer items-center gap-1.5"
+            title="Ver o copiar el documento Markdown completo en tiempo real"
           >
             <svg className="w-3.5 h-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
             </svg>
-            Ver Markdown
+            Ver
           </button>
 
           {/* Import / Paste Markdown Button */}
           <button
             type="button"
             onClick={() => setIsImportModalOpen(true)}
-            className="px-3 py-1.5 text-xs font-mono font-medium text-emerald-300 bg-emerald-950/60 hover:bg-emerald-900/70 border border-emerald-700/60 rounded-md transition-colors cursor-pointer flex items-center gap-1.5"
+            className="hidden md:flex px-2.5 py-1.5 text-xs font-mono font-medium text-zinc-300 bg-zinc-800 hover:bg-zinc-700 hover:text-zinc-100 border border-zinc-700/60 rounded-md transition-colors cursor-pointer items-center gap-1"
+            title="Pegar Markdown manualmente en cuadro de texto"
           >
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            Importar
+            Pegar
           </button>
 
           <button
             type="button"
             onClick={handleZoomToFit}
-            className="px-3 py-1.5 text-xs font-mono font-medium text-zinc-300 bg-zinc-800 hover:bg-zinc-700 hover:text-zinc-100 border border-zinc-700/60 rounded-md transition-colors cursor-pointer"
+            className="hidden sm:inline-block px-2.5 py-1.5 text-xs font-mono font-medium text-zinc-300 bg-zinc-800 hover:bg-zinc-700 hover:text-zinc-100 border border-zinc-700/60 rounded-md transition-colors cursor-pointer"
+            title="Ajustar zoom para ver todo el canvas"
           >
             Zoom
           </button>
@@ -683,7 +879,8 @@ export default function App() {
           <button
             type="button"
             onClick={handleResetLayout}
-            className="px-3 py-1.5 text-xs font-mono font-medium text-zinc-300 bg-zinc-800 hover:bg-zinc-700 hover:text-zinc-100 border border-zinc-700/60 rounded-md transition-colors cursor-pointer"
+            className="hidden sm:inline-block px-2.5 py-1.5 text-xs font-mono font-medium text-zinc-300 bg-zinc-800 hover:bg-zinc-700 hover:text-zinc-100 border border-zinc-700/60 rounded-md transition-colors cursor-pointer"
+            title="Reiniciar canvas al ejemplo inicial"
           >
             Reset
           </button>
@@ -696,6 +893,30 @@ export default function App() {
           shapeUtils={customShapeUtils}
           onMount={handleMount}
         />
+
+        {/* Drag & Drop Discrete Overlay */}
+        {isDraggingOver && (
+          <div className="absolute inset-0 z-50 pointer-events-none bg-zinc-950/85 backdrop-blur-xs flex flex-col items-center justify-center animate-fade-in p-6">
+            <div className="w-full max-w-lg p-8 bg-zinc-900/95 border-2 border-dashed border-emerald-500/80 rounded-2xl shadow-2xl flex flex-col items-center text-center gap-4">
+              <div className="w-16 h-16 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
+                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                </svg>
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-base font-semibold text-zinc-100 font-mono">
+                  Suelta aquí tu archivo TASKS.md
+                </h3>
+                <p className="text-xs text-zinc-400 font-sans max-w-sm">
+                  Cargaremos tus secciones y tareas preservando IDs, prioridades, dependencias y metadatos no gestionados.
+                </p>
+              </div>
+              <div className="px-3 py-1 rounded bg-zinc-800/80 border border-zinc-700 text-[11px] font-mono text-emerald-400">
+                Formatos aceptados: .md, .markdown, .txt
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Toast notification */}
         {toastMessage && (
