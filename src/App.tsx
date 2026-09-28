@@ -15,6 +15,7 @@ import {
   TaskPriority,
   TaskShapeUtil,
 } from './shapes/TaskShapeUtil';
+import { applyAutoLayout } from './utils/autoLayout';
 import {
   addTaskToMarkdown,
   deleteTaskFromMarkdown,
@@ -66,6 +67,7 @@ export default function App() {
   const [isImportModalOpen, setIsImportModalOpen] = useState<boolean>(false);
   const [isViewMarkdownOpen, setIsViewMarkdownOpen] = useState<boolean>(false);
   const [isSanityModalOpen, setIsSanityModalOpen] = useState<boolean>(false);
+  const [isAutoLayoutConfirmOpen, setIsAutoLayoutConfirmOpen] = useState<boolean>(false);
   const [deleteWarningState, setDeleteWarningState] = useState<DeleteWarningInfo | null>(null);
 
   // New task form state
@@ -468,6 +470,19 @@ export default function App() {
     showToast(`Tarea #${taskId} eliminada`);
   };
 
+  // Execute Auto-Layout (DAG hierarchical organizing via Dagre)
+  const handleExecuteAutoLayout = () => {
+    if (!editor) return;
+    setIsAutoLayoutConfirmOpen(false);
+    const { taskCount, groupCount } = applyAutoLayout(editor, markdownInput);
+    if (taskCount > 0 || groupCount > 0) {
+      triggerDebouncedVisualSave(editor);
+      showToast(`Canvas auto organizado (${taskCount} tareas en ${groupCount} secciones)`);
+    } else {
+      showToast('No hay tareas para organizar');
+    }
+  };
+
   const handleSaveSanityConfig = (e: React.FormEvent) => {
     e.preventDefault();
     saveSanityConfig({
@@ -504,7 +519,7 @@ export default function App() {
         <div className="hidden md:flex items-center gap-3 text-xs font-mono text-zinc-400">
           <span className="text-zinc-500">TASKS.md</span>
           <span aria-hidden="true" className="text-zinc-700">·</span>
-          <span>Live Task Sync</span>
+          <span>Auto Layout (DAG)</span>
           <span aria-hidden="true" className="text-zinc-700">·</span>
           {/* Visual Sync Badge */}
           <button
@@ -537,6 +552,19 @@ export default function App() {
 
         {/* Zone 3: Actions */}
         <div className="flex items-center gap-2">
+          {/* Auto Organizar Button */}
+          <button
+            type="button"
+            onClick={() => setIsAutoLayoutConfirmOpen(true)}
+            className="px-3 py-1.5 text-xs font-mono font-medium text-emerald-300 bg-emerald-950/70 hover:bg-emerald-900/80 border border-emerald-700/70 rounded-md transition-colors cursor-pointer flex items-center gap-1.5 shadow-xs"
+            title="Distribuir automáticamente las tareas y grupos según su jerarquía de dependencias"
+          >
+            <svg className="w-3.5 h-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
+            </svg>
+            Auto organizar
+          </button>
+
           {/* Create New Task Button */}
           <button
             type="button"
@@ -573,7 +601,7 @@ export default function App() {
           <button
             type="button"
             onClick={() => setIsImportModalOpen(true)}
-            className="px-3 py-1.5 text-xs font-mono font-medium text-emerald-300 bg-emerald-950/60 hover:bg-emerald-900/70 border border-emerald-700/60 rounded-md transition-colors cursor-pointer flex items-center gap-1.5"
+            className="px-3 py-1.5 text-xs font-mono font-medium text-zinc-300 bg-zinc-800 hover:bg-zinc-700 hover:text-zinc-100 border border-zinc-700/60 rounded-md transition-colors cursor-pointer flex items-center gap-1.5"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -614,6 +642,68 @@ export default function App() {
           </div>
         )}
       </main>
+
+      {/* Modal: Confirmación Auto Organizar */}
+      {isAutoLayoutConfirmOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs">
+          <div
+            className="w-full max-w-md bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="autolayout-modal-title"
+          >
+            <div className="px-5 py-4 border-b border-zinc-800 flex items-center justify-between">
+              <div>
+                <h2 id="autolayout-modal-title" className="text-sm font-semibold text-zinc-100 font-mono flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                  ¿Auto organizar el canvas?
+                </h2>
+                <p className="text-xs text-zinc-400 mt-0.5">
+                  Distribución jerárquica basada en dependencias (DAG)
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAutoLayoutConfirmOpen(false)}
+                className="text-zinc-400 hover:text-zinc-200 p-1 rounded transition-colors cursor-pointer"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="p-5 flex flex-col gap-3">
+              <p className="text-xs text-zinc-300 leading-relaxed">
+                Esta acción reorganizará automáticamente las tarjetas de tareas y los grupos visuales del canvas:
+              </p>
+              <ul className="text-xs text-zinc-400 space-y-1.5 list-disc list-inside font-mono bg-zinc-950 p-3 rounded-lg border border-zinc-800/80">
+                <li>Ordena tareas bloqueadoras hacia arriba (<code className="text-zinc-200">Blocked by</code>).</li>
+                <li>Evita solapamientos y ajusta tamaños de sección.</li>
+                <li>Guarda las nuevas posiciones en la persistencia visual.</li>
+                <li><span className="text-emerald-400 font-semibold">No modifica</span> el texto ni datos de <code className="text-zinc-300">TASKS.md</code>.</li>
+              </ul>
+            </div>
+
+            <div className="px-5 py-3.5 bg-zinc-950/60 border-t border-zinc-800 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setIsAutoLayoutConfirmOpen(false)}
+                className="px-3.5 py-1.5 text-xs font-mono text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800 rounded-md transition-colors cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleExecuteAutoLayout}
+                className="px-4 py-1.5 text-xs font-mono font-medium text-white bg-emerald-600 hover:bg-emerald-500 rounded-md transition-colors cursor-pointer shadow-sm"
+              >
+                Auto organizar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal: Nueva Tarea */}
       {isNewTaskModalOpen && (
