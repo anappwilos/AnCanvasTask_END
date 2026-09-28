@@ -22,8 +22,10 @@ import {
   TaskGroupShapeUtil,
   TaskPriority,
   TaskShapeUtil,
+  TaskStatus,
 } from './shapes/TaskShapeUtil';
 import { applyAutoLayout } from './utils/autoLayout';
+import { KanbanBoard } from './components/KanbanBoard';
 import {
   addTaskToMarkdown,
   deleteTaskFromMarkdown,
@@ -72,6 +74,7 @@ export default function App() {
 
   // Shell Layout State (DESIGN.md Section 3 & 16)
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
+  const [activeView, setActiveView] = useState<'canvas' | 'kanban'>('canvas');
   const [selectedTaskShapeId, setSelectedTaskShapeId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [activeFilter, setActiveFilter] = useState<'all' | 'todo' | 'done' | 'critical' | 'blocked'>('all');
@@ -725,21 +728,190 @@ export default function App() {
     setTimeout(() => setCopiedMarkdown(false), 2000);
   };
 
+  // Kanban update callbacks
+  const handleUpdateTaskFromKanban = useCallback(
+    (
+      taskId: string,
+      updates: {
+        title?: string;
+        completed?: boolean;
+        priority?: TaskPriority;
+        status?: TaskStatus;
+        groupTitle?: string;
+      }
+    ) => {
+      setMarkdownInput((currentMd) => {
+        let updatedMd = currentMd;
+
+        if (updates.groupTitle) {
+          updatedMd = moveTaskToGroupInMarkdown(updatedMd, taskId, updates.groupTitle);
+        }
+
+        if (
+          updates.title !== undefined ||
+          updates.completed !== undefined ||
+          updates.priority !== undefined ||
+          updates.status !== undefined
+        ) {
+          updatedMd = updateTaskInMarkdown(updatedMd, taskId, {
+            title: updates.title,
+            completed: updates.completed,
+            priority: updates.priority,
+            status: updates.status,
+          });
+        }
+
+        return updatedMd;
+      });
+
+      if (editor) {
+        const shapes = editor.getCurrentPageShapes();
+        const taskShape = shapes.find((s) => {
+          if ((s as any).type !== 'task') return false;
+          const p = (s as any).props || {};
+          return (p.taskId && p.taskId.toLowerCase() === taskId.toLowerCase()) || s.id === taskId;
+        });
+
+        if (taskShape) {
+          editor.updateShape({
+            id: taskShape.id,
+            type: 'task',
+            props: {
+              ...(updates.title !== undefined ? { title: updates.title } : {}),
+              ...(updates.completed !== undefined ? { completed: updates.completed } : {}),
+              ...(updates.priority !== undefined ? { priority: updates.priority } : {}),
+              ...(updates.status !== undefined ? { status: updates.status } : {}),
+            },
+          } as any);
+        }
+      }
+    },
+    [editor]
+  );
+
+  const handleBatchUpdateTasksFromKanban = useCallback(
+    (
+      taskIds: string[],
+      updates: {
+        completed?: boolean;
+        priority?: TaskPriority;
+        status?: TaskStatus;
+      }
+    ) => {
+      setMarkdownInput((currentMd) => {
+        let updatedMd = currentMd;
+        for (const taskId of taskIds) {
+          updatedMd = updateTaskInMarkdown(updatedMd, taskId, updates);
+        }
+        return updatedMd;
+      });
+
+      if (editor) {
+        const shapes = editor.getCurrentPageShapes();
+        for (const taskId of taskIds) {
+          const taskShape = shapes.find((s) => {
+            if ((s as any).type !== 'task') return false;
+            const p = (s as any).props || {};
+            return (p.taskId && p.taskId.toLowerCase() === taskId.toLowerCase()) || s.id === taskId;
+          });
+          if (taskShape) {
+            editor.updateShape({
+              id: taskShape.id,
+              type: 'task',
+              props: {
+                ...(updates.completed !== undefined ? { completed: updates.completed } : {}),
+                ...(updates.priority !== undefined ? { priority: updates.priority } : {}),
+                ...(updates.status !== undefined ? { status: updates.status } : {}),
+              },
+            } as any);
+          }
+        }
+      }
+      showToast(`${taskIds.length} tareas actualizadas`);
+    },
+    [editor]
+  );
+
+  const handleBatchDeleteTasksFromKanban = useCallback(
+    (taskIds: string[]) => {
+      setMarkdownInput((currentMd) => {
+        let updatedMd = currentMd;
+        for (const taskId of taskIds) {
+          updatedMd = deleteTaskFromMarkdown(updatedMd, taskId);
+        }
+        return updatedMd;
+      });
+
+      if (editor) {
+        const shapes = editor.getCurrentPageShapes();
+        const shapesToDelete: string[] = [];
+        for (const taskId of taskIds) {
+          const taskShape = shapes.find((s) => {
+            if ((s as any).type !== 'task') return false;
+            const p = (s as any).props || {};
+            return (p.taskId && p.taskId.toLowerCase() === taskId.toLowerCase()) || s.id === taskId;
+          });
+          if (taskShape) {
+            shapesToDelete.push(taskShape.id);
+          }
+        }
+        if (shapesToDelete.length > 0) {
+          editor.deleteShapes(shapesToDelete as any);
+        }
+      }
+      showToast(`${taskIds.length} tareas eliminadas`);
+    },
+    [editor]
+  );
+
   // Selected Task Details Helper
   const selectedTaskData = useMemo(() => {
-    if (!selectedTaskShapeId || !editor) return null;
-    const shape = editor.getShape(selectedTaskShapeId as any) as any;
-    if (!shape || shape.type !== 'task') return null;
+    if (!selectedTaskShapeId) return null;
 
-    const tProps = shape.props || {};
-    return {
-      shapeId: shape.id,
-      taskId: tProps.taskId || 'sin-id',
-      title: tProps.title || '',
-      completed: Boolean(tProps.completed),
-      priority: (tProps.priority || 'P1') as TaskPriority,
-      blockedBy: tProps.blockedBy || '',
-    };
+    if (editor) {
+      const shape = (editor.getShape(selectedTaskShapeId as any) ||
+        editor.getCurrentPageShapes().find((s) => {
+          if ((s as any).type !== 'task') return false;
+          const p = (s as any).props || {};
+          return p.taskId === selectedTaskShapeId || p.temporaryId === selectedTaskShapeId || s.id === selectedTaskShapeId;
+        })) as any;
+
+      if (shape && shape.type === 'task') {
+        const tProps = shape.props || {};
+        return {
+          shapeId: shape.id,
+          taskId: tProps.taskId || tProps.temporaryId || 'sin-id',
+          title: tProps.title || '',
+          completed: Boolean(tProps.completed),
+          priority: (tProps.priority || 'P1') as TaskPriority,
+          status: (tProps.status || (tProps.completed ? 'done' : 'todo')) as TaskStatus,
+          tags: tProps.tags || [],
+          subtasks: tProps.subtasks,
+          blockedBy: tProps.blockedBy || '',
+        };
+      }
+    }
+
+    const { taskBlocks } = scanTaskBlocks(markdownInput);
+    const block = taskBlocks.find(
+      (b) => b.detectedId === selectedTaskShapeId || b.temporaryId === selectedTaskShapeId
+    );
+    if (block) {
+      const isCompleted = block.rawTaskLine.includes('[x]') || block.rawTaskLine.includes('[X]');
+      return {
+        shapeId: selectedTaskShapeId,
+        taskId: block.detectedId || block.temporaryId,
+        title: block.detectedTitle,
+        completed: isCompleted,
+        priority: block.detectedPriority || 'P1',
+        status: (block.detectedStatus as any) || (isCompleted ? 'done' : 'todo'),
+        tags: block.detectedTags || [],
+        subtasks: block.detectedSubtasks,
+        blockedBy: block.detectedBlockedBy || '',
+      };
+    }
+
+    return null;
   }, [selectedTaskShapeId, editor, markdownInput]);
 
   return (
@@ -808,9 +980,40 @@ export default function App() {
           </div>
         </div>
 
-        {/* Center Section: Quick Search bar (M3 Search Style) */}
-        <div className="hidden md:flex items-center flex-1 max-w-xs lg:max-w-md mx-2">
-          <div className="relative w-full">
+        {/* Center Section: View Switcher (Canvas / Kanban) & Quick Search bar */}
+        <div className="flex items-center gap-2 sm:gap-4 flex-1 max-w-xs md:max-w-md lg:max-w-lg mx-2 justify-center">
+          {/* View Switcher Segmented Control (DESIGN.md Section 14 & 15) */}
+          <div className="flex items-center bg-[var(--surface)] p-0.5 rounded-full border border-[var(--outline)] shadow-xs shrink-0">
+            <button
+              type="button"
+              onClick={() => setActiveView('canvas')}
+              className={`px-2.5 sm:px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer ${
+                activeView === 'canvas'
+                  ? 'bg-[var(--primary)] text-[var(--on-primary)] shadow-xs'
+                  : 'text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]'
+              }`}
+              title="Vista espacial en Canvas interactivo"
+            >
+              <span className="material-symbols-outlined text-[16px]">grid_view</span>
+              <span className="hidden sm:inline">Canvas</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveView('kanban')}
+              className={`px-2.5 sm:px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer ${
+                activeView === 'kanban'
+                  ? 'bg-[var(--primary)] text-[var(--on-primary)] shadow-xs'
+                  : 'text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]'
+              }`}
+              title="Vista de Tablero Kanban por columnas"
+            >
+              <span className="material-symbols-outlined text-[16px]">view_kanban</span>
+              <span className="hidden sm:inline">Kanban</span>
+            </button>
+          </div>
+
+          <div className="relative w-full hidden md:block">
             <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-[var(--on-surface-variant)] pointer-events-none">
               search
             </span>
@@ -1106,33 +1309,63 @@ export default function App() {
           </aside>
         )}
 
-        {/* Workspace: Infinite Canvas (DESIGN.md Section 3 & 14) */}
+        {/* Workspace: Infinite Canvas vs Kanban Board (DESIGN.md Section 3, 14 & 15) */}
         <main className="flex-1 h-full relative overflow-hidden bg-[var(--surface)]">
-          <Tldraw
-            shapeUtils={customShapeUtils}
-            onMount={handleMount}
-            autoFocus
-          />
+          {activeView === 'canvas' ? (
+            <>
+              <Tldraw
+                shapeUtils={customShapeUtils}
+                onMount={handleMount}
+                autoFocus
+              />
 
-          {/* Floating Canvas Controls Overlay (Bottom Left) */}
-          <div className="absolute bottom-4 left-4 z-10 hidden sm:flex items-center gap-1.5 bg-[var(--surface-container)]/90 backdrop-blur-md border border-[var(--outline)] rounded-full p-1 shadow-lg">
-            <button
-              type="button"
-              onClick={handleZoomToFit}
-              className="btn-m3-icon w-8 h-8 cursor-pointer"
-              title="Ajustar zoom al contenido (Zoom to Fit)"
-            >
-              <span className="material-symbols-outlined text-[18px]">fit_screen</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsAutoLayoutConfirmOpen(true)}
-              className="btn-m3-icon w-8 h-8 cursor-pointer text-sky-400"
-              title="Auto organizar canvas"
-            >
-              <span className="material-symbols-outlined text-[18px]">auto_fix_high</span>
-            </button>
-          </div>
+              {/* Floating Canvas Controls Overlay (Bottom Left) */}
+              <div className="absolute bottom-4 left-4 z-10 hidden sm:flex items-center gap-1.5 bg-[var(--surface-container)]/90 backdrop-blur-md border border-[var(--outline)] rounded-full p-1 shadow-lg">
+                <button
+                  type="button"
+                  onClick={handleZoomToFit}
+                  className="btn-m3-icon w-8 h-8 cursor-pointer"
+                  title="Ajustar zoom al contenido (Zoom to Fit)"
+                >
+                  <span className="material-symbols-outlined text-[18px]">fit_screen</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsAutoLayoutConfirmOpen(true)}
+                  className="btn-m3-icon w-8 h-8 cursor-pointer text-sky-400"
+                  title="Auto organizar canvas (DAG)"
+                >
+                  <span className="material-symbols-outlined text-[18px]">auto_fix_high</span>
+                </button>
+              </div>
+            </>
+          ) : (
+            <KanbanBoard
+              markdown={markdownInput}
+              onUpdateTask={handleUpdateTaskFromKanban}
+              onBatchUpdateTasks={handleBatchUpdateTasksFromKanban}
+              onDeleteTask={(taskId, title) => {
+                const dependents = findDependentTasks(markdownInput, taskId);
+                setDeleteWarningState({
+                  shapeId: taskId,
+                  taskId,
+                  title,
+                  dependents,
+                });
+              }}
+              onBatchDeleteTasks={handleBatchDeleteTasksFromKanban}
+              onSelectTask={(id) => setSelectedTaskShapeId(id)}
+              selectedTaskId={selectedTaskShapeId}
+              onOpenNewTaskModalWithGroup={(groupOrStatus) => {
+                if (existingSections.includes(groupOrStatus)) {
+                  setNewTaskGroup(groupOrStatus);
+                }
+                setIsNewTaskModalOpen(true);
+              }}
+              searchQuery={searchQuery}
+              activeFilter={activeFilter}
+            />
+          )}
 
           {/* Drag & Drop Discrete Overlay */}
           {isDraggingOver && (
@@ -1168,8 +1401,8 @@ export default function App() {
                   <span className="text-xs font-mono font-medium px-2 py-0.5 rounded-md bg-[var(--surface)] border border-[var(--outline)] text-[var(--primary)]">
                     #{selectedTaskData.taskId}
                   </span>
-                  <span className="text-xs font-mono text-[var(--on-surface-variant)]">
-                    {selectedTaskData.completed ? 'Completada' : 'Pendiente'}
+                  <span className="text-xs font-mono text-[var(--on-surface-variant)] uppercase">
+                    {selectedTaskData.completed ? 'Done' : selectedTaskData.status || 'Todo'}
                   </span>
                 </div>
                 <button
@@ -1191,65 +1424,53 @@ export default function App() {
                   value={selectedTaskData.title}
                   onChange={(e) => {
                     const newTitle = e.target.value;
-                    if (editor && selectedTaskShapeId) {
-                      editor.updateShape({
-                        id: selectedTaskShapeId as any,
-                        type: 'task',
-                        props: { title: newTitle },
-                      } as any);
-                    }
+                    handleUpdateTaskFromKanban(selectedTaskData.taskId, { title: newTitle });
                   }}
                   rows={2}
                   className="w-full bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--outline)] rounded-xl p-2.5 text-xs font-sans focus:outline-none focus:border-[var(--primary)] resize-none"
                 />
               </div>
 
-              {/* Status Toggle */}
+              {/* Status Normalizado: Backlog, Todo, In Progress, Review, Done (DESIGN.md Section 10) */}
               <div className="flex flex-col gap-1.5">
                 <label className="text-[11px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
                   Estado
                 </label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (editor && selectedTaskShapeId) {
-                        editor.updateShape({
-                          id: selectedTaskShapeId as any,
-                          type: 'task',
-                          props: { completed: false },
-                        } as any);
-                      }
-                    }}
-                    className={`py-2 px-3 rounded-xl border text-xs font-medium flex items-center justify-center gap-1.5 cursor-pointer transition-all ${
-                      !selectedTaskData.completed
-                        ? 'bg-amber-950/40 text-amber-300 border-amber-700 font-semibold'
-                        : 'bg-[var(--surface)] text-[var(--on-surface-variant)] border-[var(--outline)]'
-                    }`}
-                  >
-                    <span>Todo</span>
-                  </button>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                  {[
+                    { id: 'backlog', label: 'Backlog', icon: 'inventory_2' },
+                    { id: 'todo', label: 'Todo', icon: 'pending_actions' },
+                    { id: 'in_progress', label: 'In Progress', icon: 'play_circle' },
+                    { id: 'review', label: 'Review', icon: 'rate_review' },
+                    { id: 'done', label: 'Done', icon: 'check_circle' },
+                  ].map((st) => {
+                    const isCurrent =
+                      st.id === 'done'
+                        ? selectedTaskData.completed
+                        : !selectedTaskData.completed && (selectedTaskData.status === st.id || (!selectedTaskData.status && st.id === 'todo'));
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (editor && selectedTaskShapeId) {
-                        editor.updateShape({
-                          id: selectedTaskShapeId as any,
-                          type: 'task',
-                          props: { completed: true },
-                        } as any);
-                      }
-                    }}
-                    className={`py-2 px-3 rounded-xl border text-xs font-medium flex items-center justify-center gap-1.5 cursor-pointer transition-all ${
-                      selectedTaskData.completed
-                        ? 'bg-emerald-950/40 text-emerald-300 border-emerald-700 font-semibold'
-                        : 'bg-[var(--surface)] text-[var(--on-surface-variant)] border-[var(--outline)]'
-                    }`}
-                  >
-                    <span className="material-symbols-outlined text-[16px]">check</span>
-                    <span>Done</span>
-                  </button>
+                    return (
+                      <button
+                        key={st.id}
+                        type="button"
+                        onClick={() => {
+                          const isDone = st.id === 'done';
+                          handleUpdateTaskFromKanban(selectedTaskData.taskId, {
+                            status: st.id as TaskStatus,
+                            completed: isDone,
+                          });
+                        }}
+                        className={`py-1.5 px-2 rounded-xl border text-[11px] font-medium flex items-center justify-center gap-1 cursor-pointer transition-all ${
+                          isCurrent
+                            ? 'bg-[var(--primary)] text-[var(--on-primary)] border-[var(--primary)] font-semibold shadow-xs'
+                            : 'bg-[var(--surface)] text-[var(--on-surface-variant)] border-[var(--outline)] hover:text-[var(--on-surface)]'
+                        }`}
+                      >
+                        <span className="material-symbols-outlined text-[14px]">{st.icon}</span>
+                        <span className="truncate">{st.label}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -1266,13 +1487,7 @@ export default function App() {
                         key={p}
                         type="button"
                         onClick={() => {
-                          if (editor && selectedTaskShapeId) {
-                            editor.updateShape({
-                              id: selectedTaskShapeId as any,
-                              type: 'task',
-                              props: { priority: p },
-                            } as any);
-                          }
+                          handleUpdateTaskFromKanban(selectedTaskData.taskId, { priority: p });
                         }}
                         className={`py-1.5 rounded-lg border text-xs font-mono font-semibold text-center cursor-pointer transition-all ${
                           isSelected
@@ -1286,6 +1501,52 @@ export default function App() {
                   })}
                 </div>
               </div>
+
+              {/* Tags and Subtasks info */}
+              {(selectedTaskData.tags?.length || selectedTaskData.subtasks) && (
+                <div className="flex flex-col gap-2 p-3 rounded-xl bg-[var(--surface)] border border-[var(--outline)]">
+                  {selectedTaskData.tags && selectedTaskData.tags.length > 0 && (
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] font-semibold text-[var(--on-surface-variant)] uppercase">
+                        Etiquetas
+                      </span>
+                      <div className="flex flex-wrap gap-1">
+                        {selectedTaskData.tags.map((tag: string) => (
+                          <span
+                            key={tag}
+                            className="px-2 py-0.5 rounded-md bg-[var(--surface-container)] border border-[var(--outline)] text-[11px] text-[var(--on-surface)] font-mono"
+                          >
+                            #{tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedTaskData.subtasks && (
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] font-semibold text-[var(--on-surface-variant)] uppercase flex items-center justify-between">
+                        <span>Progreso subtareas</span>
+                        <span className="font-mono text-sky-400">
+                          {selectedTaskData.subtasks.completed}/{selectedTaskData.subtasks.total} (
+                          {Math.round(
+                            (selectedTaskData.subtasks.completed / selectedTaskData.subtasks.total) * 100
+                          )}
+                          %)
+                        </span>
+                      </span>
+                      <div className="w-full h-1.5 bg-[var(--surface-container)] rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-sky-400 rounded-full transition-all"
+                          style={{
+                            width: `${(selectedTaskData.subtasks.completed / selectedTaskData.subtasks.total) * 100}%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Dependencies info */}
               {selectedTaskData.blockedBy && (
@@ -1305,25 +1566,30 @@ export default function App() {
             <div className="pt-4 border-t border-[var(--outline)] flex items-center justify-between gap-2">
               <button
                 type="button"
-                onClick={() => handleFocusTaskOnCanvas(selectedTaskData.taskId, selectedTaskData.title)}
+                onClick={() => {
+                  if (activeView !== 'canvas') {
+                    setActiveView('canvas');
+                  }
+                  setTimeout(() => {
+                    handleFocusTaskOnCanvas(selectedTaskData.taskId, selectedTaskData.title);
+                  }, 100);
+                }}
                 className="btn-m3-secondary flex-1 py-2 text-xs cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[16px]">center_focus_strong</span>
-                <span>Centrar</span>
+                <span>Enfocar en Canvas</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => {
-                  window.dispatchEvent(
-                    new CustomEvent('antask-request-delete-task', {
-                      detail: {
-                        shapeId: selectedTaskData.shapeId,
-                        taskId: selectedTaskData.taskId,
-                        title: selectedTaskData.title,
-                      },
-                    })
-                  );
+                  const dependents = findDependentTasks(markdownInput, selectedTaskData.taskId);
+                  setDeleteWarningState({
+                    shapeId: selectedTaskData.shapeId,
+                    taskId: selectedTaskData.taskId,
+                    title: selectedTaskData.title,
+                    dependents,
+                  });
                 }}
                 className="btn-m3-icon w-9 h-9 text-[var(--error)] hover:bg-rose-950/40 cursor-pointer"
                 title="Eliminar tarea"
@@ -1352,6 +1618,17 @@ export default function App() {
         >
           <span className="material-symbols-outlined text-[18px]">add</span>
           <span>+ Tarea</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveView(activeView === 'canvas' ? 'kanban' : 'canvas')}
+          className="btn-m3-secondary flex-1 py-2 px-1 min-h-[44px] flex flex-col items-center justify-center text-[10px] cursor-pointer"
+        >
+          <span className="material-symbols-outlined text-[18px]">
+            {activeView === 'canvas' ? 'view_kanban' : 'grid_view'}
+          </span>
+          <span>{activeView === 'canvas' ? 'Kanban' : 'Canvas'}</span>
         </button>
 
         <button

@@ -13,6 +13,7 @@ import { CanvasVisualDocument } from '../services/sanityService';
 import { scanTaskBlocks, validateMarkdownDocument } from '../utils/markdownSync';
 
 export type TaskPriority = 'P0' | 'P1' | 'P2' | 'P3';
+export type TaskStatus = 'backlog' | 'todo' | 'in_progress' | 'review' | 'done' | 'blocked';
 
 export type TaskShapeProps = {
   w: number;
@@ -21,6 +22,9 @@ export type TaskShapeProps = {
   completed: boolean;
   priority: TaskPriority;
   taskId?: string;
+  status?: TaskStatus;
+  tags?: string[];
+  subtasks?: { total: number; completed: number };
   blockedBy?: string;
   isDuplicateId?: boolean;
   hasMissingId?: boolean;
@@ -41,6 +45,9 @@ function TaskCardComponent({
     completed,
     priority,
     taskId,
+    status,
+    tags,
+    subtasks,
     blockedBy,
     isDuplicateId,
     hasMissingId,
@@ -50,6 +57,7 @@ function TaskCardComponent({
   } = shape.props;
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editedTitle, setEditedTitle] = useState(title);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     setEditedTitle(title);
@@ -62,6 +70,7 @@ function TaskCardComponent({
       type: 'task',
       props: {
         completed: !completed,
+        status: !completed ? 'done' : 'todo',
       },
     } as any);
   };
@@ -114,17 +123,17 @@ function TaskCardComponent({
       }}
     >
       <div
-        className={`w-full h-full rounded-2xl bg-[#161b22] border transition-all duration-150 select-none flex flex-col justify-between p-3.5 shadow-md ${
+        className={`w-full h-full rounded-2xl bg-[var(--surface-container)] border transition-all duration-150 select-none flex flex-col justify-between p-3 shadow-md relative ${
           isDuplicateId
-            ? 'border-rose-600/80 shadow-[0_0_12px_rgba(244,63,94,0.2)]'
+            ? 'border-rose-600/80 shadow-[0_0_12px_rgba(244,63,94,0.25)]'
             : completed
-            ? 'border-[#21262d] bg-[#0e1117]/90 opacity-80'
-            : 'border-[#30363d] hover:border-[#8b949e] shadow-black/40'
+            ? 'border-[var(--outline)] bg-[var(--surface)]/90 opacity-80'
+            : 'border-[var(--outline)] hover:border-[var(--on-surface-variant)] shadow-black/20'
         }`}
       >
-        {/* Top Row: Checkbox + Title / Inline Edit + Priority chip */}
-        <div className="flex items-start justify-between gap-2.5">
-          <div className="flex items-start gap-2.5 flex-1 min-w-0">
+        {/* Top Row: Checkbox + Title / Inline Edit + Context Menu + Priority chip */}
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex items-start gap-2 flex-1 min-w-0">
             {/* M3 Checkbox */}
             <button
               type="button"
@@ -136,8 +145,8 @@ function TaskCardComponent({
               <span
                 className={`w-4 h-4 rounded-md border flex items-center justify-center transition-all ${
                   completed
-                    ? 'bg-sky-500 border-sky-400 text-slate-950 shadow-xs'
-                    : 'bg-[#21262d] border-[#484f58] hover:border-sky-400'
+                    ? 'bg-[var(--primary)] border-[var(--primary)] text-[var(--on-primary)] shadow-xs'
+                    : 'bg-[var(--surface-container-high)] border-[var(--outline)] hover:border-[var(--primary)]'
                 }`}
               >
                 {completed && (
@@ -169,7 +178,7 @@ function TaskCardComponent({
                     setEditedTitle(title);
                   }
                 }}
-                className="w-full text-[13px] font-medium bg-[#0e1117] border border-sky-500 rounded-lg px-2 py-1 text-slate-100 focus:outline-none -mt-0.5"
+                className="w-full text-[13px] font-medium bg-[var(--surface)] border border-[var(--primary)] rounded-lg px-2 py-0.5 text-[var(--on-surface)] focus:outline-none -mt-0.5"
               />
             ) : (
               <div
@@ -177,12 +186,12 @@ function TaskCardComponent({
                   e.stopPropagation();
                   setIsEditingTitle(true);
                 }}
-                title="Doble clic o toca el lápiz para editar"
-                className="group/title flex items-start gap-1 flex-1 cursor-text"
+                title="Doble clic para editar título"
+                className="group/title flex items-start gap-1 flex-1 cursor-text min-w-0"
               >
                 <span
                   className={`text-[13px] font-medium leading-snug transition-colors line-clamp-2 ${
-                    completed ? 'text-slate-500 line-through' : 'text-slate-100'
+                    completed ? 'text-[var(--on-surface-variant)] line-through' : 'text-[var(--on-surface)]'
                   }`}
                 >
                   {title}
@@ -194,7 +203,7 @@ function TaskCardComponent({
                     e.stopPropagation();
                     setIsEditingTitle(true);
                   }}
-                  className="opacity-60 sm:opacity-0 group-hover/title:opacity-100 transition-opacity text-slate-400 hover:text-slate-200 p-0.5 shrink-0 cursor-pointer"
+                  className="opacity-60 sm:opacity-0 group-hover/title:opacity-100 transition-opacity text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] p-0.5 shrink-0 cursor-pointer"
                   title="Editar título"
                 >
                   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -205,29 +214,128 @@ function TaskCardComponent({
             )}
           </div>
 
-          {/* M3 Discrete Priority Chip */}
-          <button
-            type="button"
-            onPointerDown={(e) => e.stopPropagation()}
-            onClick={cyclePriority}
-            title="Clic para cambiar prioridad (P0-P3)"
-            className={`min-h-[22px] px-2 py-0.5 text-[11px] font-mono font-medium rounded-full border cursor-pointer shrink-0 transition-all hover:brightness-110 active:scale-95 flex items-center gap-1 ${currentPriority.text} ${currentPriority.bg} ${currentPriority.border}`}
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-current" />
-            <span>{priority}</span>
-          </button>
+          <div className="flex items-center gap-1 shrink-0">
+            {/* M3 Discrete Priority Chip */}
+            <button
+              type="button"
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={cyclePriority}
+              title="Clic para cambiar prioridad (P0-P3)"
+              className={`min-h-[22px] px-2 py-0.5 text-[11px] font-mono font-medium rounded-full border cursor-pointer shrink-0 transition-all hover:brightness-110 active:scale-95 flex items-center gap-1 ${currentPriority.text} ${currentPriority.bg} ${currentPriority.border}`}
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-current" />
+              <span>{priority}</span>
+            </button>
+
+            {/* Contextual Action Menu Trigger ⋮ */}
+            <button
+              type="button"
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsMenuOpen(!isMenuOpen);
+              }}
+              className="w-6 h-6 flex items-center justify-center text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] rounded-full hover:bg-[var(--surface-container-high)] cursor-pointer"
+              title="Más acciones"
+            >
+              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                <circle cx="12" cy="5" r="2" />
+                <circle cx="12" cy="12" r="2" />
+                <circle cx="12" cy="19" r="2" />
+              </svg>
+            </button>
+          </div>
         </div>
 
+        {/* Popover Contextual Menu */}
+        {isMenuOpen && (
+          <div
+            onPointerDown={(e) => e.stopPropagation()}
+            className="absolute top-10 right-2 z-50 bg-[var(--surface-container)] border border-[var(--outline)] rounded-xl shadow-2xl p-1.5 flex flex-col gap-1 min-w-[150px] text-xs font-sans animate-slide-up"
+          >
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsMenuOpen(false);
+                toggleCompleted(e);
+              }}
+              className="px-2.5 py-1.5 rounded-lg text-left text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] flex items-center gap-2 cursor-pointer"
+            >
+              <span>{completed ? '↺ Marcar pendiente' : '✓ Marcar completada'}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsMenuOpen(false);
+                cyclePriority(e);
+              }}
+              className="px-2.5 py-1.5 rounded-lg text-left text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] flex items-center gap-2 cursor-pointer"
+            >
+              <span>⚡ Cambiar prioridad</span>
+            </button>
+
+            <div className="h-px bg-[var(--outline)] my-0.5" />
+
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsMenuOpen(false);
+                window.dispatchEvent(
+                  new CustomEvent('antask-request-delete-task', {
+                    detail: {
+                      shapeId: shape.id,
+                      taskId: taskId || '',
+                      title,
+                    },
+                  })
+                );
+              }}
+              className="px-2.5 py-1.5 rounded-lg text-left text-[var(--error)] hover:bg-rose-950/40 flex items-center gap-2 cursor-pointer"
+            >
+              <span>🗑 Eliminar tarea</span>
+            </button>
+          </div>
+        )}
+
+        {/* Middle Row: Tags & Subtask progress (DESIGN.md Section 5 & 6) */}
+        {(tags?.length || subtasks) && (
+          <div className="flex items-center gap-1.5 flex-wrap py-0.5">
+            {tags?.slice(0, 2).map((t) => (
+              <span
+                key={t}
+                className="px-1.5 py-0.2 rounded-md bg-[var(--surface-container-high)] border border-[var(--outline)] text-[10px] font-sans text-[var(--on-surface-variant)]"
+              >
+                #{t}
+              </span>
+            ))}
+            {tags && tags.length > 2 && (
+              <span className="px-1.5 py-0.2 rounded-md bg-[var(--surface-container-high)] text-[10px] font-mono text-[var(--on-surface-variant)]">
+                +{tags.length - 2}
+              </span>
+            )}
+            {subtasks && (
+              <span className="px-1.5 py-0.2 rounded-md bg-sky-950/50 border border-sky-800/60 text-[10px] font-mono text-sky-300 flex items-center gap-1">
+                <span>✓</span>
+                <span>{subtasks.completed}/{subtasks.total}</span>
+              </span>
+            )}
+          </div>
+        )}
+
         {/* Bottom Row: Metadata & Actions (DESIGN.md Section 9) */}
-        <div className="flex items-center justify-between text-xs text-slate-400 pt-2 border-t border-[#30363d]/70 mt-1">
+        <div className="flex items-center justify-between text-xs text-[var(--on-surface-variant)] pt-1.5 border-t border-[var(--outline)] mt-0.5">
           <div className="flex items-center gap-1.5 truncate max-w-[200px]">
             {taskId ? (
-              <span className="text-slate-400 font-mono text-[11px] font-medium truncate tracking-tight flex items-center gap-0.5 bg-[#21262d] px-1.5 py-0.5 rounded-md border border-[#30363d]" title={`ID: ${taskId}`}>
-                <span className="text-slate-500">#</span>
+              <span className="text-[var(--on-surface)] font-mono text-[11px] font-medium truncate tracking-tight flex items-center gap-0.5 bg-[var(--surface)] px-1.5 py-0.5 rounded-md border border-[var(--outline)]" title={`ID: ${taskId}`}>
+                <span className="text-[var(--on-surface-variant)]">#</span>
                 <span>{taskId}</span>
               </span>
             ) : (
-              <span className="text-slate-500 font-mono text-[11px] italic">sin-id</span>
+              <span className="text-[var(--on-surface-variant)] font-mono text-[11px] italic">sin-id</span>
             )}
 
             {isDuplicateId && (
@@ -259,7 +367,7 @@ function TaskCardComponent({
 
             {blockedBy && !completed && !unresolvedBlockers?.length && (
               <span
-                className="px-1.5 py-0.5 text-[10px] font-medium text-rose-300 bg-rose-950/80 border border-rose-800/80 rounded-md flex items-center gap-1"
+                className="px-1.5 py-0.5 text-[10px] font-medium text-amber-300 bg-amber-950/80 border border-amber-800/80 rounded-md flex items-center gap-1"
                 title={`Bloqueada por #${blockedBy}`}
               >
                 <span>🔒</span>
@@ -268,32 +376,9 @@ function TaskCardComponent({
             )}
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
-            <button
-              type="button"
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={(e) => {
-                e.stopPropagation();
-                window.dispatchEvent(
-                  new CustomEvent('antask-request-delete-task', {
-                    detail: {
-                      shapeId: shape.id,
-                      taskId: taskId || '',
-                      title,
-                    },
-                  })
-                );
-              }}
-              className="text-slate-500 hover:text-rose-400 p-1 rounded-full cursor-pointer transition-colors active:scale-90"
-              title="Eliminar tarea"
-            >
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
-            </button>
-
-            <span className="text-[10px] font-mono font-medium text-slate-500 tracking-wider">
-              {completed ? 'DONE' : 'TODO'}
+          <div className="flex items-center gap-1.5 shrink-0">
+            <span className="text-[10px] font-mono font-medium text-[var(--on-surface-variant)] tracking-wider">
+              {completed ? 'DONE' : status ? status.toUpperCase() : 'TODO'}
             </span>
           </div>
         </div>
@@ -312,6 +397,9 @@ export class TaskShapeUtil extends ShapeUtil<any> {
     completed: T.boolean,
     priority: T.string,
     taskId: T.string.optional(),
+    status: T.string.optional(),
+    tags: T.arrayOf(T.string).optional(),
+    subtasks: T.object({ total: T.number, completed: T.number }).optional(),
     blockedBy: T.string.optional(),
     isDuplicateId: T.boolean.optional(),
     hasMissingId: T.boolean.optional(),
@@ -419,17 +507,17 @@ export class TaskGroupShapeUtil extends ShapeUtil<any> {
           pointerEvents: 'none',
         }}
       >
-        <div className="w-full h-full rounded-2xl bg-[#161b22]/70 border border-[#30363d]/80 p-4 flex flex-col justify-between select-none shadow-xs backdrop-blur-xs transition-colors">
+        <div className="w-full h-full rounded-2xl bg-[var(--surface-container)]/70 border border-[var(--outline)]/80 p-4 flex flex-col justify-between select-none shadow-xs backdrop-blur-xs transition-colors">
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-[#30363d]/70 pb-3">
+          <div className="flex items-center justify-between border-b border-[var(--outline)] pb-3">
             <div className="flex items-center gap-2">
-              <span className="text-sky-400 font-mono text-xs font-semibold">##</span>
-              <h2 className="text-sm font-semibold text-slate-100 font-sans tracking-tight truncate max-w-[220px]">
+              <span className="text-[var(--primary)] font-mono text-xs font-semibold">##</span>
+              <h2 className="text-sm font-semibold text-[var(--on-surface)] font-sans tracking-tight truncate max-w-[220px]">
                 {title}
               </h2>
             </div>
             {count > 0 && (
-              <span className="text-[11px] font-mono text-slate-400 bg-[#21262d] px-2 py-0.5 rounded-full border border-[#30363d] tabular-nums">
+              <span className="text-[11px] font-mono text-[var(--on-surface-variant)] bg-[var(--surface)] px-2 py-0.5 rounded-full border border-[var(--outline)] tabular-nums">
                 {completedCount > 0
                   ? `${completedCount}/${count} completadas`
                   : `${count} ${count === 1 ? 'tarea' : 'tareas'}`}
@@ -438,7 +526,7 @@ export class TaskGroupShapeUtil extends ShapeUtil<any> {
           </div>
 
           {/* Guide background area */}
-          <div className="flex-1 w-full rounded-xl border border-dashed border-[#30363d]/40 mt-3 bg-[#0e1117]/20" />
+          <div className="flex-1 w-full rounded-xl border border-dashed border-[var(--outline)]/40 mt-3 bg-[var(--surface)]/20" />
         </div>
       </HTMLContainer>
     );
@@ -451,6 +539,9 @@ export interface ParsedMarkdownTask {
   taskId?: string;
   temporaryId?: string;
   priority: TaskPriority;
+  status?: TaskStatus;
+  tags?: string[];
+  subtasks?: { total: number; completed: number };
   blockedBy?: string;
 }
 
@@ -467,12 +558,14 @@ export const INITIAL_MOCK_GROUPS: ParsedGroup[] = [
         title: 'Configurar OAuth',
         completed: false,
         priority: 'P0',
+        status: 'todo',
         taskId: 'oauth',
       },
       {
         title: 'Persistir sesión',
         completed: false,
         priority: 'P0',
+        status: 'todo',
         taskId: 'session',
         blockedBy: 'oauth',
       },
@@ -485,12 +578,14 @@ export const INITIAL_MOCK_GROUPS: ParsedGroup[] = [
         title: 'Crear pantalla de perfil',
         completed: false,
         priority: 'P2',
+        status: 'todo',
         taskId: 'profile',
       },
       {
         title: 'Añadir avatar',
         completed: true,
         priority: 'P3',
+        status: 'done',
         taskId: 'avatar',
         blockedBy: 'profile',
       },
@@ -512,12 +607,16 @@ export function parseTasksMarkdown(markdown: string): ParsedGroup[] {
     if (!groupsMap.has(grp)) {
       groupsMap.set(grp, []);
     }
+    const isCompleted = block.rawTaskLine.includes('[x]') || block.rawTaskLine.includes('[X]');
     groupsMap.get(grp)!.push({
       title: block.detectedTitle,
-      completed: block.rawTaskLine.includes('[x]') || block.rawTaskLine.includes('[X]'),
+      completed: isCompleted,
       taskId: block.detectedId,
       temporaryId: block.temporaryId,
       priority: block.detectedPriority || 'P1',
+      status: (block.detectedStatus as any) || (isCompleted ? 'done' : 'todo'),
+      tags: block.detectedTags,
+      subtasks: block.detectedSubtasks,
       blockedBy: block.detectedBlockedBy,
     });
   });
@@ -684,6 +783,9 @@ export function populateCanvasWithGroups(
           completed: task.completed,
           priority: task.priority || 'P1',
           taskId: task.taskId,
+          status: task.status,
+          tags: task.tags,
+          subtasks: task.subtasks,
           blockedBy: task.blockedBy,
           isDuplicateId: isDuplicate,
           hasMissingId: isMissingId,

@@ -4,6 +4,9 @@ export interface TaskUpdatePayload {
   title?: string;
   completed?: boolean;
   priority?: TaskPriority;
+  status?: string;
+  tags?: string[];
+  blockedBy?: string;
 }
 
 export interface TaskBlockInfo {
@@ -16,6 +19,9 @@ export interface TaskBlockInfo {
   detectedPriority?: TaskPriority;
   rawPriority?: string;
   detectedBlockedBy?: string;
+  detectedStatus?: string;
+  detectedTags?: string[];
+  detectedSubtasks?: { total: number; completed: number };
   unknownMetadata: Array<{ key: string; rawLine: string }>;
   groupTitle: string;
   isOutsideHeading: boolean;
@@ -144,6 +150,48 @@ export function scanTaskBlocks(markdown: string): {
         const blockedByMatch = trimmed.match(/^(?:[-*]\s*)?Blocked\s*(?:by|-by)?\s*:\s*(.+)$/i);
         if (blockedByMatch) {
           currentBlock.detectedBlockedBy = blockedByMatch[1].trim();
+          currentBlock.endLineIndex = i;
+          continue;
+        }
+
+        const statusMatch = trimmed.match(/^(?:[-*]\s*)?Status\s*:\s*(.+)$/i);
+        if (statusMatch) {
+          currentBlock.detectedStatus = statusMatch[1].trim().toLowerCase().replace(/\s+/g, '_');
+          currentBlock.endLineIndex = i;
+          continue;
+        }
+
+        const tagsMatch = trimmed.match(/^(?:[-*]\s*)?(?:Tags|Labels)\s*:\s*(.+)$/i);
+        if (tagsMatch) {
+          currentBlock.detectedTags = tagsMatch[1]
+            .split(',')
+            .map((t) => t.trim().replace(/^#/, ''))
+            .filter(Boolean);
+          currentBlock.endLineIndex = i;
+          continue;
+        }
+
+        const progressMatch = trimmed.match(/^(?:[-*]\s*)?(?:Progress|Subtasks)\s*:\s*(\d+)\s*\/\s*(\d+)$/i);
+        if (progressMatch) {
+          const completed = parseInt(progressMatch[1], 10);
+          const total = parseInt(progressMatch[2], 10);
+          if (!isNaN(completed) && !isNaN(total) && total > 0) {
+            currentBlock.detectedSubtasks = { completed, total };
+          }
+          currentBlock.endLineIndex = i;
+          continue;
+        }
+
+        // Subtask bullet line: "- [ ] Subtask title" or "- [x] Subtask title"
+        const subtaskMatch = trimmed.match(/^[-*]\s*\[([ xX])\]\s*(.+)$/);
+        if (subtaskMatch) {
+          if (!currentBlock.detectedSubtasks) {
+            currentBlock.detectedSubtasks = { completed: 0, total: 0 };
+          }
+          currentBlock.detectedSubtasks.total += 1;
+          if (subtaskMatch[1].toLowerCase() === 'x') {
+            currentBlock.detectedSubtasks.completed += 1;
+          }
           currentBlock.endLineIndex = i;
           continue;
         }
@@ -469,6 +517,8 @@ export function updateTaskInMarkdown(
 
     if (updates.completed !== undefined) {
       checkChar = updates.completed ? 'x' : ' ';
+    } else if (updates.status !== undefined) {
+      checkChar = updates.status === 'done' ? 'x' : ' ';
     }
 
     if (updates.title !== undefined) {
@@ -496,6 +546,27 @@ export function updateTaskInMarkdown(
       const baseIndent = targetBlock.indentation ? `${targetBlock.indentation}  ` : '  ';
       const newPriorityLine = `${baseIndent}- Priority: ${updates.priority}`;
       resultLines.splice(targetBlock.taskLineIndex + 1, 0, newPriorityLine);
+    }
+  }
+
+  // 3. Update status line if explicitly given
+  if (updates.status !== undefined) {
+    let foundStatus = false;
+    for (let i = targetBlock.taskLineIndex + 1; i <= targetBlock.endLineIndex; i++) {
+      if (resultLines[i].match(/^(?:[-*]\s*)?Status\s*:\s*(.+)$/i)) {
+        resultLines[i] = resultLines[i].replace(
+          /(Status\s*:\s*)(.+)$/i,
+          `$1${updates.status}`
+        );
+        foundStatus = true;
+        break;
+      }
+    }
+
+    if (!foundStatus && !['todo', 'done'].includes(updates.status)) {
+      const baseIndent = targetBlock.indentation ? `${targetBlock.indentation}  ` : '  ';
+      const newStatusLine = `${baseIndent}- Status: ${updates.status}`;
+      resultLines.splice(targetBlock.taskLineIndex + 1, 0, newStatusLine);
     }
   }
 
