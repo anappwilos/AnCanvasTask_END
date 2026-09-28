@@ -58,10 +58,20 @@ function TaskCardComponent({
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editedTitle, setEditedTitle] = useState(title);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSelected, setIsSelected] = useState(false);
 
   useEffect(() => {
     setEditedTitle(title);
   }, [title]);
+
+  useEffect(() => {
+    const checkSelection = () => {
+      setIsSelected(editor.getSelectedShapeIds().includes(shape.id));
+    };
+    checkSelection();
+    const unsub = editor.store.listen(checkSelection);
+    return () => unsub();
+  }, [editor, shape.id]);
 
   const toggleCompleted = (e: React.MouseEvent | React.PointerEvent) => {
     e.stopPropagation();
@@ -113,6 +123,18 @@ function TaskCardComponent({
 
   const currentPriority = priorityConfig[priority] || priorityConfig.P1;
 
+  const statusConfig: Record<string, { label: string; text: string; bg: string }> = {
+    backlog: { label: 'Backlog', text: 'text-slate-400', bg: 'bg-slate-800/40' },
+    todo: { label: 'Todo', text: 'text-amber-400', bg: 'bg-amber-950/40' },
+    in_progress: { label: 'In Progress', text: 'text-sky-400', bg: 'bg-sky-950/40' },
+    review: { label: 'Review', text: 'text-purple-400', bg: 'bg-purple-950/40' },
+    done: { label: 'Done', text: 'text-emerald-400', bg: 'bg-emerald-950/40' },
+    blocked: { label: 'Blocked', text: 'text-rose-400', bg: 'bg-rose-950/40' },
+  };
+
+  const normalizedStatus = completed ? 'done' : status || 'todo';
+  const currentStatus = statusConfig[normalizedStatus] || statusConfig.todo;
+
   return (
     <HTMLContainer
       id={shape.id}
@@ -124,7 +146,9 @@ function TaskCardComponent({
     >
       <div
         className={`w-full h-full rounded-2xl bg-[var(--surface-container)] border transition-all duration-150 select-none flex flex-col justify-between p-3 shadow-md relative ${
-          isDuplicateId
+          isSelected
+            ? 'border-[var(--primary)] ring-2 ring-[var(--primary)] ring-offset-1 ring-offset-[var(--surface)] shadow-[0_0_14px_rgba(56,189,248,0.25)]'
+            : isDuplicateId
             ? 'border-rose-600/80 shadow-[0_0_12px_rgba(244,63,94,0.25)]'
             : completed
             ? 'border-[var(--outline)] bg-[var(--surface)]/90 opacity-80'
@@ -251,7 +275,7 @@ function TaskCardComponent({
         {isMenuOpen && (
           <div
             onPointerDown={(e) => e.stopPropagation()}
-            className="absolute top-10 right-2 z-50 bg-[var(--surface-container)] border border-[var(--outline)] rounded-xl shadow-2xl p-1.5 flex flex-col gap-1 min-w-[150px] text-xs font-sans animate-slide-up"
+            className="absolute top-10 right-2 z-50 bg-[var(--surface-container)] border border-[var(--outline)] rounded-xl shadow-2xl p-1.5 flex flex-col gap-1 min-w-[160px] text-xs font-sans animate-slide-up"
           >
             <button
               type="button"
@@ -275,6 +299,18 @@ function TaskCardComponent({
               className="px-2.5 py-1.5 rounded-lg text-left text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] flex items-center gap-2 cursor-pointer"
             >
               <span>⚡ Cambiar prioridad</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsMenuOpen(false);
+                editor.setSelectedShapes([shape.id]);
+              }}
+              className="px-2.5 py-1.5 rounded-lg text-left text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] flex items-center gap-2 cursor-pointer"
+            >
+              <span>🔍 Ver en panel de detalles</span>
             </button>
 
             <div className="h-px bg-[var(--outline)] my-0.5" />
@@ -326,7 +362,7 @@ function TaskCardComponent({
           </div>
         )}
 
-        {/* Bottom Row: Metadata & Actions (DESIGN.md Section 9) */}
+        {/* Bottom Row: Metadata & Actions (DESIGN.md Section 9 & 10) */}
         <div className="flex items-center justify-between text-xs text-[var(--on-surface-variant)] pt-1.5 border-t border-[var(--outline)] mt-0.5">
           <div className="flex items-center gap-1.5 truncate max-w-[200px]">
             {taskId ? (
@@ -377,8 +413,8 @@ function TaskCardComponent({
           </div>
 
           <div className="flex items-center gap-1.5 shrink-0">
-            <span className="text-[10px] font-mono font-medium text-[var(--on-surface-variant)] tracking-wider">
-              {completed ? 'DONE' : status ? status.toUpperCase() : 'TODO'}
+            <span className={`px-1.5 py-0.5 text-[10px] font-mono font-medium rounded-md tracking-wider ${currentStatus.text} ${currentStatus.bg}`}>
+              {currentStatus.label.toUpperCase()}
             </span>
           </div>
         </div>

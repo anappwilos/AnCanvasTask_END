@@ -196,21 +196,48 @@ export default function App() {
     };
   }, []);
 
-  // Selection synchronization with editor
+  // Selection and Zoom state for Canvas (DESIGN.md Section 14)
+  const [canvasZoom, setCanvasZoom] = useState<number>(100);
+  const [selectedTaskIdsOnCanvas, setSelectedTaskIdsOnCanvas] = useState<string[]>([]);
+
+  // Selection and Zoom synchronization with editor
   useEffect(() => {
     if (!editor) return;
 
-    const updateSelection = () => {
+    const updateSelectionAndZoom = () => {
+      try {
+        const zoom = Math.round(editor.getZoomLevel() * 100);
+        setCanvasZoom(zoom);
+      } catch {
+        // ignore
+      }
+
       const selected = editor.getSelectedShapes();
-      const taskShape = selected.find((s) => (s as any).type === 'task');
-      if (taskShape) {
-        setSelectedTaskShapeId(taskShape.id);
+      const taskShapes = selected.filter((s) => (s as any).type === 'task');
+      const taskIds = taskShapes
+        .map((s) => ((s as any).props?.taskId || (s as any).props?.temporaryId || s.id) as string)
+        .filter(Boolean);
+
+      setSelectedTaskIdsOnCanvas(taskIds);
+
+      if (taskShapes.length === 1) {
+        setSelectedTaskShapeId(taskShapes[0].id);
+      } else if (taskShapes.length === 0 && activeView === 'canvas') {
+        setSelectedTaskShapeId(null);
       }
     };
 
-    const unsub = editor.store.listen(updateSelection);
+    updateSelectionAndZoom();
+    const unsub = editor.store.listen(updateSelectionAndZoom);
     return () => unsub();
-  }, [editor]);
+  }, [editor, activeView]);
+
+  // Sync theme with editor user preferences
+  useEffect(() => {
+    if (editor) {
+      editor.user.updateUserPreferences({ colorScheme: theme === 'dark' ? 'dark' : 'light' });
+    }
+  }, [editor, theme]);
 
   const handleMount = useCallback(
     (editorInstance: Editor) => {
@@ -343,6 +370,24 @@ export default function App() {
   const handleZoomToFit = useCallback(() => {
     if (editor) {
       editor.zoomToFit({ animation: { duration: 250 } });
+    }
+  }, [editor]);
+
+  const handleZoomIn = useCallback(() => {
+    if (editor) {
+      editor.zoomIn(undefined, { animation: { duration: 200 } });
+    }
+  }, [editor]);
+
+  const handleZoomOut = useCallback(() => {
+    if (editor) {
+      editor.zoomOut(undefined, { animation: { duration: 200 } });
+    }
+  }, [editor]);
+
+  const handleResetZoom = useCallback(() => {
+    if (editor) {
+      editor.resetZoom(undefined, { animation: { duration: 200 } });
     }
   }, [editor]);
 
@@ -1319,25 +1364,145 @@ export default function App() {
                 autoFocus
               />
 
-              {/* Floating Canvas Controls Overlay (Bottom Left) */}
-              <div className="absolute bottom-4 left-4 z-10 hidden sm:flex items-center gap-1.5 bg-[var(--surface-container)]/90 backdrop-blur-md border border-[var(--outline)] rounded-full p-1 shadow-lg">
+              {/* Floating Canvas Navigation Controls (DESIGN.md Section 3 & 14) */}
+              <div className="absolute bottom-4 left-4 z-10 hidden sm:flex items-center gap-1 bg-[var(--surface-container)]/95 backdrop-blur-md border border-[var(--outline)] rounded-full p-1 shadow-lg select-none">
+                <button
+                  type="button"
+                  onClick={handleZoomOut}
+                  className="btn-m3-icon w-7 h-7 cursor-pointer"
+                  title="Alejar zoom (Zoom Out)"
+                  aria-label="Zoom out"
+                >
+                  <span className="material-symbols-outlined text-[16px]">remove</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleResetZoom}
+                  className="px-2 py-0.5 text-xs font-mono font-medium text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] rounded-full transition-colors cursor-pointer"
+                  title="Clic para restablecer zoom al 100%"
+                >
+                  {canvasZoom}%
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleZoomIn}
+                  className="btn-m3-icon w-7 h-7 cursor-pointer"
+                  title="Acercar zoom (Zoom In)"
+                  aria-label="Zoom in"
+                >
+                  <span className="material-symbols-outlined text-[16px]">add</span>
+                </button>
+
+                <div className="w-px h-4 bg-[var(--outline)] my-auto mx-0.5" />
+
                 <button
                   type="button"
                   onClick={handleZoomToFit}
-                  className="btn-m3-icon w-8 h-8 cursor-pointer"
+                  className="btn-m3-icon w-7 h-7 cursor-pointer"
                   title="Ajustar zoom al contenido (Zoom to Fit)"
+                  aria-label="Zoom to fit"
                 >
-                  <span className="material-symbols-outlined text-[18px]">fit_screen</span>
+                  <span className="material-symbols-outlined text-[16px]">fit_screen</span>
                 </button>
+
                 <button
                   type="button"
                   onClick={() => setIsAutoLayoutConfirmOpen(true)}
-                  className="btn-m3-icon w-8 h-8 cursor-pointer text-sky-400"
-                  title="Auto organizar canvas (DAG)"
+                  className="btn-m3-icon w-7 h-7 cursor-pointer text-sky-400"
+                  title="Auto organizar canvas jerárquicamente (DAG)"
+                  aria-label="Auto organizar"
                 >
-                  <span className="material-symbols-outlined text-[18px]">auto_fix_high</span>
+                  <span className="material-symbols-outlined text-[16px]">account_tree</span>
                 </button>
               </div>
+
+              {/* Floating Canvas Multi-Selection Action Bar (DESIGN.md Section 14) */}
+              {selectedTaskIdsOnCanvas.length > 1 && (
+                <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-20 bg-[var(--surface-container)]/95 backdrop-blur-md border border-[var(--outline)] rounded-full px-3 py-1.5 shadow-2xl flex items-center gap-2 animate-slide-up select-none max-w-[95vw] overflow-x-auto">
+                  <div className="flex items-center gap-1.5 pr-2 border-r border-[var(--outline)] shrink-0">
+                    <span className="w-2 h-2 rounded-full bg-[var(--primary)]" />
+                    <span className="text-xs font-mono font-medium text-[var(--on-surface)]">
+                      {selectedTaskIdsOnCanvas.length} seleccionadas
+                    </span>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleBatchUpdateTasksFromKanban(selectedTaskIdsOnCanvas, {
+                        completed: true,
+                        status: 'done',
+                      })
+                    }
+                    className="btn-m3-secondary px-2.5 py-1 text-xs text-emerald-400 border-emerald-800/60 bg-emerald-950/30 cursor-pointer shrink-0"
+                    title="Marcar seleccionadas como completadas"
+                  >
+                    <span className="material-symbols-outlined text-[15px]">check_circle</span>
+                    <span className="hidden sm:inline">Completar</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleBatchUpdateTasksFromKanban(selectedTaskIdsOnCanvas, {
+                        completed: false,
+                        status: 'todo',
+                      })
+                    }
+                    className="btn-m3-secondary px-2.5 py-1 text-xs text-amber-400 border-amber-800/60 bg-amber-950/30 cursor-pointer shrink-0"
+                    title="Marcar seleccionadas como pendientes"
+                  >
+                    <span className="material-symbols-outlined text-[15px]">pending</span>
+                    <span className="hidden sm:inline">Pendiente</span>
+                  </button>
+
+                  {/* Quick Priorities */}
+                  <div className="flex items-center gap-1 shrink-0 border-l border-r border-[var(--outline)] px-1.5">
+                    {(['P0', 'P1', 'P2', 'P3'] as TaskPriority[]).map((p) => (
+                      <button
+                        key={p}
+                        type="button"
+                        onClick={() =>
+                          handleBatchUpdateTasksFromKanban(selectedTaskIdsOnCanvas, { priority: p })
+                        }
+                        className="px-1.5 py-0.5 text-[10px] font-mono font-semibold rounded-md border border-[var(--outline)] text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer"
+                        title={`Establecer prioridad ${p}`}
+                      >
+                        {p}
+                      </button>
+                    ))}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleBatchDeleteTasksFromKanban(selectedTaskIdsOnCanvas);
+                    }}
+                    className="btn-m3-secondary px-2.5 py-1 text-xs text-[var(--error)] border-rose-800/60 bg-rose-950/30 cursor-pointer shrink-0"
+                    title="Eliminar tareas seleccionadas"
+                  >
+                    <span className="material-symbols-outlined text-[15px]">delete</span>
+                    <span className="hidden sm:inline">Eliminar</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (editor) {
+                        editor.selectNone();
+                      }
+                      setSelectedTaskIdsOnCanvas([]);
+                      setSelectedTaskShapeId(null);
+                    }}
+                    className="btn-m3-icon w-6 h-6 shrink-0 cursor-pointer"
+                    title="Deseleccionar"
+                  >
+                    <span className="material-symbols-outlined text-[14px]">close</span>
+                  </button>
+                </div>
+              )}
             </>
           ) : (
             <KanbanBoard

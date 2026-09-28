@@ -229,3 +229,44 @@ body,
 ::-webkit-scrollbar-thumb:hover {
   background: var(--on-surface-variant);
 }
+
+/* Tldraw Canvas M3 Theme Integration (DESIGN.md Section 4 & 14) */
+.tl-container {
+  --color-background: var(--surface) !important;
+  --color-low: var(--surface-container) !important;
+  --color-mid: var(--surface-container-high) !important;
+  --color-high: var(--surface-container-highest) !important;
+  --color-text: var(--on-surface) !important;
+  --color-muted: var(--on-surface-variant) !important;
+  --color-selection-stroke: var(--primary) !important;
+  --color-selection-fill: rgba(56, 189, 248, 0.08) !important;
+  --color-grid: var(--outline-variant) !important;
+  --color-laser: var(--primary) !important;
+  font-family: var(--font-sans) !important;
+}
+
+[data-theme="light"] .tl-container {
+  --color-selection-fill: rgba(2, 132, 199, 0.1) !important;
+}
+
+.tl-canvas {
+  background-color: var(--surface) !important;
+}
+
+.tl-grid {
+  opacity: 0.25 !important;
+}
+
+/* Subtle selection box styling */
+.tl-selection__box {
+  border-color: var(--primary) !important;
+  background-color: rgba(56, 189, 248, 0.08) !important;
+  border-radius: 6px !important;
+}
+
+.tl-selection__corner,
+.tl-selection__edge {
+  border-color: var(--primary) !important;
+  background-color: var(--surface) !important;
+}
+
