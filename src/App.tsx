@@ -29,6 +29,8 @@ import { KanbanBoard } from './components/KanbanBoard';
 import { TaskDetailsPanel } from './components/TaskDetailsPanel';
 import { CommandPalette, CommandPaletteAction, CommandPaletteTask } from './components/CommandPalette';
 import { FilterBar, TaskFilterState } from './components/FilterBar';
+import { ToastContainer, ToastItem, ToastType } from './components/ToastSystem';
+import { QuickGuideModal } from './components/QuickGuideModal';
 import {
   addTaskToMarkdown,
   deleteTaskFromMarkdown,
@@ -117,12 +119,25 @@ export default function App() {
     });
   }, []);
 
-  // Global Keyboard Shortcuts (Cmd/Ctrl + K, Escape)
+  // Global Keyboard Shortcuts (Cmd/Ctrl + K, ?, Escape)
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      const isInput =
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.isContentEditable);
+
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         setIsCommandPaletteOpen((prev) => !prev);
+        return;
+      }
+
+      if (e.key === '?' && !isInput && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        e.preventDefault();
+        setIsQuickGuideOpen((prev) => !prev);
       }
     };
 
@@ -138,7 +153,59 @@ export default function App() {
   const [isAutoLayoutConfirmOpen, setIsAutoLayoutConfirmOpen] = useState<boolean>(false);
   const [isProblemsModalOpen, setIsProblemsModalOpen] = useState<boolean>(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
+  const [isQuickGuideOpen, setIsQuickGuideOpen] = useState<boolean>(false);
   const [deleteWarningState, setDeleteWarningState] = useState<DeleteWarningInfo | null>(null);
+
+  // Operations and Loading state (DESIGN.md Section 1 & 3)
+  const [isAutoOrganizing, setIsAutoOrganizing] = useState<boolean>(false);
+  const [isLoadingDocument, setIsLoadingDocument] = useState<boolean>(false);
+  const [isOnline, setIsOnline] = useState<boolean>(() =>
+    typeof navigator !== 'undefined' ? navigator.onLine : true
+  );
+
+  // Undo history stack for destructive task deletions
+  const undoStackRef = useRef<Array<{ markdown: string; label: string }>>([]);
+
+  // Toast System State
+  const [toasts, setToasts] = useState<ToastItem[]>([]);
+
+  const pushToast = useCallback(
+    (message: string, type: ToastType = 'info', action?: { label: string; onClick: () => void }) => {
+      const id = 'toast_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
+      setToasts((prev) => [...prev.slice(-3), { id, message, type, action }]);
+    },
+    []
+  );
+
+  const handleDismissToast = useCallback((id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
+
+  const showToast = useCallback(
+    (msg: string, type: ToastType = 'info') => {
+      pushToast(msg, type);
+    },
+    [pushToast]
+  );
+
+  // Online / Offline network status listener
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      pushToast('Conexión reestablecida', 'success');
+    };
+    const handleOffline = () => {
+      setIsOnline(false);
+      pushToast('Sin conexión a internet. Los cambios se guardarán localmente.', 'warning');
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [pushToast]);
 
   // New task form state
   const [newTaskTitle, setNewTaskTitle] = useState<string>('');
@@ -153,7 +220,6 @@ export default function App() {
   const [lastSavedMarkdown, setLastSavedMarkdown] = useState<string>(SAMPLE_MARKDOWN);
   const [isDraggingOver, setIsDraggingOver] = useState<boolean>(false);
   const [copiedMarkdown, setCopiedMarkdown] = useState<boolean>(false);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [syncStatus, setSyncStatus] = useState<SyncStatus>('idle');
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -188,13 +254,6 @@ export default function App() {
     setSanityDataset(config.dataset || 'production');
     setSanityToken(config.token || '');
   }, []);
-
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => {
-      setToastMessage(null);
-    }, 2500);
-  };
 
   const parsedGroups = useMemo(() => {
     return parseTasksMarkdown(markdownInput);
@@ -762,10 +821,37 @@ export default function App() {
     showToast(`Tarea #${taskId} creada en "${groupTitle}"`);
   };
 
-  // Confirm Delete Task Handler
+  // Load Sample Project Helper
+  const handleLoadSampleProject = useCallback(async () => {
+    setIsLoadingDocument(true);
+    setCurrentFileName('TASKS.md');
+    setMarkdownInput(SAMPLE_MARKDOWN);
+    setLastSavedMarkdown(SAMPLE_MARKDOWN);
+
+    if (editor) {
+      const currentShapes = editor.getCurrentPageShapes().filter(
+        (s) =>
+          (s as any).type === 'task' ||
+          (s as any).type === 'task-group' ||
+          (s as any).type === 'arrow'
+      );
+      if (currentShapes.length > 0) {
+        editor.deleteShapes(currentShapes.map((s) => s.id));
+      }
+      seedMockTasks(editor, null);
+      triggerDebouncedVisualSave(editor);
+    }
+    setTimeout(() => {
+      setIsLoadingDocument(false);
+      pushToast('Proyecto de ejemplo cargado', 'success');
+    }, 150);
+  }, [editor, triggerDebouncedVisualSave, pushToast]);
+
+  // Confirm Delete Task Handler with Undo Action (DESIGN.md Section 9)
   const handleConfirmDeleteTask = () => {
     if (!deleteWarningState || !editor) return;
-    const { shapeId, taskId } = deleteWarningState;
+    const { shapeId, taskId, title } = deleteWarningState;
+    const priorMarkdown = markdownInput;
 
     const updatedMarkdown = deleteTaskFromMarkdown(markdownInput, taskId);
     setMarkdownInput(updatedMarkdown);
@@ -788,20 +874,42 @@ export default function App() {
 
     setDeleteWarningState(null);
     triggerDebouncedVisualSave(editor);
-    showToast(`Tarea #${taskId} eliminada`);
+
+    pushToast(`Tarea #${taskId} eliminada`, 'info', {
+      label: 'Deshacer',
+      onClick: async () => {
+        setMarkdownInput(priorMarkdown);
+        if (editor) {
+          const visual = await loadCanvasVisualState();
+          loadTasksFromMarkdown(editor, priorMarkdown, visual);
+          triggerDebouncedVisualSave(editor);
+        }
+        pushToast(`Tarea "${title}" restaurada`, 'success');
+      },
+    });
   };
 
-  // Execute Auto-Layout (DAG hierarchical organizing via Dagre)
+  // Execute Auto-Layout (DAG hierarchical organizing via Dagre) with local feedback
   const handleExecuteAutoLayout = () => {
     if (!editor) return;
     setIsAutoLayoutConfirmOpen(false);
-    const { taskCount, groupCount } = applyAutoLayout(editor, markdownInput);
-    if (taskCount > 0 || groupCount > 0) {
-      triggerDebouncedVisualSave(editor);
-      showToast(`Canvas organizado (${taskCount} tareas en ${groupCount} secciones)`);
-    } else {
-      showToast('No hay tareas para organizar');
-    }
+    setIsAutoOrganizing(true);
+
+    setTimeout(() => {
+      try {
+        const { taskCount, groupCount } = applyAutoLayout(editor, markdownInput);
+        if (taskCount > 0 || groupCount > 0) {
+          triggerDebouncedVisualSave(editor);
+          pushToast(`Canvas organizado (${taskCount} tareas en ${groupCount} secciones)`, 'success');
+        } else {
+          pushToast('No hay tareas para organizar', 'info');
+        }
+      } catch (err) {
+        pushToast('Error al organizar el canvas', 'error');
+      } finally {
+        setIsAutoOrganizing(false);
+      }
+    }, 100);
   };
 
   const handleSaveSanityConfig = (e: React.FormEvent) => {
@@ -930,6 +1038,8 @@ export default function App() {
 
   const handleBatchDeleteTasksFromKanban = useCallback(
     (taskIds: string[]) => {
+      const priorMarkdown = markdownInput;
+
       setMarkdownInput((currentMd) => {
         let updatedMd = currentMd;
         for (const taskId of taskIds) {
@@ -954,10 +1064,23 @@ export default function App() {
         if (shapesToDelete.length > 0) {
           editor.deleteShapes(shapesToDelete as any);
         }
+        triggerDebouncedVisualSave(editor);
       }
-      showToast(`${taskIds.length} tareas eliminadas`);
+
+      pushToast(`${taskIds.length} tareas eliminadas`, 'info', {
+        label: 'Deshacer',
+        onClick: async () => {
+          setMarkdownInput(priorMarkdown);
+          if (editor) {
+            const visual = await loadCanvasVisualState();
+            loadTasksFromMarkdown(editor, priorMarkdown, visual);
+            triggerDebouncedVisualSave(editor);
+          }
+          pushToast(`${taskIds.length} tareas restauradas`, 'success');
+        },
+      });
     },
-    [editor]
+    [editor, markdownInput, pushToast, triggerDebouncedVisualSave]
   );
 
   // All Parsed Tasks for navigation and linking
@@ -1068,6 +1191,26 @@ export default function App() {
         category: 'action',
         perform: () => {
           setIsProblemsModalOpen(true);
+        },
+      },
+      {
+        id: 'quick-guide',
+        title: 'Guía rápida y atajos de teclado',
+        shortcut: '?',
+        icon: 'help',
+        category: 'action',
+        perform: () => {
+          setIsQuickGuideOpen(true);
+        },
+      },
+      {
+        id: 'load-sample-project',
+        title: 'Cargar proyecto de ejemplo inicial',
+        shortcut: '',
+        icon: 'refresh',
+        category: 'action',
+        perform: () => {
+          handleLoadSampleProject();
         },
       },
       {
@@ -1331,8 +1474,19 @@ export default function App() {
           </div>
         </div>
 
-        {/* Right Section: Global Actions (Primary CTA, Auto Layout, Save, View .md, Theme) */}
+        {/* Right Section: Global Actions (Primary CTA, Auto Layout, Save, View .md, Help, Theme) */}
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          {/* Offline indicator badge */}
+          {!isOnline && (
+            <span
+              className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-950/80 border border-amber-700/60 text-amber-300 text-[10px] sm:text-[11px] font-sans"
+              title="Sin conexión a internet. Los cambios se guardarán localmente."
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+              <span className="hidden sm:inline">Offline</span>
+            </span>
+          )}
+
           {/* Quick Save Button */}
           <button
             type="button"
@@ -1342,21 +1496,30 @@ export default function App() {
                 ? 'border-emerald-500 text-emerald-400 bg-emerald-950/40 shadow-xs'
                 : ''
             }`}
-            title="Guardar archivo TASKS.md en disco"
+            title="Guardar archivo TASKS.md en disco (⌘S)"
           >
             <span className="material-symbols-outlined text-[16px]">save</span>
             <span className="hidden sm:inline">Guardar</span>
           </button>
 
-          {/* Auto Organizar Button */}
+          {/* Auto Organizar Button with loading feedback */}
           <button
             type="button"
+            disabled={isAutoOrganizing}
             onClick={() => setIsAutoLayoutConfirmOpen(true)}
             className="btn-m3-secondary hidden sm:inline-flex px-3 py-1.5 text-xs cursor-pointer text-sky-400 border-sky-800/60 bg-sky-950/30"
-            title="Organizar automáticamente dependencias y grupos jerárquicamente"
+            title="Organizar automáticamente dependencias y grupos jerárquicamente (DAG)"
           >
-            <span className="material-symbols-outlined text-[16px]">account_tree</span>
-            <span className="hidden md:inline">Auto organizar</span>
+            <span
+              className={`material-symbols-outlined text-[16px] ${
+                isAutoOrganizing ? 'animate-spin' : ''
+              }`}
+            >
+              {isAutoOrganizing ? 'progress_activity' : 'account_tree'}
+            </span>
+            <span className="hidden md:inline">
+              {isAutoOrganizing ? 'Organizando...' : 'Auto organizar'}
+            </span>
           </button>
 
           {/* Nueva Tarea (Primary Action) */}
@@ -1369,7 +1532,7 @@ export default function App() {
               setIsNewTaskModalOpen(true);
             }}
             className="btn-m3-primary px-3.5 py-1.5 cursor-pointer shadow-sm"
-            title="Crear nueva tarea"
+            title="Crear nueva tarea (N)"
           >
             <span className="material-symbols-outlined text-[18px]">add</span>
             <span className="hidden xs:inline">Nueva tarea</span>
@@ -1385,20 +1548,31 @@ export default function App() {
                   ? 'bg-rose-950/80 text-rose-300 border-rose-800 animate-pulse'
                   : 'bg-amber-950/80 text-amber-300 border-amber-800'
               }`}
-              title="Ver problemas detectados en el Markdown"
+              title="Ver problemas detectados en el Markdown (P)"
             >
               <span>⚠</span>
               <span>{validationReport.issues.length}</span>
             </button>
           )}
 
+          {/* Quick Guide & Shortcuts Button */}
+          <button
+            type="button"
+            onClick={() => setIsQuickGuideOpen(true)}
+            className="btn-m3-icon shrink-0 cursor-pointer hidden sm:inline-flex"
+            title="Guía rápida y atajos de teclado (?)"
+            aria-label="Abrir guía de uso y atajos"
+          >
+            <span className="material-symbols-outlined text-[18px]">help</span>
+          </button>
+
           {/* Theme Toggle (DESIGN.md Section 4: Light & Dark Theme) */}
           <button
             type="button"
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
             className="btn-m3-icon shrink-0 cursor-pointer hidden sm:inline-flex"
-            title={`Cambiar a tema ${theme === 'dark' ? 'claro' : 'oscuro'}`}
-            aria-label="Toggle Theme"
+            title={`Cambiar a tema ${theme === 'dark' ? 'claro' : 'oscuro'} (T)`}
+            aria-label="Alternar tema"
           >
             <span className="material-symbols-outlined text-[18px]">
               {theme === 'dark' ? 'light_mode' : 'dark_mode'}
@@ -1733,6 +1907,46 @@ export default function App() {
                   </button>
                 </div>
 
+                {/* Canvas Empty State Overlay */}
+                {allParsedTasks.length === 0 && (
+                  <div className="absolute inset-0 pointer-events-none flex items-center justify-center p-6 z-10">
+                    <div className="pointer-events-auto bg-[var(--surface-container)]/95 backdrop-blur-md border border-[var(--outline)] rounded-3xl p-6 sm:p-8 max-w-md text-center shadow-2xl animate-fade-in flex flex-col items-center">
+                      <div className="w-14 h-14 rounded-2xl bg-[var(--primary-container)]/30 border border-[var(--primary)]/30 flex items-center justify-center text-[var(--primary)] mb-3 shadow-xs">
+                        <span className="material-symbols-outlined text-[28px]">grid_view</span>
+                      </div>
+                      <h3 className="text-base font-semibold text-[var(--on-surface)] font-sans mb-1">
+                        Lienzo vacío
+                      </h3>
+                      <p className="text-xs text-[var(--on-surface-variant)] mb-5 leading-relaxed">
+                        No hay tareas en este archivo TASKS.md. Comienza añadiendo una tarea o carga un proyecto de ejemplo.
+                      </p>
+                      <div className="flex items-center gap-2.5 flex-wrap justify-center">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (existingSections.length > 0 && !isCustomGroup) {
+                              setNewTaskGroup(existingSections[0]);
+                            }
+                            setIsNewTaskModalOpen(true);
+                          }}
+                          className="btn-m3-primary px-4 py-2 text-xs cursor-pointer shadow-sm"
+                        >
+                          <span className="material-symbols-outlined text-[16px]">add</span>
+                          <span>Crear primera tarea</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleLoadSampleProject}
+                          className="btn-m3-secondary px-3.5 py-2 text-xs cursor-pointer"
+                        >
+                          <span className="material-symbols-outlined text-[16px]">refresh</span>
+                          <span>Cargar ejemplo</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Floating Canvas Multi-Selection Action Bar (DESIGN.md Section 14) */}
                 {selectedTaskIdsOnCanvas.length > 1 && (
                   <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-20 bg-[var(--surface-container)]/95 backdrop-blur-md border border-[var(--outline)] rounded-full px-3 py-1.5 shadow-2xl flex items-center gap-2 animate-slide-up select-none max-w-[95vw] overflow-x-auto">
@@ -1822,6 +2036,8 @@ export default function App() {
             ) : (
               <KanbanBoard
                 markdown={markdownInput}
+                isLoading={isLoadingDocument}
+                onOpenSampleProject={handleLoadSampleProject}
                 onUpdateTask={handleUpdateTaskFromKanban}
                 onBatchUpdateTasks={handleBatchUpdateTasksFromKanban}
                 onDeleteTask={(taskId, title) => {
@@ -1876,13 +2092,8 @@ export default function App() {
             )}
           </div>
 
-          {/* Toast notification */}
-          {toastMessage && (
-            <div className="fixed bottom-20 sm:bottom-6 right-4 sm:right-6 z-50 px-4 py-2.5 bg-[var(--surface-container-high)] border border-[var(--outline)] text-xs font-sans text-[var(--on-surface)] rounded-2xl shadow-2xl flex items-center gap-2.5 animate-slide-up max-w-[90vw]">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
-              <span className="truncate">{toastMessage}</span>
-            </div>
-          )}
+          {/* Toast notification system */}
+          <ToastContainer toasts={toasts} onDismiss={handleDismissToast} />
         </main>
 
         {/* Details Panel (DESIGN.md Section 16 & Fase 4: Modular Details & Multi-Selection Panel) */}
@@ -2702,6 +2913,13 @@ export default function App() {
           setTaskFilters((prev) => ({ ...prev, tag }));
         }}
         actions={commandActions}
+      />
+
+      {/* Quick Guide & Shortcuts Modal (?) */}
+      <QuickGuideModal
+        isOpen={isQuickGuideOpen}
+        onClose={() => setIsQuickGuideOpen(false)}
+        onOpenSampleProject={handleLoadSampleProject}
       />
     </div>
   );

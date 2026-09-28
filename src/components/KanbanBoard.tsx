@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { TaskPriority, TaskStatus } from '../shapes/TaskShapeUtil';
 import { scanTaskBlocks, TaskBlockInfo } from '../utils/markdownSync';
 import { TaskFilterState } from './FilterBar';
+import { SkeletonKanbanColumn } from './Skeletons';
 
 export interface KanbanTask {
   taskId: string;
@@ -44,10 +45,12 @@ export interface KanbanBoardProps {
   onSelectTask: (taskId: string) => void;
   selectedTaskId: string | null;
   onOpenNewTaskModalWithGroup?: (groupOrStatus: string) => void;
+  onOpenSampleProject?: () => void;
   searchQuery?: string;
   activeFilter?: 'all' | 'todo' | 'done' | 'critical' | 'blocked';
   filters?: TaskFilterState;
   onResetFilters?: () => void;
+  isLoading?: boolean;
 }
 
 type GroupByMode = 'status' | 'section';
@@ -84,10 +87,12 @@ export function KanbanBoard({
   onSelectTask,
   selectedTaskId,
   onOpenNewTaskModalWithGroup,
+  onOpenSampleProject,
   searchQuery = '',
   activeFilter = 'all',
   filters,
   onResetFilters,
+  isLoading = false,
 }: KanbanBoardProps) {
   const [groupBy, setGroupBy] = useState<GroupByMode>('status');
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
@@ -369,8 +374,71 @@ export function KanbanBoard({
         </div>
       </div>
 
-      {/* Columns Container with horizontal scroll */}
-      <div className="flex-1 w-full overflow-x-auto overflow-y-hidden p-3 sm:p-4 flex gap-4 items-stretch">
+      {/* Columns Container with horizontal scroll or Empty States */}
+      {isLoading ? (
+        <div className="flex-1 w-full overflow-x-auto overflow-y-hidden p-3 sm:p-4 flex gap-4 items-stretch">
+          <SkeletonKanbanColumn title="Backlog" />
+          <SkeletonKanbanColumn title="Todo" />
+          <SkeletonKanbanColumn title="In Progress" />
+          <SkeletonKanbanColumn title="Review" />
+          <SkeletonKanbanColumn title="Done" />
+        </div>
+      ) : allTasks.length === 0 ? (
+        <div className="flex-1 flex flex-col items-center justify-center p-6 text-center animate-fade-in">
+          <div className="w-16 h-16 rounded-3xl bg-[var(--surface-container)] border border-[var(--outline)] flex items-center justify-center text-[var(--on-surface-variant)] mb-4 shadow-sm">
+            <span className="material-symbols-outlined text-[32px] text-sky-400">inventory_2</span>
+          </div>
+          <h3 className="text-base font-semibold text-[var(--on-surface)] font-sans mb-1">
+            No hay tareas en el archivo TASKS.md
+          </h3>
+          <p className="text-xs text-[var(--on-surface-variant)] max-w-sm mb-6 leading-relaxed">
+            Comienza creando tu primera tarea o carga un proyecto de ejemplo para explorar el flujo de trabajo en Canvas y Kanban.
+          </p>
+          <div className="flex items-center gap-3 flex-wrap justify-center">
+            <button
+              type="button"
+              onClick={() => onOpenNewTaskModalWithGroup?.('General')}
+              className="btn-m3-primary px-4 py-2 text-xs cursor-pointer shadow-sm"
+            >
+              <span className="material-symbols-outlined text-[18px]">add</span>
+              <span>Crear primera tarea</span>
+            </button>
+            {onOpenSampleProject && (
+              <button
+                type="button"
+                onClick={onOpenSampleProject}
+                className="btn-m3-secondary px-4 py-2 text-xs cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[18px]">refresh</span>
+                <span>Cargar ejemplo inicial</span>
+              </button>
+            )}
+          </div>
+        </div>
+      ) : filteredTasks.length === 0 ? (
+        <div className="flex-1 flex flex-col items-center justify-center p-6 text-center animate-fade-in">
+          <div className="w-14 h-14 rounded-2xl bg-[var(--surface-container)] border border-[var(--outline)] flex items-center justify-center text-[var(--on-surface-variant)] mb-3 shadow-xs">
+            <span className="material-symbols-outlined text-[28px] text-amber-400">filter_alt_off</span>
+          </div>
+          <h3 className="text-sm font-semibold text-[var(--on-surface)] font-sans mb-1">
+            No hay tareas que coincidan con los filtros activos
+          </h3>
+          <p className="text-xs text-[var(--on-surface-variant)] max-w-xs mb-4">
+            Prueba a cambiar el término de búsqueda o limpia los filtros para ver todas las {allTasks.length} tareas.
+          </p>
+          {onResetFilters && (
+            <button
+              type="button"
+              onClick={onResetFilters}
+              className="btn-m3-secondary px-4 py-1.5 text-xs cursor-pointer text-[var(--primary)] border-[var(--primary)]/40 hover:bg-[var(--primary-container)]/20"
+            >
+              <span className="material-symbols-outlined text-[16px]">restart_alt</span>
+              <span>Limpiar filtros</span>
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="flex-1 w-full overflow-x-auto overflow-y-hidden p-3 sm:p-4 flex gap-4 items-stretch">
         {groupBy === 'status'
           ? STATUS_COLUMNS.map((col) => {
               const tasksInCol = filteredTasks.filter((t) => {
@@ -803,7 +871,8 @@ export function KanbanBoard({
                 </div>
               );
             })}
-      </div>
+        </div>
+      )}
 
       {/* Floating Multi-Selection Contextual Toolbar (DESIGN.md Section 9 & 13) */}
       {selectedTaskIds.size > 0 && (
