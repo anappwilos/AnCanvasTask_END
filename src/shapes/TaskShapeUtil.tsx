@@ -436,7 +436,13 @@ export function parseTasksMarkdown(markdown: string): ParsedGroup[] {
   return groups;
 }
 
-export function populateCanvasWithGroups(editor: Editor, groups: ParsedGroup[]): { taskCount: number; groupCount: number } {
+import { CanvasVisualDocument } from '../services/sanityService';
+
+export function populateCanvasWithGroups(
+  editor: Editor,
+  groups: ParsedGroup[],
+  savedVisualState?: CanvasVisualDocument | null
+): { taskCount: number; groupCount: number } {
   // Clear existing task, group, and arrow shapes on canvas
   const existingShapes = editor
     .getCurrentPageShapes()
@@ -474,6 +480,25 @@ export function populateCanvasWithGroups(editor: Editor, groups: ParsedGroup[]):
     blockedByStr: string;
   }> = [];
 
+  // Index saved visual state for rapid retrieval
+  const savedTaskMap = new Map<string, { x: number; y: number; width: number; height: number }>();
+  if (savedVisualState?.tasks) {
+    for (const t of savedVisualState.tasks) {
+      if (t.taskId) {
+        savedTaskMap.set(t.taskId.toLowerCase(), t);
+      }
+    }
+  }
+
+  const savedGroupMap = new Map<string, { x: number; y: number; width: number; height: number; isCollapsed?: boolean }>();
+  if (savedVisualState?.groups) {
+    for (const g of savedVisualState.groups) {
+      if (g.groupTitle) {
+        savedGroupMap.set(g.groupTitle.toLowerCase(), g);
+      }
+    }
+  }
+
   let totalTasks = 0;
 
   groups.forEach((group, groupIndex) => {
@@ -481,7 +506,7 @@ export function populateCanvasWithGroups(editor: Editor, groups: ParsedGroup[]):
     totalTasks += taskCount;
     const completedCount = group.tasks.filter((t) => t.completed).length;
 
-    const calculatedHeight = Math.max(
+    const defaultCalculatedHeight = Math.max(
       160,
       groupHeaderHeight +
         groupPaddingTop +
@@ -490,8 +515,15 @@ export function populateCanvasWithGroups(editor: Editor, groups: ParsedGroup[]):
         groupPaddingBottom
     );
 
-    const groupX = 80 + groupIndex * groupSpacingX;
-    const groupY = 80;
+    const defaultGroupX = 80 + groupIndex * groupSpacingX;
+    const defaultGroupY = 80;
+
+    // Check if group has a saved visual state from Sanity
+    const savedGroup = savedGroupMap.get(group.title.toLowerCase());
+    const groupX = savedGroup ? savedGroup.x : defaultGroupX;
+    const groupY = savedGroup ? savedGroup.y : defaultGroupY;
+    const groupW = savedGroup && savedGroup.width ? savedGroup.width : groupWidth;
+    const groupH = savedGroup && savedGroup.height ? savedGroup.height : defaultCalculatedHeight;
 
     // Create Group container shape
     groupShapesToCreate.push({
@@ -500,8 +532,8 @@ export function populateCanvasWithGroups(editor: Editor, groups: ParsedGroup[]):
       x: groupX,
       y: groupY,
       props: {
-        w: groupWidth,
-        h: calculatedHeight,
+        w: groupW,
+        h: groupH,
         title: group.title,
         count: taskCount,
         completedCount,
@@ -510,8 +542,8 @@ export function populateCanvasWithGroups(editor: Editor, groups: ParsedGroup[]):
 
     // Create movable Task shapes inside the group's visual bounds
     group.tasks.forEach((task, taskIndex) => {
-      const taskX = groupX + groupPaddingX;
-      const taskY =
+      const defaultTaskX = groupX + groupPaddingX;
+      const defaultTaskY =
         groupY +
         groupHeaderHeight +
         groupPaddingTop +
@@ -529,14 +561,21 @@ export function populateCanvasWithGroups(editor: Editor, groups: ParsedGroup[]):
         });
       }
 
+      // Check if task has a saved position from Sanity
+      const savedTask = savedTaskMap.get(resolvedTaskId.toLowerCase());
+      const taskX = savedTask ? savedTask.x : defaultTaskX;
+      const taskY = savedTask ? savedTask.y : defaultTaskY;
+      const taskW = savedTask && savedTask.width ? savedTask.width : cardWidth;
+      const taskH = savedTask && savedTask.height ? savedTask.height : cardHeight;
+
       taskShapesToCreate.push({
         id: shapeId,
         type: 'task' as const,
         x: taskX,
         y: taskY,
         props: {
-          w: cardWidth,
-          h: cardHeight,
+          w: taskW,
+          h: taskH,
           title: task.title,
           completed: task.completed,
           priority: task.priority || 'P1',
@@ -620,18 +659,25 @@ export function populateCanvasWithGroups(editor: Editor, groups: ParsedGroup[]):
   return { taskCount: totalTasks, groupCount: groups.length };
 }
 
-export function seedMockTasks(editor: Editor) {
+export function seedMockTasks(
+  editor: Editor,
+  savedVisualState?: CanvasVisualDocument | null
+) {
   const existingShapes = editor
     .getCurrentPageShapes()
     .filter((s) => (s as any).type === 'task' || (s as any).type === 'task-group');
 
   if (existingShapes.length === 0) {
-    populateCanvasWithGroups(editor, INITIAL_MOCK_GROUPS);
+    populateCanvasWithGroups(editor, INITIAL_MOCK_GROUPS, savedVisualState);
   }
 }
 
-export function loadTasksFromMarkdown(editor: Editor, markdown: string): { taskCount: number; groupCount: number } {
+export function loadTasksFromMarkdown(
+  editor: Editor,
+  markdown: string,
+  savedVisualState?: CanvasVisualDocument | null
+): { taskCount: number; groupCount: number } {
   const parsedGroups = parseTasksMarkdown(markdown);
   if (parsedGroups.length === 0) return { taskCount: 0, groupCount: 0 };
-  return populateCanvasWithGroups(editor, parsedGroups);
+  return populateCanvasWithGroups(editor, parsedGroups, savedVisualState);
 }

@@ -1,5 +1,12 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Editor, Tldraw } from 'tldraw';
+import {
+  extractVisualStateFromEditor,
+  getSanityConfig,
+  loadCanvasVisualState,
+  saveCanvasVisualState,
+  saveSanityConfig,
+} from './services/sanityService';
 import {
   loadTasksFromMarkdown,
   parseTasksMarkdown,
@@ -32,21 +39,113 @@ const SAMPLE_MARKDOWN = `# TASKS
   - Priority: P3
   - Blocked by: profile`;
 
+type SyncStatus = 'idle' | 'loading' | 'saving' | 'synced' | 'local';
+
 export default function App() {
   const [editor, setEditor] = useState<Editor | null>(null);
   const [isImportModalOpen, setIsImportModalOpen] = useState<boolean>(false);
+  const [isSanityModalOpen, setIsSanityModalOpen] = useState<boolean>(false);
   const [markdownInput, setMarkdownInput] = useState<string>(SAMPLE_MARKDOWN);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>('idle');
 
+  // Sanity settings form state
+  const [sanityProjectId, setSanityProjectId] = useState<string>('');
+  const [sanityDataset, setSanityDataset] = useState<string>('production');
+  const [sanityToken, setSanityToken] = useState<string>('');
+
+  const debouncedSaveRef = useRef<NodeJS.Timeout | null>(null);
   const customShapeUtils = useMemo(() => [TaskGroupShapeUtil, TaskShapeUtil], []);
 
-  const handleMount = useCallback((editorInstance: Editor) => {
-    setEditor(editorInstance);
-    // Apply sleek dark mode preference
-    editorInstance.user.updateUserPreferences({ colorScheme: 'dark' });
-    // Seed the initial movable mock task cards organized by groups
-    seedMockTasks(editorInstance);
+  // Load initial Sanity configuration
+  useEffect(() => {
+    const config = getSanityConfig();
+    setSanityProjectId(config.projectId || '');
+    setSanityDataset(config.dataset || 'production');
+    setSanityToken(config.token || '');
   }, []);
+
+  const triggerDebouncedVisualSave = useCallback((editorInstance: Editor) => {
+    if (debouncedSaveRef.current) {
+      clearTimeout(debouncedSaveRef.current);
+    }
+    setSyncStatus('saving');
+    debouncedSaveRef.current = setTimeout(async () => {
+      const visualState = extractVisualStateFromEditor(editorInstance);
+      if (visualState.tasks.length > 0 || visualState.groups.length > 0) {
+        const res = await saveCanvasVisualState(visualState);
+        setSyncStatus(res.remote ? 'synced' : 'local');
+      } else {
+        setSyncStatus('idle');
+      }
+    }, 700);
+  }, []);
+
+  const handleMount = useCallback(
+    (editorInstance: Editor) => {
+      setEditor(editorInstance);
+      editorInstance.user.updateUserPreferences({ colorScheme: 'dark' });
+
+      // Async initialization of visual state
+      const initVisualState = async () => {
+        setSyncStatus('loading');
+        const savedVisualState = await loadCanvasVisualState();
+        if (savedVisualState) {
+          setSyncStatus(getSanityConfig().token ? 'synced' : 'local');
+        } else {
+          setSyncStatus('idle');
+        }
+
+        // Reconstruct tasks from TASKS.md using visual state positions
+        seedMockTasks(editorInstance, savedVisualState);
+      };
+
+      initVisualState();
+
+      // Set up store listener to auto-persist visual positions on movement/resize end
+      const unsubscribe = editorInstance.store.listen((entry) => {
+        let hasVisualChange = false;
+        const changes = entry.changes as any;
+
+        if (changes.updated) {
+          for (const id of Object.keys(changes.updated)) {
+            const [from, to] = changes.updated[id] || [];
+            if (to?.typeName === 'shape' || from?.typeName === 'shape') {
+              hasVisualChange = true;
+              break;
+            }
+          }
+        }
+
+        if (!hasVisualChange && changes.added) {
+          for (const id of Object.keys(changes.added)) {
+            if (changes.added[id]?.typeName === 'shape') {
+              hasVisualChange = true;
+              break;
+            }
+          }
+        }
+
+        if (!hasVisualChange && changes.removed) {
+          for (const id of Object.keys(changes.removed)) {
+            if (changes.removed[id]?.typeName === 'shape') {
+              hasVisualChange = true;
+              break;
+            }
+          }
+        }
+
+        if (hasVisualChange) {
+          triggerDebouncedVisualSave(editorInstance);
+        }
+      });
+
+      return () => {
+        unsubscribe();
+      };
+    },
+    [triggerDebouncedVisualSave]
+  );
 
   const handleZoomToFit = useCallback(() => {
     if (editor) {
@@ -54,19 +153,25 @@ export default function App() {
     }
   }, [editor]);
 
-  const handleResetLayout = useCallback(() => {
+  const handleResetLayout = useCallback(async () => {
     if (editor) {
-      // Remove current tasks and groups and re-seed
+      // Remove current tasks, groups, and arrows
       const currentShapes = editor
         .getCurrentPageShapes()
-        .filter((s) => (s as any).type === 'task' || (s as any).type === 'task-group');
+        .filter(
+          (s) =>
+            (s as any).type === 'task' ||
+            (s as any).type === 'task-group' ||
+            (s as any).type === 'arrow'
+        );
       if (currentShapes.length > 0) {
         editor.deleteShapes(currentShapes.map((s) => s.id));
       }
-      seedMockTasks(editor);
-      showToast('Canvas reset to default groups');
+      seedMockTasks(editor, null);
+      triggerDebouncedVisualSave(editor);
+      showToast('Canvas reset to default layout');
     }
-  }, [editor]);
+  }, [editor, triggerDebouncedVisualSave]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -84,16 +189,39 @@ export default function App() {
     };
   }, [markdownInput]);
 
-  const handleApplyMarkdown = useCallback(() => {
+  const handleApplyMarkdown = useCallback(async () => {
     if (!editor) return;
-    const { taskCount, groupCount } = loadTasksFromMarkdown(editor, markdownInput);
+    // Retrieve latest saved visual layout from Sanity to preserve custom positions
+    const savedVisualState = await loadCanvasVisualState();
+    const { taskCount, groupCount } = loadTasksFromMarkdown(
+      editor,
+      markdownInput,
+      savedVisualState
+    );
     if (taskCount > 0 || groupCount > 0) {
       setIsImportModalOpen(false);
-      showToast(`${taskCount} ${taskCount === 1 ? 'task' : 'tasks'} loaded across ${groupCount} ${groupCount === 1 ? 'group' : 'groups'}`);
+      showToast(
+        `${taskCount} ${taskCount === 1 ? 'task' : 'tasks'} loaded with Sanity visual positions`
+      );
+      triggerDebouncedVisualSave(editor);
     } else {
       showToast('No tasks or headings found in Markdown');
     }
-  }, [editor, markdownInput]);
+  }, [editor, markdownInput, triggerDebouncedVisualSave]);
+
+  const handleSaveSanityConfig = (e: React.FormEvent) => {
+    e.preventDefault();
+    saveSanityConfig({
+      projectId: sanityProjectId.trim(),
+      dataset: sanityDataset.trim(),
+      token: sanityToken.trim(),
+    });
+    setIsSanityModalOpen(false);
+    showToast('Sanity configuration saved');
+    if (editor) {
+      triggerDebouncedVisualSave(editor);
+    }
+  };
 
   return (
     <div className="flex flex-col w-screen h-screen bg-zinc-950 text-zinc-100 overflow-hidden font-sans">
@@ -113,9 +241,35 @@ export default function App() {
           <span aria-hidden="true" className="text-zinc-700">·</span>
           <span>Groups (##)</span>
           <span aria-hidden="true" className="text-zinc-700">·</span>
-          <span>ID & Priority</span>
+          <span>Blocked by</span>
           <span aria-hidden="true" className="text-zinc-700">·</span>
-          <span>Dependencies (Blocked by)</span>
+          {/* Visual Sync Badge */}
+          <button
+            type="button"
+            onClick={() => setIsSanityModalOpen(true)}
+            className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-zinc-800/80 border border-zinc-700/60 hover:border-zinc-500 text-zinc-300 transition-colors cursor-pointer"
+            title="Click to configure Sanity Visual Persistence"
+          >
+            <span
+              className={`w-1.5 h-1.5 rounded-full ${
+                syncStatus === 'saving' || syncStatus === 'loading'
+                  ? 'bg-amber-400 animate-pulse'
+                  : syncStatus === 'synced'
+                  ? 'bg-emerald-400'
+                  : 'bg-cyan-400'
+              }`}
+            />
+            <span className="text-[11px]">
+              Sanity:{' '}
+              {syncStatus === 'saving'
+                ? 'Saving...'
+                : syncStatus === 'loading'
+                ? 'Loading...'
+                : syncStatus === 'synced'
+                ? 'Remote Synced'
+                : 'Visual Cache'}
+            </span>
+          </button>
         </div>
 
         {/* Zone 3: Primary developer actions */}
@@ -220,7 +374,7 @@ export default function App() {
                   }
                 }}
                 rows={11}
-                placeholder={`# TASKS\n\n## Autenticación\n- [ ] Crear login\n- [ ] Añadir Google OAuth\n\n## Perfil\n- [ ] Crear pantalla de perfil\n- [x] Añadir avatar`}
+                placeholder={`# TASKS\n\n## Autenticación\n- [ ] Configurar OAuth\n  - ID: oauth\n  - Priority: P0\n\n- [ ] Persistir sesión\n  - ID: session\n  - Priority: P0\n  - Blocked by: oauth`}
                 className="w-full bg-zinc-950 border border-zinc-800 focus:border-emerald-500 rounded-lg p-3 text-xs font-mono text-zinc-200 focus:outline-none resize-none leading-relaxed"
                 autoFocus
               />
@@ -271,6 +425,98 @@ export default function App() {
                 Load to Canvas ({parsedStats.groupCount} {parsedStats.groupCount === 1 ? 'group' : 'groups'})
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Sanity Visual Persistence Configuration Modal */}
+      {isSanityModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs">
+          <div
+            className="w-full max-w-md bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="sanity-modal-title"
+          >
+            <div className="px-5 py-4 border-b border-zinc-800 flex items-center justify-between">
+              <div>
+                <h2 id="sanity-modal-title" className="text-sm font-semibold text-zinc-100 font-mono flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                  Sanity Visual Persistence
+                </h2>
+                <p className="text-xs text-zinc-400 mt-0.5">
+                  Stores only spatial coordinates <code className="text-zinc-300">(taskId, x, y, w, h)</code>
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsSanityModalOpen(false)}
+                className="text-zinc-400 hover:text-zinc-200 p-1 rounded transition-colors cursor-pointer"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveSanityConfig} className="p-5 flex flex-col gap-3.5">
+              <div className="p-3 rounded-lg bg-zinc-950 border border-zinc-800/80 text-[11px] font-mono text-zinc-400 leading-relaxed">
+                <span className="text-emerald-400 font-semibold">Single Source of Truth: </span>
+                TASKS.md defines your titles, states, IDs, priorities and dependencies. Sanity only remembers where you placed the cards.
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-mono text-zinc-300">Sanity Project ID</label>
+                <input
+                  type="text"
+                  value={sanityProjectId}
+                  onChange={(e) => setSanityProjectId(e.target.value)}
+                  placeholder="e.g. 8k9abcde (optional)"
+                  className="w-full bg-zinc-950 border border-zinc-800 focus:border-emerald-500 rounded-md px-3 py-1.5 text-xs font-mono text-zinc-100 focus:outline-none"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-mono text-zinc-300">Dataset</label>
+                <input
+                  type="text"
+                  value={sanityDataset}
+                  onChange={(e) => setSanityDataset(e.target.value)}
+                  placeholder="production"
+                  className="w-full bg-zinc-950 border border-zinc-800 focus:border-emerald-500 rounded-md px-3 py-1.5 text-xs font-mono text-zinc-100 focus:outline-none"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-mono text-zinc-300">Sanity API Write Token</label>
+                <input
+                  type="password"
+                  value={sanityToken}
+                  onChange={(e) => setSanityToken(e.target.value)}
+                  placeholder="sk..."
+                  className="w-full bg-zinc-950 border border-zinc-800 focus:border-emerald-500 rounded-md px-3 py-1.5 text-xs font-mono text-zinc-100 focus:outline-none"
+                />
+                <span className="text-[10px] text-zinc-500 font-mono">
+                  Leave empty to use local persistence fallback
+                </span>
+              </div>
+
+              <div className="pt-2 flex items-center justify-end gap-2 border-t border-zinc-800">
+                <button
+                  type="button"
+                  onClick={() => setIsSanityModalOpen(false)}
+                  className="px-3 py-1.5 text-xs font-mono text-zinc-400 hover:text-zinc-200 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-1.5 text-xs font-mono font-medium text-white bg-emerald-600 hover:bg-emerald-500 rounded-md transition-colors cursor-pointer"
+                >
+                  Save Configuration
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
