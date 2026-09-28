@@ -570,6 +570,56 @@ export function updateTaskInMarkdown(
     }
   }
 
+  // 4. Update tags line if given
+  if (updates.tags !== undefined) {
+    let foundTags = false;
+    for (let i = targetBlock.taskLineIndex + 1; i <= targetBlock.endLineIndex; i++) {
+      if (resultLines[i] && resultLines[i].match(/^(?:[-*]\s*)?(?:Tags|Labels)\s*:\s*(.+)$/i)) {
+        if (updates.tags.length > 0) {
+          resultLines[i] = resultLines[i].replace(
+            /((?:Tags|Labels)\s*:\s*)(.+)$/i,
+            `$1${updates.tags.join(', ')}`
+          );
+        } else {
+          resultLines.splice(i, 1);
+        }
+        foundTags = true;
+        break;
+      }
+    }
+
+    if (!foundTags && updates.tags.length > 0) {
+      const baseIndent = targetBlock.indentation ? `${targetBlock.indentation}  ` : '  ';
+      const newTagsLine = `${baseIndent}- Tags: ${updates.tags.join(', ')}`;
+      resultLines.splice(targetBlock.taskLineIndex + 1, 0, newTagsLine);
+    }
+  }
+
+  // 5. Update blockedBy line if given
+  if (updates.blockedBy !== undefined) {
+    let foundBlockedBy = false;
+    for (let i = targetBlock.taskLineIndex + 1; i <= targetBlock.endLineIndex; i++) {
+      if (resultLines[i] && resultLines[i].match(/^(?:[-*]\s*)?Blocked\s*(?:by|-by)?\s*:\s*(.+)$/i)) {
+        if (updates.blockedBy.trim().length > 0) {
+          resultLines[i] = resultLines[i].replace(
+            /(Blocked\s*(?:by|-by)?\s*:\s*)(.+)$/i,
+            `$1${updates.blockedBy.trim()}`
+          );
+        } else {
+          resultLines.splice(i, 1);
+        }
+        foundBlockedBy = true;
+        break;
+      }
+    }
+
+    if (!foundBlockedBy && updates.blockedBy.trim().length > 0) {
+      const baseIndent = targetBlock.indentation ? `${targetBlock.indentation}  ` : '  ';
+      const newBlockedLine = `${baseIndent}- Blocked by: ${updates.blockedBy.trim()}`;
+      resultLines.splice(targetBlock.taskLineIndex + 1, 0, newBlockedLine);
+    }
+  }
+
   return resultLines.join('\n');
 }
 

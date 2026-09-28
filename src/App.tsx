@@ -26,6 +26,9 @@ import {
 } from './shapes/TaskShapeUtil';
 import { applyAutoLayout } from './utils/autoLayout';
 import { KanbanBoard } from './components/KanbanBoard';
+import { TaskDetailsPanel } from './components/TaskDetailsPanel';
+import { CommandPalette, CommandPaletteAction, CommandPaletteTask } from './components/CommandPalette';
+import { FilterBar, TaskFilterState } from './components/FilterBar';
 import {
   addTaskToMarkdown,
   deleteTaskFromMarkdown,
@@ -78,6 +81,54 @@ export default function App() {
   const [selectedTaskShapeId, setSelectedTaskShapeId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [activeFilter, setActiveFilter] = useState<'all' | 'todo' | 'done' | 'critical' | 'blocked'>('all');
+
+  // Advanced Filters State (DESIGN.md Section 6 & 7)
+  const [taskFilters, setTaskFilters] = useState<TaskFilterState>({
+    status: 'all',
+    priority: 'all',
+    section: 'all',
+    tag: 'all',
+    onlyBlocked: false,
+    sortBy: 'default',
+  });
+
+  // Command Palette & Recent Tasks State (DESIGN.md Section 12 & 15)
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState<boolean>(false);
+  const [recentTaskIds, setRecentTaskIds] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('antask_recent_tasks');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const pushRecentTask = useCallback((taskId: string) => {
+    if (!taskId) return;
+    setRecentTaskIds((prev) => {
+      const filtered = prev.filter((id) => id.toLowerCase() !== taskId.toLowerCase());
+      const next = [taskId, ...filtered].slice(0, 8);
+      try {
+        localStorage.setItem('antask_recent_tasks', JSON.stringify(next));
+      } catch {
+        // ignore
+      }
+      return next;
+    });
+  }, []);
+
+  // Global Keyboard Shortcuts (Cmd/Ctrl + K, Escape)
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsCommandPaletteOpen((prev) => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, []);
 
   // Modals state
   const [isNewTaskModalOpen, setIsNewTaskModalOpen] = useState<boolean>(false);
@@ -909,9 +960,187 @@ export default function App() {
     [editor]
   );
 
+  // All Parsed Tasks for navigation and linking
+  const allParsedTasks = useMemo(() => {
+    const { taskBlocks } = scanTaskBlocks(markdownInput);
+    return taskBlocks.map((b) => {
+      const isCompleted = b.rawTaskLine.includes('[x]') || b.rawTaskLine.includes('[X]');
+      return {
+        taskId: b.detectedId || b.temporaryId,
+        title: b.detectedTitle,
+        groupTitle: b.groupTitle || 'General',
+        completed: isCompleted,
+        priority: (b.detectedPriority || 'P1') as TaskPriority,
+        status: ((b.detectedStatus as any) || (isCompleted ? 'done' : 'todo')) as TaskStatus,
+        tags: b.detectedTags,
+        blockedBy: b.detectedBlockedBy,
+      };
+    });
+  }, [markdownInput]);
+
+  // All Available Tags in markdown
+  const allAvailableTags = useMemo(() => {
+    const tagSet = new Set<string>();
+    allParsedTasks.forEach((t) => {
+      t.tags?.forEach((tag) => tagSet.add(tag));
+    });
+    return Array.from(tagSet);
+  }, [allParsedTasks]);
+
+  // Command Palette Actions (DESIGN.md Section 12)
+  const commandActions = useMemo<CommandPaletteAction[]>(
+    () => [
+      {
+        id: 'new-task',
+        title: 'Crear nueva tarea',
+        shortcut: 'N',
+        icon: 'add_circle',
+        category: 'action',
+        perform: () => {
+          setIsNewTaskModalOpen(true);
+        },
+      },
+      {
+        id: 'view-canvas',
+        title: 'Cambiar a vista Canvas',
+        shortcut: 'V',
+        icon: 'grid_view',
+        category: 'view',
+        perform: () => {
+          setActiveView('canvas');
+        },
+      },
+      {
+        id: 'view-kanban',
+        title: 'Cambiar a vista Kanban',
+        shortcut: 'K',
+        icon: 'view_kanban',
+        category: 'view',
+        perform: () => {
+          setActiveView('kanban');
+        },
+      },
+      {
+        id: 'auto-organize',
+        title: 'Auto organizar Canvas jerárquicamente (DAG)',
+        shortcut: 'A',
+        icon: 'account_tree',
+        category: 'action',
+        perform: () => {
+          setIsAutoLayoutConfirmOpen(true);
+        },
+      },
+      {
+        id: 'toggle-theme',
+        title: `Cambiar a tema ${theme === 'dark' ? 'claro' : 'oscuro'}`,
+        shortcut: 'T',
+        icon: theme === 'dark' ? 'light_mode' : 'dark_mode',
+        category: 'action',
+        perform: () => {
+          setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+        },
+      },
+      {
+        id: 'save-file',
+        title: 'Guardar archivo TASKS.md',
+        shortcut: '⌘S',
+        icon: 'save',
+        category: 'action',
+        perform: () => {
+          handleExportFile();
+        },
+      },
+      {
+        id: 'view-markdown',
+        title: 'Ver TASKS.md en vivo',
+        shortcut: 'M',
+        icon: 'code',
+        category: 'action',
+        perform: () => {
+          setIsViewMarkdownOpen(true);
+        },
+      },
+      {
+        id: 'problems-modal',
+        title: 'Ver diagnóstico y problemas de sintaxis',
+        shortcut: 'P',
+        icon: 'warning',
+        category: 'action',
+        perform: () => {
+          setIsProblemsModalOpen(true);
+        },
+      },
+      {
+        id: 'reset-filters',
+        title: 'Limpiar todos los filtros y búsqueda',
+        shortcut: 'ESC',
+        icon: 'filter_alt_off',
+        category: 'action',
+        perform: () => {
+          setSearchQuery('');
+          setTaskFilters({
+            status: 'all',
+            priority: 'all',
+            section: 'all',
+            tag: 'all',
+            onlyBlocked: false,
+            sortBy: 'default',
+          });
+          setActiveFilter('all');
+        },
+      },
+    ],
+    [theme, handleExportFile]
+  );
+
+  // Filtered tasks count computed
+  const filteredTasksCount = useMemo(() => {
+    return allParsedTasks.filter((t) => {
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const matchTitle = t.title.toLowerCase().includes(q);
+        const matchId = t.taskId.toLowerCase().includes(q);
+        const matchGroup = t.groupTitle.toLowerCase().includes(q);
+        const matchTags = t.tags?.some((tag) => tag.toLowerCase().includes(q));
+        if (!matchTitle && !matchId && !matchGroup && !matchTags) return false;
+      }
+
+      if (taskFilters.status !== 'all') {
+        if (taskFilters.status === 'done' && !t.completed) return false;
+        if (taskFilters.status !== 'done' && (t.completed || t.status !== taskFilters.status)) return false;
+      }
+
+      if (taskFilters.priority !== 'all' && t.priority !== taskFilters.priority) return false;
+      if (taskFilters.section !== 'all' && t.groupTitle.toLowerCase() !== taskFilters.section.toLowerCase()) return false;
+      if (taskFilters.tag !== 'all' && (!t.tags || !t.tags.some((tag) => tag.toLowerCase() === taskFilters.tag.toLowerCase()))) return false;
+      if (taskFilters.onlyBlocked && (!t.blockedBy || t.completed)) return false;
+
+      return true;
+    }).length;
+  }, [allParsedTasks, searchQuery, taskFilters]);
+
+  // Navigate to task from Command Palette or search
+  const handleSelectTaskFromPalette = useCallback(
+    (taskId: string) => {
+      setSelectedTaskShapeId(taskId);
+      pushRecentTask(taskId);
+      const found = allParsedTasks.find(
+        (t) => t.taskId.toLowerCase() === taskId.toLowerCase()
+      );
+      if (found) {
+        if (activeView === 'canvas') {
+          handleFocusTaskOnCanvas(found.taskId, found.title);
+        }
+      }
+    },
+    [allParsedTasks, activeView, pushRecentTask, handleFocusTaskOnCanvas]
+  );
+
   // Selected Task Details Helper
   const selectedTaskData = useMemo(() => {
     if (!selectedTaskShapeId) return null;
+
+    const { taskBlocks } = scanTaskBlocks(markdownInput);
 
     if (editor) {
       const shape = (editor.getShape(selectedTaskShapeId as any) ||
@@ -923,24 +1152,34 @@ export default function App() {
 
       if (shape && shape.type === 'task') {
         const tProps = shape.props || {};
+        const resId = tProps.taskId || tProps.temporaryId || selectedTaskShapeId;
+        const matchedBlock = taskBlocks.find(
+          (b) =>
+            (b.detectedId && b.detectedId.toLowerCase() === resId.toLowerCase()) ||
+            b.temporaryId.toLowerCase() === resId.toLowerCase()
+        );
+
         return {
           shapeId: shape.id,
-          taskId: tProps.taskId || tProps.temporaryId || 'sin-id',
+          taskId: resId,
           title: tProps.title || '',
           completed: Boolean(tProps.completed),
           priority: (tProps.priority || 'P1') as TaskPriority,
           status: (tProps.status || (tProps.completed ? 'done' : 'todo')) as TaskStatus,
-          tags: tProps.tags || [],
-          subtasks: tProps.subtasks,
-          blockedBy: tProps.blockedBy || '',
+          tags: tProps.tags || matchedBlock?.detectedTags || [],
+          subtasks: tProps.subtasks || matchedBlock?.detectedSubtasks,
+          blockedBy: tProps.blockedBy || matchedBlock?.detectedBlockedBy || '',
+          groupTitle: matchedBlock?.groupTitle || 'General',
         };
       }
     }
 
-    const { taskBlocks } = scanTaskBlocks(markdownInput);
     const block = taskBlocks.find(
-      (b) => b.detectedId === selectedTaskShapeId || b.temporaryId === selectedTaskShapeId
+      (b) =>
+        (b.detectedId && b.detectedId.toLowerCase() === selectedTaskShapeId.toLowerCase()) ||
+        b.temporaryId.toLowerCase() === selectedTaskShapeId.toLowerCase()
     );
+
     if (block) {
       const isCompleted = block.rawTaskLine.includes('[x]') || block.rawTaskLine.includes('[X]');
       return {
@@ -953,6 +1192,7 @@ export default function App() {
         tags: block.detectedTags || [],
         subtasks: block.detectedSubtasks,
         blockedBy: block.detectedBlockedBy || '',
+        groupTitle: block.groupTitle || 'General',
       };
     }
 
@@ -1067,15 +1307,25 @@ export default function App() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Buscar tarea por título o #ID..."
-              className="w-full bg-[var(--surface)] text-[var(--on-surface)] placeholder:text-[var(--on-surface-variant)] border border-[var(--outline)] rounded-full pl-9 pr-8 py-1.5 text-xs font-sans focus:outline-none focus:border-[var(--primary)] transition-all"
+              className="w-full bg-[var(--surface)] text-[var(--on-surface)] placeholder:text-[var(--on-surface-variant)] border border-[var(--outline)] rounded-full pl-9 pr-14 py-1.5 text-xs font-sans focus:outline-none focus:border-[var(--primary)] transition-all"
             />
-            {searchQuery && (
+            {searchQuery ? (
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] cursor-pointer"
+                title="Limpiar búsqueda"
               >
                 <span className="material-symbols-outlined text-[16px]">close</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setIsCommandPaletteOpen(true)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 px-1.5 py-0.5 rounded bg-[var(--surface-container)] border border-[var(--outline)] text-[10px] font-mono text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] cursor-pointer"
+                title="Abrir paleta de comandos (⌘K)"
+              >
+                ⌘K
               </button>
             )}
           </div>
@@ -1202,9 +1452,12 @@ export default function App() {
 
                 <button
                   type="button"
-                  onClick={() => setActiveFilter('all')}
-                  className={`w-full px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center justify-between transition-colors ${
-                    activeFilter === 'all'
+                  onClick={() => {
+                    setActiveFilter('all');
+                    setTaskFilters((prev) => ({ ...prev, status: 'all', priority: 'all', onlyBlocked: false }));
+                  }}
+                  className={`w-full px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center justify-between transition-colors cursor-pointer ${
+                    activeFilter === 'all' && taskFilters.status === 'all' && taskFilters.priority === 'all' && !taskFilters.onlyBlocked
                       ? 'bg-[var(--surface-container-highest)] text-[var(--on-surface)]'
                       : 'text-[var(--on-surface-variant)] hover:bg-[var(--surface-container-high)]'
                   }`}
@@ -1220,9 +1473,12 @@ export default function App() {
 
                 <button
                   type="button"
-                  onClick={() => setActiveFilter('todo')}
-                  className={`w-full px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center justify-between transition-colors ${
-                    activeFilter === 'todo'
+                  onClick={() => {
+                    setActiveFilter('todo');
+                    setTaskFilters((prev) => ({ ...prev, status: 'todo', priority: 'all', onlyBlocked: false }));
+                  }}
+                  className={`w-full px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center justify-between transition-colors cursor-pointer ${
+                    activeFilter === 'todo' || taskFilters.status === 'todo'
                       ? 'bg-[var(--surface-container-highest)] text-[var(--on-surface)]'
                       : 'text-[var(--on-surface-variant)] hover:bg-[var(--surface-container-high)]'
                   }`}
@@ -1238,9 +1494,12 @@ export default function App() {
 
                 <button
                   type="button"
-                  onClick={() => setActiveFilter('done')}
-                  className={`w-full px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center justify-between transition-colors ${
-                    activeFilter === 'done'
+                  onClick={() => {
+                    setActiveFilter('done');
+                    setTaskFilters((prev) => ({ ...prev, status: 'done', priority: 'all', onlyBlocked: false }));
+                  }}
+                  className={`w-full px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center justify-between transition-colors cursor-pointer ${
+                    activeFilter === 'done' || taskFilters.status === 'done'
                       ? 'bg-[var(--surface-container-highest)] text-[var(--on-surface)]'
                       : 'text-[var(--on-surface-variant)] hover:bg-[var(--surface-container-high)]'
                   }`}
@@ -1256,9 +1515,12 @@ export default function App() {
 
                 <button
                   type="button"
-                  onClick={() => setActiveFilter('critical')}
-                  className={`w-full px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center justify-between transition-colors ${
-                    activeFilter === 'critical'
+                  onClick={() => {
+                    setActiveFilter('critical');
+                    setTaskFilters((prev) => ({ ...prev, priority: 'P0', onlyBlocked: false }));
+                  }}
+                  className={`w-full px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center justify-between transition-colors cursor-pointer ${
+                    activeFilter === 'critical' || taskFilters.priority === 'P0'
                       ? 'bg-[var(--surface-container-highest)] text-[var(--on-surface)]'
                       : 'text-[var(--on-surface-variant)] hover:bg-[var(--surface-container-high)]'
                   }`}
@@ -1274,9 +1536,12 @@ export default function App() {
 
                 <button
                   type="button"
-                  onClick={() => setActiveFilter('blocked')}
-                  className={`w-full px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center justify-between transition-colors ${
-                    activeFilter === 'blocked'
+                  onClick={() => {
+                    setActiveFilter('blocked');
+                    setTaskFilters((prev) => ({ ...prev, onlyBlocked: true }));
+                  }}
+                  className={`w-full px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center justify-between transition-colors cursor-pointer ${
+                    activeFilter === 'blocked' || taskFilters.onlyBlocked
                       ? 'bg-[var(--surface-container-highest)] text-[var(--on-surface)]'
                       : 'text-[var(--on-surface-variant)] hover:bg-[var(--surface-container-high)]'
                   }`}
@@ -1293,22 +1558,46 @@ export default function App() {
 
               {/* Sections & Groups List */}
               <div className="flex flex-col gap-1">
-                <span className="text-[11px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider px-2">
-                  Secciones ({parsedGroups.length})
-                </span>
+                <div className="flex items-center justify-between px-2">
+                  <span className="text-[11px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
+                    Secciones ({parsedGroups.length})
+                  </span>
+                  {taskFilters.section !== 'all' && (
+                    <button
+                      type="button"
+                      onClick={() => setTaskFilters((prev) => ({ ...prev, section: 'all' }))}
+                      className="text-[10px] text-[var(--primary)] hover:underline cursor-pointer"
+                    >
+                      Ver todas
+                    </button>
+                  )}
+                </div>
 
                 <div className="flex flex-col gap-0.5 max-h-48 overflow-y-auto pr-1">
                   {parsedGroups.map((grp) => {
                     const doneInGrp = grp.tasks.filter((t) => t.completed).length;
+                    const isSectionActive = taskFilters.section.toLowerCase() === grp.title.toLowerCase();
                     return (
                       <button
                         key={grp.title}
                         type="button"
-                        onClick={() => handleFocusSectionOnCanvas(grp.title)}
-                        className="w-full px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center justify-between text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] text-left transition-colors cursor-pointer group"
+                        onClick={() => {
+                          setTaskFilters((prev) => ({
+                            ...prev,
+                            section: isSectionActive ? 'all' : grp.title,
+                          }));
+                          if (activeView === 'canvas') {
+                            handleFocusSectionOnCanvas(grp.title);
+                          }
+                        }}
+                        className={`w-full px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center justify-between text-left transition-colors cursor-pointer group ${
+                          isSectionActive
+                            ? 'bg-[var(--primary-container)]/30 text-[var(--primary)] font-semibold'
+                            : 'text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--surface-container-high)]'
+                        }`}
                       >
-                        <span className="truncate max-w-[140px]">{grp.title}</span>
-                        <span className="text-[10px] font-mono text-[var(--on-surface-variant)] group-hover:text-[var(--on-surface)]">
+                        <span className="truncate max-w-[140px]">## {grp.title}</span>
+                        <span className="text-[10px] font-mono opacity-80">
                           {doneInGrp}/{grp.tasks.length}
                         </span>
                       </button>
@@ -1355,197 +1644,237 @@ export default function App() {
         )}
 
         {/* Workspace: Infinite Canvas vs Kanban Board (DESIGN.md Section 3, 14 & 15) */}
-        <main className="flex-1 h-full relative overflow-hidden bg-[var(--surface)]">
-          {activeView === 'canvas' ? (
-            <>
-              <Tldraw
-                shapeUtils={customShapeUtils}
-                onMount={handleMount}
-                autoFocus
-              />
+        <main className="flex-1 h-full relative overflow-hidden bg-[var(--surface)] flex flex-col">
+          {/* Advanced Filter Bar (DESIGN.md Section 6, 7 & 8) */}
+          <FilterBar
+            filters={taskFilters}
+            onFilterChange={(f) => setTaskFilters(f)}
+            onResetFilters={() => {
+              setSearchQuery('');
+              setTaskFilters({
+                status: 'all',
+                priority: 'all',
+                section: 'all',
+                tag: 'all',
+                onlyBlocked: false,
+                sortBy: 'default',
+              });
+              setActiveFilter('all');
+            }}
+            searchQuery={searchQuery}
+            onSearchChange={(q) => setSearchQuery(q)}
+            availableSections={existingSections}
+            availableTags={allAvailableTags}
+            totalTasksCount={allParsedTasks.length}
+            filteredTasksCount={filteredTasksCount}
+            onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
+          />
 
-              {/* Floating Canvas Navigation Controls (DESIGN.md Section 3 & 14) */}
-              <div className="absolute bottom-4 left-4 z-10 hidden sm:flex items-center gap-1 bg-[var(--surface-container)]/95 backdrop-blur-md border border-[var(--outline)] rounded-full p-1 shadow-lg select-none">
-                <button
-                  type="button"
-                  onClick={handleZoomOut}
-                  className="btn-m3-icon w-7 h-7 cursor-pointer"
-                  title="Alejar zoom (Zoom Out)"
-                  aria-label="Zoom out"
-                >
-                  <span className="material-symbols-outlined text-[16px]">remove</span>
-                </button>
+          <div className="flex-1 relative overflow-hidden w-full h-full">
+            {activeView === 'canvas' ? (
+              <>
+                <Tldraw
+                  shapeUtils={customShapeUtils}
+                  onMount={handleMount}
+                  autoFocus
+                />
 
-                <button
-                  type="button"
-                  onClick={handleResetZoom}
-                  className="px-2 py-0.5 text-xs font-mono font-medium text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] rounded-full transition-colors cursor-pointer"
-                  title="Clic para restablecer zoom al 100%"
-                >
-                  {canvasZoom}%
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleZoomIn}
-                  className="btn-m3-icon w-7 h-7 cursor-pointer"
-                  title="Acercar zoom (Zoom In)"
-                  aria-label="Zoom in"
-                >
-                  <span className="material-symbols-outlined text-[16px]">add</span>
-                </button>
-
-                <div className="w-px h-4 bg-[var(--outline)] my-auto mx-0.5" />
-
-                <button
-                  type="button"
-                  onClick={handleZoomToFit}
-                  className="btn-m3-icon w-7 h-7 cursor-pointer"
-                  title="Ajustar zoom al contenido (Zoom to Fit)"
-                  aria-label="Zoom to fit"
-                >
-                  <span className="material-symbols-outlined text-[16px]">fit_screen</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setIsAutoLayoutConfirmOpen(true)}
-                  className="btn-m3-icon w-7 h-7 cursor-pointer text-sky-400"
-                  title="Auto organizar canvas jerárquicamente (DAG)"
-                  aria-label="Auto organizar"
-                >
-                  <span className="material-symbols-outlined text-[16px]">account_tree</span>
-                </button>
-              </div>
-
-              {/* Floating Canvas Multi-Selection Action Bar (DESIGN.md Section 14) */}
-              {selectedTaskIdsOnCanvas.length > 1 && (
-                <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-20 bg-[var(--surface-container)]/95 backdrop-blur-md border border-[var(--outline)] rounded-full px-3 py-1.5 shadow-2xl flex items-center gap-2 animate-slide-up select-none max-w-[95vw] overflow-x-auto">
-                  <div className="flex items-center gap-1.5 pr-2 border-r border-[var(--outline)] shrink-0">
-                    <span className="w-2 h-2 rounded-full bg-[var(--primary)]" />
-                    <span className="text-xs font-mono font-medium text-[var(--on-surface)]">
-                      {selectedTaskIdsOnCanvas.length} seleccionadas
-                    </span>
-                  </div>
-
+                {/* Floating Canvas Navigation Controls (DESIGN.md Section 3 & 14) */}
+                <div className="absolute bottom-4 left-4 z-10 hidden sm:flex items-center gap-1 bg-[var(--surface-container)]/95 backdrop-blur-md border border-[var(--outline)] rounded-full p-1 shadow-lg select-none">
                   <button
                     type="button"
-                    onClick={() =>
-                      handleBatchUpdateTasksFromKanban(selectedTaskIdsOnCanvas, {
-                        completed: true,
-                        status: 'done',
-                      })
-                    }
-                    className="btn-m3-secondary px-2.5 py-1 text-xs text-emerald-400 border-emerald-800/60 bg-emerald-950/30 cursor-pointer shrink-0"
-                    title="Marcar seleccionadas como completadas"
+                    onClick={handleZoomOut}
+                    className="btn-m3-icon w-7 h-7 cursor-pointer"
+                    title="Alejar zoom (Zoom Out)"
+                    aria-label="Zoom out"
                   >
-                    <span className="material-symbols-outlined text-[15px]">check_circle</span>
-                    <span className="hidden sm:inline">Completar</span>
+                    <span className="material-symbols-outlined text-[16px]">remove</span>
                   </button>
 
                   <button
                     type="button"
-                    onClick={() =>
-                      handleBatchUpdateTasksFromKanban(selectedTaskIdsOnCanvas, {
-                        completed: false,
-                        status: 'todo',
-                      })
-                    }
-                    className="btn-m3-secondary px-2.5 py-1 text-xs text-amber-400 border-amber-800/60 bg-amber-950/30 cursor-pointer shrink-0"
-                    title="Marcar seleccionadas como pendientes"
+                    onClick={handleResetZoom}
+                    className="px-2 py-0.5 text-xs font-mono font-medium text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] rounded-full transition-colors cursor-pointer"
+                    title="Clic para restablecer zoom al 100%"
                   >
-                    <span className="material-symbols-outlined text-[15px]">pending</span>
-                    <span className="hidden sm:inline">Pendiente</span>
-                  </button>
-
-                  {/* Quick Priorities */}
-                  <div className="flex items-center gap-1 shrink-0 border-l border-r border-[var(--outline)] px-1.5">
-                    {(['P0', 'P1', 'P2', 'P3'] as TaskPriority[]).map((p) => (
-                      <button
-                        key={p}
-                        type="button"
-                        onClick={() =>
-                          handleBatchUpdateTasksFromKanban(selectedTaskIdsOnCanvas, { priority: p })
-                        }
-                        className="px-1.5 py-0.5 text-[10px] font-mono font-semibold rounded-md border border-[var(--outline)] text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer"
-                        title={`Establecer prioridad ${p}`}
-                      >
-                        {p}
-                      </button>
-                    ))}
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      handleBatchDeleteTasksFromKanban(selectedTaskIdsOnCanvas);
-                    }}
-                    className="btn-m3-secondary px-2.5 py-1 text-xs text-[var(--error)] border-rose-800/60 bg-rose-950/30 cursor-pointer shrink-0"
-                    title="Eliminar tareas seleccionadas"
-                  >
-                    <span className="material-symbols-outlined text-[15px]">delete</span>
-                    <span className="hidden sm:inline">Eliminar</span>
+                    {canvasZoom}%
                   </button>
 
                   <button
                     type="button"
-                    onClick={() => {
-                      if (editor) {
-                        editor.selectNone();
-                      }
-                      setSelectedTaskIdsOnCanvas([]);
-                      setSelectedTaskShapeId(null);
-                    }}
-                    className="btn-m3-icon w-6 h-6 shrink-0 cursor-pointer"
-                    title="Deseleccionar"
+                    onClick={handleZoomIn}
+                    className="btn-m3-icon w-7 h-7 cursor-pointer"
+                    title="Acercar zoom (Zoom In)"
+                    aria-label="Zoom in"
                   >
-                    <span className="material-symbols-outlined text-[14px]">close</span>
+                    <span className="material-symbols-outlined text-[16px]">add</span>
+                  </button>
+
+                  <div className="w-px h-4 bg-[var(--outline)] my-auto mx-0.5" />
+
+                  <button
+                    type="button"
+                    onClick={handleZoomToFit}
+                    className="btn-m3-icon w-7 h-7 cursor-pointer"
+                    title="Ajustar zoom al contenido (Zoom to Fit)"
+                    aria-label="Zoom to fit"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">fit_screen</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setIsAutoLayoutConfirmOpen(true)}
+                    className="btn-m3-icon w-7 h-7 cursor-pointer text-sky-400"
+                    title="Auto organizar canvas jerárquicamente (DAG)"
+                    aria-label="Auto organizar"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">account_tree</span>
                   </button>
                 </div>
-              )}
-            </>
-          ) : (
-            <KanbanBoard
-              markdown={markdownInput}
-              onUpdateTask={handleUpdateTaskFromKanban}
-              onBatchUpdateTasks={handleBatchUpdateTasksFromKanban}
-              onDeleteTask={(taskId, title) => {
-                const dependents = findDependentTasks(markdownInput, taskId);
-                setDeleteWarningState({
-                  shapeId: taskId,
-                  taskId,
-                  title,
-                  dependents,
-                });
-              }}
-              onBatchDeleteTasks={handleBatchDeleteTasksFromKanban}
-              onSelectTask={(id) => setSelectedTaskShapeId(id)}
-              selectedTaskId={selectedTaskShapeId}
-              onOpenNewTaskModalWithGroup={(groupOrStatus) => {
-                if (existingSections.includes(groupOrStatus)) {
-                  setNewTaskGroup(groupOrStatus);
-                }
-                setIsNewTaskModalOpen(true);
-              }}
-              searchQuery={searchQuery}
-              activeFilter={activeFilter}
-            />
-          )}
 
-          {/* Drag & Drop Discrete Overlay */}
-          {isDraggingOver && (
-            <div className="absolute inset-0 z-50 pointer-events-none bg-black/80 backdrop-blur-xs flex flex-col items-center justify-center animate-fade-in p-6">
-              <div className="w-16 h-16 rounded-2xl bg-sky-950/80 border border-sky-600 flex items-center justify-center text-sky-400 mb-4 shadow-xl">
-                <span className="material-symbols-outlined text-[32px]">upload_file</span>
+                {/* Floating Canvas Multi-Selection Action Bar (DESIGN.md Section 14) */}
+                {selectedTaskIdsOnCanvas.length > 1 && (
+                  <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-20 bg-[var(--surface-container)]/95 backdrop-blur-md border border-[var(--outline)] rounded-full px-3 py-1.5 shadow-2xl flex items-center gap-2 animate-slide-up select-none max-w-[95vw] overflow-x-auto">
+                    <div className="flex items-center gap-1.5 pr-2 border-r border-[var(--outline)] shrink-0">
+                      <span className="w-2 h-2 rounded-full bg-[var(--primary)]" />
+                      <span className="text-xs font-mono font-medium text-[var(--on-surface)]">
+                        {selectedTaskIdsOnCanvas.length} seleccionadas
+                      </span>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleBatchUpdateTasksFromKanban(selectedTaskIdsOnCanvas, {
+                          completed: true,
+                          status: 'done',
+                        })
+                      }
+                      className="btn-m3-secondary px-2.5 py-1 text-xs text-emerald-400 border-emerald-800/60 bg-emerald-950/30 cursor-pointer shrink-0"
+                      title="Marcar seleccionadas como completadas"
+                    >
+                      <span className="material-symbols-outlined text-[15px]">check_circle</span>
+                      <span className="hidden sm:inline">Completar</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleBatchUpdateTasksFromKanban(selectedTaskIdsOnCanvas, {
+                          completed: false,
+                          status: 'todo',
+                        })
+                      }
+                      className="btn-m3-secondary px-2.5 py-1 text-xs text-amber-400 border-amber-800/60 bg-amber-950/30 cursor-pointer shrink-0"
+                      title="Marcar seleccionadas como pendientes"
+                    >
+                      <span className="material-symbols-outlined text-[15px]">pending</span>
+                      <span className="hidden sm:inline">Pendiente</span>
+                    </button>
+
+                    {/* Quick Priorities */}
+                    <div className="flex items-center gap-1 shrink-0 border-l border-r border-[var(--outline)] px-1.5">
+                      {(['P0', 'P1', 'P2', 'P3'] as TaskPriority[]).map((p) => (
+                        <button
+                          key={p}
+                          type="button"
+                          onClick={() =>
+                            handleBatchUpdateTasksFromKanban(selectedTaskIdsOnCanvas, { priority: p })
+                          }
+                          className="px-1.5 py-0.5 text-[10px] font-mono font-semibold rounded-md border border-[var(--outline)] text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer"
+                          title={`Establecer prioridad ${p}`}
+                        >
+                          {p}
+                        </button>
+                      ))}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleBatchDeleteTasksFromKanban(selectedTaskIdsOnCanvas);
+                      }}
+                      className="btn-m3-secondary px-2.5 py-1 text-xs text-[var(--error)] border-rose-800/60 bg-rose-950/30 cursor-pointer shrink-0"
+                      title="Eliminar tareas seleccionadas"
+                    >
+                      <span className="material-symbols-outlined text-[15px]">delete</span>
+                      <span className="hidden sm:inline">Eliminar</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (editor) {
+                          editor.selectNone();
+                        }
+                        setSelectedTaskIdsOnCanvas([]);
+                        setSelectedTaskShapeId(null);
+                      }}
+                      className="btn-m3-icon w-6 h-6 shrink-0 cursor-pointer"
+                      title="Deseleccionar"
+                    >
+                      <span className="material-symbols-outlined text-[14px]">close</span>
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <KanbanBoard
+                markdown={markdownInput}
+                onUpdateTask={handleUpdateTaskFromKanban}
+                onBatchUpdateTasks={handleBatchUpdateTasksFromKanban}
+                onDeleteTask={(taskId, title) => {
+                  const dependents = findDependentTasks(markdownInput, taskId);
+                  setDeleteWarningState({
+                    shapeId: taskId,
+                    taskId,
+                    title,
+                    dependents,
+                  });
+                }}
+                onBatchDeleteTasks={handleBatchDeleteTasksFromKanban}
+                onSelectTask={(id) => setSelectedTaskShapeId(id)}
+                selectedTaskId={selectedTaskShapeId}
+                onOpenNewTaskModalWithGroup={(groupOrStatus) => {
+                  if (existingSections.includes(groupOrStatus)) {
+                    setNewTaskGroup(groupOrStatus);
+                  }
+                  setIsNewTaskModalOpen(true);
+                }}
+                searchQuery={searchQuery}
+                activeFilter={activeFilter}
+                filters={taskFilters}
+                onResetFilters={() => {
+                  setSearchQuery('');
+                  setTaskFilters({
+                    status: 'all',
+                    priority: 'all',
+                    section: 'all',
+                    tag: 'all',
+                    onlyBlocked: false,
+                    sortBy: 'default',
+                  });
+                  setActiveFilter('all');
+                }}
+              />
+            )}
+
+            {/* Drag & Drop Discrete Overlay */}
+            {isDraggingOver && (
+              <div className="absolute inset-0 z-50 pointer-events-none bg-black/80 backdrop-blur-xs flex flex-col items-center justify-center animate-fade-in p-6">
+                <div className="w-16 h-16 rounded-2xl bg-sky-950/80 border border-sky-600 flex items-center justify-center text-sky-400 mb-4 shadow-xl">
+                  <span className="material-symbols-outlined text-[32px]">upload_file</span>
+                </div>
+                <h3 className="text-base font-semibold text-white font-sans mb-1">
+                  Suelta tu archivo TASKS.md aquí
+                </h3>
+                <p className="text-xs text-slate-400 font-sans">
+                  Se parseará automáticamente manteniendo coordenadas y jerarquía
+                </p>
               </div>
-              <h3 className="text-base font-semibold text-white font-sans mb-1">
-                Suelta tu archivo TASKS.md aquí
-              </h3>
-              <p className="text-xs text-slate-400 font-sans">
-                Se parseará automáticamente manteniendo coordenadas y jerarquía
-              </p>
-            </div>
-          )}
+            )}
+          </div>
 
           {/* Toast notification */}
           {toastMessage && (
@@ -1556,213 +1885,52 @@ export default function App() {
           )}
         </main>
 
-        {/* Details Panel (DESIGN.md Section 16: Lateral panel for selected task inspection & editing) */}
-        {selectedTaskData && (
-          <aside className="w-80 bg-[var(--surface-container)] border-l border-[var(--outline)] flex flex-col justify-between p-4 z-20 flex-shrink-0 animate-slide-up sm:animate-none overflow-y-auto">
-            <div className="flex flex-col gap-4">
-              {/* Header */}
-              <div className="flex items-center justify-between border-b border-[var(--outline)] pb-3">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-mono font-medium px-2 py-0.5 rounded-md bg-[var(--surface)] border border-[var(--outline)] text-[var(--primary)]">
-                    #{selectedTaskData.taskId}
-                  </span>
-                  <span className="text-xs font-mono text-[var(--on-surface-variant)] uppercase">
-                    {selectedTaskData.completed ? 'Done' : selectedTaskData.status || 'Todo'}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setSelectedTaskShapeId(null)}
-                  className="btn-m3-icon w-7 h-7 cursor-pointer"
-                  title="Cerrar panel de detalles"
-                >
-                  <span className="material-symbols-outlined text-[18px]">close</span>
-                </button>
-              </div>
-
-              {/* Title Edit */}
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[11px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
-                  Título de la tarea
-                </label>
-                <textarea
-                  value={selectedTaskData.title}
-                  onChange={(e) => {
-                    const newTitle = e.target.value;
-                    handleUpdateTaskFromKanban(selectedTaskData.taskId, { title: newTitle });
-                  }}
-                  rows={2}
-                  className="w-full bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--outline)] rounded-xl p-2.5 text-xs font-sans focus:outline-none focus:border-[var(--primary)] resize-none"
-                />
-              </div>
-
-              {/* Status Normalizado: Backlog, Todo, In Progress, Review, Done (DESIGN.md Section 10) */}
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[11px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
-                  Estado
-                </label>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
-                  {[
-                    { id: 'backlog', label: 'Backlog', icon: 'inventory_2' },
-                    { id: 'todo', label: 'Todo', icon: 'pending_actions' },
-                    { id: 'in_progress', label: 'In Progress', icon: 'play_circle' },
-                    { id: 'review', label: 'Review', icon: 'rate_review' },
-                    { id: 'done', label: 'Done', icon: 'check_circle' },
-                  ].map((st) => {
-                    const isCurrent =
-                      st.id === 'done'
-                        ? selectedTaskData.completed
-                        : !selectedTaskData.completed && (selectedTaskData.status === st.id || (!selectedTaskData.status && st.id === 'todo'));
-
-                    return (
-                      <button
-                        key={st.id}
-                        type="button"
-                        onClick={() => {
-                          const isDone = st.id === 'done';
-                          handleUpdateTaskFromKanban(selectedTaskData.taskId, {
-                            status: st.id as TaskStatus,
-                            completed: isDone,
-                          });
-                        }}
-                        className={`py-1.5 px-2 rounded-xl border text-[11px] font-medium flex items-center justify-center gap-1 cursor-pointer transition-all ${
-                          isCurrent
-                            ? 'bg-[var(--primary)] text-[var(--on-primary)] border-[var(--primary)] font-semibold shadow-xs'
-                            : 'bg-[var(--surface)] text-[var(--on-surface-variant)] border-[var(--outline)] hover:text-[var(--on-surface)]'
-                        }`}
-                      >
-                        <span className="material-symbols-outlined text-[14px]">{st.icon}</span>
-                        <span className="truncate">{st.label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Priority Chips (DESIGN.md Section 11) */}
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[11px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
-                  Prioridad
-                </label>
-                <div className="grid grid-cols-4 gap-1.5">
-                  {(['P0', 'P1', 'P2', 'P3'] as TaskPriority[]).map((p) => {
-                    const isSelected = selectedTaskData.priority === p;
-                    return (
-                      <button
-                        key={p}
-                        type="button"
-                        onClick={() => {
-                          handleUpdateTaskFromKanban(selectedTaskData.taskId, { priority: p });
-                        }}
-                        className={`py-1.5 rounded-lg border text-xs font-mono font-semibold text-center cursor-pointer transition-all ${
-                          isSelected
-                            ? 'bg-[var(--primary)] text-[var(--on-primary)] border-[var(--primary)] shadow-xs'
-                            : 'bg-[var(--surface)] text-[var(--on-surface-variant)] border-[var(--outline)] hover:border-[var(--on-surface-variant)]'
-                        }`}
-                      >
-                        {p}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Tags and Subtasks info */}
-              {(selectedTaskData.tags?.length || selectedTaskData.subtasks) && (
-                <div className="flex flex-col gap-2 p-3 rounded-xl bg-[var(--surface)] border border-[var(--outline)]">
-                  {selectedTaskData.tags && selectedTaskData.tags.length > 0 && (
-                    <div className="flex flex-col gap-1">
-                      <span className="text-[10px] font-semibold text-[var(--on-surface-variant)] uppercase">
-                        Etiquetas
-                      </span>
-                      <div className="flex flex-wrap gap-1">
-                        {selectedTaskData.tags.map((tag: string) => (
-                          <span
-                            key={tag}
-                            className="px-2 py-0.5 rounded-md bg-[var(--surface-container)] border border-[var(--outline)] text-[11px] text-[var(--on-surface)] font-mono"
-                          >
-                            #{tag}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {selectedTaskData.subtasks && (
-                    <div className="flex flex-col gap-1">
-                      <span className="text-[10px] font-semibold text-[var(--on-surface-variant)] uppercase flex items-center justify-between">
-                        <span>Progreso subtareas</span>
-                        <span className="font-mono text-sky-400">
-                          {selectedTaskData.subtasks.completed}/{selectedTaskData.subtasks.total} (
-                          {Math.round(
-                            (selectedTaskData.subtasks.completed / selectedTaskData.subtasks.total) * 100
-                          )}
-                          %)
-                        </span>
-                      </span>
-                      <div className="w-full h-1.5 bg-[var(--surface-container)] rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-sky-400 rounded-full transition-all"
-                          style={{
-                            width: `${(selectedTaskData.subtasks.completed / selectedTaskData.subtasks.total) * 100}%`,
-                          }}
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Dependencies info */}
-              {selectedTaskData.blockedBy && (
-                <div className="p-3 rounded-xl bg-[var(--surface)] border border-[var(--outline)] flex flex-col gap-1 text-xs">
-                  <span className="text-[11px] font-semibold text-amber-400 flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[15px]">lock</span>
-                    Dependencias
-                  </span>
-                  <span className="text-[var(--on-surface-variant)] font-mono text-[11px]">
-                    Bloqueada por: #{selectedTaskData.blockedBy}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {/* Footer Actions */}
-            <div className="pt-4 border-t border-[var(--outline)] flex items-center justify-between gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  if (activeView !== 'canvas') {
-                    setActiveView('canvas');
-                  }
-                  setTimeout(() => {
-                    handleFocusTaskOnCanvas(selectedTaskData.taskId, selectedTaskData.title);
-                  }, 100);
-                }}
-                className="btn-m3-secondary flex-1 py-2 text-xs cursor-pointer"
-              >
-                <span className="material-symbols-outlined text-[16px]">center_focus_strong</span>
-                <span>Enfocar en Canvas</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  const dependents = findDependentTasks(markdownInput, selectedTaskData.taskId);
-                  setDeleteWarningState({
-                    shapeId: selectedTaskData.shapeId,
-                    taskId: selectedTaskData.taskId,
-                    title: selectedTaskData.title,
-                    dependents,
-                  });
-                }}
-                className="btn-m3-icon w-9 h-9 text-[var(--error)] hover:bg-rose-950/40 cursor-pointer"
-                title="Eliminar tarea"
-              >
-                <span className="material-symbols-outlined text-[18px]">delete</span>
-              </button>
-            </div>
-          </aside>
+        {/* Details Panel (DESIGN.md Section 16 & Fase 4: Modular Details & Multi-Selection Panel) */}
+        {(selectedTaskData || selectedTaskIdsOnCanvas.length > 1) && (
+          <TaskDetailsPanel
+            task={selectedTaskData}
+            selectedTaskIds={selectedTaskIdsOnCanvas}
+            allTasks={allParsedTasks}
+            allSections={existingSections}
+            onUpdateTask={handleUpdateTaskFromKanban}
+            onBatchUpdateTasks={handleBatchUpdateTasksFromKanban}
+            onDeleteTask={(taskId, title) => {
+              const dependents = findDependentTasks(markdownInput, taskId);
+              setDeleteWarningState({
+                shapeId: taskId,
+                taskId,
+                title,
+                dependents,
+              });
+            }}
+            onBatchDeleteTasks={handleBatchDeleteTasksFromKanban}
+            onSelectTask={(id) => {
+              setSelectedTaskShapeId(id);
+              if (id) {
+                const found = allParsedTasks.find(
+                  (t) => t.taskId.toLowerCase() === id.toLowerCase()
+                );
+                if (found) {
+                  handleFocusTaskOnCanvas(found.taskId, found.title);
+                }
+              }
+            }}
+            onFocusOnCanvas={(taskId, title) => {
+              if (activeView !== 'canvas') {
+                setActiveView('canvas');
+              }
+              setTimeout(() => {
+                handleFocusTaskOnCanvas(taskId, title);
+              }, 100);
+            }}
+            onClose={() => {
+              setSelectedTaskShapeId(null);
+              if (editor) {
+                editor.selectNone();
+              }
+              setSelectedTaskIdsOnCanvas([]);
+            }}
+          />
         )}
       </div>
 
@@ -2514,6 +2682,27 @@ export default function App() {
           </div>
         </div>
       )}
+
+      {/* Global Command Palette & Search Modal (Ctrl/Cmd + K) */}
+      <CommandPalette
+        isOpen={isCommandPaletteOpen}
+        onClose={() => setIsCommandPaletteOpen(false)}
+        tasks={allParsedTasks}
+        sections={existingSections}
+        tags={allAvailableTags}
+        recentTaskIds={recentTaskIds}
+        onSelectTask={handleSelectTaskFromPalette}
+        onSelectSection={(sec) => {
+          setTaskFilters((prev) => ({ ...prev, section: sec }));
+          if (activeView === 'canvas') {
+            handleFocusSectionOnCanvas(sec);
+          }
+        }}
+        onSelectTag={(tag) => {
+          setTaskFilters((prev) => ({ ...prev, tag }));
+        }}
+        actions={commandActions}
+      />
     </div>
   );
 }

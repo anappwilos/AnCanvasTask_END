@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { TaskPriority, TaskStatus } from '../shapes/TaskShapeUtil';
 import { scanTaskBlocks, TaskBlockInfo } from '../utils/markdownSync';
+import { TaskFilterState } from './FilterBar';
 
 export interface KanbanTask {
   taskId: string;
@@ -45,6 +46,8 @@ export interface KanbanBoardProps {
   onOpenNewTaskModalWithGroup?: (groupOrStatus: string) => void;
   searchQuery?: string;
   activeFilter?: 'all' | 'todo' | 'done' | 'critical' | 'blocked';
+  filters?: TaskFilterState;
+  onResetFilters?: () => void;
 }
 
 type GroupByMode = 'status' | 'section';
@@ -83,6 +86,8 @@ export function KanbanBoard({
   onOpenNewTaskModalWithGroup,
   searchQuery = '',
   activeFilter = 'all',
+  filters,
+  onResetFilters,
 }: KanbanBoardProps) {
   const [groupBy, setGroupBy] = useState<GroupByMode>('status');
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
@@ -133,27 +138,61 @@ export function KanbanBoard({
     return { allTasks: tasks, sections: secList };
   }, [markdown]);
 
-  // Filter tasks according to search & sidebar filter
+  // Filter & Sort tasks according to search, filters & sort state
   const filteredTasks = useMemo(() => {
-    return allTasks.filter((t) => {
+    let result = allTasks.filter((t) => {
       // 1. Search Query
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
         const matchesTitle = t.title.toLowerCase().includes(q);
         const matchesId = t.taskId.toLowerCase().includes(q);
+        const matchesGroup = t.groupTitle.toLowerCase().includes(q);
         const matchesTags = t.tags?.some((tag) => tag.toLowerCase().includes(q));
-        if (!matchesTitle && !matchesId && !matchesTags) return false;
+        if (!matchesTitle && !matchesId && !matchesGroup && !matchesTags) return false;
       }
 
-      // 2. Status Filter
-      if (activeFilter === 'todo' && t.completed) return false;
-      if (activeFilter === 'done' && !t.completed) return false;
-      if (activeFilter === 'critical' && t.priority !== 'P0') return false;
-      if (activeFilter === 'blocked' && (!t.blockedBy || t.completed)) return false;
+      // 2. Comprehensive Filters
+      if (filters) {
+        if (filters.status !== 'all') {
+          if (filters.status === 'done' && !t.completed) return false;
+          if (filters.status !== 'done' && (t.completed || t.status !== filters.status)) return false;
+        }
+        if (filters.priority !== 'all' && t.priority !== filters.priority) return false;
+        if (filters.section !== 'all' && t.groupTitle.toLowerCase() !== filters.section.toLowerCase()) return false;
+        if (filters.tag !== 'all' && (!t.tags || !t.tags.some((tag) => tag.toLowerCase() === filters.tag.toLowerCase()))) return false;
+        if (filters.onlyBlocked && (!t.blockedBy || t.completed)) return false;
+      } else {
+        // Fallback to activeFilter
+        if (activeFilter === 'todo' && t.completed) return false;
+        if (activeFilter === 'done' && !t.completed) return false;
+        if (activeFilter === 'critical' && t.priority !== 'P0') return false;
+        if (activeFilter === 'blocked' && (!t.blockedBy || t.completed)) return false;
+      }
 
       return true;
     });
-  }, [allTasks, searchQuery, activeFilter]);
+
+    // 3. Sorting
+    const sortBy = filters?.sortBy || 'default';
+    if (sortBy === 'priority') {
+      const pOrder: Record<TaskPriority, number> = { P0: 0, P1: 1, P2: 2, P3: 3 };
+      result = [...result].sort((a, b) => pOrder[a.priority] - pOrder[b.priority]);
+    } else if (sortBy === 'status') {
+      const sOrder: Record<TaskStatus, number> = {
+        backlog: 0,
+        todo: 1,
+        in_progress: 2,
+        review: 3,
+        blocked: 4,
+        done: 5,
+      };
+      result = [...result].sort((a, b) => (sOrder[a.status] ?? 99) - (sOrder[b.status] ?? 99));
+    } else if (sortBy === 'title') {
+      result = [...result].sort((a, b) => a.title.localeCompare(b.title));
+    }
+
+    return result;
+  }, [allTasks, searchQuery, activeFilter, filters]);
 
   // Multi-selection handlers
   const toggleSelectTask = (taskId: string, e: React.MouseEvent) => {
