@@ -31,6 +31,14 @@ import { CommandPalette, CommandPaletteAction, CommandPaletteTask } from './comp
 import { FilterBar, TaskFilterState } from './components/FilterBar';
 import { ToastContainer, ToastItem, ToastType } from './components/ToastSystem';
 import { QuickGuideModal } from './components/QuickGuideModal';
+import { SettingsModal } from './components/SettingsModal';
+import { ImportExportModal } from './components/ImportExportModal';
+import {
+  AppUserSettings,
+  loadUserSettings,
+  saveUserSettings,
+  recordRecentFile,
+} from './services/settingsService';
 import {
   addTaskToMarkdown,
   deleteTaskFromMarkdown,
@@ -74,12 +82,54 @@ interface DeleteWarningInfo {
 export default function App() {
   const [editor, setEditor] = useState<Editor | null>(null);
 
-  // Theme state (DESIGN.md Section 4)
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  // User Settings & Preferences State (DESIGN.md Section 4 & Fase 7)
+  const [userSettings, setUserSettings] = useState<AppUserSettings>(() => loadUserSettings());
+  const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
+  const [isImportExportOpen, setIsImportExportOpen] = useState<boolean>(false);
+
+  // Compute effective theme based on userSettings (including system preference)
+  const effectiveTheme = useMemo<'dark' | 'light'>(() => {
+    if (userSettings.theme === 'system') {
+      return typeof window !== 'undefined' &&
+        window.matchMedia &&
+        window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'dark'
+        : 'light';
+    }
+    return userSettings.theme;
+  }, [userSettings.theme]);
+
+  // Sync theme, density, high contrast, and reduced motion attributes with document element
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', effectiveTheme);
+  }, [effectiveTheme]);
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-density', userSettings.density);
+  }, [userSettings.density]);
+
+  useEffect(() => {
+    document.documentElement.setAttribute(
+      'data-contrast',
+      userSettings.accessibilityHighContrast ? 'high' : 'normal'
+    );
+  }, [userSettings.accessibilityHighContrast]);
+
+  useEffect(() => {
+    document.documentElement.setAttribute(
+      'data-reduced-motion',
+      userSettings.accessibilityReducedMotion ? 'true' : 'false'
+    );
+  }, [userSettings.accessibilityReducedMotion]);
+
+  const handleUpdateSettings = useCallback((newSettings: AppUserSettings) => {
+    setUserSettings(newSettings);
+    saveUserSettings(newSettings);
+  }, []);
 
   // Shell Layout State (DESIGN.md Section 3 & 16)
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
-  const [activeView, setActiveView] = useState<'canvas' | 'kanban'>('canvas');
+  const [activeView, setActiveView] = useState<'canvas' | 'kanban'>(() => userSettings.defaultView || 'canvas');
   const [selectedTaskShapeId, setSelectedTaskShapeId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [activeFilter, setActiveFilter] = useState<'all' | 'todo' | 'done' | 'critical' | 'blocked'>('all');
@@ -119,7 +169,7 @@ export default function App() {
     });
   }, []);
 
-  // Global Keyboard Shortcuts (Cmd/Ctrl + K, ?, Escape)
+  // Global Keyboard Shortcuts (Cmd/Ctrl + K, Cmd/Ctrl + ,, ?, Escape)
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
@@ -135,6 +185,12 @@ export default function App() {
         return;
       }
 
+      if ((e.metaKey || e.ctrlKey) && e.key === ',') {
+        e.preventDefault();
+        setIsSettingsOpen((prev) => !prev);
+        return;
+      }
+
       if (e.key === '?' && !isInput && !e.metaKey && !e.ctrlKey && !e.altKey) {
         e.preventDefault();
         setIsQuickGuideOpen((prev) => !prev);
@@ -147,7 +203,6 @@ export default function App() {
 
   // Modals state
   const [isNewTaskModalOpen, setIsNewTaskModalOpen] = useState<boolean>(false);
-  const [isImportModalOpen, setIsImportModalOpen] = useState<boolean>(false);
   const [isViewMarkdownOpen, setIsViewMarkdownOpen] = useState<boolean>(false);
   const [isSanityModalOpen, setIsSanityModalOpen] = useState<boolean>(false);
   const [isAutoLayoutConfirmOpen, setIsAutoLayoutConfirmOpen] = useState<boolean>(false);
@@ -236,10 +291,6 @@ export default function App() {
 
   const customShapeUtils = useMemo(() => [TaskGroupShapeUtil, TaskShapeUtil], []);
 
-  // Set theme attribute on html
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-  }, [theme]);
 
   // Validation Report computed reactively
   const validationReport = useMemo(
@@ -345,14 +396,14 @@ export default function App() {
   // Sync theme with editor user preferences
   useEffect(() => {
     if (editor) {
-      editor.user.updateUserPreferences({ colorScheme: theme === 'dark' ? 'dark' : 'light' });
+      editor.user.updateUserPreferences({ colorScheme: effectiveTheme === 'dark' ? 'dark' : 'light' });
     }
-  }, [editor, theme]);
+  }, [editor, effectiveTheme]);
 
   const handleMount = useCallback(
     (editorInstance: Editor) => {
       setEditor(editorInstance);
-      editorInstance.user.updateUserPreferences({ colorScheme: theme === 'dark' ? 'dark' : 'light' });
+      editorInstance.user.updateUserPreferences({ colorScheme: effectiveTheme === 'dark' ? 'dark' : 'light' });
 
       // Async initialization of visual state
       const initVisualState = async () => {
@@ -474,7 +525,7 @@ export default function App() {
         unsubscribe();
       };
     },
-    [theme, triggerDebouncedVisualSave]
+    [effectiveTheme, triggerDebouncedVisualSave]
   );
 
   const handleZoomToFit = useCallback(() => {
@@ -579,20 +630,82 @@ export default function App() {
             text,
             savedVisualState
           );
+          const recents = recordRecentFile(file.name, taskCount, groupCount);
+          setUserSettings((prev) => ({ ...prev, recentFiles: recents }));
+
           if (taskCount > 0 || groupCount > 0) {
             triggerDebouncedVisualSave(editor);
-            showToast(`"${file.name}" cargado (${taskCount} tareas en ${groupCount} secciones)`);
+            pushToast(`"${file.name}" cargado (${taskCount} tareas en ${groupCount} secciones)`, 'success');
           } else {
-            showToast(`"${file.name}" cargado, pero no contiene tareas válidas (- [ ] ...)`);
+            pushToast(`"${file.name}" cargado, pero no contiene tareas válidas (- [ ] ...)`, 'warning');
           }
         } else {
-          showToast(`"${file.name}" cargado en memoria`);
+          pushToast(`"${file.name}" cargado en memoria`, 'info');
         }
       } catch (err) {
-        showToast(`Error al leer "${file.name}"`);
+        pushToast(`Error al leer "${file.name}"`, 'error');
       }
     },
-    [editor, triggerDebouncedVisualSave]
+    [editor, triggerDebouncedVisualSave, pushToast]
+  );
+
+  const handleImportMarkdownFromModal = useCallback(
+    async (newText: string, fileName: string, mode: 'replace' | 'merge') => {
+      let finalMarkdown = newText;
+      if (mode === 'merge') {
+        finalMarkdown = markdownInput.trim() + '\n\n' + newText.trim() + '\n';
+      }
+
+      const cleanFileName = fileName || 'TASKS.md';
+      setCurrentFileName(cleanFileName);
+      setMarkdownInput(finalMarkdown);
+      setLastSavedMarkdown(finalMarkdown);
+
+      if (editor) {
+        const savedVisualState = await loadCanvasVisualState();
+        const { taskCount, groupCount } = loadTasksFromMarkdown(
+          editor,
+          finalMarkdown,
+          savedVisualState
+        );
+        const recents = recordRecentFile(cleanFileName, taskCount, groupCount);
+        setUserSettings((prev) => ({ ...prev, recentFiles: recents }));
+        triggerDebouncedVisualSave(editor);
+        pushToast(
+          mode === 'replace'
+            ? `Documento reemplazado (${taskCount} tareas en ${groupCount} secciones)`
+            : `Contenido combinado (${taskCount} tareas en ${groupCount} secciones)`,
+          'success'
+        );
+      }
+    },
+    [editor, markdownInput, triggerDebouncedVisualSave, pushToast]
+  );
+
+  const handleExportMarkdownFromModal = useCallback(
+    (content: string, fileName: string, format: 'md' | 'json') => {
+      try {
+        const mimeType =
+          format === 'json'
+            ? 'application/json;charset=utf-8'
+            : 'text/markdown;charset=utf-8';
+        const blob = new Blob([content], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.href = url;
+        downloadAnchor.download = fileName || (format === 'json' ? 'TASKS.json' : 'TASKS.md');
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        document.body.removeChild(downloadAnchor);
+        URL.revokeObjectURL(url);
+
+        setLastSavedMarkdown(markdownInput);
+        pushToast(`Archivo "${fileName}" descargado con éxito`, 'success');
+      } catch (err) {
+        pushToast('Error al exportar archivo', 'error');
+      }
+    },
+    [markdownInput, pushToast]
   );
 
   const handleOpenFilePicker = () => {
@@ -622,11 +735,11 @@ export default function App() {
       URL.revokeObjectURL(url);
 
       setLastSavedMarkdown(markdownInput);
-      showToast(`Archivo "${currentFileName || 'TASKS.md'}" guardado`);
+      pushToast(`Archivo "${currentFileName || 'TASKS.md'}" guardado`, 'success');
     } catch (err) {
-      showToast('Error al exportar archivo');
+      pushToast('Error al exportar archivo', 'error');
     }
-  }, [markdownInput, currentFileName]);
+  }, [markdownInput, currentFileName, pushToast]);
 
   // Drag & Drop Handlers
   const handleDragEnter = (e: React.DragEvent) => {
@@ -674,7 +787,7 @@ export default function App() {
       savedVisualState
     );
     if (taskCount > 0 || groupCount > 0) {
-      setIsImportModalOpen(false);
+      setIsImportExportOpen(false);
       setLastSavedMarkdown(markdownInput);
       showToast(`${taskCount} tareas aplicadas al canvas`);
       triggerDebouncedVisualSave(editor);
@@ -1155,12 +1268,35 @@ export default function App() {
       },
       {
         id: 'toggle-theme',
-        title: `Cambiar a tema ${theme === 'dark' ? 'claro' : 'oscuro'}`,
+        title: `Cambiar a tema ${effectiveTheme === 'dark' ? 'claro' : 'oscuro'}`,
         shortcut: 'T',
-        icon: theme === 'dark' ? 'light_mode' : 'dark_mode',
+        icon: effectiveTheme === 'dark' ? 'light_mode' : 'dark_mode',
         category: 'action',
         perform: () => {
-          setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+          handleUpdateSettings({
+            ...userSettings,
+            theme: effectiveTheme === 'dark' ? 'light' : 'dark',
+          });
+        },
+      },
+      {
+        id: 'open-settings',
+        title: 'Abrir configuración y preferencias',
+        shortcut: '⌘,',
+        icon: 'settings',
+        category: 'action',
+        perform: () => {
+          setIsSettingsOpen(true);
+        },
+      },
+      {
+        id: 'import-export-modal',
+        title: 'Importar / Exportar TASKS.md o JSON',
+        shortcut: '⌘E',
+        icon: 'sync_alt',
+        category: 'action',
+        perform: () => {
+          setIsImportExportOpen(true);
         },
       },
       {
@@ -1233,7 +1369,7 @@ export default function App() {
         },
       },
     ],
-    [theme, handleExportFile]
+    [effectiveTheme, handleExportFile]
   );
 
   // Filtered tasks count computed
@@ -1566,16 +1702,32 @@ export default function App() {
             <span className="material-symbols-outlined text-[18px]">help</span>
           </button>
 
+          {/* Settings Button (DESIGN.md Section 4 & Fase 7) */}
+          <button
+            type="button"
+            onClick={() => setIsSettingsOpen(true)}
+            className="btn-m3-icon shrink-0 cursor-pointer hidden sm:inline-flex"
+            title="Configuración y preferencias (⌘,)"
+            aria-label="Abrir configuración"
+          >
+            <span className="material-symbols-outlined text-[18px]">settings</span>
+          </button>
+
           {/* Theme Toggle (DESIGN.md Section 4: Light & Dark Theme) */}
           <button
             type="button"
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            onClick={() =>
+              handleUpdateSettings({
+                ...userSettings,
+                theme: effectiveTheme === 'dark' ? 'light' : 'dark',
+              })
+            }
             className="btn-m3-icon shrink-0 cursor-pointer hidden sm:inline-flex"
-            title={`Cambiar a tema ${theme === 'dark' ? 'claro' : 'oscuro'} (T)`}
+            title={`Cambiar a tema ${effectiveTheme === 'dark' ? 'claro' : 'oscuro'} (T)`}
             aria-label="Alternar tema"
           >
             <span className="material-symbols-outlined text-[18px]">
-              {theme === 'dark' ? 'light_mode' : 'dark_mode'}
+              {effectiveTheme === 'dark' ? 'light_mode' : 'dark_mode'}
             </span>
           </button>
 
@@ -1610,11 +1762,11 @@ export default function App() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setIsImportModalOpen(true)}
+                  onClick={() => setIsImportExportOpen(true)}
                   className="btn-m3-secondary px-2.5 py-1.5 text-xs cursor-pointer"
-                  title="Pegar Markdown"
+                  title="Importar o Exportar TASKS.md / JSON"
                 >
-                  <span className="material-symbols-outlined text-[16px]">content_paste</span>
+                  <span className="material-symbols-outlined text-[16px]">sync_alt</span>
                 </button>
               </div>
 
@@ -1783,6 +1935,24 @@ export default function App() {
 
             {/* Sidebar Footer: Tools & Persistence */}
             <div className="flex flex-col gap-1.5 pt-3 border-t border-[var(--outline)]">
+              <button
+                type="button"
+                onClick={() => setIsImportExportOpen(true)}
+                className="btn-m3-text w-full py-1.5 text-xs justify-start px-2 cursor-pointer text-emerald-400"
+              >
+                <span className="material-symbols-outlined text-[18px]">sync_alt</span>
+                <span>Importar / Exportar</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsSettingsOpen(true)}
+                className="btn-m3-text w-full py-1.5 text-xs justify-start px-2 cursor-pointer text-[var(--on-surface)]"
+              >
+                <span className="material-symbols-outlined text-[18px] text-[var(--primary)]">settings</span>
+                <span>Configuración</span>
+              </button>
+
               <button
                 type="button"
                 onClick={() => setIsViewMarkdownOpen(true)}
@@ -2291,13 +2461,43 @@ export default function App() {
                 type="button"
                 onClick={() => {
                   setIsMobileMenuOpen(false);
-                  setIsImportModalOpen(true);
+                  setIsImportExportOpen(true);
                 }}
                 className="w-full min-h-[44px] px-3 py-2.5 rounded-xl bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between text-[var(--on-surface)]"
               >
                 <div className="flex items-center gap-2.5">
-                  <span className="material-symbols-outlined text-[18px] text-[var(--primary)]">content_paste</span>
-                  <span>Pegar Markdown</span>
+                  <span className="material-symbols-outlined text-[18px] text-[var(--primary)]">sync_alt</span>
+                  <span>Importar / Exportar</span>
+                </div>
+                <span>➔</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  setIsSettingsOpen(true);
+                }}
+                className="w-full min-h-[44px] px-3 py-2.5 rounded-xl bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between text-[var(--on-surface)]"
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="material-symbols-outlined text-[18px] text-[var(--primary)]">settings</span>
+                  <span>Configuración & Preferencias</span>
+                </div>
+                <span>➔</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  setIsQuickGuideOpen(true);
+                }}
+                className="w-full min-h-[44px] px-3 py-2.5 rounded-xl bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between text-[var(--on-surface)]"
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="material-symbols-outlined text-[18px] text-[var(--primary)]">help</span>
+                  <span>Guía rápida y atajos</span>
                 </div>
                 <span>➔</span>
               </button>
@@ -2739,68 +2939,15 @@ export default function App() {
         </div>
       )}
 
-      {/* Modal: Importar / Pegar TASKS.md */}
-      {isImportModalOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-xs"
-          onClick={() => setIsImportModalOpen(false)}
-        >
-          <div
-            className="w-full sm:max-w-xl bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-3xl sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-slide-up sm:animate-none pb-safe sm:pb-0"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="modal-title"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="w-10 h-1.5 bg-[var(--outline)] rounded-full mx-auto my-2.5 sm:hidden" />
-
-            <div className="px-5 py-4 border-b border-[var(--outline)] flex items-center justify-between">
-              <div>
-                <h2 id="modal-title" className="text-sm font-semibold text-[var(--on-surface)] font-sans">
-                  Pegar TASKS.md
-                </h2>
-                <p className="text-xs text-[var(--on-surface-variant)] mt-0.5">
-                  <code className="text-[var(--primary)] font-bold">##</code> crea secciones y <code className="text-[var(--on-surface)]">- [ ]</code> crea tareas
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsImportModalOpen(false)}
-                className="btn-m3-icon w-8 h-8"
-              >
-                <span className="material-symbols-outlined text-[18px]">close</span>
-              </button>
-            </div>
-
-            <div className="p-4 sm:p-5 flex flex-col gap-3">
-              <textarea
-                value={markdownInput}
-                onChange={(e) => setMarkdownInput(e.target.value)}
-                rows={9}
-                className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded-2xl p-3 text-xs font-mono text-[var(--on-surface)] focus:outline-none resize-none leading-relaxed"
-                placeholder="Pega aquí tu contenido Markdown..."
-              />
-            </div>
-
-            <div className="px-5 py-3.5 bg-[var(--surface)] border-t border-[var(--outline)] flex items-center justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setIsImportModalOpen(false)}
-                className="btn-m3-text px-4 py-1.5 text-xs cursor-pointer"
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={handleApplyMarkdown}
-                className="btn-m3-primary px-5 py-1.5 text-xs cursor-pointer"
-              >
-                Aplicar al Canvas
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Modal: Importar / Exportar TASKS.md o JSON (DESIGN.md Section 12-18 & Fase 7) */}
+      <ImportExportModal
+        isOpen={isImportExportOpen}
+        onClose={() => setIsImportExportOpen(false)}
+        currentMarkdown={markdownInput}
+        currentFileName={currentFileName}
+        onImportMarkdown={handleImportMarkdownFromModal}
+        onExportMarkdown={handleExportMarkdownFromModal}
+      />
 
       {/* Modal: Configuración Sanity */}
       {isSanityModalOpen && (
@@ -2920,6 +3067,18 @@ export default function App() {
         isOpen={isQuickGuideOpen}
         onClose={() => setIsQuickGuideOpen(false)}
         onOpenSampleProject={handleLoadSampleProject}
+      />
+
+      {/* Settings & Preferences Modal (DESIGN.md Section 4 & Fase 7) */}
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        settings={userSettings}
+        onUpdateSettings={handleUpdateSettings}
+        onOpenSanityConfig={() => setIsSanityModalOpen(true)}
+        onOpenFilePicker={handleOpenFilePicker}
+        onResetCanvasLayout={handleResetLayout}
+        onShowToast={pushToast}
       />
     </div>
   );
