@@ -34,6 +34,7 @@ import { QuickGuideModal } from './components/QuickGuideModal';
 import { SettingsModal } from './components/SettingsModal';
 import { ImportExportModal } from './components/ImportExportModal';
 import { SanityConfigModal } from './components/SanityConfigModal';
+import { SanityStudio } from './components/SanityStudio';
 import {
   AppUserSettings,
   loadUserSettings,
@@ -130,7 +131,7 @@ export default function App() {
 
   // Shell Layout State (DESIGN.md Section 3 & 16)
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
-  const [activeView, setActiveView] = useState<'canvas' | 'kanban'>(() => userSettings.defaultView || 'canvas');
+  const [activeView, setActiveView] = useState<'canvas' | 'kanban' | 'studio'>(() => userSettings.defaultView || 'canvas');
   const [selectedTaskShapeId, setSelectedTaskShapeId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [activeFilter, setActiveFilter] = useState<'all' | 'todo' | 'done' | 'critical' | 'blocked'>('all');
@@ -1034,6 +1035,24 @@ export default function App() {
     [editor, triggerDebouncedVisualSave, pushToast]
   );
 
+  const handleImportTaskFromSanity = useCallback(
+    (taskDoc: any) => {
+      if (!taskDoc || !taskDoc.title) return;
+      const groupTitle = taskDoc.groupTitle || 'General';
+      const { updatedMarkdown, taskId } = addTaskToMarkdown(markdownInput, {
+        title: taskDoc.title,
+        priority: taskDoc.priority || 'P1',
+        groupTitle,
+        blockedBy: taskDoc.blockedBy,
+        tags: taskDoc.tags,
+        subtasks: taskDoc.subtasks,
+      });
+      setMarkdownInput(updatedMarkdown);
+      pushToast(`Tarea #${taskDoc.taskId || taskId} importada de Sanity al lienzo`, 'success');
+    },
+    [markdownInput, pushToast]
+  );
+
   const handleCopyMarkdown = () => {
     navigator.clipboard.writeText(markdownInput);
     setCopiedMarkdown(true);
@@ -1541,7 +1560,7 @@ export default function App() {
 
         {/* Center Section: View Switcher (Canvas / Kanban) & Quick Search bar */}
         <div className="flex items-center gap-2 sm:gap-4 flex-1 max-w-xs md:max-w-md lg:max-w-lg mx-2 justify-center">
-          {/* View Switcher Segmented Control (DESIGN.md Section 14 & 15) */}
+          {/* View Switcher Segmented Control (Canvas / Kanban / Studio) */}
           <div className="flex items-center bg-[var(--surface)] p-0.5 rounded-full border border-[var(--outline)] shadow-xs shrink-0">
             <button
               type="button"
@@ -1569,6 +1588,20 @@ export default function App() {
             >
               <span className="material-symbols-outlined text-[16px]">view_kanban</span>
               <span className="hidden sm:inline">Kanban</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveView('studio')}
+              className={`px-2.5 sm:px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer ${
+                activeView === 'studio'
+                  ? 'bg-[var(--primary)] text-[var(--on-primary)] shadow-xs'
+                  : 'text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]'
+              }`}
+              title="Sanity Studio: Explorar y editar documentos _type: 'task'"
+            >
+              <span className="material-symbols-outlined text-[16px] text-rose-400">cloud_sync</span>
+              <span className="hidden sm:inline">Studio</span>
             </button>
           </div>
 
@@ -1959,6 +1992,15 @@ export default function App() {
 
               <button
                 type="button"
+                onClick={() => setActiveView('studio')}
+                className="btn-m3-text w-full py-1.5 text-xs justify-start px-2 cursor-pointer text-rose-400"
+              >
+                <span className="material-symbols-outlined text-[18px]">cloud_sync</span>
+                <span>Abrir Sanity Studio</span>
+              </button>
+
+              <button
+                type="button"
                 onClick={() => setIsSanityModalOpen(true)}
                 className="btn-m3-text w-full py-1.5 text-xs justify-start px-2 cursor-pointer"
               >
@@ -2198,7 +2240,7 @@ export default function App() {
                   </div>
                 )}
               </>
-            ) : (
+            ) : activeView === 'kanban' ? (
               <KanbanBoard
                 markdown={markdownInput}
                 isLoading={isLoadingDocument}
@@ -2238,6 +2280,12 @@ export default function App() {
                   });
                   setActiveFilter('all');
                 }}
+              />
+            ) : (
+              <SanityStudio
+                onOpenSanityConfig={() => setIsSanityModalOpen(true)}
+                onImportTaskToMarkdown={handleImportTaskFromSanity}
+                onShowToast={pushToast}
               />
             )}
 

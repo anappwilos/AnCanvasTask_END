@@ -48,7 +48,7 @@ const LOCAL_STORAGE_KEY_VISUAL_STATE = 'antaskcanvas_visual_state_v1';
 const LOCAL_STORAGE_KEY_SANITY_CONFIG = 'antaskcanvas_sanity_config';
 
 const DEFAULT_SANITY_CONFIG: SanityConfig = {
-  projectId: import.meta.env.VITE_SANITY_PROJECT_ID || '',
+  projectId: import.meta.env.VITE_SANITY_PROJECT_ID || 'or19faat',
   dataset: import.meta.env.VITE_SANITY_DATASET || 'production',
   apiVersion: '2024-03-01',
   token: import.meta.env.VITE_SANITY_API_TOKEN || '',
@@ -490,6 +490,65 @@ export async function fetchSanityDocumentsList(
   } catch (err) {
     console.warn('Error fetching Sanity documents list:', err);
     return [];
+  }
+}
+
+/**
+ * Updates or creates any document in Sanity.
+ */
+export async function saveSanityDocument(
+  doc: any,
+  configOverride?: Partial<SanityConfig>
+): Promise<{ ok: boolean; document?: any; message: string }> {
+  const config = { ...getSanityConfig(), ...configOverride };
+  if (!config.projectId || !config.dataset || !config.token) {
+    return { ok: false, message: 'Se requiere API Token con permisos de Editor para guardar en Sanity' };
+  }
+
+  try {
+    const client = createClient({
+      projectId: config.projectId,
+      dataset: config.dataset,
+      apiVersion: config.apiVersion || '2024-03-01',
+      token: config.token,
+      useCdn: false,
+    });
+
+    const docToSave = {
+      ...doc,
+      updatedAt: new Date().toISOString(),
+    };
+    const result = await client.createOrReplace(docToSave);
+    return { ok: true, document: result, message: 'Documento publicado con éxito en Sanity' };
+  } catch (err: any) {
+    return { ok: false, message: err?.message || 'Error al guardar documento en Sanity' };
+  }
+}
+
+/**
+ * Fetches single document by ID from Sanity.
+ */
+export async function fetchSanityDocumentById(
+  id: string,
+  configOverride?: Partial<SanityConfig>
+): Promise<any | null> {
+  const config = { ...getSanityConfig(), ...configOverride };
+  if (!config.projectId || !config.dataset) return null;
+
+  try {
+    const client = createClient({
+      projectId: config.projectId,
+      dataset: config.dataset,
+      apiVersion: config.apiVersion || '2024-03-01',
+      token: config.token || undefined,
+      useCdn: false,
+    });
+
+    const doc = await client.fetch(`*[_id == $id][0]`, { id });
+    return doc || null;
+  } catch (err) {
+    console.warn('Error fetching document by ID:', err);
+    return null;
   }
 }
 

@@ -633,6 +633,9 @@ export function addTaskToMarkdown(
     priority?: TaskPriority;
     groupTitle: string;
     customId?: string;
+    blockedBy?: string;
+    tags?: string[];
+    subtasks?: Array<{ title: string; completed?: boolean }>;
   }
 ): { updatedMarkdown: string; taskId: string } {
   const cleanTitle = payload.title.trim();
@@ -643,11 +646,27 @@ export function addTaskToMarkdown(
   const lines = markdown.split(/\r?\n/);
   const { groupHeadings } = scanTaskBlocks(markdown);
 
-  const taskBlockText = [
+  const taskLines: string[] = [
     `- [ ] ${cleanTitle}`,
     `  - ID: ${finalId}`,
     `  - Priority: ${priority}`,
-  ].join('\n');
+  ];
+
+  if (payload.blockedBy && payload.blockedBy.trim()) {
+    taskLines.push(`  - Blocked by: ${payload.blockedBy.trim()}`);
+  }
+
+  if (payload.tags && payload.tags.length > 0) {
+    taskLines.push(`  - Tags: ${payload.tags.join(', ')}`);
+  }
+
+  if (payload.subtasks && payload.subtasks.length > 0) {
+    for (const sub of payload.subtasks) {
+      taskLines.push(`  - [${sub.completed ? 'x' : ' '}] ${sub.title}`);
+    }
+  }
+
+  const taskBlockText = taskLines.join('\n');
 
   // Check if target group heading exists
   const existingGroupHeading = groupHeadings.find(
