@@ -145,14 +145,14 @@ function TaskCardComponent({
       }}
     >
       <div
-        className={`w-full h-full rounded-2xl bg-[var(--surface-container)] border transition-all duration-150 select-none flex flex-col justify-between p-3 shadow-md relative ${
+        className={`w-full h-full rounded-xl bg-[var(--surface-container)] border transition-colors duration-150 select-none flex flex-col justify-between p-3 relative ${
           isSelected
-            ? 'border-[var(--primary)] ring-2 ring-[var(--primary)] ring-offset-1 ring-offset-[var(--surface)] shadow-[0_0_14px_rgba(56,189,248,0.25)]'
+            ? 'border-[var(--primary)] ring-2 ring-[var(--primary)]/40 bg-[var(--surface-container-high)] shadow-xs'
             : isDuplicateId
-            ? 'border-rose-600/80 shadow-[0_0_12px_rgba(244,63,94,0.25)]'
+            ? 'border-rose-600/80 bg-rose-950/10'
             : completed
             ? 'border-[var(--outline)] bg-[var(--surface)]/90 opacity-80'
-            : 'border-[var(--outline)] hover:border-[var(--on-surface-variant)] shadow-black/20'
+            : 'border-[var(--outline)] hover:border-[var(--on-surface-variant)] shadow-xs'
         }`}
       >
         {/* Top Row: Checkbox + Title / Inline Edit + Context Menu + Priority chip */}

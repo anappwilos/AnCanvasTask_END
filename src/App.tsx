@@ -1513,7 +1513,7 @@ export default function App() {
           </button>
 
           <div className="flex items-center gap-2">
-            <div className="w-2.5 h-2.5 rounded-full bg-[var(--primary)] shadow-[0_0_8px_rgba(56,189,248,0.5)]" />
+            <div className="w-2 h-2 rounded-full bg-[var(--primary)]" />
             <h1 className="text-sm font-semibold tracking-tight text-[var(--on-surface)] font-sans hidden md:inline-block">
               AnTask<span className="text-[var(--primary)]">Canvas</span>
             </h1>
