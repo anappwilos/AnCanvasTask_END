@@ -2388,7 +2388,7 @@ export default function App() {
       {/* Mobile Drawer Menu */}
       {isMobileMenuOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 backdrop-blur-xs sm:hidden"
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 sm:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         >
           <div
@@ -2541,7 +2541,7 @@ export default function App() {
       {/* Modal: Panel de Problemas */}
       {isProblemsModalOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-xs"
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70"
           onClick={() => setIsProblemsModalOpen(false)}
         >
           <div
@@ -2630,7 +2630,7 @@ export default function App() {
       {/* Modal: Confirmación Auto Organizar */}
       {isAutoLayoutConfirmOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-xs"
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70"
           onClick={() => setIsAutoLayoutConfirmOpen(false)}
         >
           <div
@@ -2688,7 +2688,7 @@ export default function App() {
       {/* Modal: Nueva Tarea */}
       {isNewTaskModalOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-xs"
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70"
           onClick={() => setIsNewTaskModalOpen(false)}
         >
           <div
@@ -2811,7 +2811,7 @@ export default function App() {
       {/* Modal: Advertencia / Confirmación de Eliminación */}
       {deleteWarningState && (
         <div
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-xs"
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70"
           onClick={() => setDeleteWarningState(null)}
         >
           <div
@@ -2879,7 +2879,7 @@ export default function App() {
       {/* Modal: Ver TASKS.md Sincronizado */}
       {isViewMarkdownOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-xs"
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70"
           onClick={() => setIsViewMarkdownOpen(false)}
         >
           <div
@@ -2952,7 +2952,7 @@ export default function App() {
       {/* Modal: Configuración Sanity */}
       {isSanityModalOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-xs"
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70"
           onClick={() => setIsSanityModalOpen(false)}
         >
           <div

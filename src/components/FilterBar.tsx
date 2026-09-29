@@ -92,7 +92,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   ];
 
   return (
-    <div className="w-full bg-[var(--surface-container)]/80 backdrop-blur-xs border-b border-[var(--outline)] px-3 sm:px-4 py-2 flex flex-col gap-2 select-none shrink-0 z-10">
+    <div className="w-full bg-[var(--surface-container)] border-b border-[var(--outline)] px-3 sm:px-4 py-2 flex flex-col gap-2 select-none shrink-0 z-10">
       {/* Top row of FilterBar: Filter popover toggle + Search trigger + Quick view summary */}
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-2 flex-wrap">
