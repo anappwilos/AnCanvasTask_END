@@ -100,6 +100,9 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           <div className="relative" ref={popoverRef}>
             <button
               type="button"
+              aria-expanded={isFilterPopoverOpen}
+              aria-haspopup="true"
+              aria-label="Abrir panel de filtros y ordenación"
               onClick={() => setIsFilterPopoverOpen(!isFilterPopoverOpen)}
               className={`btn-m3-secondary px-3 py-1.5 text-xs font-medium cursor-pointer ${
                 activeFiltersCount > (searchQuery ? 1 : 0)

@@ -21,6 +21,7 @@ export interface MinimalTaskInfo {
   completed?: boolean;
   priority?: TaskPriority;
   status?: TaskStatus;
+  blockedBy?: string;
 }
 
 interface TaskDetailsPanelProps {
@@ -93,6 +94,25 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
     }
   }, [task?.taskId, task?.title]);
 
+  // Global escape handler to close panel when not editing inputs
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        const active = document.activeElement as HTMLElement | null;
+        const isInput =
+          active &&
+          (active.tagName === 'INPUT' ||
+            active.tagName === 'TEXTAREA' ||
+            active.isContentEditable);
+        if (!isInput && !isEditingTitle && !isAddingTag) {
+          onClose();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isEditingTitle, isAddingTag, onClose]);
+
   // Current task index and navigation
   const currentTaskIndex = useMemo(() => {
     if (!task) return -1;
@@ -113,7 +133,9 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
     const normalizedId = task.taskId.toLowerCase();
     return allTasks.filter((t) => {
       if (t.taskId.toLowerCase() === normalizedId) return false;
-      return false; // will be resolved dynamically if needed
+      if (!t.blockedBy) return false;
+      const blockers = t.blockedBy.split(',').map((b) => b.trim().toLowerCase());
+      return blockers.includes(normalizedId);
     });
   }, [allTasks, task]);
 
@@ -812,6 +834,38 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
               </select>
             </div>
           </div>
+
+          {/* Reverse dependencies: Tasks blocked by this task */}
+          {blockingTasks.length > 0 && (
+            <div className="flex flex-col gap-1 pt-2 border-t border-[var(--outline)]">
+              <span className="text-[10px] text-amber-400 font-medium flex items-center gap-1">
+                <span>⚠</span>
+                <span>Bloquea a ({blockingTasks.length} tareas dependientes):</span>
+              </span>
+              <div className="flex flex-col gap-1">
+                {blockingTasks.map((bTask) => (
+                  <div
+                    key={bTask.taskId}
+                    className="flex items-center justify-between p-1.5 rounded-lg bg-[var(--surface-container)] border border-[var(--outline)] text-xs"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => onSelectTask(bTask.taskId)}
+                      className="flex items-center gap-1.5 text-left text-[var(--on-surface)] hover:text-[var(--primary)] truncate flex-1 cursor-pointer"
+                      title="Clic para inspeccionar tarea bloqueada"
+                    >
+                      <span className="font-mono text-[11px] text-amber-400 shrink-0">
+                        #{bTask.taskId}
+                      </span>
+                      <span className="truncate text-[11px]">
+                        {bTask.title}
+                      </span>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

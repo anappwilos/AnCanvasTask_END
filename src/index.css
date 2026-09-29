@@ -106,6 +106,22 @@ body,
   -webkit-font-smoothing: antialiased;
 }
 
+/* Accessible Focus Indicators (WEB_GUIDELINES.md Section 3 & 5) */
+:focus-visible {
+  outline: 2px solid var(--primary) !important;
+  outline-offset: 2px !important;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--primary) !important;
+  outline-offset: 2px !important;
+}
+
 /* Material Design 3 Button Styles */
 .btn-m3-primary {
   background-color: var(--primary);

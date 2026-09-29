@@ -512,8 +512,19 @@ export function KanbanBoard({
                           <div
                             key={task.taskId}
                             draggable
+                            tabIndex={0}
+                            role="button"
+                            aria-label={`Tarea ${task.title}, prioridad ${task.priority}, estado ${task.status}`}
                             onDragStart={(e) => handleDragStart(e, task.taskId)}
                             onClick={() => onSelectTask(task.taskId)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                if (e.target === e.currentTarget) {
+                                  e.preventDefault();
+                                  onSelectTask(task.taskId);
+                                }
+                              }
+                            }}
                             className={`rounded-xl bg-[var(--surface)] border p-3 flex flex-col gap-2 cursor-grab active:cursor-grabbing transition-all duration-150 relative select-none shadow-xs group hover:border-[var(--on-surface-variant)] ${
                               isSelected
                                 ? 'border-[var(--primary)] ring-2 ring-[var(--primary)]/30 bg-[var(--surface-container-high)]'
@@ -791,8 +802,19 @@ export function KanbanBoard({
                           <div
                             key={task.taskId}
                             draggable
+                            tabIndex={0}
+                            role="button"
+                            aria-label={`Tarea ${task.title}, sección ${sec}, prioridad ${task.priority}`}
                             onDragStart={(e) => handleDragStart(e, task.taskId)}
                             onClick={() => onSelectTask(task.taskId)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                if (e.target === e.currentTarget) {
+                                  e.preventDefault();
+                                  onSelectTask(task.taskId);
+                                }
+                              }
+                            }}
                             className={`rounded-xl bg-[var(--surface)] border p-3 flex flex-col gap-2 cursor-grab active:cursor-grabbing transition-all duration-150 relative select-none shadow-xs group hover:border-[var(--on-surface-variant)] ${
                               isSelected
                                 ? 'border-[var(--primary)] ring-2 ring-[var(--primary)]/30 bg-[var(--surface-container-high)]'
