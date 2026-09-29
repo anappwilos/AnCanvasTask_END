@@ -10,7 +10,7 @@ import {
   getSanityConfig,
   loadCanvasVisualState,
   saveCanvasVisualState,
-  saveSanityConfig,
+  SanityConfig,
 } from './services/sanityService';
 import {
   ITaskGroupShape,
@@ -33,6 +33,7 @@ import { ToastContainer, ToastItem, ToastType } from './components/ToastSystem';
 import { QuickGuideModal } from './components/QuickGuideModal';
 import { SettingsModal } from './components/SettingsModal';
 import { ImportExportModal } from './components/ImportExportModal';
+import { SanityConfigModal } from './components/SanityConfigModal';
 import {
   AppUserSettings,
   loadUserSettings,
@@ -280,11 +281,6 @@ export default function App() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const dragCounterRef = useRef<number>(0);
 
-  // Sanity settings form state
-  const [sanityProjectId, setSanityProjectId] = useState<string>('');
-  const [sanityDataset, setSanityDataset] = useState<string>('production');
-  const [sanityToken, setSanityToken] = useState<string>('');
-
   const debouncedSaveRef = useRef<NodeJS.Timeout | null>(null);
   const markdownRef = useRef<string>(markdownInput);
   markdownRef.current = markdownInput;
@@ -297,14 +293,6 @@ export default function App() {
     () => validateMarkdownDocument(markdownInput),
     [markdownInput]
   );
-
-  // Load initial Sanity configuration
-  useEffect(() => {
-    const config = getSanityConfig();
-    setSanityProjectId(config.projectId || '');
-    setSanityDataset(config.dataset || 'production');
-    setSanityToken(config.token || '');
-  }, []);
 
   const parsedGroups = useMemo(() => {
     return parseTasksMarkdown(markdownInput);
@@ -1025,19 +1013,26 @@ export default function App() {
     }, 100);
   };
 
-  const handleSaveSanityConfig = (e: React.FormEvent) => {
-    e.preventDefault();
-    saveSanityConfig({
-      projectId: sanityProjectId.trim(),
-      dataset: sanityDataset.trim(),
-      token: sanityToken.trim(),
-    });
-    setIsSanityModalOpen(false);
-    showToast('Configuración de Sanity guardada');
-    if (editor) {
-      triggerDebouncedVisualSave(editor);
-    }
-  };
+  const handleSanityConfigSaved = useCallback(
+    async (newConfig: SanityConfig) => {
+      if (newConfig.projectId && newConfig.dataset) {
+        setSyncStatus('loading');
+        if (editor) {
+          const remoteState = await loadCanvasVisualState();
+          if (remoteState) {
+            seedMockTasks(editor, remoteState);
+            pushToast('Estado visual cargado desde Sanity', 'success');
+          } else {
+            triggerDebouncedVisualSave(editor);
+          }
+        }
+        setSyncStatus(newConfig.token ? 'synced' : 'local');
+      } else {
+        setSyncStatus('local');
+      }
+    },
+    [editor, triggerDebouncedVisualSave, pushToast]
+  );
 
   const handleCopyMarkdown = () => {
     navigator.clipboard.writeText(markdownInput);
@@ -2949,97 +2944,13 @@ export default function App() {
         onExportMarkdown={handleExportMarkdownFromModal}
       />
 
-      {/* Modal: Configuración Sanity */}
-      {isSanityModalOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70"
-          onClick={() => setIsSanityModalOpen(false)}
-        >
-          <div
-            className="w-full sm:max-w-md bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-lg sm:rounded-lg shadow-xl flex flex-col overflow-hidden animate-slide-up sm:animate-none pb-safe sm:pb-0"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="sanity-modal-title"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="w-10 h-1 bg-[var(--outline)] rounded mx-auto my-2 sm:hidden" />
-
-            <div className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
-              <div>
-                <h2 id="sanity-modal-title" className="text-sm font-semibold text-[var(--on-surface)] font-sans">
-                  Persistencia Visual (Sanity)
-                </h2>
-                <p className="text-xs text-[var(--on-surface-variant)] mt-0.5">
-                  Guarda coordenadas espaciales <code className="text-[var(--on-surface)]">(taskId, x, y, w, h)</code>
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsSanityModalOpen(false)}
-                className="btn-m3-icon w-7 h-7 cursor-pointer"
-              >
-                <span className="material-symbols-outlined text-[16px]">close</span>
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveSanityConfig} className="p-4 flex flex-col gap-3">
-              <div className="p-2.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-xs text-[var(--on-surface-variant)] leading-relaxed">
-                <span className="text-[var(--primary)] font-medium">Single Source of Truth: </span>
-                TASKS.md define títulos, estados y prioridades. Sanity guarda la posición visual en el canvas.
-              </div>
-
-              <div className="flex flex-col gap-1">
-                <label className="text-xs font-medium text-[var(--on-surface)]">Project ID</label>
-                <input
-                  type="text"
-                  value={sanityProjectId}
-                  onChange={(e) => setSanityProjectId(e.target.value)}
-                  placeholder="ej. 8k9abcde"
-                  className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-2.5 py-1.5 text-xs font-mono text-[var(--on-surface)] focus:outline-none"
-                />
-              </div>
-
-              <div className="flex flex-col gap-1">
-                <label className="text-xs font-medium text-[var(--on-surface)]">Dataset</label>
-                <input
-                  type="text"
-                  value={sanityDataset}
-                  onChange={(e) => setSanityDataset(e.target.value)}
-                  placeholder="production"
-                  className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-2.5 py-1.5 text-xs font-mono text-[var(--on-surface)] focus:outline-none"
-                />
-              </div>
-
-              <div className="flex flex-col gap-1">
-                <label className="text-xs font-medium text-[var(--on-surface)]">API Token (Opcional)</label>
-                <input
-                  type="password"
-                  value={sanityToken}
-                  onChange={(e) => setSanityToken(e.target.value)}
-                  placeholder="sk..."
-                  className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-2.5 py-1.5 text-xs font-mono text-[var(--on-surface)] focus:outline-none"
-                />
-              </div>
-
-              <div className="pt-2.5 flex items-center justify-end gap-2 border-t border-[var(--outline)]">
-                <button
-                  type="button"
-                  onClick={() => setIsSanityModalOpen(false)}
-                  className="btn-m3-text px-3 py-1 text-xs cursor-pointer"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="btn-m3-primary px-4 py-1 text-xs cursor-pointer shadow-sm"
-                >
-                  Guardar
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      {/* Modal: Configuración Sanity con prueba de conexión */}
+      <SanityConfigModal
+        isOpen={isSanityModalOpen}
+        onClose={() => setIsSanityModalOpen(false)}
+        onConfigSaved={handleSanityConfigSaved}
+        onShowToast={pushToast}
+      />
 
       {/* Global Command Palette & Search Modal (Ctrl/Cmd + K) */}
       <CommandPalette

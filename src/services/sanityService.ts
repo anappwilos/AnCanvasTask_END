@@ -35,6 +35,15 @@ export interface SanityConfig {
   useCdn: boolean;
 }
 
+export interface SanityConnectionTestResult {
+  ok: boolean;
+  message: string;
+  details?: string;
+  latencyMs?: number;
+  mode: 'authenticated' | 'public_read' | 'failed';
+  existingDocsCount?: number;
+}
+
 const LOCAL_STORAGE_KEY_VISUAL_STATE = 'antaskcanvas_visual_state_v1';
 const LOCAL_STORAGE_KEY_SANITY_CONFIG = 'antaskcanvas_sanity_config';
 
@@ -67,6 +76,110 @@ export function saveSanityConfig(config: Partial<SanityConfig>) {
   } catch (e) {
     console.warn('Could not save Sanity config', e);
     return DEFAULT_SANITY_CONFIG;
+  }
+}
+
+export function clearSanityConfig() {
+  try {
+    localStorage.removeItem(LOCAL_STORAGE_KEY_SANITY_CONFIG);
+  } catch (e) {
+    console.warn('Could not clear Sanity config', e);
+  }
+  return DEFAULT_SANITY_CONFIG;
+}
+
+/**
+ * Tests connection with Sanity using provided credentials.
+ */
+export async function testSanityConnection(config: {
+  projectId: string;
+  dataset: string;
+  apiVersion?: string;
+  token?: string;
+}): Promise<SanityConnectionTestResult> {
+  const pId = config.projectId?.trim();
+  const ds = config.dataset?.trim();
+  const token = config.token?.trim();
+  const apiVersion = config.apiVersion || '2024-03-01';
+
+  if (!pId) {
+    return {
+      ok: false,
+      mode: 'failed',
+      message: 'Falta el Project ID de Sanity',
+      details: 'Introduce el identificador del proyecto (disponible en manage.sanity.io).',
+    };
+  }
+
+  if (!ds) {
+    return {
+      ok: false,
+      mode: 'failed',
+      message: 'Falta el Dataset de Sanity',
+      details: 'Introduce el nombre del dataset (normalmente "production").',
+    };
+  }
+
+  const startTime = Date.now();
+  try {
+    const client = createClient({
+      projectId: pId,
+      dataset: ds,
+      apiVersion,
+      token: token || undefined,
+      useCdn: false,
+    });
+
+    const query = `count(*[_type == "canvasVisualState"])`;
+    const count = await client.fetch<number>(query);
+    const latencyMs = Date.now() - startTime;
+
+    if (token) {
+      return {
+        ok: true,
+        mode: 'authenticated',
+        message: 'Conexión exitosa con Sanity (Lectura y Escritura)',
+        details: `Dataset "${ds}" alcanzado correctamente en ${latencyMs}ms. Documentos de canvas encontrados: ${count}.`,
+        latencyMs,
+        existingDocsCount: count,
+      };
+    } else {
+      return {
+        ok: true,
+        mode: 'public_read',
+        message: 'Conexión exitosa (Modo solo lectura pública)',
+        details: `Dataset "${ds}" alcanzado en ${latencyMs}ms. Para sincronizar y guardar posiciones en la nube, añade un API Token con permisos de Editor.`,
+        latencyMs,
+        existingDocsCount: count,
+      };
+    }
+  } catch (err: any) {
+    const latencyMs = Date.now() - startTime;
+    const errorMsg = err?.message || String(err);
+    const statusCode = err?.statusCode || err?.response?.statusCode;
+
+    let userFriendlyMessage = 'No se pudo conectar con Sanity';
+    let details = errorMsg;
+
+    if (statusCode === 401 || statusCode === 403 || errorMsg.includes('Unauthorized') || errorMsg.includes('Forbidden')) {
+      userFriendlyMessage = 'Error de autenticación o permisos (401/403)';
+      details = 'El API Token no es válido o no tiene los permisos necesarios sobre este dataset. Verifica el token en manage.sanity.io.';
+    } else if (statusCode === 404 || errorMsg.includes('not found') || errorMsg.includes('Dataset not found')) {
+      userFriendlyMessage = 'Proyecto o Dataset no encontrado (404)';
+      details = `Verifica que el Project ID "${pId}" y el Dataset "${ds}" existan y estén bien escritos.`;
+    } else if (errorMsg.includes('Failed to fetch') || errorMsg.includes('NetworkError') || errorMsg.includes('CORS')) {
+      const currentOrigin = typeof window !== 'undefined' ? window.location.origin : 'esta URL';
+      userFriendlyMessage = 'Error de red o política CORS';
+      details = `Asegúrate de agregar ${currentOrigin} en la configuración de CORS en manage.sanity.io (Project -> API -> CORS Origins -> Add CORS origin).`;
+    }
+
+    return {
+      ok: false,
+      mode: 'failed',
+      message: userFriendlyMessage,
+      details,
+      latencyMs,
+    };
   }
 }
 
