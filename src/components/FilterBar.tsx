@@ -124,7 +124,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             {isFilterPopoverOpen && (
               <div
                 onPointerDown={(e) => e.stopPropagation()}
-                className="absolute left-0 top-10 z-40 w-72 sm:w-80 bg-[var(--surface-container-high)] border border-[var(--outline)] rounded-2xl shadow-2xl p-3 flex flex-col gap-3 text-xs animate-slide-up"
+                className="absolute left-0 top-9 z-40 w-72 sm:w-80 bg-[var(--surface-container-high)] border border-[var(--outline)] rounded-lg shadow-lg p-3 flex flex-col gap-2.5 text-xs"
               >
                 <div className="flex items-center justify-between border-b border-[var(--outline)] pb-2">
                   <span className="font-semibold text-[var(--on-surface)] flex items-center gap-1.5">
@@ -150,7 +150,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                     onChange={(e) =>
                       onFilterChange({ ...filters, status: e.target.value as any })
                     }
-                    className="w-full bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--outline)] rounded-xl px-2.5 py-1.5 text-xs font-sans focus:outline-none focus:border-[var(--primary)] cursor-pointer"
+                    className="w-full bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--outline)] rounded px-2.5 py-1 text-xs font-sans focus:outline-none focus:border-[var(--primary)] cursor-pointer"
                   >
                     {statusOptions.map((opt) => (
                       <option key={opt.id} value={opt.id}>
@@ -170,7 +170,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                     onChange={(e) =>
                       onFilterChange({ ...filters, priority: e.target.value as any })
                     }
-                    className="w-full bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--outline)] rounded-xl px-2.5 py-1.5 text-xs font-sans focus:outline-none focus:border-[var(--primary)] cursor-pointer"
+                    className="w-full bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--outline)] rounded px-2.5 py-1 text-xs font-sans focus:outline-none focus:border-[var(--primary)] cursor-pointer"
                   >
                     {priorityOptions.map((opt) => (
                       <option key={opt.id} value={opt.id}>
@@ -191,7 +191,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                       onChange={(e) =>
                         onFilterChange({ ...filters, section: e.target.value })
                       }
-                      className="w-full bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--outline)] rounded-xl px-2.5 py-1.5 text-xs font-sans focus:outline-none focus:border-[var(--primary)] cursor-pointer"
+                      className="w-full bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--outline)] rounded px-2.5 py-1 text-xs font-sans focus:outline-none focus:border-[var(--primary)] cursor-pointer"
                     >
                       <option value="all">Todas las secciones</option>
                       {availableSections.map((sec) => (
@@ -214,7 +214,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                       onChange={(e) =>
                         onFilterChange({ ...filters, tag: e.target.value })
                       }
-                      className="w-full bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--outline)] rounded-xl px-2.5 py-1.5 text-xs font-sans focus:outline-none focus:border-[var(--primary)] cursor-pointer"
+                      className="w-full bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--outline)] rounded px-2.5 py-1 text-xs font-sans focus:outline-none focus:border-[var(--primary)] cursor-pointer"
                     >
                       <option value="all">Todas las etiquetas</option>
                       {availableTags.map((tag) => (
@@ -227,14 +227,14 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                 )}
 
                 {/* 5. Solo bloqueadas */}
-                <label className="flex items-center gap-2 cursor-pointer pt-1">
+                <label className="flex items-center gap-2 cursor-pointer pt-0.5">
                   <input
                     type="checkbox"
                     checked={filters.onlyBlocked}
                     onChange={(e) =>
                       onFilterChange({ ...filters, onlyBlocked: e.target.checked })
                     }
-                    className="w-4 h-4 rounded text-[var(--primary)] focus:ring-0 cursor-pointer"
+                    className="w-3.5 h-3.5 rounded text-[var(--primary)] focus:ring-0 cursor-pointer"
                   />
                   <span className="text-xs text-[var(--on-surface)] font-medium">
                     Mostrar únicamente tareas bloqueadas
@@ -251,7 +251,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                     onChange={(e) =>
                       onFilterChange({ ...filters, sortBy: e.target.value as any })
                     }
-                    className="w-full bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--outline)] rounded-xl px-2.5 py-1.5 text-xs font-sans focus:outline-none focus:border-[var(--primary)] cursor-pointer"
+                    className="w-full bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--outline)] rounded px-2.5 py-1 text-xs font-sans focus:outline-none focus:border-[var(--primary)] cursor-pointer"
                   >
                     {sortOptions.map((s) => (
                       <option key={s.id} value={s.id}>
@@ -303,7 +303,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
 
         {/* Counter of matching tasks */}
         <div className="flex items-center gap-2 text-xs font-mono text-[var(--on-surface-variant)]">
-          <span className="px-2.5 py-0.5 rounded-full bg-[var(--surface)] border border-[var(--outline)]">
+          <span className="px-2 py-0.5 rounded bg-[var(--surface)] border border-[var(--outline)]">
             {filteredTasksCount} de {totalTasksCount} tareas
           </span>
         </div>
@@ -311,13 +311,13 @@ export const FilterBar: React.FC<FilterBarProps> = ({
 
       {/* Active Filter Chips Bar (Visible when any filter or query is active) */}
       {hasActiveFilters && (
-        <div className="flex items-center gap-1.5 flex-wrap pt-1 border-t border-[var(--outline)]/50">
+        <div className="flex items-center gap-1.5 flex-wrap pt-1 border-t border-[var(--outline)]">
           <span className="text-[11px] text-[var(--on-surface-variant)] font-medium">
             Filtros activos:
           </span>
 
           {searchQuery.trim() && (
-            <span className="px-2 py-0.5 rounded-full bg-[var(--surface)] border border-[var(--primary)]/60 text-[11px] text-[var(--primary)] font-medium flex items-center gap-1">
+            <span className="px-2 py-0.5 rounded bg-[var(--surface)] border border-[var(--primary)]/60 text-[11px] text-[var(--primary)] font-medium flex items-center gap-1">
               <span>Búsqueda: &ldquo;{searchQuery}&rdquo;</span>
               <button
                 type="button"
@@ -331,7 +331,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           )}
 
           {filters.status !== 'all' && (
-            <span className="px-2 py-0.5 rounded-full bg-[var(--surface)] border border-[var(--outline)] text-[11px] text-[var(--on-surface)] font-medium flex items-center gap-1">
+            <span className="px-2 py-0.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] text-[var(--on-surface)] font-medium flex items-center gap-1">
               <span>Estado: {filters.status.toUpperCase()}</span>
               <button
                 type="button"
@@ -344,7 +344,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           )}
 
           {filters.priority !== 'all' && (
-            <span className="px-2 py-0.5 rounded-full bg-[var(--surface)] border border-[var(--outline)] text-[11px] text-[var(--on-surface)] font-mono font-medium flex items-center gap-1">
+            <span className="px-2 py-0.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] text-[var(--on-surface)] font-mono font-medium flex items-center gap-1">
               <span>Prioridad: {filters.priority}</span>
               <button
                 type="button"
@@ -357,7 +357,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           )}
 
           {filters.section !== 'all' && (
-            <span className="px-2 py-0.5 rounded-full bg-[var(--surface)] border border-[var(--outline)] text-[11px] text-[var(--on-surface)] font-medium flex items-center gap-1">
+            <span className="px-2 py-0.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] text-[var(--on-surface)] font-medium flex items-center gap-1">
               <span>Sección: ## {filters.section}</span>
               <button
                 type="button"
@@ -370,7 +370,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           )}
 
           {filters.tag !== 'all' && (
-            <span className="px-2 py-0.5 rounded-full bg-[var(--surface)] border border-[var(--outline)] text-[11px] text-[var(--on-surface)] font-mono flex items-center gap-1">
+            <span className="px-2 py-0.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] text-[var(--on-surface)] font-mono flex items-center gap-1">
               <span>Etiqueta: #{filters.tag}</span>
               <button
                 type="button"
@@ -383,7 +383,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           )}
 
           {filters.onlyBlocked && (
-            <span className="px-2 py-0.5 rounded-full bg-amber-950/40 border border-amber-800/60 text-[11px] text-amber-300 font-medium flex items-center gap-1">
+            <span className="px-2 py-0.5 rounded bg-amber-950/40 border border-amber-800/60 text-[11px] text-amber-300 font-medium flex items-center gap-1">
               <span>Solo bloqueadas</span>
               <button
                 type="button"
@@ -396,7 +396,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           )}
 
           {filters.sortBy !== 'default' && (
-            <span className="px-2 py-0.5 rounded-full bg-[var(--surface)] border border-[var(--outline)] text-[11px] text-[var(--on-surface-variant)] font-medium flex items-center gap-1">
+            <span className="px-2 py-0.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] text-[var(--on-surface-variant)] font-medium flex items-center gap-1">
               <span>Orden: {filters.sortBy}</span>
               <button
                 type="button"

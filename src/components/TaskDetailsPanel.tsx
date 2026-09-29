@@ -290,9 +290,9 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
                       completed: isDone,
                     });
                   }}
-                  className="py-1.5 px-2 rounded-xl border border-[var(--outline)] bg-[var(--surface)] hover:bg-[var(--surface-container-high)] text-[11px] font-medium text-[var(--on-surface)] flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+                  className="py-1 px-2 rounded border border-[var(--outline)] bg-[var(--surface)] hover:bg-[var(--surface-container-high)] text-[11px] font-medium text-[var(--on-surface)] flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
                 >
-                  <span className={`material-symbols-outlined text-[15px] ${st.color}`}>
+                  <span className={`material-symbols-outlined text-[14px] ${st.color}`}>
                     {st.icon}
                   </span>
                   <span>{st.label}</span>
@@ -312,7 +312,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
                   key={p.id}
                   type="button"
                   onClick={() => onBatchUpdateTasks(selectedTaskIds, { priority: p.id })}
-                  className={`py-1.5 rounded-lg border text-xs font-mono font-semibold text-center cursor-pointer transition-colors ${p.text} ${p.bg} ${p.border} hover:brightness-110`}
+                  className={`py-1 rounded border text-xs font-mono font-medium text-center cursor-pointer transition-colors ${p.text} ${p.bg} ${p.border} hover:brightness-110`}
                 >
                   {p.id}
                 </button>
@@ -333,7 +333,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
                     onBatchUpdateTasks(selectedTaskIds, { groupTitle: e.target.value });
                   }
                 }}
-                className="w-full bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--outline)] rounded-xl px-3 py-2 text-xs font-sans focus:outline-none focus:border-[var(--primary)] cursor-pointer"
+                className="w-full bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--outline)] rounded px-2.5 py-1.5 text-xs font-sans focus:outline-none focus:border-[var(--primary)] cursor-pointer"
               >
                 <option value="" disabled>
                   Seleccionar sección de destino...
@@ -349,19 +349,19 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
         </div>
 
         {/* Footer Actions */}
-        <div className="pt-4 border-t border-[var(--outline)] flex items-center justify-between gap-2 mt-4">
+        <div className="pt-3 border-t border-[var(--outline)] flex items-center justify-between gap-2 mt-4">
           <button
             type="button"
             onClick={() => onBatchDeleteTasks(selectedTaskIds)}
-            className="btn-m3-secondary flex-1 py-2 text-xs text-[var(--error)] border-rose-800/60 bg-rose-950/30 cursor-pointer"
+            className="btn-m3-secondary flex-1 py-1.5 text-xs text-[var(--error)] border-rose-800/60 bg-rose-950/30 cursor-pointer"
           >
-            <span className="material-symbols-outlined text-[16px]">delete</span>
+            <span className="material-symbols-outlined text-[15px]">delete</span>
             <span>Eliminar {selectedTaskIds.length} tareas</span>
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="btn-m3-text px-3 py-2 text-xs cursor-pointer"
+            className="btn-m3-text px-3 py-1.5 text-xs cursor-pointer"
           >
             Deseleccionar
           </button>
@@ -381,16 +381,16 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
   return (
     <aside
       aria-label="Panel de detalles de la tarea"
-      className="fixed inset-x-0 bottom-0 max-h-[85vh] sm:static sm:max-h-none sm:w-96 bg-[var(--surface-container)] border-t sm:border-t-0 sm:border-l border-[var(--outline)] flex flex-col justify-between p-4 z-20 flex-shrink-0 animate-slide-up sm:animate-none overflow-y-auto shadow-2xl sm:shadow-none"
+      className="fixed inset-x-0 bottom-0 max-h-[85vh] sm:static sm:max-h-none sm:w-88 bg-[var(--surface-container)] border-t sm:border-t-0 sm:border-l border-[var(--outline)] flex flex-col justify-between p-3.5 z-20 flex-shrink-0 overflow-y-auto"
     >
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-3.5">
         {/* 1. Header: #ID + Navigation + Menu + Close */}
-        <div className="flex items-center justify-between border-b border-[var(--outline)] pb-3">
+        <div className="flex items-center justify-between border-b border-[var(--outline)] pb-2.5">
           <div className="flex items-center gap-1.5">
             <button
               type="button"
               onClick={handleCopyId}
-              className="group/id flex items-center gap-1 text-xs font-mono font-medium px-2 py-0.5 rounded-md bg-[var(--surface)] border border-[var(--outline)] hover:border-[var(--primary)] text-[var(--primary)] cursor-pointer transition-colors"
+              className="group/id flex items-center gap-1 text-xs font-mono font-medium px-1.5 py-0.5 rounded bg-[var(--surface)] border border-[var(--outline)] hover:border-[var(--primary)] text-[var(--primary)] cursor-pointer transition-colors"
               title="Clic para copiar ID"
             >
               <span className="text-[var(--on-surface-variant)]">#</span>
@@ -401,22 +401,22 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
             </button>
 
             {copiedId && (
-              <span className="text-[10px] font-sans text-emerald-400 animate-fade-in">
-                ¡Copiado!
+              <span className="text-[10px] font-sans text-emerald-400">
+                Copiado
               </span>
             )}
           </div>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-0.5">
             {/* Previous Task */}
             <button
               type="button"
               disabled={!prevTask}
               onClick={() => prevTask && onSelectTask(prevTask.taskId)}
-              className="btn-m3-icon w-7 h-7 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+              className="btn-m3-icon w-6 h-6 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
               title={prevTask ? `Anterior: ${prevTask.title}` : 'No hay tarea anterior'}
             >
-              <span className="material-symbols-outlined text-[16px]">arrow_back</span>
+              <span className="material-symbols-outlined text-[15px]">arrow_back</span>
             </button>
 
             {/* Next Task */}
@@ -424,10 +424,10 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
               type="button"
               disabled={!nextTask}
               onClick={() => nextTask && onSelectTask(nextTask.taskId)}
-              className="btn-m3-icon w-7 h-7 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+              className="btn-m3-icon w-6 h-6 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
               title={nextTask ? `Siguiente: ${nextTask.title}` : 'No hay tarea siguiente'}
             >
-              <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+              <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
             </button>
 
             {/* Context Menu Trigger ⋮ */}
@@ -435,16 +435,16 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
               <button
                 type="button"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="btn-m3-icon w-7 h-7 cursor-pointer"
+                className="btn-m3-icon w-6 h-6 cursor-pointer"
                 title="Más opciones"
               >
-                <span className="material-symbols-outlined text-[18px]">more_vert</span>
+                <span className="material-symbols-outlined text-[16px]">more_vert</span>
               </button>
 
               {isMenuOpen && (
                 <div
                   onPointerDown={(e) => e.stopPropagation()}
-                  className="absolute right-0 top-8 z-50 bg-[var(--surface-container-high)] border border-[var(--outline)] rounded-xl shadow-2xl p-1 flex flex-col gap-0.5 min-w-[170px] text-xs animate-slide-up"
+                  className="absolute right-0 top-7 z-50 bg-[var(--surface-container-high)] border border-[var(--outline)] rounded-md shadow-lg p-1 flex flex-col gap-0.5 min-w-[170px] text-xs font-sans"
                 >
                   <button
                     type="button"
@@ -452,18 +452,18 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
                       handleCopyId();
                       setIsMenuOpen(false);
                     }}
-                    className="px-2.5 py-1.5 rounded-lg text-left text-[var(--on-surface)] hover:bg-[var(--surface-container-highest)] flex items-center gap-2 cursor-pointer"
+                    className="px-2 py-1 rounded text-left text-[var(--on-surface)] hover:bg-[var(--surface-container-highest)] flex items-center gap-2 cursor-pointer"
                   >
-                    <span className="material-symbols-outlined text-[15px]">tag</span>
+                    <span className="material-symbols-outlined text-[14px]">tag</span>
                     <span>Copiar ID (#{task.taskId})</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={handleCopyMarkdownSnippet}
-                    className="px-2.5 py-1.5 rounded-lg text-left text-[var(--on-surface)] hover:bg-[var(--surface-container-highest)] flex items-center gap-2 cursor-pointer"
+                    className="px-2 py-1 rounded text-left text-[var(--on-surface)] hover:bg-[var(--surface-container-highest)] flex items-center gap-2 cursor-pointer"
                   >
-                    <span className="material-symbols-outlined text-[15px]">content_copy</span>
+                    <span className="material-symbols-outlined text-[14px]">content_copy</span>
                     <span>Copiar en Markdown</span>
                   </button>
 
@@ -474,9 +474,9 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
                         setIsMenuOpen(false);
                         onFocusOnCanvas(task.taskId, task.title);
                       }}
-                      className="px-2.5 py-1.5 rounded-lg text-left text-[var(--on-surface)] hover:bg-[var(--surface-container-highest)] flex items-center gap-2 cursor-pointer"
+                      className="px-2 py-1 rounded text-left text-[var(--on-surface)] hover:bg-[var(--surface-container-highest)] flex items-center gap-2 cursor-pointer"
                     >
-                      <span className="material-symbols-outlined text-[15px]">center_focus_strong</span>
+                      <span className="material-symbols-outlined text-[14px]">center_focus_strong</span>
                       <span>Enfocar en Canvas</span>
                     </button>
                   )}
@@ -489,9 +489,9 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
                       setIsMenuOpen(false);
                       onDeleteTask(task.taskId, task.title);
                     }}
-                    className="px-2.5 py-1.5 rounded-lg text-left text-[var(--error)] hover:bg-rose-950/40 flex items-center gap-2 cursor-pointer"
+                    className="px-2 py-1 rounded text-left text-[var(--error)] hover:bg-rose-950/40 flex items-center gap-2 cursor-pointer"
                   >
-                    <span className="material-symbols-outlined text-[15px]">delete</span>
+                    <span className="material-symbols-outlined text-[14px]">delete</span>
                     <span>Eliminar tarea</span>
                   </button>
                 </div>
@@ -502,22 +502,22 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="btn-m3-icon w-7 h-7 cursor-pointer"
+              className="btn-m3-icon w-6 h-6 cursor-pointer"
               title="Cerrar panel de detalles"
             >
-              <span className="material-symbols-outlined text-[18px]">close</span>
+              <span className="material-symbols-outlined text-[16px]">close</span>
             </button>
           </div>
         </div>
 
-        {/* 2. Title (Direct Inline Edit with M3 Focus) */}
+        {/* 2. Title (Direct Inline Edit with clean focus) */}
         <div className="flex flex-col gap-1">
           <div className="flex items-center justify-between">
-            <label className="text-[11px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
-              Título de la tarea
+            <label className="text-[10px] font-mono font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
+              Título
             </label>
             <span className="text-[10px] font-mono text-[var(--on-surface-variant)]">
-              {saveIndicator === 'saving' ? 'Guardando...' : '✓ Guardado'}
+              {saveIndicator === 'saving' ? 'Guardando...' : '✓ Sincronizado'}
             </span>
           </div>
 
@@ -537,14 +537,14 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
                 }
               }}
               rows={2}
-              className="w-full bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--primary)] rounded-xl p-2.5 text-xs font-sans focus:outline-none resize-none font-medium leading-relaxed"
+              className="w-full bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--primary)] rounded p-2 text-xs font-sans focus:outline-none resize-none font-medium leading-relaxed"
             />
           ) : (
             <div
               onDoubleClick={() => setIsEditingTitle(true)}
               onClick={() => setIsEditingTitle(true)}
               title="Clic o doble clic para editar"
-              className="group/title p-2 rounded-xl bg-[var(--surface)]/60 hover:bg-[var(--surface)] border border-[var(--outline)] hover:border-[var(--on-surface-variant)] cursor-text transition-all flex items-start justify-between gap-2"
+              className="group/title p-2 rounded bg-[var(--surface)] border border-[var(--outline)] hover:border-[var(--on-surface-variant)] cursor-text transition-colors flex items-start justify-between gap-2"
             >
               <p
                 className={`text-xs font-medium leading-relaxed ${
@@ -553,7 +553,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
               >
                 {task.title}
               </p>
-              <span className="material-symbols-outlined text-[15px] text-[var(--on-surface-variant)] opacity-40 group-hover/title:opacity-100 transition-opacity shrink-0 mt-0.5">
+              <span className="material-symbols-outlined text-[14px] text-[var(--on-surface-variant)] opacity-0 group-hover/title:opacity-100 transition-opacity shrink-0 mt-0.5">
                 edit
               </span>
             </div>
@@ -563,15 +563,15 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
         {/* 3. Section / Group Selection */}
         {allSections.length > 0 && (
           <div className="flex flex-col gap-1">
-            <label className="text-[11px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
-              Sección (Grupo)
+            <label className="text-[10px] font-mono font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
+              Sección
             </label>
             <select
               value={task.groupTitle || allSections[0]}
               onChange={(e) => {
                 onUpdateTask(task.taskId, { groupTitle: e.target.value });
               }}
-              className="w-full bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--outline)] rounded-xl px-2.5 py-1.5 text-xs font-sans focus:outline-none focus:border-[var(--primary)] cursor-pointer"
+              className="w-full bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--outline)] rounded px-2.5 py-1.5 text-xs font-sans focus:outline-none focus:border-[var(--primary)] cursor-pointer"
             >
               {allSections.map((sec) => (
                 <option key={sec} value={sec}>
@@ -582,12 +582,12 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
           </div>
         )}
 
-        {/* 4. Status Grid (Normalized M3: Backlog, Todo, In Progress, Review, Blocked, Done) */}
+        {/* 4. Status Grid */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-[11px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
+          <label className="text-[10px] font-mono font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
             Estado
           </label>
-          <div className="grid grid-cols-3 gap-1.5">
+          <div className="grid grid-cols-3 gap-1">
             {statusOptions.map((st) => {
               const isCurrent = currentStatusId === st.id;
               return (
@@ -601,14 +601,14 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
                       completed: isDone,
                     });
                   }}
-                  className={`py-1.5 px-2 rounded-xl border text-[11px] font-medium flex items-center justify-center gap-1.5 cursor-pointer transition-all ${
+                  className={`py-1 px-1.5 rounded border text-[11px] font-medium flex items-center justify-center gap-1 cursor-pointer transition-colors ${
                     isCurrent
-                      ? 'bg-[var(--primary)] text-[var(--on-primary)] border-[var(--primary)] font-semibold shadow-xs'
+                      ? 'bg-[var(--primary)] text-[var(--on-primary)] border-[var(--primary)] font-semibold'
                       : 'bg-[var(--surface)] text-[var(--on-surface-variant)] border-[var(--outline)] hover:border-[var(--on-surface-variant)] hover:text-[var(--on-surface)]'
                   }`}
                 >
                   <span
-                    className={`material-symbols-outlined text-[15px] ${
+                    className={`material-symbols-outlined text-[13px] ${
                       isCurrent ? 'text-[var(--on-primary)]' : st.color
                     }`}
                   >
@@ -621,12 +621,12 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
           </div>
         </div>
 
-        {/* 5. Priority Selector (Discrete M3 Chips) */}
+        {/* 5. Priority Selector */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-[11px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
+          <label className="text-[10px] font-mono font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
             Prioridad
           </label>
-          <div className="grid grid-cols-4 gap-1.5">
+          <div className="grid grid-cols-4 gap-1">
             {priorityOptions.map((p) => {
               const isSelected = task.priority === p.id;
               return (
@@ -634,9 +634,9 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
                   key={p.id}
                   type="button"
                   onClick={() => onUpdateTask(task.taskId, { priority: p.id })}
-                  className={`py-1.5 rounded-xl border text-xs font-mono font-semibold flex items-center justify-center gap-1 cursor-pointer transition-all ${
+                  className={`py-1 rounded border text-xs font-mono font-medium flex items-center justify-center gap-1 cursor-pointer transition-colors ${
                     isSelected
-                      ? `${p.text} ${p.bg} ${p.border} ring-2 ring-current font-bold shadow-xs`
+                      ? `${p.text} ${p.bg} ${p.border} ring-1 ring-current font-semibold`
                       : 'bg-[var(--surface)] text-[var(--on-surface-variant)] border-[var(--outline)] hover:border-[var(--on-surface-variant)]'
                   }`}
                   title={`${p.label} - ${p.desc}`}
@@ -649,10 +649,10 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
           </div>
         </div>
 
-        {/* 6. Tags Section (Chips + Add/Remove) */}
+        {/* 6. Tags Section */}
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between">
-            <label className="text-[11px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
+            <label className="text-[10px] font-mono font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
               Etiquetas
             </label>
             {!isAddingTag && (
@@ -666,18 +666,18 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
             )}
           </div>
 
-          <div className="flex flex-wrap gap-1.5 min-h-[28px] items-center">
+          <div className="flex flex-wrap gap-1 min-h-[24px] items-center">
             {task.tags && task.tags.length > 0 ? (
               task.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="px-2 py-0.5 rounded-lg bg-[var(--surface)] border border-[var(--outline)] text-xs text-[var(--on-surface)] font-mono flex items-center gap-1"
+                  className="px-1.5 py-0.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] text-[var(--on-surface)] font-mono flex items-center gap-1"
                 >
                   <span>#{tag}</span>
                   <button
                     type="button"
                     onClick={() => handleRemoveTag(tag)}
-                    className="text-[var(--on-surface-variant)] hover:text-rose-400 cursor-pointer p-0.5"
+                    className="text-[var(--on-surface-variant)] hover:text-rose-400 cursor-pointer leading-none"
                     title={`Eliminar etiqueta #${tag}`}
                   >
                     ×
@@ -685,7 +685,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
                 </span>
               ))
             ) : (
-              <span className="text-xs text-[var(--on-surface-variant)] italic">
+              <span className="text-[11px] text-[var(--on-surface-variant)] italic">
                 Sin etiquetas asignadas
               </span>
             )}
@@ -709,19 +709,19 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
                   }
                 }}
                 placeholder="Nombre de etiqueta..."
-                className="flex-1 bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--primary)] rounded-lg px-2 py-1 text-xs font-mono focus:outline-none"
+                className="flex-1 bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--primary)] rounded px-2 py-0.5 text-xs font-mono focus:outline-none"
               />
               <button
                 type="button"
                 onClick={() => handleAddTag(newTagInput)}
-                className="btn-m3-primary px-2.5 py-1 text-xs cursor-pointer"
+                className="btn-m3-primary px-2 py-0.5 text-xs cursor-pointer"
               >
                 Añadir
               </button>
               <button
                 type="button"
                 onClick={() => setIsAddingTag(false)}
-                className="btn-m3-icon w-6 h-6 cursor-pointer"
+                className="btn-m3-icon w-5 h-5 cursor-pointer"
               >
                 ✕
               </button>
@@ -729,22 +729,22 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
           )}
         </div>
 
-        {/* 7. Subtasks / Checklist Progress (DESIGN.md Section 13) */}
+        {/* 7. Subtasks / Checklist Progress - Structure instead of nested card */}
         {task.subtasks && (
-          <div className="flex flex-col gap-1.5 p-3 rounded-xl bg-[var(--surface)]/80 border border-[var(--outline)]">
+          <div className="flex flex-col gap-1 pt-2 border-t border-[var(--outline)]">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
-                Progreso de Subtareas
+              <span className="text-[10px] font-mono font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
+                Subtareas
               </span>
-              <span className="text-xs font-mono font-semibold text-sky-400">
+              <span className="text-[11px] font-mono text-[var(--on-surface-variant)]">
                 {task.subtasks.completed}/{task.subtasks.total} (
                 {Math.round((task.subtasks.completed / task.subtasks.total) * 100)}%)
               </span>
             </div>
 
-            <div className="w-full h-1.5 bg-[var(--surface-container)] rounded-full overflow-hidden">
+            <div className="w-full h-1 bg-[var(--surface-container-highest)] rounded overflow-hidden">
               <div
-                className="h-full bg-sky-400 rounded-full transition-all duration-300"
+                className="h-full bg-[var(--primary)] transition-all duration-200"
                 style={{
                   width: `${(task.subtasks.completed / task.subtasks.total) * 100}%`,
                 }}
@@ -753,17 +753,21 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
           </div>
         )}
 
-        {/* 8. Dependencies & Blockers Section (DESIGN.md Section 15 & 17) */}
-        <div className="flex flex-col gap-2 p-3 rounded-xl bg-[var(--surface)]/80 border border-[var(--outline)] text-xs">
-          <span className="text-[11px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-[15px] text-amber-400">account_tree</span>
-            <span>Dependencias</span>
-          </span>
+        {/* 8. Dependencies & Blockers Section - Clean structure instead of nested card */}
+        <div className="flex flex-col gap-2 pt-2 border-t border-[var(--outline)] text-xs">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-mono font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider flex items-center gap-1">
+              <span>Dependencias</span>
+            </span>
+            <span className="text-[10px] font-mono text-[var(--on-surface-variant)]">
+              {blockerIds.length} bloqueos
+            </span>
+          </div>
 
           {/* Blocked by (Depende de) */}
           <div className="flex flex-col gap-1">
             <span className="text-[10px] text-[var(--on-surface-variant)] font-medium">
-              Depende de (Bloqueada por):
+              Depende de:
             </span>
 
             {blockerIds.length > 0 ? (
@@ -775,7 +779,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
                   return (
                     <div
                       key={bId}
-                      className="flex items-center justify-between p-1.5 rounded-lg bg-[var(--surface-container)] border border-[var(--outline)] text-xs"
+                      className="flex items-center justify-between px-2 py-1 rounded bg-[var(--surface)] border border-[var(--outline)] text-xs"
                     >
                       <button
                         type="button"
@@ -787,7 +791,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
                           #{bId}
                         </span>
                         <span className="truncate text-[11px]">
-                          {blockerTask ? blockerTask.title : '(ID externo o no resuelto)'}
+                          {blockerTask ? blockerTask.title : '(ID no resuelto)'}
                         </span>
                       </button>
 
@@ -805,12 +809,12 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
               </div>
             ) : (
               <span className="text-[11px] text-[var(--on-surface-variant)] italic">
-                No tiene dependencias asignadas
+                Sin dependencias previas
               </span>
             )}
 
             {/* Quick Add Blocker Dropdown */}
-            <div className="mt-1">
+            <div className="mt-0.5">
               <select
                 defaultValue=""
                 onChange={(e) => {
@@ -819,7 +823,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
                     e.target.value = '';
                   }
                 }}
-                className="w-full bg-[var(--surface-container)] text-[var(--on-surface)] border border-[var(--outline)] rounded-lg px-2 py-1 text-[11px] font-sans focus:outline-none focus:border-[var(--primary)] cursor-pointer"
+                className="w-full bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--outline)] rounded px-2 py-1 text-[11px] font-sans focus:outline-none focus:border-[var(--primary)] cursor-pointer"
               >
                 <option value="" disabled>
                   + Vincular tarea bloqueadora...
@@ -835,18 +839,17 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
             </div>
           </div>
 
-          {/* Reverse dependencies: Tasks blocked by this task */}
+          {/* Reverse dependencies */}
           {blockingTasks.length > 0 && (
-            <div className="flex flex-col gap-1 pt-2 border-t border-[var(--outline)]">
-              <span className="text-[10px] text-amber-400 font-medium flex items-center gap-1">
-                <span>⚠</span>
-                <span>Bloquea a ({blockingTasks.length} tareas dependientes):</span>
+            <div className="flex flex-col gap-1 pt-1.5 border-t border-[var(--outline)]">
+              <span className="text-[10px] text-amber-400 font-mono font-medium flex items-center gap-1">
+                <span>⚠ Bloquea a {blockingTasks.length} tareas:</span>
               </span>
               <div className="flex flex-col gap-1">
                 {blockingTasks.map((bTask) => (
                   <div
                     key={bTask.taskId}
-                    className="flex items-center justify-between p-1.5 rounded-lg bg-[var(--surface-container)] border border-[var(--outline)] text-xs"
+                    className="flex items-center justify-between px-2 py-1 rounded bg-[var(--surface)] border border-[var(--outline)] text-xs"
                   >
                     <button
                       type="button"
@@ -870,14 +873,14 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
       </div>
 
       {/* Footer Actions */}
-      <div className="pt-4 border-t border-[var(--outline)] flex items-center justify-between gap-2 mt-4">
+      <div className="pt-3 border-t border-[var(--outline)] flex items-center justify-between gap-2 mt-4">
         {onFocusOnCanvas && (
           <button
             type="button"
             onClick={() => onFocusOnCanvas(task.taskId, task.title)}
-            className="btn-m3-secondary flex-1 py-2 text-xs cursor-pointer"
+            className="btn-m3-secondary flex-1 py-1.5 text-xs cursor-pointer"
           >
-            <span className="material-symbols-outlined text-[16px]">center_focus_strong</span>
+            <span className="material-symbols-outlined text-[15px]">center_focus_strong</span>
             <span>Enfocar en Canvas</span>
           </button>
         )}
@@ -885,10 +888,10 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
         <button
           type="button"
           onClick={() => onDeleteTask(task.taskId, task.title)}
-          className="btn-m3-icon w-9 h-9 text-[var(--error)] hover:bg-rose-950/40 cursor-pointer"
+          className="btn-m3-icon w-8 h-8 text-[var(--error)] hover:bg-rose-950/40 cursor-pointer"
           title="Eliminar tarea"
         >
-          <span className="material-symbols-outlined text-[18px]">delete</span>
+          <span className="material-symbols-outlined text-[16px]">delete</span>
         </button>
       </div>
     </aside>

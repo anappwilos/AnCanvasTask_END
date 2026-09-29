@@ -283,15 +283,15 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       aria-modal="true"
       aria-label="Paleta de comandos y búsqueda global"
       onClick={onClose}
-      className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-start justify-center p-3 sm:p-6 pt-16 sm:pt-20 animate-fade-in"
+      className="fixed inset-0 z-50 bg-black/70 flex items-start justify-center p-3 sm:p-6 pt-16 sm:pt-20"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-xl bg-[var(--surface-container)] border border-[var(--outline)] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[82vh] animate-slide-up"
+        className="w-full max-w-xl bg-[var(--surface-container)] border border-[var(--outline)] rounded-lg shadow-xl overflow-hidden flex flex-col max-h-[82vh]"
       >
         {/* Search Input Header */}
-        <div className="flex items-center gap-2.5 px-4 py-3 border-b border-[var(--outline)] bg-[var(--surface)]">
-          <span className="material-symbols-outlined text-[20px] text-[var(--primary)] shrink-0">
+        <div className="flex items-center gap-2.5 px-3.5 py-2.5 border-b border-[var(--outline)] bg-[var(--surface)]">
+          <span className="material-symbols-outlined text-[18px] text-[var(--primary)] shrink-0">
             search
           </span>
           <input
@@ -313,12 +313,12 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                 setQuery('');
                 inputRef.current?.focus();
               }}
-              className="text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] p-1 rounded-full cursor-pointer"
+              className="text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] p-0.5 rounded cursor-pointer"
             >
-              <span className="material-symbols-outlined text-[16px]">close</span>
+              <span className="material-symbols-outlined text-[15px]">close</span>
             </button>
           )}
-          <span className="hidden sm:inline-block px-1.5 py-0.5 rounded-md bg-[var(--surface-container)] border border-[var(--outline)] text-[10px] font-mono text-[var(--on-surface-variant)]">
+          <span className="hidden sm:inline-block px-1.5 py-0.5 rounded bg-[var(--surface-container)] border border-[var(--outline)] text-[10px] font-mono text-[var(--on-surface-variant)]">
             ESC
           </span>
         </div>
@@ -358,9 +358,9 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                       type="button"
                       onClick={() => handleExecute(res)}
                       onMouseEnter={() => setSelectedIndex(index)}
-                      className={`w-full px-3 py-2 rounded-xl text-left flex items-center justify-between text-xs transition-colors cursor-pointer ${
+                      className={`w-full px-2.5 py-1.5 rounded text-left flex items-center justify-between text-xs transition-colors cursor-pointer ${
                         isSelected
-                          ? 'bg-[var(--primary)] text-[var(--on-primary)] font-medium shadow-xs'
+                          ? 'bg-[var(--primary)] text-[var(--on-primary)] font-medium'
                           : 'text-[var(--on-surface)] hover:bg-[var(--surface-container-high)]'
                       }`}
                     >
@@ -394,9 +394,9 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                       type="button"
                       onClick={() => handleExecute(res)}
                       onMouseEnter={() => setSelectedIndex(index)}
-                      className={`w-full px-3 py-2 rounded-xl text-left flex items-center justify-between gap-2 text-xs transition-colors cursor-pointer ${
+                      className={`w-full px-2.5 py-1.5 rounded text-left flex items-center justify-between gap-2 text-xs transition-colors cursor-pointer ${
                         isSelected
-                          ? 'bg-[var(--primary)] text-[var(--on-primary)] shadow-xs'
+                          ? 'bg-[var(--primary)] text-[var(--on-primary)]'
                           : 'text-[var(--on-surface)] hover:bg-[var(--surface-container-high)]'
                       }`}
                     >
@@ -432,7 +432,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
 
                       <div className="flex items-center gap-1.5 shrink-0">
                         <span
-                          className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full border ${
+                          className={`text-[10px] font-mono px-1.5 py-0.2 rounded border ${
                             isSelected
                               ? 'border-[var(--on-primary)]/40 text-[var(--on-primary)]'
                               : priorityStyles[res.item.priority]
@@ -453,9 +453,9 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                       type="button"
                       onClick={() => handleExecute(res)}
                       onMouseEnter={() => setSelectedIndex(index)}
-                      className={`w-full px-3 py-2 rounded-xl text-left flex items-center justify-between text-xs transition-colors cursor-pointer ${
+                      className={`w-full px-2.5 py-1.5 rounded text-left flex items-center justify-between text-xs transition-colors cursor-pointer ${
                         isSelected
-                          ? 'bg-[var(--primary)] text-[var(--on-primary)] font-medium shadow-xs'
+                          ? 'bg-[var(--primary)] text-[var(--on-primary)] font-medium'
                           : 'text-[var(--on-surface)] hover:bg-[var(--surface-container-high)]'
                       }`}
                     >
@@ -477,9 +477,9 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                       type="button"
                       onClick={() => handleExecute(res)}
                       onMouseEnter={() => setSelectedIndex(index)}
-                      className={`w-full px-3 py-2 rounded-xl text-left flex items-center justify-between text-xs transition-colors cursor-pointer ${
+                      className={`w-full px-2.5 py-1.5 rounded text-left flex items-center justify-between text-xs transition-colors cursor-pointer ${
                         isSelected
-                          ? 'bg-[var(--primary)] text-[var(--on-primary)] font-medium shadow-xs'
+                          ? 'bg-[var(--primary)] text-[var(--on-primary)] font-medium'
                           : 'text-[var(--on-surface)] hover:bg-[var(--surface-container-high)]'
                       }`}
                     >

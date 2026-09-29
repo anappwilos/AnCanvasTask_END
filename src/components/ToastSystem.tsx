@@ -91,12 +91,12 @@ const ToastCard: React.FC<{ toast: ToastItem; onDismiss: () => void }> = ({ toas
   return (
     <div
       role={toast.type === 'error' ? 'alert' : 'status'}
-      className={`pointer-events-auto flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-2xl border ${config.borderClass} ${config.bgClass} backdrop-blur-md shadow-2xl text-xs font-sans text-[var(--on-surface)] transition-all duration-200 ${
-        isClosing ? 'opacity-0 translate-y-2 scale-95' : 'animate-slide-up opacity-100 translate-y-0'
+      className={`pointer-events-auto flex items-center justify-between gap-3 px-3 py-2 rounded-md border ${config.borderClass} ${config.bgClass} shadow-md text-xs font-sans text-[var(--on-surface)] transition-all duration-150 ${
+        isClosing ? 'opacity-0 translate-y-1' : 'opacity-100 translate-y-0'
       }`}
     >
-      <div className="flex items-center gap-2.5 min-w-0">
-        <span className={`material-symbols-outlined text-[18px] ${config.textClass} shrink-0`}>
+      <div className="flex items-center gap-2 min-w-0">
+        <span className={`material-symbols-outlined text-[16px] ${config.textClass} shrink-0`}>
           {config.icon}
         </span>
         <span className="truncate max-w-[240px] sm:max-w-xs font-medium leading-tight">
@@ -112,7 +112,7 @@ const ToastCard: React.FC<{ toast: ToastItem; onDismiss: () => void }> = ({ toas
               toast.action?.onClick();
               handleManualDismiss();
             }}
-            className="px-2.5 py-1 rounded-lg bg-[var(--primary)] text-[var(--on-primary)] font-semibold text-[11px] hover:brightness-110 active:scale-95 transition-all cursor-pointer shadow-xs"
+            className="px-2 py-0.5 rounded bg-[var(--primary)] text-[var(--on-primary)] font-medium text-[11px] hover:brightness-110 active:opacity-90 transition-opacity cursor-pointer"
           >
             {toast.action.label}
           </button>
@@ -121,7 +121,7 @@ const ToastCard: React.FC<{ toast: ToastItem; onDismiss: () => void }> = ({ toas
         <button
           type="button"
           onClick={handleManualDismiss}
-          className="p-1 rounded-full text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--surface-container-highest)] cursor-pointer transition-colors"
+          className="p-0.5 rounded text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--surface-container-highest)] cursor-pointer transition-colors"
           aria-label="Cerrar notificación"
         >
           <span className="material-symbols-outlined text-[15px]">close</span>

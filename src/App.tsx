@@ -2080,17 +2080,17 @@ export default function App() {
                 {/* Canvas Empty State Overlay */}
                 {allParsedTasks.length === 0 && (
                   <div className="absolute inset-0 pointer-events-none flex items-center justify-center p-6 z-10">
-                    <div className="pointer-events-auto bg-[var(--surface-container)]/95 backdrop-blur-md border border-[var(--outline)] rounded-3xl p-6 sm:p-8 max-w-md text-center shadow-2xl animate-fade-in flex flex-col items-center">
-                      <div className="w-14 h-14 rounded-2xl bg-[var(--primary-container)]/30 border border-[var(--primary)]/30 flex items-center justify-center text-[var(--primary)] mb-3 shadow-xs">
-                        <span className="material-symbols-outlined text-[28px]">grid_view</span>
+                    <div className="pointer-events-auto bg-[var(--surface-container)] border border-[var(--outline)] rounded-lg p-6 max-w-md text-center shadow-lg flex flex-col items-center">
+                      <div className="w-10 h-10 rounded bg-[var(--primary-container)]/30 border border-[var(--primary)]/30 flex items-center justify-center text-[var(--primary)] mb-3">
+                        <span className="material-symbols-outlined text-[22px]">grid_view</span>
                       </div>
-                      <h3 className="text-base font-semibold text-[var(--on-surface)] font-sans mb-1">
+                      <h3 className="text-sm font-semibold text-[var(--on-surface)] font-sans mb-1">
                         Lienzo vacío
                       </h3>
-                      <p className="text-xs text-[var(--on-surface-variant)] mb-5 leading-relaxed">
+                      <p className="text-xs text-[var(--on-surface-variant)] mb-4 leading-relaxed">
                         No hay tareas en este archivo TASKS.md. Comienza añadiendo una tarea o carga un proyecto de ejemplo.
                       </p>
-                      <div className="flex items-center gap-2.5 flex-wrap justify-center">
+                      <div className="flex items-center gap-2 flex-wrap justify-center">
                         <button
                           type="button"
                           onClick={() => {
@@ -2099,17 +2099,17 @@ export default function App() {
                             }
                             setIsNewTaskModalOpen(true);
                           }}
-                          className="btn-m3-primary px-4 py-2 text-xs cursor-pointer shadow-sm"
+                          className="btn-m3-primary px-3.5 py-1.5 text-xs cursor-pointer shadow-sm"
                         >
-                          <span className="material-symbols-outlined text-[16px]">add</span>
+                          <span className="material-symbols-outlined text-[15px]">add</span>
                           <span>Crear primera tarea</span>
                         </button>
                         <button
                           type="button"
                           onClick={handleLoadSampleProject}
-                          className="btn-m3-secondary px-3.5 py-2 text-xs cursor-pointer"
+                          className="btn-m3-secondary px-3 py-1.5 text-xs cursor-pointer"
                         >
-                          <span className="material-symbols-outlined text-[16px]">refresh</span>
+                          <span className="material-symbols-outlined text-[15px]">refresh</span>
                           <span>Cargar ejemplo</span>
                         </button>
                       </div>
@@ -2119,9 +2119,9 @@ export default function App() {
 
                 {/* Floating Canvas Multi-Selection Action Bar (DESIGN.md Section 14) */}
                 {selectedTaskIdsOnCanvas.length > 1 && (
-                  <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-20 bg-[var(--surface-container)]/95 backdrop-blur-md border border-[var(--outline)] rounded-full px-3 py-1.5 shadow-2xl flex items-center gap-2 animate-slide-up select-none max-w-[95vw] overflow-x-auto">
+                  <div className="absolute bottom-14 left-1/2 -translate-x-1/2 z-20 bg-[var(--surface-container-high)] border border-[var(--outline)] rounded-md px-3 py-1.5 shadow-lg flex items-center gap-2 select-none max-w-[95vw] overflow-x-auto">
                     <div className="flex items-center gap-1.5 pr-2 border-r border-[var(--outline)] shrink-0">
-                      <span className="w-2 h-2 rounded-full bg-[var(--primary)]" />
+                      <span className="w-2 h-2 rounded bg-[var(--primary)]" />
                       <span className="text-xs font-mono font-medium text-[var(--on-surface)]">
                         {selectedTaskIdsOnCanvas.length} seleccionadas
                       </span>
@@ -2135,7 +2135,7 @@ export default function App() {
                           status: 'done',
                         })
                       }
-                      className="btn-m3-secondary px-2.5 py-1 text-xs text-emerald-400 border-emerald-800/60 bg-emerald-950/30 cursor-pointer shrink-0"
+                      className="btn-m3-secondary px-2 py-1 text-xs text-emerald-400 border-emerald-800/60 bg-emerald-950/30 cursor-pointer shrink-0"
                       title="Marcar seleccionadas como completadas"
                     >
                       <span className="material-symbols-outlined text-[15px]">check_circle</span>
@@ -2150,7 +2150,7 @@ export default function App() {
                           status: 'todo',
                         })
                       }
-                      className="btn-m3-secondary px-2.5 py-1 text-xs text-amber-400 border-amber-800/60 bg-amber-950/30 cursor-pointer shrink-0"
+                      className="btn-m3-secondary px-2 py-1 text-xs text-amber-400 border-amber-800/60 bg-amber-950/30 cursor-pointer shrink-0"
                       title="Marcar seleccionadas como pendientes"
                     >
                       <span className="material-symbols-outlined text-[15px]">pending</span>
@@ -2166,7 +2166,7 @@ export default function App() {
                           onClick={() =>
                             handleBatchUpdateTasksFromKanban(selectedTaskIdsOnCanvas, { priority: p })
                           }
-                          className="px-1.5 py-0.5 text-[10px] font-mono font-semibold rounded-md border border-[var(--outline)] text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer"
+                          className="px-1.5 py-0.5 text-[10px] font-mono font-medium rounded border border-[var(--outline)] text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer"
                           title={`Establecer prioridad ${p}`}
                         >
                           {p}
@@ -2179,7 +2179,7 @@ export default function App() {
                       onClick={() => {
                         handleBatchDeleteTasksFromKanban(selectedTaskIdsOnCanvas);
                       }}
-                      className="btn-m3-secondary px-2.5 py-1 text-xs text-[var(--error)] border-rose-800/60 bg-rose-950/30 cursor-pointer shrink-0"
+                      className="btn-m3-secondary px-2 py-1 text-xs text-[var(--error)] border-rose-800/60 bg-rose-950/30 cursor-pointer shrink-0"
                       title="Eliminar tareas seleccionadas"
                     >
                       <span className="material-symbols-outlined text-[15px]">delete</span>
@@ -2318,7 +2318,7 @@ export default function App() {
       {/* Floating Bottom Navigation Bar for Mobile */}
       <nav
         aria-label="Acciones rápidas móviles"
-        className="sm:hidden fixed bottom-3 left-3 right-3 z-30 bg-[var(--surface-container)]/95 backdrop-blur-md border border-[var(--outline)] rounded-2xl shadow-2xl p-1.5 flex items-center justify-between gap-1 pb-safe"
+        className="sm:hidden fixed bottom-3 left-3 right-3 z-30 bg-[var(--surface-container)] border border-[var(--outline)] rounded-lg shadow-lg p-1.5 flex items-center justify-between gap-1 pb-safe"
       >
         <button
           type="button"
@@ -2328,18 +2328,18 @@ export default function App() {
             }
             setIsNewTaskModalOpen(true);
           }}
-          className="btn-m3-primary flex-1 py-2 px-1 min-h-[44px] flex flex-col items-center justify-center text-[10px] cursor-pointer"
+          className="btn-m3-primary flex-1 py-1.5 px-1 min-h-[40px] flex flex-col items-center justify-center text-[10px] cursor-pointer"
         >
-          <span className="material-symbols-outlined text-[18px]">add</span>
+          <span className="material-symbols-outlined text-[17px]">add</span>
           <span>+ Tarea</span>
         </button>
 
         <button
           type="button"
           onClick={() => setActiveView(activeView === 'canvas' ? 'kanban' : 'canvas')}
-          className="btn-m3-secondary flex-1 py-2 px-1 min-h-[44px] flex flex-col items-center justify-center text-[10px] cursor-pointer"
+          className="btn-m3-secondary flex-1 py-1.5 px-1 min-h-[40px] flex flex-col items-center justify-center text-[10px] cursor-pointer"
         >
-          <span className="material-symbols-outlined text-[18px]">
+          <span className="material-symbols-outlined text-[17px]">
             {activeView === 'canvas' ? 'view_kanban' : 'grid_view'}
           </span>
           <span>{activeView === 'canvas' ? 'Kanban' : 'Canvas'}</span>
@@ -2348,39 +2348,39 @@ export default function App() {
         <button
           type="button"
           onClick={() => setIsAutoLayoutConfirmOpen(true)}
-          className="btn-m3-secondary flex-1 py-2 px-1 min-h-[44px] flex flex-col items-center justify-center text-[10px] cursor-pointer text-sky-400"
+          className="btn-m3-secondary flex-1 py-1.5 px-1 min-h-[40px] flex flex-col items-center justify-center text-[10px] cursor-pointer text-sky-400"
         >
-          <span className="material-symbols-outlined text-[18px]">account_tree</span>
+          <span className="material-symbols-outlined text-[17px]">account_tree</span>
           <span>Organizar</span>
         </button>
 
         <button
           type="button"
           onClick={handleZoomToFit}
-          className="btn-m3-secondary flex-1 py-2 px-1 min-h-[44px] flex flex-col items-center justify-center text-[10px] cursor-pointer"
+          className="btn-m3-secondary flex-1 py-1.5 px-1 min-h-[40px] flex flex-col items-center justify-center text-[10px] cursor-pointer"
         >
-          <span className="material-symbols-outlined text-[18px]">fit_screen</span>
+          <span className="material-symbols-outlined text-[17px]">fit_screen</span>
           <span>Ajustar</span>
         </button>
 
         <button
           type="button"
           onClick={() => setIsViewMarkdownOpen(true)}
-          className="btn-m3-secondary flex-1 py-2 px-1 min-h-[44px] flex flex-col items-center justify-center text-[10px] cursor-pointer"
+          className="btn-m3-secondary flex-1 py-1.5 px-1 min-h-[40px] flex flex-col items-center justify-center text-[10px] cursor-pointer"
         >
-          <span className="material-symbols-outlined text-[18px]">code</span>
+          <span className="material-symbols-outlined text-[17px]">code</span>
           <span>Ver .md</span>
         </button>
 
         <button
           type="button"
           onClick={() => setIsMobileMenuOpen(true)}
-          className="btn-m3-secondary flex-1 py-2 px-1 min-h-[44px] flex flex-col items-center justify-center text-[10px] cursor-pointer relative"
+          className="btn-m3-secondary flex-1 py-1.5 px-1 min-h-[40px] flex flex-col items-center justify-center text-[10px] cursor-pointer relative"
         >
           {validationReport.issues.length > 0 && (
-            <span className="absolute top-1.5 right-2 w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+            <span className="absolute top-1.5 right-2 w-2 h-2 rounded bg-rose-500" />
           )}
-          <span className="material-symbols-outlined text-[18px]">menu</span>
+          <span className="material-symbols-outlined text-[17px]">menu</span>
           <span>Menú</span>
         </button>
       </nav>
@@ -2392,15 +2392,15 @@ export default function App() {
           onClick={() => setIsMobileMenuOpen(false)}
         >
           <div
-            className="w-full bg-[var(--surface-container)] border-t border-[var(--outline)] rounded-t-3xl shadow-2xl p-4 flex flex-col gap-4 animate-slide-up max-h-[85vh] overflow-y-auto pb-safe"
+            className="w-full bg-[var(--surface-container)] border-t border-[var(--outline)] rounded-t-lg shadow-xl p-4 flex flex-col gap-3 animate-slide-up max-h-[85vh] overflow-y-auto pb-safe"
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
             aria-label="Opciones y herramientas"
           >
-            <div className="w-10 h-1.5 bg-[var(--outline)] rounded-full mx-auto" />
+            <div className="w-10 h-1 bg-[var(--outline)] rounded mx-auto" />
 
-            <div className="flex items-center justify-between border-b border-[var(--outline)] pb-3">
+            <div className="flex items-center justify-between border-b border-[var(--outline)] pb-2.5">
               <div>
                 <h2 className="text-sm font-semibold text-[var(--on-surface)] font-sans">
                   Menú de Opciones
@@ -2412,23 +2412,23 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="btn-m3-icon w-8 h-8"
+                className="btn-m3-icon w-7 h-7"
               >
-                <span className="material-symbols-outlined text-[18px]">close</span>
+                <span className="material-symbols-outlined text-[16px]">close</span>
               </button>
             </div>
 
-            <div className="flex flex-col gap-2 text-xs">
+            <div className="flex flex-col gap-1.5 text-xs">
               <button
                 type="button"
                 onClick={() => {
                   setIsMobileMenuOpen(false);
                   handleOpenFilePicker();
                 }}
-                className="w-full min-h-[44px] px-3 py-2.5 rounded-xl bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between text-[var(--on-surface)]"
+                className="w-full min-h-[40px] px-3 py-2 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer"
               >
                 <div className="flex items-center gap-2.5">
-                  <span className="material-symbols-outlined text-[18px] text-[var(--primary)]">folder_open</span>
+                  <span className="material-symbols-outlined text-[16px] text-[var(--primary)]">folder_open</span>
                   <span>Abrir TASKS.md</span>
                 </div>
                 <span>➔</span>
@@ -2440,14 +2440,14 @@ export default function App() {
                   setIsMobileMenuOpen(false);
                   handleExportFile();
                 }}
-                className={`w-full min-h-[44px] px-3 py-2.5 rounded-xl border flex items-center justify-between ${
+                className={`w-full min-h-[40px] px-3 py-2 rounded border flex items-center justify-between cursor-pointer ${
                   hasUnsavedChanges
-                    ? 'bg-emerald-950/80 border-emerald-600 text-emerald-200 font-semibold'
-                    : 'bg-[var(--surface)] border-[var(--outline)] text-[var(--on-surface)]'
+                    ? 'bg-emerald-950/80 border-emerald-600 text-emerald-200 font-medium'
+                    : 'bg-[var(--surface)] border-[var(--outline)] text-[var(--on-surface)] hover:bg-[var(--surface-container-high)]'
                 }`}
               >
                 <div className="flex items-center gap-2.5">
-                  <span className="material-symbols-outlined text-[18px] text-[var(--primary)]">save</span>
+                  <span className="material-symbols-outlined text-[16px] text-[var(--primary)]">save</span>
                   <span>Guardar {currentFileName}</span>
                 </div>
                 {hasUnsavedChanges && (
@@ -2463,10 +2463,10 @@ export default function App() {
                   setIsMobileMenuOpen(false);
                   setIsImportExportOpen(true);
                 }}
-                className="w-full min-h-[44px] px-3 py-2.5 rounded-xl bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between text-[var(--on-surface)]"
+                className="w-full min-h-[40px] px-3 py-2 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer"
               >
                 <div className="flex items-center gap-2.5">
-                  <span className="material-symbols-outlined text-[18px] text-[var(--primary)]">sync_alt</span>
+                  <span className="material-symbols-outlined text-[16px] text-[var(--primary)]">sync_alt</span>
                   <span>Importar / Exportar</span>
                 </div>
                 <span>➔</span>
@@ -2478,10 +2478,10 @@ export default function App() {
                   setIsMobileMenuOpen(false);
                   setIsSettingsOpen(true);
                 }}
-                className="w-full min-h-[44px] px-3 py-2.5 rounded-xl bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between text-[var(--on-surface)]"
+                className="w-full min-h-[40px] px-3 py-2 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer"
               >
                 <div className="flex items-center gap-2.5">
-                  <span className="material-symbols-outlined text-[18px] text-[var(--primary)]">settings</span>
+                  <span className="material-symbols-outlined text-[16px] text-[var(--primary)]">settings</span>
                   <span>Configuración & Preferencias</span>
                 </div>
                 <span>➔</span>
@@ -2493,10 +2493,10 @@ export default function App() {
                   setIsMobileMenuOpen(false);
                   setIsQuickGuideOpen(true);
                 }}
-                className="w-full min-h-[44px] px-3 py-2.5 rounded-xl bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between text-[var(--on-surface)]"
+                className="w-full min-h-[40px] px-3 py-2 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer"
               >
                 <div className="flex items-center gap-2.5">
-                  <span className="material-symbols-outlined text-[18px] text-[var(--primary)]">help</span>
+                  <span className="material-symbols-outlined text-[16px] text-[var(--primary)]">help</span>
                   <span>Guía rápida y atajos</span>
                 </div>
                 <span>➔</span>
@@ -2508,7 +2508,7 @@ export default function App() {
                   setIsMobileMenuOpen(false);
                   setIsProblemsModalOpen(true);
                 }}
-                className="w-full min-h-[44px] px-3 py-2.5 rounded-xl bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between text-[var(--on-surface)]"
+                className="w-full min-h-[40px] px-3 py-2 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer"
               >
                 <div className="flex items-center gap-2.5">
                   <span className="text-amber-400">⚠</span>
@@ -2525,10 +2525,10 @@ export default function App() {
                   setIsMobileMenuOpen(false);
                   setIsSanityModalOpen(true);
                 }}
-                className="w-full min-h-[44px] px-3 py-2.5 rounded-xl bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between text-[var(--on-surface)]"
+                className="w-full min-h-[40px] px-3 py-2 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer"
               >
                 <div className="flex items-center gap-2.5">
-                  <span className="w-2 h-2 rounded-full bg-sky-400" />
+                  <span className="w-2 h-2 rounded bg-sky-400" />
                   <span>Persistencia visual</span>
                 </div>
                 <span className="text-[10px] text-[var(--on-surface-variant)]">{syncStatus}</span>
@@ -2545,15 +2545,15 @@ export default function App() {
           onClick={() => setIsProblemsModalOpen(false)}
         >
           <div
-            className="w-full sm:max-w-2xl bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-3xl sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-slide-up sm:animate-none max-h-[90vh] sm:max-h-[85vh] pb-safe sm:pb-0"
+            className="w-full sm:max-w-2xl bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-lg sm:rounded-lg shadow-xl flex flex-col overflow-hidden animate-slide-up sm:animate-none max-h-[90vh] sm:max-h-[85vh] pb-safe sm:pb-0"
             role="dialog"
             aria-modal="true"
             aria-labelledby="problems-modal-title"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="w-10 h-1.5 bg-[var(--outline)] rounded-full mx-auto my-2.5 sm:hidden" />
+            <div className="w-10 h-1 bg-[var(--outline)] rounded mx-auto my-2 sm:hidden" />
 
-            <div className="px-5 py-3.5 border-b border-[var(--outline)] flex items-center justify-between">
+            <div className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
               <div>
                 <h2 id="problems-modal-title" className="text-sm font-semibold text-[var(--on-surface)] font-sans flex items-center gap-2">
                   <span>Problemas detectados en TASKS.md</span>
@@ -2565,22 +2565,22 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => setIsProblemsModalOpen(false)}
-                className="btn-m3-icon w-8 h-8"
+                className="btn-m3-icon w-7 h-7 cursor-pointer"
               >
-                <span className="material-symbols-outlined text-[18px]">close</span>
+                <span className="material-symbols-outlined text-[16px]">close</span>
               </button>
             </div>
 
-            <div className="px-5 py-2.5 bg-[var(--surface)] border-b border-[var(--outline)] flex items-center gap-4 text-xs font-mono overflow-x-auto">
+            <div className="px-4 py-2 bg-[var(--surface)] border-b border-[var(--outline)] flex items-center gap-4 text-xs font-mono overflow-x-auto">
               <span>Total: <strong className="text-[var(--on-surface)]">{validationReport.issues.length}</strong></span>
               <span className="text-rose-400">Errores: <strong>{validationReport.errorCount}</strong></span>
               <span className="text-amber-400">Avisos: <strong>{validationReport.warningCount}</strong></span>
             </div>
 
-            <div className="p-4 sm:p-5 overflow-auto max-h-[50vh] flex flex-col gap-2.5">
+            <div className="p-4 overflow-auto max-h-[50vh] flex flex-col gap-2">
               {validationReport.issues.length === 0 ? (
                 <div className="py-8 text-center flex flex-col items-center justify-center gap-2">
-                  <div className="w-10 h-10 rounded-full bg-emerald-950/80 border border-emerald-700 flex items-center justify-center text-emerald-400 text-lg">
+                  <div className="w-8 h-8 rounded bg-emerald-950/80 border border-emerald-700 flex items-center justify-center text-emerald-400 text-base">
                     ✓
                   </div>
                   <p className="text-xs text-[var(--on-surface-variant)]">Documento válido sin incidencias.</p>
@@ -2589,9 +2589,9 @@ export default function App() {
                 validationReport.issues.map((issue) => (
                   <div
                     key={issue.id}
-                    className="p-3 rounded-xl bg-[var(--surface)] border border-[var(--outline)] flex items-start justify-between gap-3 text-xs"
+                    className="p-2.5 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-start justify-between gap-3 text-xs"
                   >
-                    <div className="flex items-start gap-2.5 flex-1 min-w-0">
+                    <div className="flex items-start gap-2 flex-1 min-w-0">
                       <span className="text-amber-400 font-bold shrink-0 mt-0.5">⚠</span>
                       <div className="flex flex-col gap-0.5 min-w-0">
                         <span className="font-semibold text-[var(--on-surface)] truncate">{issue.message}</span>
@@ -2614,11 +2614,11 @@ export default function App() {
               )}
             </div>
 
-            <div className="px-5 py-3 bg-[var(--surface)] border-t border-[var(--outline)] flex justify-end">
+            <div className="px-4 py-2.5 bg-[var(--surface)] border-t border-[var(--outline)] flex justify-end">
               <button
                 type="button"
                 onClick={() => setIsProblemsModalOpen(false)}
-                className="btn-m3-secondary px-4 py-1.5 text-xs cursor-pointer"
+                className="btn-m3-secondary px-3.5 py-1 text-xs cursor-pointer"
               >
                 Cerrar
               </button>
@@ -2634,49 +2634,49 @@ export default function App() {
           onClick={() => setIsAutoLayoutConfirmOpen(false)}
         >
           <div
-            className="w-full sm:max-w-md bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-3xl sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-slide-up sm:animate-none pb-safe sm:pb-0"
+            className="w-full sm:max-w-md bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-lg sm:rounded-lg shadow-xl flex flex-col overflow-hidden animate-slide-up sm:animate-none pb-safe sm:pb-0"
             role="dialog"
             aria-modal="true"
             aria-labelledby="autolayout-modal-title"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="w-10 h-1.5 bg-[var(--outline)] rounded-full mx-auto my-2.5 sm:hidden" />
+            <div className="w-10 h-1 bg-[var(--outline)] rounded mx-auto my-2 sm:hidden" />
 
-            <div className="px-5 py-4 border-b border-[var(--outline)] flex items-center justify-between">
+            <div className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
               <h2 id="autolayout-modal-title" className="text-sm font-semibold text-[var(--on-surface)] font-sans flex items-center gap-2">
-                <span className="material-symbols-outlined text-[18px] text-[var(--primary)]">account_tree</span>
+                <span className="material-symbols-outlined text-[16px] text-sky-400">account_tree</span>
                 <span>Auto organizar Canvas (DAG)</span>
               </h2>
               <button
                 type="button"
                 onClick={() => setIsAutoLayoutConfirmOpen(false)}
-                className="btn-m3-icon w-8 h-8"
+                className="btn-m3-icon w-7 h-7 cursor-pointer"
               >
-                <span className="material-symbols-outlined text-[18px]">close</span>
+                <span className="material-symbols-outlined text-[16px]">close</span>
               </button>
             </div>
 
-            <div className="p-5 flex flex-col gap-3 text-xs text-[var(--on-surface-variant)] leading-relaxed">
+            <div className="p-4 flex flex-col gap-2.5 text-xs text-[var(--on-surface-variant)] leading-relaxed">
               <p>
                 Esta acción organizará todas las tarjetas y secciones en un grafo jerárquico según sus dependencias <code className="text-[var(--primary)] font-mono">blockedBy</code>.
               </p>
-              <div className="p-3 rounded-xl bg-[var(--surface)] border border-[var(--outline)] text-[11px] font-mono">
+              <div className="p-2.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] font-mono">
                 • {parsedStats.taskCount} tareas en {parsedStats.groupCount} secciones
               </div>
             </div>
 
-            <div className="px-5 py-3.5 bg-[var(--surface)] border-t border-[var(--outline)] flex items-center justify-end gap-2">
+            <div className="px-4 py-2.5 bg-[var(--surface)] border-t border-[var(--outline)] flex items-center justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setIsAutoLayoutConfirmOpen(false)}
-                className="btn-m3-text px-4 py-1.5 text-xs cursor-pointer"
+                className="btn-m3-text px-3 py-1 text-xs cursor-pointer"
               >
                 Cancelar
               </button>
               <button
                 type="button"
                 onClick={handleExecuteAutoLayout}
-                className="btn-m3-primary px-4 py-1.5 text-xs cursor-pointer"
+                className="btn-m3-primary px-3.5 py-1 text-xs cursor-pointer shadow-sm"
               >
                 Auto organizar
               </button>
@@ -2692,30 +2692,30 @@ export default function App() {
           onClick={() => setIsNewTaskModalOpen(false)}
         >
           <div
-            className="w-full sm:max-w-md bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-3xl sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-slide-up sm:animate-none pb-safe sm:pb-0"
+            className="w-full sm:max-w-md bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-lg sm:rounded-lg shadow-xl flex flex-col overflow-hidden animate-slide-up sm:animate-none pb-safe sm:pb-0"
             role="dialog"
             aria-modal="true"
             aria-labelledby="new-task-modal-title"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="w-10 h-1.5 bg-[var(--outline)] rounded-full mx-auto my-2.5 sm:hidden" />
+            <div className="w-10 h-1 bg-[var(--outline)] rounded mx-auto my-2 sm:hidden" />
 
-            <div className="px-5 py-4 border-b border-[var(--outline)] flex items-center justify-between">
+            <div className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
               <h2 id="new-task-modal-title" className="text-sm font-semibold text-[var(--on-surface)] font-sans flex items-center gap-2">
-                <span className="material-symbols-outlined text-[18px] text-[var(--primary)]">add_task</span>
+                <span className="material-symbols-outlined text-[16px] text-sky-400">add_task</span>
                 <span>Crear Nueva Tarea</span>
               </h2>
               <button
                 type="button"
                 onClick={() => setIsNewTaskModalOpen(false)}
-                className="btn-m3-icon w-8 h-8"
+                className="btn-m3-icon w-7 h-7 cursor-pointer"
               >
-                <span className="material-symbols-outlined text-[18px]">close</span>
+                <span className="material-symbols-outlined text-[16px]">close</span>
               </button>
             </div>
 
-            <form onSubmit={handleCreateTask} className="p-4 sm:p-5 flex flex-col gap-4">
-              <div className="flex flex-col gap-1.5">
+            <form onSubmit={handleCreateTask} className="p-4 flex flex-col gap-3.5">
+              <div className="flex flex-col gap-1">
                 <label className="text-xs font-medium text-[var(--on-surface)]">Título de la tarea</label>
                 <input
                   type="text"
@@ -2723,12 +2723,12 @@ export default function App() {
                   value={newTaskTitle}
                   onChange={(e) => setNewTaskTitle(e.target.value)}
                   placeholder="ej. Crear recuperación de contraseña"
-                  className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded-xl px-3 py-2 text-xs font-sans text-[var(--on-surface)] focus:outline-none"
+                  className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-2.5 py-1.5 text-xs font-sans text-[var(--on-surface)] focus:outline-none"
                 />
               </div>
 
               {/* Priority Selection */}
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-1">
                 <label className="text-xs font-medium text-[var(--on-surface)]">Prioridad</label>
                 <div className="grid grid-cols-4 gap-2">
                   {(['P0', 'P1', 'P2', 'P3'] as TaskPriority[]).map((p) => {
@@ -2738,10 +2738,10 @@ export default function App() {
                         key={p}
                         type="button"
                         onClick={() => setNewTaskPriority(p)}
-                        className={`py-2 px-2 text-xs font-mono font-bold rounded-xl border text-center transition-all cursor-pointer ${
+                        className={`py-1.5 px-2 text-xs font-mono font-medium rounded border text-center transition-colors cursor-pointer ${
                           isSelected
                             ? 'bg-[var(--primary)] text-[var(--on-primary)] border-[var(--primary)]'
-                            : 'bg-[var(--surface)] text-[var(--on-surface-variant)] border-[var(--outline)]'
+                            : 'bg-[var(--surface)] text-[var(--on-surface-variant)] border-[var(--outline)] hover:bg-[var(--surface-container-high)]'
                         }`}
                       >
                         {p}
@@ -2752,7 +2752,7 @@ export default function App() {
               </div>
 
               {/* Section / Group */}
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-1">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-medium text-[var(--on-surface)]">Sección</label>
                   <button
@@ -2770,13 +2770,13 @@ export default function App() {
                     value={customGroupInput}
                     onChange={(e) => setCustomGroupInput(e.target.value)}
                     placeholder="ej. Notificaciones"
-                    className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded-xl px-3 py-2 text-xs font-sans text-[var(--on-surface)] focus:outline-none"
+                    className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-2.5 py-1.5 text-xs font-sans text-[var(--on-surface)] focus:outline-none"
                   />
                 ) : (
                   <select
                     value={newTaskGroup}
                     onChange={(e) => setNewTaskGroup(e.target.value)}
-                    className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded-xl px-3 py-2 text-xs font-sans text-[var(--on-surface)] focus:outline-none cursor-pointer"
+                    className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-2.5 py-1.5 text-xs font-sans text-[var(--on-surface)] focus:outline-none cursor-pointer"
                   >
                     {existingSections.map((sec) => (
                       <option key={sec} value={sec}>
@@ -2787,18 +2787,18 @@ export default function App() {
                 )}
               </div>
 
-              <div className="pt-3 flex items-center justify-end gap-2 border-t border-[var(--outline)]">
+              <div className="pt-2.5 flex items-center justify-end gap-2 border-t border-[var(--outline)]">
                 <button
                   type="button"
                   onClick={() => setIsNewTaskModalOpen(false)}
-                  className="btn-m3-text px-4 py-1.5 text-xs cursor-pointer"
+                  className="btn-m3-text px-3 py-1 text-xs cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={!newTaskTitle.trim()}
-                  className="btn-m3-primary px-5 py-1.5 text-xs cursor-pointer shadow-sm"
+                  className="btn-m3-primary px-4 py-1 text-xs cursor-pointer shadow-sm"
                 >
                   Crear Tarea
                 </button>
@@ -2815,35 +2815,35 @@ export default function App() {
           onClick={() => setDeleteWarningState(null)}
         >
           <div
-            className="w-full sm:max-w-md bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-3xl sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-slide-up sm:animate-none pb-safe sm:pb-0"
+            className="w-full sm:max-w-md bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-lg sm:rounded-lg shadow-xl flex flex-col overflow-hidden animate-slide-up sm:animate-none pb-safe sm:pb-0"
             role="dialog"
             aria-modal="true"
             aria-labelledby="delete-warning-title"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="w-10 h-1.5 bg-[var(--outline)] rounded-full mx-auto my-2.5 sm:hidden" />
+            <div className="w-10 h-1 bg-[var(--outline)] rounded mx-auto my-2 sm:hidden" />
 
-            <div className="px-5 py-4 border-b border-[var(--outline)] flex items-center justify-between">
+            <div className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
               <h2 id="delete-warning-title" className="text-sm font-semibold text-rose-400 font-sans flex items-center gap-2">
-                <span className="material-symbols-outlined text-[18px]">warning</span>
+                <span className="material-symbols-outlined text-[16px]">warning</span>
                 <span>Confirmar Eliminación</span>
               </h2>
               <button
                 type="button"
                 onClick={() => setDeleteWarningState(null)}
-                className="btn-m3-icon w-8 h-8"
+                className="btn-m3-icon w-7 h-7 cursor-pointer"
               >
-                <span className="material-symbols-outlined text-[18px]">close</span>
+                <span className="material-symbols-outlined text-[16px]">close</span>
               </button>
             </div>
 
-            <div className="p-5 flex flex-col gap-3 text-xs text-[var(--on-surface-variant)] leading-relaxed">
+            <div className="p-4 flex flex-col gap-2.5 text-xs text-[var(--on-surface-variant)] leading-relaxed">
               <p>
                 ¿Estás seguro de que deseas eliminar la tarea <strong className="text-[var(--on-surface)]">"{deleteWarningState.title}"</strong> (#{deleteWarningState.taskId})?
               </p>
 
               {deleteWarningState.dependents.length > 0 && (
-                <div className="p-3 rounded-xl bg-rose-950/40 border border-rose-800/80 text-rose-200">
+                <div className="p-2.5 rounded bg-rose-950/40 border border-rose-800/80 text-rose-200">
                   <span className="font-semibold block mb-1">Tareas dependientes que quedarán afectadas:</span>
                   <ul className="list-disc pl-4 space-y-0.5">
                     {deleteWarningState.dependents.map((dep) => (
@@ -2856,18 +2856,18 @@ export default function App() {
               )}
             </div>
 
-            <div className="px-5 py-3.5 bg-[var(--surface)] border-t border-[var(--outline)] flex items-center justify-end gap-2">
+            <div className="px-4 py-2.5 bg-[var(--surface)] border-t border-[var(--outline)] flex items-center justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setDeleteWarningState(null)}
-                className="btn-m3-text px-4 py-1.5 text-xs cursor-pointer"
+                className="btn-m3-text px-3 py-1 text-xs cursor-pointer"
               >
                 Cancelar
               </button>
               <button
                 type="button"
                 onClick={handleConfirmDeleteTask}
-                className="btn-m3-primary bg-rose-600 hover:bg-rose-500 text-white px-5 py-1.5 text-xs cursor-pointer shadow-sm"
+                className="btn-m3-primary bg-rose-600 hover:bg-rose-500 text-white px-4 py-1 text-xs cursor-pointer shadow-sm"
               >
                 Eliminar
               </button>
@@ -2883,15 +2883,15 @@ export default function App() {
           onClick={() => setIsViewMarkdownOpen(false)}
         >
           <div
-            className="w-full sm:max-w-2xl bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-3xl sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-slide-up sm:animate-none max-h-[90vh] sm:max-h-[85vh] pb-safe sm:pb-0"
+            className="w-full sm:max-w-2xl bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-lg sm:rounded-lg shadow-xl flex flex-col overflow-hidden animate-slide-up sm:animate-none max-h-[90vh] sm:max-h-[85vh] pb-safe sm:pb-0"
             role="dialog"
             aria-modal="true"
             aria-labelledby="view-markdown-title"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="w-10 h-1.5 bg-[var(--outline)] rounded-full mx-auto my-2.5 sm:hidden" />
+            <div className="w-10 h-1 bg-[var(--outline)] rounded mx-auto my-2 sm:hidden" />
 
-            <div className="px-5 py-4 border-b border-[var(--outline)] flex items-center justify-between">
+            <div className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
               <div>
                 <h2 id="view-markdown-title" className="text-sm font-semibold text-[var(--on-surface)] font-sans">
                   TASKS.md — Sincronizado en Vivo
@@ -2903,34 +2903,34 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => setIsViewMarkdownOpen(false)}
-                className="btn-m3-icon w-8 h-8"
+                className="btn-m3-icon w-7 h-7 cursor-pointer"
               >
-                <span className="material-symbols-outlined text-[18px]">close</span>
+                <span className="material-symbols-outlined text-[16px]">close</span>
               </button>
             </div>
 
-            <div className="p-4 sm:p-5 flex flex-col gap-3 overflow-hidden">
-              <div className="relative w-full rounded-2xl bg-[var(--surface)] border border-[var(--outline)] overflow-hidden">
-                <pre className="p-3.5 sm:p-4 text-xs font-mono text-[var(--on-surface)] overflow-auto max-h-[46vh] leading-relaxed select-text whitespace-pre-wrap">
+            <div className="p-4 flex flex-col gap-2.5 overflow-hidden">
+              <div className="relative w-full rounded bg-[var(--surface)] border border-[var(--outline)] overflow-hidden">
+                <pre className="p-3 text-xs font-mono text-[var(--on-surface)] overflow-auto max-h-[46vh] leading-relaxed select-text whitespace-pre-wrap">
                   {markdownInput}
                 </pre>
               </div>
             </div>
 
-            <div className="px-5 py-3.5 bg-[var(--surface)] border-t border-[var(--outline)] flex items-center justify-between">
+            <div className="px-4 py-2.5 bg-[var(--surface)] border-t border-[var(--outline)] flex items-center justify-between">
               <button
                 type="button"
                 onClick={handleCopyMarkdown}
-                className="btn-m3-secondary px-4 py-1.5 text-xs cursor-pointer"
+                className="btn-m3-secondary px-3 py-1 text-xs cursor-pointer flex items-center gap-1.5"
               >
-                <span className="material-symbols-outlined text-[16px]">content_copy</span>
+                <span className="material-symbols-outlined text-[15px]">content_copy</span>
                 <span>{copiedMarkdown ? '¡Copiado!' : 'Copiar Markdown'}</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setIsViewMarkdownOpen(false)}
-                className="btn-m3-text px-4 py-1.5 text-xs cursor-pointer"
+                className="btn-m3-text px-3 py-1 text-xs cursor-pointer"
               >
                 Cerrar
               </button>
@@ -2956,15 +2956,15 @@ export default function App() {
           onClick={() => setIsSanityModalOpen(false)}
         >
           <div
-            className="w-full sm:max-w-md bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-3xl sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-slide-up sm:animate-none pb-safe sm:pb-0"
+            className="w-full sm:max-w-md bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-lg sm:rounded-lg shadow-xl flex flex-col overflow-hidden animate-slide-up sm:animate-none pb-safe sm:pb-0"
             role="dialog"
             aria-modal="true"
             aria-labelledby="sanity-modal-title"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="w-10 h-1.5 bg-[var(--outline)] rounded-full mx-auto my-2.5 sm:hidden" />
+            <div className="w-10 h-1 bg-[var(--outline)] rounded mx-auto my-2 sm:hidden" />
 
-            <div className="px-5 py-4 border-b border-[var(--outline)] flex items-center justify-between">
+            <div className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
               <div>
                 <h2 id="sanity-modal-title" className="text-sm font-semibold text-[var(--on-surface)] font-sans">
                   Persistencia Visual (Sanity)
@@ -2976,62 +2976,62 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => setIsSanityModalOpen(false)}
-                className="btn-m3-icon w-8 h-8"
+                className="btn-m3-icon w-7 h-7 cursor-pointer"
               >
-                <span className="material-symbols-outlined text-[18px]">close</span>
+                <span className="material-symbols-outlined text-[16px]">close</span>
               </button>
             </div>
 
-            <form onSubmit={handleSaveSanityConfig} className="p-4 sm:p-5 flex flex-col gap-3.5">
-              <div className="p-3 rounded-xl bg-[var(--surface)] border border-[var(--outline)] text-xs text-[var(--on-surface-variant)] leading-relaxed">
-                <span className="text-[var(--primary)] font-semibold">Single Source of Truth: </span>
+            <form onSubmit={handleSaveSanityConfig} className="p-4 flex flex-col gap-3">
+              <div className="p-2.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-xs text-[var(--on-surface-variant)] leading-relaxed">
+                <span className="text-[var(--primary)] font-medium">Single Source of Truth: </span>
                 TASKS.md define títulos, estados y prioridades. Sanity guarda la posición visual en el canvas.
               </div>
 
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-1">
                 <label className="text-xs font-medium text-[var(--on-surface)]">Project ID</label>
                 <input
                   type="text"
                   value={sanityProjectId}
                   onChange={(e) => setSanityProjectId(e.target.value)}
                   placeholder="ej. 8k9abcde"
-                  className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded-xl px-3 py-2 text-xs font-mono text-[var(--on-surface)] focus:outline-none"
+                  className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-2.5 py-1.5 text-xs font-mono text-[var(--on-surface)] focus:outline-none"
                 />
               </div>
 
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-1">
                 <label className="text-xs font-medium text-[var(--on-surface)]">Dataset</label>
                 <input
                   type="text"
                   value={sanityDataset}
                   onChange={(e) => setSanityDataset(e.target.value)}
                   placeholder="production"
-                  className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded-xl px-3 py-2 text-xs font-mono text-[var(--on-surface)] focus:outline-none"
+                  className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-2.5 py-1.5 text-xs font-mono text-[var(--on-surface)] focus:outline-none"
                 />
               </div>
 
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-1">
                 <label className="text-xs font-medium text-[var(--on-surface)]">API Token (Opcional)</label>
                 <input
                   type="password"
                   value={sanityToken}
                   onChange={(e) => setSanityToken(e.target.value)}
                   placeholder="sk..."
-                  className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded-xl px-3 py-2 text-xs font-mono text-[var(--on-surface)] focus:outline-none"
+                  className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-2.5 py-1.5 text-xs font-mono text-[var(--on-surface)] focus:outline-none"
                 />
               </div>
 
-              <div className="pt-3 flex items-center justify-end gap-2 border-t border-[var(--outline)]">
+              <div className="pt-2.5 flex items-center justify-end gap-2 border-t border-[var(--outline)]">
                 <button
                   type="button"
                   onClick={() => setIsSanityModalOpen(false)}
-                  className="btn-m3-text px-4 py-1.5 text-xs cursor-pointer"
+                  className="btn-m3-text px-3 py-1 text-xs cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="btn-m3-primary px-5 py-1.5 text-xs cursor-pointer shadow-sm"
+                  className="btn-m3-primary px-4 py-1 text-xs cursor-pointer shadow-sm"
                 >
                   Guardar
                 </button>

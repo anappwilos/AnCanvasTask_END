@@ -114,22 +114,22 @@ function TaskCardComponent({
     }
   };
 
-  const priorityConfig: Record<TaskPriority, { label: string; text: string; bg: string; border: string }> = {
-    P0: { label: 'P0 · Critical', text: 'text-rose-400', bg: 'bg-rose-950/40', border: 'border-rose-800/60' },
-    P1: { label: 'P1 · High', text: 'text-amber-400', bg: 'bg-amber-950/40', border: 'border-amber-800/60' },
-    P2: { label: 'P2 · Medium', text: 'text-sky-400', bg: 'bg-sky-950/40', border: 'border-sky-800/60' },
-    P3: { label: 'P3 · Low', text: 'text-zinc-400', bg: 'bg-zinc-800/40', border: 'border-zinc-700/60' },
+  const priorityConfig: Record<TaskPriority, { label: string; dot: string; text: string }> = {
+    P0: { label: 'P0 · Critical', dot: 'bg-rose-500', text: 'text-rose-400' },
+    P1: { label: 'P1 · High', dot: 'bg-amber-500', text: 'text-amber-400' },
+    P2: { label: 'P2 · Medium', dot: 'bg-blue-500', text: 'text-blue-400' },
+    P3: { label: 'P3 · Low', dot: 'bg-zinc-500', text: 'text-zinc-400' },
   };
 
   const currentPriority = priorityConfig[priority] || priorityConfig.P1;
 
-  const statusConfig: Record<string, { label: string; text: string; bg: string }> = {
-    backlog: { label: 'Backlog', text: 'text-slate-400', bg: 'bg-slate-800/40' },
-    todo: { label: 'Todo', text: 'text-amber-400', bg: 'bg-amber-950/40' },
-    in_progress: { label: 'In Progress', text: 'text-sky-400', bg: 'bg-sky-950/40' },
-    review: { label: 'Review', text: 'text-purple-400', bg: 'bg-purple-950/40' },
-    done: { label: 'Done', text: 'text-emerald-400', bg: 'bg-emerald-950/40' },
-    blocked: { label: 'Blocked', text: 'text-rose-400', bg: 'bg-rose-950/40' },
+  const statusConfig: Record<string, { label: string; text: string }> = {
+    backlog: { label: 'Backlog', text: 'text-slate-400' },
+    todo: { label: 'Todo', text: 'text-amber-400' },
+    in_progress: { label: 'In Progress', text: 'text-blue-400' },
+    review: { label: 'Review', text: 'text-purple-400' },
+    done: { label: 'Done', text: 'text-emerald-400' },
+    blocked: { label: 'Blocked', text: 'text-rose-400' },
   };
 
   const normalizedStatus = completed ? 'done' : status || 'todo';
@@ -145,37 +145,37 @@ function TaskCardComponent({
       }}
     >
       <div
-        className={`w-full h-full rounded-xl bg-[var(--surface-container)] border transition-colors duration-150 select-none flex flex-col justify-between p-3 relative ${
+        className={`w-full h-full rounded-md bg-[var(--surface-container)] border transition-colors duration-120 select-none flex flex-col justify-between p-2.5 relative ${
           isSelected
-            ? 'border-[var(--primary)] ring-2 ring-[var(--primary)]/40 bg-[var(--surface-container-high)] shadow-xs'
+            ? 'border-[var(--primary)] ring-1 ring-[var(--primary)] bg-[var(--surface-container-high)]'
             : isDuplicateId
-            ? 'border-rose-600/80 bg-rose-950/10'
+            ? 'border-rose-600/80 bg-rose-950/20'
             : completed
-            ? 'border-[var(--outline)] bg-[var(--surface)]/90 opacity-80'
-            : 'border-[var(--outline)] hover:border-[var(--on-surface-variant)] shadow-xs'
+            ? 'border-[var(--outline)] bg-[var(--surface)] opacity-75'
+            : 'border-[var(--outline)] hover:border-[var(--on-surface-variant)]'
         }`}
       >
-        {/* Top Row: Checkbox + Title / Inline Edit + Context Menu + Priority chip */}
+        {/* Top Row: Checkbox + Title / Inline Edit + Context Menu + Priority */}
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-start gap-2 flex-1 min-w-0">
-            {/* M3 Checkbox */}
+            {/* Checkbox */}
             <button
               type="button"
               onPointerDown={(e) => e.stopPropagation()}
               onClick={toggleCompleted}
               aria-label={completed ? 'Marcar tarea como pendiente' : 'Marcar tarea como completada'}
-              className="p-1 -m-1 mt-0.5 flex-shrink-0 flex items-center justify-center cursor-pointer rounded-full focus:outline-none"
+              className="mt-0.5 flex-shrink-0 flex items-center justify-center cursor-pointer focus:outline-none"
             >
               <span
-                className={`w-4 h-4 rounded-md border flex items-center justify-center transition-all ${
+                className={`w-3.5 h-3.5 rounded border flex items-center justify-center transition-all ${
                   completed
-                    ? 'bg-[var(--primary)] border-[var(--primary)] text-[var(--on-primary)] shadow-xs'
+                    ? 'bg-[var(--primary)] border-[var(--primary)] text-[var(--on-primary)]'
                     : 'bg-[var(--surface-container-high)] border-[var(--outline)] hover:border-[var(--primary)]'
                 }`}
               >
                 {completed && (
                   <svg
-                    className="w-3 h-3 stroke-current stroke-[3]"
+                    className="w-2.5 h-2.5 stroke-current stroke-[3]"
                     fill="none"
                     viewBox="0 0 24 24"
                   >
@@ -202,7 +202,7 @@ function TaskCardComponent({
                     setEditedTitle(title);
                   }
                 }}
-                className="w-full text-[13px] font-medium bg-[var(--surface)] border border-[var(--primary)] rounded-lg px-2 py-0.5 text-[var(--on-surface)] focus:outline-none -mt-0.5"
+                className="w-full text-xs font-medium bg-[var(--surface)] border border-[var(--primary)] rounded px-1.5 py-0.5 text-[var(--on-surface)] focus:outline-none -mt-0.5"
               />
             ) : (
               <div
@@ -214,7 +214,7 @@ function TaskCardComponent({
                 className="group/title flex items-start gap-1 flex-1 cursor-text min-w-0"
               >
                 <span
-                  className={`text-[13px] font-medium leading-snug transition-colors line-clamp-2 ${
+                  className={`text-xs font-medium leading-snug transition-colors line-clamp-2 ${
                     completed ? 'text-[var(--on-surface-variant)] line-through' : 'text-[var(--on-surface)]'
                   }`}
                 >
@@ -227,10 +227,10 @@ function TaskCardComponent({
                     e.stopPropagation();
                     setIsEditingTitle(true);
                   }}
-                  className="opacity-60 sm:opacity-0 group-hover/title:opacity-100 transition-opacity text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] p-0.5 shrink-0 cursor-pointer"
+                  className="opacity-0 group-hover/title:opacity-100 transition-opacity text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] p-0.5 shrink-0 cursor-pointer"
                   title="Editar título"
                 >
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                   </svg>
                 </button>
@@ -239,15 +239,15 @@ function TaskCardComponent({
           </div>
 
           <div className="flex items-center gap-1 shrink-0">
-            {/* M3 Discrete Priority Chip */}
+            {/* Discreet Priority Indicator */}
             <button
               type="button"
               onPointerDown={(e) => e.stopPropagation()}
               onClick={cyclePriority}
               title="Clic para cambiar prioridad (P0-P3)"
-              className={`min-h-[22px] px-2 py-0.5 text-[11px] font-mono font-medium rounded-full border cursor-pointer shrink-0 transition-all hover:brightness-110 active:scale-95 flex items-center gap-1 ${currentPriority.text} ${currentPriority.bg} ${currentPriority.border}`}
+              className={`px-1.5 py-0.5 text-[11px] font-mono font-medium rounded border border-[var(--outline)] bg-[var(--surface)] hover:border-[var(--on-surface-variant)] cursor-pointer shrink-0 transition-colors flex items-center gap-1 ${currentPriority.text}`}
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-current" />
+              <span className={`w-1.5 h-1.5 rounded-full ${currentPriority.dot}`} />
               <span>{priority}</span>
             </button>
 
@@ -259,10 +259,10 @@ function TaskCardComponent({
                 e.stopPropagation();
                 setIsMenuOpen(!isMenuOpen);
               }}
-              className="w-6 h-6 flex items-center justify-center text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] rounded-full hover:bg-[var(--surface-container-high)] cursor-pointer"
+              className="w-5 h-5 flex items-center justify-center text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] rounded hover:bg-[var(--surface-container-high)] cursor-pointer"
               title="Más acciones"
             >
-              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
                 <circle cx="12" cy="5" r="2" />
                 <circle cx="12" cy="12" r="2" />
                 <circle cx="12" cy="19" r="2" />
@@ -275,7 +275,7 @@ function TaskCardComponent({
         {isMenuOpen && (
           <div
             onPointerDown={(e) => e.stopPropagation()}
-            className="absolute top-10 right-2 z-50 bg-[var(--surface-container)] border border-[var(--outline)] rounded-xl shadow-2xl p-1.5 flex flex-col gap-1 min-w-[160px] text-xs font-sans animate-slide-up"
+            className="absolute top-8 right-2 z-50 bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-lg p-1 flex flex-col gap-0.5 min-w-[150px] text-xs font-sans"
           >
             <button
               type="button"
@@ -284,7 +284,7 @@ function TaskCardComponent({
                 setIsMenuOpen(false);
                 toggleCompleted(e);
               }}
-              className="px-2.5 py-1.5 rounded-lg text-left text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] flex items-center gap-2 cursor-pointer"
+              className="px-2 py-1 rounded text-left text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] flex items-center gap-2 cursor-pointer"
             >
               <span>{completed ? '↺ Marcar pendiente' : '✓ Marcar completada'}</span>
             </button>
@@ -296,7 +296,7 @@ function TaskCardComponent({
                 setIsMenuOpen(false);
                 cyclePriority(e);
               }}
-              className="px-2.5 py-1.5 rounded-lg text-left text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] flex items-center gap-2 cursor-pointer"
+              className="px-2 py-1 rounded text-left text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] flex items-center gap-2 cursor-pointer"
             >
               <span>⚡ Cambiar prioridad</span>
             </button>
@@ -308,9 +308,9 @@ function TaskCardComponent({
                 setIsMenuOpen(false);
                 editor.setSelectedShapes([shape.id]);
               }}
-              className="px-2.5 py-1.5 rounded-lg text-left text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] flex items-center gap-2 cursor-pointer"
+              className="px-2 py-1 rounded text-left text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] flex items-center gap-2 cursor-pointer"
             >
-              <span>🔍 Ver en panel de detalles</span>
+              <span>🔍 Ver detalles</span>
             </button>
 
             <div className="h-px bg-[var(--outline)] my-0.5" />
@@ -330,31 +330,28 @@ function TaskCardComponent({
                   })
                 );
               }}
-              className="px-2.5 py-1.5 rounded-lg text-left text-[var(--error)] hover:bg-rose-950/40 flex items-center gap-2 cursor-pointer"
+              className="px-2 py-1 rounded text-left text-[var(--error)] hover:bg-[var(--surface-container-high)] flex items-center gap-2 cursor-pointer"
             >
-              <span>🗑 Eliminar tarea</span>
+              <span>🗑 Eliminar</span>
             </button>
           </div>
         )}
 
-        {/* Middle Row: Tags & Subtask progress (DESIGN.md Section 5 & 6) */}
+        {/* Middle Row: Unboxed Tags & Subtask progress */}
         {(tags?.length || subtasks) && (
-          <div className="flex items-center gap-1.5 flex-wrap py-0.5">
-            {tags?.slice(0, 2).map((t) => (
-              <span
-                key={t}
-                className="px-1.5 py-0.2 rounded-md bg-[var(--surface-container-high)] border border-[var(--outline)] text-[10px] font-sans text-[var(--on-surface-variant)]"
-              >
+          <div className="flex items-center gap-1.5 flex-wrap py-0.5 text-[10px] text-[var(--on-surface-variant)]">
+            {tags?.slice(0, 3).map((t) => (
+              <span key={t} className="font-mono text-[var(--on-surface-variant)]">
                 #{t}
               </span>
             ))}
-            {tags && tags.length > 2 && (
-              <span className="px-1.5 py-0.2 rounded-md bg-[var(--surface-container-high)] text-[10px] font-mono text-[var(--on-surface-variant)]">
-                +{tags.length - 2}
+            {tags && tags.length > 3 && (
+              <span className="font-mono text-[var(--on-surface-variant)]">
+                +{tags.length - 3}
               </span>
             )}
             {subtasks && (
-              <span className="px-1.5 py-0.2 rounded-md bg-sky-950/50 border border-sky-800/60 text-[10px] font-mono text-sky-300 flex items-center gap-1">
+              <span className="font-mono text-[var(--on-surface-variant)] flex items-center gap-0.5">
                 <span>✓</span>
                 <span>{subtasks.completed}/{subtasks.total}</span>
               </span>
@@ -362,13 +359,12 @@ function TaskCardComponent({
           </div>
         )}
 
-        {/* Bottom Row: Metadata & Actions (DESIGN.md Section 9 & 10) */}
+        {/* Bottom Row: Metadata & Status */}
         <div className="flex items-center justify-between text-xs text-[var(--on-surface-variant)] pt-1.5 border-t border-[var(--outline)] mt-0.5">
           <div className="flex items-center gap-1.5 truncate max-w-[200px]">
             {taskId ? (
-              <span className="text-[var(--on-surface)] font-mono text-[11px] font-medium truncate tracking-tight flex items-center gap-0.5 bg-[var(--surface)] px-1.5 py-0.5 rounded-md border border-[var(--outline)]" title={`ID: ${taskId}`}>
-                <span className="text-[var(--on-surface-variant)]">#</span>
-                <span>{taskId}</span>
+              <span className="text-[var(--on-surface-variant)] font-mono text-[11px] truncate tracking-tight" title={`ID: ${taskId}`}>
+                #{taskId}
               </span>
             ) : (
               <span className="text-[var(--on-surface-variant)] font-mono text-[11px] italic">sin-id</span>
@@ -376,34 +372,34 @@ function TaskCardComponent({
 
             {isDuplicateId && (
               <span
-                className="px-1.5 py-0.5 text-[10px] font-semibold text-rose-300 bg-rose-950/90 border border-rose-800 rounded-md"
+                className="px-1 py-0.2 text-[10px] font-semibold text-rose-400 border border-rose-800/80 rounded"
                 title="ID duplicado en TASKS.md"
               >
-                ⚠ Dup
+                dup
               </span>
             )}
 
             {hasMissingId && (
               <span
-                className="px-1.5 py-0.5 text-[10px] font-semibold text-amber-300 bg-amber-950/90 border border-amber-800 rounded-md"
+                className="px-1 py-0.2 text-[10px] font-semibold text-amber-400 border border-amber-800/80 rounded"
                 title="Tarea sin ID explícito en TASKS.md"
               >
-                ⚠ Sin ID
+                sin-id
               </span>
             )}
 
             {unresolvedBlockers && unresolvedBlockers.length > 0 && (
               <span
-                className="px-1.5 py-0.5 text-[10px] font-semibold text-amber-300 bg-amber-950/90 border border-amber-800 rounded-md"
+                className="px-1 py-0.2 text-[10px] font-semibold text-amber-400 border border-amber-800/80 rounded"
                 title={`Dependencia no resuelta: #${unresolvedBlockers.join(', #')}`}
               >
-                ⚠ Dep ?
+                dep?
               </span>
             )}
 
             {blockedBy && !completed && !unresolvedBlockers?.length && (
               <span
-                className="px-1.5 py-0.5 text-[10px] font-medium text-amber-300 bg-amber-950/80 border border-amber-800/80 rounded-md flex items-center gap-1"
+                className="text-[10px] font-mono text-amber-400 flex items-center gap-0.5"
                 title={`Bloqueada por #${blockedBy}`}
               >
                 <span>🔒</span>
@@ -412,9 +408,9 @@ function TaskCardComponent({
             )}
           </div>
 
-          <div className="flex items-center gap-1.5 shrink-0">
-            <span className={`px-1.5 py-0.5 text-[10px] font-mono font-medium rounded-md tracking-wider ${currentStatus.text} ${currentStatus.bg}`}>
-              {currentStatus.label.toUpperCase()}
+          <div className="flex items-center gap-1 shrink-0">
+            <span className={`text-[10px] font-mono uppercase tracking-wider ${currentStatus.text}`}>
+              {currentStatus.label}
             </span>
           </div>
         </div>
@@ -465,7 +461,7 @@ export class TaskShapeUtil extends ShapeUtil<any> {
     if (typeof Path2D !== 'undefined') {
       const path = new Path2D();
       if (typeof path.roundRect === 'function') {
-        path.roundRect(0, 0, shape.props.w, shape.props.h, 12);
+        path.roundRect(0, 0, shape.props.w, shape.props.h, 5);
       } else {
         path.rect(0, 0, shape.props.w, shape.props.h);
       }
@@ -522,7 +518,7 @@ export class TaskGroupShapeUtil extends ShapeUtil<any> {
     if (typeof Path2D !== 'undefined') {
       const path = new Path2D();
       if (typeof path.roundRect === 'function') {
-        path.roundRect(0, 0, shape.props.w, shape.props.h, 16);
+        path.roundRect(0, 0, shape.props.w, shape.props.h, 6);
       } else {
         path.rect(0, 0, shape.props.w, shape.props.h);
       }
@@ -543,26 +539,23 @@ export class TaskGroupShapeUtil extends ShapeUtil<any> {
           pointerEvents: 'none',
         }}
       >
-        <div className="w-full h-full rounded-2xl bg-[var(--surface-container)]/70 border border-[var(--outline)]/80 p-4 flex flex-col justify-between select-none shadow-xs backdrop-blur-xs transition-colors">
+        <div className="w-full h-full rounded-md bg-[var(--surface-container)]/30 border border-[var(--outline)] p-3 flex flex-col justify-start select-none transition-colors">
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-[var(--outline)] pb-3">
-            <div className="flex items-center gap-2">
-              <span className="text-[var(--primary)] font-mono text-xs font-semibold">##</span>
-              <h2 className="text-sm font-semibold text-[var(--on-surface)] font-sans tracking-tight truncate max-w-[220px]">
+          <div className="flex items-center justify-between border-b border-[var(--outline)] pb-2">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[var(--on-surface-variant)] font-mono text-xs font-semibold">##</span>
+              <h2 className="text-xs font-semibold text-[var(--on-surface)] font-sans tracking-tight truncate max-w-[220px]">
                 {title}
               </h2>
             </div>
             {count > 0 && (
-              <span className="text-[11px] font-mono text-[var(--on-surface-variant)] bg-[var(--surface)] px-2 py-0.5 rounded-full border border-[var(--outline)] tabular-nums">
+              <span className="text-[11px] font-mono text-[var(--on-surface-variant)] tabular-nums">
                 {completedCount > 0
                   ? `${completedCount}/${count} completadas`
                   : `${count} ${count === 1 ? 'tarea' : 'tareas'}`}
               </span>
             )}
           </div>
-
-          {/* Guide background area */}
-          <div className="flex-1 w-full rounded-xl border border-dashed border-[var(--outline)]/40 mt-3 bg-[var(--surface)]/20" />
         </div>
       </HTMLContainer>
     );
