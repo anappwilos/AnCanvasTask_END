@@ -302,6 +302,197 @@ export async function saveCanvasVisualState(
   return { success: true, remote: false };
 }
 
+export interface SanityTestingTaskDocument {
+  _id: string;
+  _type: 'task';
+  taskId: string;
+  title: string;
+  completed: boolean;
+  status: 'todo' | 'in_progress' | 'blocked' | 'done';
+  priority: 'P0' | 'P1' | 'P2' | 'P3';
+  groupTitle: string;
+  blockedBy?: string;
+  tags?: string[];
+  subtasks?: Array<{ title: string; completed: boolean }>;
+  description?: string;
+  updatedAt: string;
+}
+
+export interface SanityWriteTestResult {
+  ok: boolean;
+  message: string;
+  details?: string;
+  latencyMs?: number;
+  dataset?: string;
+  document?: any;
+  action: 'created' | 'verified' | 'failed';
+}
+
+/**
+ * Executes a real live write mutation to Sanity (dataset `production` or active dataset)
+ * and immediately verifies that the document exists and can be retrieved.
+ */
+export async function writeTestingTaskToSanity(
+  configOverride?: Partial<SanityConfig>,
+  customTask?: Partial<SanityTestingTaskDocument>
+): Promise<SanityWriteTestResult> {
+  const config = { ...getSanityConfig(), ...configOverride };
+  if (!config.projectId || !config.dataset) {
+    return {
+      ok: false,
+      action: 'failed',
+      message: 'Falta configuración de Sanity',
+      details: 'Introduce un Project ID y Dataset válidos.',
+    };
+  }
+
+  if (!config.token) {
+    return {
+      ok: false,
+      action: 'failed',
+      message: 'Se requiere API Token con permisos de escritura',
+      details: 'Para escribir datos en el dataset de Sanity necesitas un token de tipo "Editor".',
+    };
+  }
+
+  const client = createClient({
+    projectId: config.projectId,
+    dataset: config.dataset,
+    apiVersion: config.apiVersion || '2024-03-01',
+    token: config.token,
+    useCdn: false,
+  });
+
+  const now = new Date();
+  const testDocId = customTask?._id || `task-test-schema-${Date.now().toString(36)}`;
+  const testTaskId = customTask?.taskId || `test-${Math.floor(1000 + Math.random() * 9000)}`;
+
+  const testDocument: SanityTestingTaskDocument = {
+    _id: testDocId,
+    _type: 'task',
+    taskId: testTaskId,
+    title: customTask?.title || 'Tarea de Prueba - Verificación de Escritura Sanity',
+    completed: customTask?.completed ?? false,
+    status: customTask?.status || 'in_progress',
+    priority: customTask?.priority || 'P0',
+    groupTitle: customTask?.groupTitle || 'Autenticación & Nube',
+    tags: customTask?.tags || ['sanity-test', 'production-write', 'schema-v1'],
+    subtasks: customTask?.subtasks || [
+      { title: 'Validar schema task en Sanity', completed: true },
+      { title: 'Comprobar persistencia en dataset ' + config.dataset, completed: true },
+      { title: 'Sincronizar con el lienzo infinito', completed: false },
+    ],
+    description:
+      customTask?.description ||
+      `Documento de prueba generado por AnTaskCanvas a las ${now.toLocaleTimeString()} para comprobar mutaciones en el dataset "${config.dataset}".`,
+    updatedAt: now.toISOString(),
+  };
+
+  const startTime = Date.now();
+  try {
+    // 1. Write document to Sanity
+    const createResult = await client.createOrReplace(testDocument as any);
+
+    // 2. Immediate read verification (Read-After-Write)
+    const verifiedDoc = await client.fetch(`*[_id == $id][0]`, { id: testDocId });
+    const latencyMs = Date.now() - startTime;
+
+    if (!verifiedDoc) {
+      return {
+        ok: false,
+        action: 'failed',
+        message: 'Escritura completada pero el documento no se pudo leer',
+        details: `El documento ${testDocId} fue enviado pero no se encontró en la consulta inmediata.`,
+        latencyMs,
+        dataset: config.dataset,
+      };
+    }
+
+    return {
+      ok: true,
+      action: 'created',
+      message: `Documento "${testDocument.title}" escrito con éxito en "${config.dataset}"`,
+      details: `ID: ${verifiedDoc._id} | Tipo: ${verifiedDoc._type} | Verificado en ${latencyMs}ms.`,
+      latencyMs,
+      dataset: config.dataset,
+      document: verifiedDoc,
+    };
+  } catch (err: any) {
+    const latencyMs = Date.now() - startTime;
+    return {
+      ok: false,
+      action: 'failed',
+      message: 'Error al escribir documento en Sanity',
+      details: err?.message || String(err),
+      latencyMs,
+      dataset: config.dataset,
+    };
+  }
+}
+
+/**
+ * Deletes a test document from Sanity.
+ */
+export async function deleteDocumentFromSanity(
+  docId: string,
+  configOverride?: Partial<SanityConfig>
+): Promise<{ ok: boolean; message: string }> {
+  const config = { ...getSanityConfig(), ...configOverride };
+  if (!config.projectId || !config.dataset || !config.token) {
+    return { ok: false, message: 'Falta token de autenticación para eliminar' };
+  }
+
+  try {
+    const client = createClient({
+      projectId: config.projectId,
+      dataset: config.dataset,
+      apiVersion: config.apiVersion || '2024-03-01',
+      token: config.token,
+      useCdn: false,
+    });
+
+    await client.delete(docId);
+    return { ok: true, message: `Documento ${docId} eliminado con éxito` };
+  } catch (err: any) {
+    return { ok: false, message: err?.message || 'Error al eliminar documento' };
+  }
+}
+
+/**
+ * Fetches recent documents stored in Sanity dataset (both task and canvasVisualState).
+ */
+export async function fetchSanityDocumentsList(
+  configOverride?: Partial<SanityConfig>
+): Promise<Array<{ _id: string; _type: string; title?: string; taskId?: string; projectId?: string; _updatedAt?: string }>> {
+  const config = { ...getSanityConfig(), ...configOverride };
+  if (!config.projectId || !config.dataset) return [];
+
+  try {
+    const client = createClient({
+      projectId: config.projectId,
+      dataset: config.dataset,
+      apiVersion: config.apiVersion || '2024-03-01',
+      token: config.token || undefined,
+      useCdn: false,
+    });
+
+    const query = `*[_type in ["task", "canvasVisualState"]] | order(_updatedAt desc)[0...15] {
+      _id,
+      _type,
+      title,
+      taskId,
+      projectId,
+      _updatedAt,
+      updatedAt
+    }`;
+    const results = await client.fetch(query);
+    return Array.isArray(results) ? results : [];
+  } catch (err) {
+    console.warn('Error fetching Sanity documents list:', err);
+    return [];
+  }
+}
+
 /**
  * Extracts current visual positions and dimensions of all task cards and groups from tldraw editor.
  */
