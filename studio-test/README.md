@@ -1,31 +1,9 @@
-# Sanity Studio para AnTaskCanvas (`studio-test`)
+# Sanity Clean Content Studio
 
-Este directorio contiene el Sanity Studio oficial para el proyecto **`or19faat`** y dataset **`production`**.
+Congratulations, you have now installed the Sanity Content Studio, an open-source real-time content editing environment connected to the Sanity backend.
 
-## 🚀 Cómo ejecutarlo en tu ordenador local:
+Now you can do the following things:
 
-### 1. Entrar en la carpeta
-```bash
-cd studio-test
-```
-
-### 2. Instalar dependencias
-```bash
-npm install
-```
-
-### 3. Iniciar el servidor de desarrollo del Studio
-```bash
-npm run dev
-```
-
-El Studio se abrirá en **http://localhost:3333**.
-
-### 4. Iniciar sesión en el Studio
-En el navegador en `http://localhost:3333`, inicia sesión con la misma cuenta de Sanity (Google, GitHub o correo).
-
----
-
-## 📋 Esquemas incluidos:
-- **`task`**: Títulos, estados Kanban (`todo`, `in_progress`, `blocked`, `done`), prioridades (`P0`-`P3`), etiquetas `#`, subtareas checklist y dependencias `blockedBy`.
-- **`canvasVisualState`**: Coordenadas espaciales `(x, y, w, h)` del lienzo infinito.
+- [Read “getting started” in the docs](https://www.sanity.io/docs/introduction/getting-started?utm_source=readme)
+- [Join the Sanity community](https://www.sanity.io/community/join?utm_source=readme)
+- [Extend and build plugins](https://www.sanity.io/docs/content-studio/extending?utm_source=readme)
