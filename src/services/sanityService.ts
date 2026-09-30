@@ -317,6 +317,8 @@ export interface SanityTestingTaskDocument {
   status: 'todo' | 'in_progress' | 'blocked' | 'done';
   priority: 'P0' | 'P1' | 'P2' | 'P3';
   groupTitle: string;
+  workspaceId?: string;
+  workspace?: { _type: 'reference'; _ref: string };
   blockedBy?: string;
   tags?: string[];
   subtasks?: Array<{ title: string; completed: boolean }>;
@@ -467,6 +469,8 @@ export async function writeTestingTaskToSanity(
     status: customTask?.status || 'in_progress',
     priority: customTask?.priority || 'P0',
     groupTitle: customTask?.groupTitle || 'Autenticación & Nube',
+    workspaceId: customTask?.workspaceId,
+    workspace: customTask?.workspace,
     tags: customTask?.tags || ['sanity-test', 'production-write', 'schema-v1'],
     subtasks: customTask?.subtasks || [
       { title: 'Validar schema task en Sanity', completed: true },

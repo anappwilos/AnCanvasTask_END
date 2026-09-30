@@ -60,6 +60,8 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
   const [isCreateTaskOpen, setIsCreateTaskOpen] = useState<boolean>(false);
   const [newTaskTitleInput, setNewTaskTitleInput] = useState<string>('');
   const [newTaskPriorityInput, setNewTaskPriorityInput] = useState<'P0' | 'P1' | 'P2' | 'P3'>('P1');
+  const [newTaskWorkspaceId, setNewTaskWorkspaceId] = useState<string>('');
+  const [workspaceFilter, setWorkspaceFilter] = useState<string>('all');
 
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState<boolean>(false);
 
@@ -133,11 +135,22 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
     };
   }, [selectedDocId, config]);
 
+  const availableWorkspaces = useMemo(() => {
+    return documents.filter((d) => d._type === 'workspace');
+  }, [documents]);
+
   // Filtered documents list
   const filteredDocuments = useMemo(() => {
     return documents.filter((doc) => {
       if (activeDocType !== 'all' && doc._type !== activeDocType) {
         return false;
+      }
+
+      if (activeDocType === 'task' && workspaceFilter !== 'all') {
+        const docWsId = doc.workspaceId || doc.workspace?._ref;
+        if (docWsId !== workspaceFilter && doc._id !== workspaceFilter) {
+          return false;
+        }
       }
 
       if (searchQuery.trim()) {
@@ -159,7 +172,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
 
       return true;
     });
-  }, [documents, activeDocType, searchQuery, statusFilter]);
+  }, [documents, activeDocType, workspaceFilter, searchQuery, statusFilter]);
 
   const taskCount = documents.filter((d) => d._type === 'task').length;
   const workspaceCount = documents.filter((d) => d._type === 'workspace').length;
@@ -302,9 +315,10 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
     }
   };
 
-  const handleOpenCreateTaskModal = () => {
+  const handleOpenCreateTaskModal = (defaultWsId?: string) => {
     setNewTaskTitleInput('Nueva tarea de Sanity');
     setNewTaskPriorityInput('P1');
+    setNewTaskWorkspaceId(defaultWsId || (formState._type === 'workspace' ? (formState.workspaceId || formState._id) : ''));
     setIsCreateTaskOpen(true);
   };
 
@@ -314,12 +328,18 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
 
     setIsCreateTaskOpen(false);
     try {
+      const selectedWs = availableWorkspaces.find(
+        (w) => w.workspaceId === newTaskWorkspaceId || w._id === newTaskWorkspaceId
+      );
+
       const res = await writeTestingTaskToSanity(config, {
         title: newTaskTitleInput.trim(),
         taskId: 'task-' + Date.now().toString(36),
         priority: newTaskPriorityInput,
         status: 'todo',
         groupTitle: 'General',
+        workspaceId: selectedWs ? (selectedWs.workspaceId || selectedWs._id.replace(/^workspace-/, '')) : undefined,
+        workspace: selectedWs ? { _type: 'reference', _ref: selectedWs._id } : undefined,
       });
 
       if (res.ok && res.document) {
@@ -420,21 +440,26 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
       >
         {/* Studio Brand Header */}
         <div className="px-3.5 py-3 border-b border-[var(--outline)] flex items-center justify-between bg-[var(--surface)]">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded bg-rose-600 flex items-center justify-center text-white font-bold text-[11px] shadow-xs">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-6 h-6 rounded bg-rose-600 flex items-center justify-center text-white font-bold text-[11px] shadow-xs shrink-0">
               S
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="font-bold text-xs text-[var(--on-surface)] tracking-tight">Sanity Studio</span>
-              <span className="text-[10px] font-mono text-[var(--primary)] truncate">{config.dataset}</span>
+              <div className="flex items-center gap-1.5">
+                <span className="font-bold text-xs text-[var(--on-surface)] tracking-tight truncate">Sanity Studio</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" title="Sincronizado en vivo" />
+              </div>
+              <span className="text-[10px] font-mono text-[var(--primary)] truncate">
+                studio-test • {config.dataset}
+              </span>
             </div>
           </div>
 
           <button
             type="button"
             onClick={loadDocuments}
-            className="btn-m3-icon w-6 h-6 cursor-pointer"
-            title="Recargar datos de Sanity"
+            className="btn-m3-icon w-6 h-6 cursor-pointer shrink-0"
+            title="Sincronizar y recargar datos de Sanity (studio-test)"
           >
             <span className={`material-symbols-outlined text-[15px] ${isLoadingList ? 'animate-spin' : ''}`}>
               refresh
@@ -609,7 +634,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
           ) : (
             <button
               type="button"
-              onClick={handleOpenCreateTaskModal}
+              onClick={() => handleOpenCreateTaskModal()}
               className="btn-m3-primary px-2.5 py-1 text-[11px] flex items-center gap-1 cursor-pointer shrink-0 shadow-xs"
               title="Crear un nuevo documento de tipo task en Sanity"
             >
@@ -644,25 +669,45 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
           </div>
 
           {activeDocType === 'task' && (
-            <div className="flex items-center gap-1 overflow-x-auto pb-0.5">
-              {[
-                { id: 'all', label: 'Todos' },
-                { id: 'todo', label: 'Pendientes' },
-                { id: 'done', label: 'Completados' },
-              ].map((f) => (
-                <button
-                  key={f.id}
-                  type="button"
-                  onClick={() => setStatusFilter(f.id)}
-                  className={`px-2 py-0.5 rounded text-[10px] whitespace-nowrap transition-colors cursor-pointer ${
-                    statusFilter === f.id
-                      ? 'bg-[var(--primary)] text-[var(--on-primary)] font-semibold'
-                      : 'bg-[var(--surface-container)] text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]'
-                  }`}
-                >
-                  {f.label}
-                </button>
-              ))}
+            <div className="flex flex-col gap-1">
+              {availableWorkspaces.length > 0 && (
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] text-[var(--on-surface-variant)] shrink-0 font-medium">Workspace:</span>
+                  <select
+                    value={workspaceFilter}
+                    onChange={(e) => setWorkspaceFilter(e.target.value)}
+                    className="flex-1 bg-[var(--surface-container)] border border-[var(--outline)] rounded px-1.5 py-0.5 text-[10px] text-[var(--on-surface)] focus:outline-none cursor-pointer truncate"
+                  >
+                    <option value="all">🏢 Todos los Workspaces ({taskCount})</option>
+                    {availableWorkspaces.map((ws) => (
+                      <option key={ws._id} value={ws.workspaceId || ws._id}>
+                        🏢 {ws.name || ws._id}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              <div className="flex items-center gap-1 overflow-x-auto pb-0.5">
+                {[
+                  { id: 'all', label: 'Todos' },
+                  { id: 'todo', label: 'Pendientes' },
+                  { id: 'done', label: 'Completados' },
+                ].map((f) => (
+                  <button
+                    key={f.id}
+                    type="button"
+                    onClick={() => setStatusFilter(f.id)}
+                    className={`px-2 py-0.5 rounded text-[10px] whitespace-nowrap transition-colors cursor-pointer ${
+                      statusFilter === f.id
+                        ? 'bg-[var(--primary)] text-[var(--on-primary)] font-semibold'
+                        : 'bg-[var(--surface-container)] text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]'
+                    }`}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
         </div>
@@ -689,7 +734,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
               ) : (
                 <button
                   type="button"
-                  onClick={handleOpenCreateTaskModal}
+                  onClick={() => handleOpenCreateTaskModal()}
                   className="btn-m3-secondary px-3 py-1 text-xs text-sky-400 cursor-pointer mt-1"
                 >
                   Crear primer Task en Sanity
@@ -1157,6 +1202,72 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
                       })}
                     </div>
                   </div>
+
+                  {/* Section 4: Linked Tasks in this Workspace */}
+                  {(() => {
+                    const wsId = formState.workspaceId || formState._id?.replace(/^workspace-/, '');
+                    const linkedTasks = documents.filter(
+                      (d) =>
+                        d._type === 'task' &&
+                        (d.workspaceId === wsId || d.workspace?._ref === formState._id || d.workspaceId === formState._id)
+                    );
+
+                    return (
+                      <div className="p-3.5 rounded-lg border border-[var(--outline)] bg-[var(--surface-container)] flex flex-col gap-3">
+                        <div className="flex items-center justify-between border-b border-[var(--outline)] pb-2">
+                          <div className="flex items-center gap-2">
+                            <span className="material-symbols-outlined text-[16px] text-sky-400">check_box</span>
+                            <span className="font-semibold text-xs text-[var(--on-surface)]">
+                              Tareas asociadas a este Workspace ({linkedTasks.length})
+                            </span>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => handleOpenCreateTaskModal(wsId)}
+                            className="btn-m3-primary px-2.5 py-1 text-[11px] flex items-center gap-1 cursor-pointer"
+                          >
+                            <span className="material-symbols-outlined text-[14px]">add</span>
+                            <span>+ Crear Tarea en este Workspace</span>
+                          </button>
+                        </div>
+
+                        {linkedTasks.length === 0 ? (
+                          <div className="p-3 text-center text-[var(--on-surface-variant)] text-xs">
+                            No hay tareas de tipo <code className="font-mono text-sky-300">task</code> asignadas explícitamente a este workspace todavía.
+                          </div>
+                        ) : (
+                          <div className="divide-y divide-[var(--outline)] rounded border border-[var(--outline)] bg-[var(--surface)]">
+                            {linkedTasks.map((t) => (
+                              <div
+                                key={t._id}
+                                onClick={() => {
+                                  setSelectedDocId(t._id);
+                                  setActiveDocType('task');
+                                }}
+                                className="p-2 flex items-center justify-between gap-2 hover:bg-[var(--surface-container-high)] cursor-pointer text-xs"
+                              >
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <span className={`w-2 h-2 rounded-full ${t.completed ? 'bg-emerald-400' : 'bg-amber-400'}`} />
+                                  <span className="font-medium text-[var(--on-surface)] truncate">
+                                    {t.title || t._id}
+                                  </span>
+                                  {t.priority && (
+                                    <span className="px-1 py-0.2 rounded text-[9px] font-mono bg-[var(--surface-container)] text-sky-300 border border-[var(--outline)]">
+                                      {t.priority}
+                                    </span>
+                                  )}
+                                </div>
+                                <span className="text-[10px] font-mono text-[var(--on-surface-variant)] shrink-0">
+                                  #{t.taskId || t._id}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
               ) : formState._type === 'task' ? (
                 /* TASK FORM FIELDS (Matching Task Schema) */
@@ -1170,6 +1281,37 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
                       onChange={(e) => handleFormFieldChange('title', e.target.value)}
                       className="w-full bg-[var(--surface-container)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-3 py-1.5 text-xs text-[var(--on-surface)] focus:outline-none"
                     />
+                  </div>
+
+                  {/* Workspace Association Selector */}
+                  <div className="flex flex-col gap-1">
+                    <label className="font-semibold text-xs text-[var(--on-surface)] flex items-center justify-between">
+                      <span>Workspace Asociado</span>
+                      {formState.workspaceId && (
+                        <span className="text-[10px] font-mono text-emerald-400">
+                          ID: {formState.workspaceId}
+                        </span>
+                      )}
+                    </label>
+                    <select
+                      value={formState.workspaceId || formState.workspace?._ref || ''}
+                      onChange={(e) => {
+                        const selectedVal = e.target.value;
+                        const targetWs = availableWorkspaces.find(
+                          (w) => w.workspaceId === selectedVal || w._id === selectedVal
+                        );
+                        handleFormFieldChange('workspaceId', targetWs ? (targetWs.workspaceId || targetWs._id.replace(/^workspace-/, '')) : selectedVal);
+                        handleFormFieldChange('workspace', targetWs ? { _type: 'reference', _ref: targetWs._id } : undefined);
+                      }}
+                      className="w-full bg-[var(--surface-container)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-2.5 py-1.5 text-xs text-[var(--on-surface)] focus:outline-none cursor-pointer"
+                    >
+                      <option value="">-- Sin Workspace asignado (General) --</option>
+                      {availableWorkspaces.map((ws) => (
+                        <option key={ws._id} value={ws.workspaceId || ws._id}>
+                          🏢 {ws.name || ws._id} {ws.githubRepo?.fullName ? `(${ws.githubRepo.fullName})` : ''}
+                        </option>
+                      ))}
+                    </select>
                   </div>
 
                   {/* Task ID and Group */}
@@ -1519,6 +1661,24 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
             </div>
 
             <form onSubmit={handleExecuteCreateTask} className="p-4 flex flex-col gap-3">
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-semibold text-[var(--on-surface)]">
+                  Workspace Asociado
+                </label>
+                <select
+                  value={newTaskWorkspaceId}
+                  onChange={(e) => setNewTaskWorkspaceId(e.target.value)}
+                  className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-2.5 py-1.5 text-xs text-[var(--on-surface)] focus:outline-none cursor-pointer"
+                >
+                  <option value="">-- Sin Workspace específico (General) --</option>
+                  {availableWorkspaces.map((ws) => (
+                    <option key={ws._id} value={ws.workspaceId || ws._id}>
+                      🏢 {ws.name || ws._id} {ws.githubRepo?.fullName ? `(${ws.githubRepo.fullName})` : ''}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <div className="flex flex-col gap-1">
                 <label className="text-xs font-semibold text-[var(--on-surface)]">
                   Título de la tarea
