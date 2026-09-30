@@ -95,6 +95,7 @@ export function KanbanBoard({
   isLoading = false,
 }: KanbanBoardProps) {
   const [groupBy, setGroupBy] = useState<GroupByMode>('status');
+  const [activeMobileColumn, setActiveMobileColumn] = useState<string>('todo');
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
   const [dragOverColumn, setDragOverColumn] = useState<string | null>(null);
   const [selectedTaskIds, setSelectedTaskIds] = useState<Set<string>>(new Set());
@@ -374,6 +375,80 @@ export function KanbanBoard({
         </div>
       </div>
 
+      {/* Mobile Column Quick Selector */}
+      {filteredTasks.length > 0 && (
+        <div className="sm:hidden px-3 py-1.5 border-b border-[var(--outline)] bg-[var(--surface)] flex items-center gap-1.5 overflow-x-auto select-none shrink-0 scrollbar-none">
+          {groupBy === 'status'
+            ? STATUS_COLUMNS.map((col) => {
+                const count = filteredTasks.filter((t) => {
+                  if (col.id === 'done') return t.completed;
+                  if (col.id === 'todo') return !t.completed && (t.status === 'todo' || !t.status);
+                  return !t.completed && t.status === col.id;
+                }).length;
+                const isActive = activeMobileColumn === col.id;
+                return (
+                  <button
+                    key={col.id}
+                    type="button"
+                    onClick={() => {
+                      setActiveMobileColumn(col.id);
+                      const el = document.getElementById(`kanban-col-${col.id}`);
+                      el?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                    }}
+                    className={`px-2.5 py-1 rounded-full text-xs whitespace-nowrap flex items-center gap-1.5 transition-colors cursor-pointer shrink-0 min-h-[32px] ${
+                      isActive
+                        ? 'bg-[var(--primary)] text-[var(--on-primary)] font-semibold shadow-xs'
+                        : 'bg-[var(--surface-container)] text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] border border-[var(--outline)]'
+                    }`}
+                  >
+                    <span>{col.label}</span>
+                    <span
+                      className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
+                        isActive
+                          ? 'bg-black/20 text-white'
+                          : 'bg-[var(--surface)] text-[var(--on-surface-variant)]'
+                      }`}
+                    >
+                      {count}
+                    </span>
+                  </button>
+                );
+              })
+            : sections.map((sec) => {
+                const count = filteredTasks.filter((t) => (t.groupTitle || 'General') === sec).length;
+                const isActive = activeMobileColumn === sec;
+                const secId = sec.toLowerCase().replace(/[^a-z0-9]/g, '-');
+                return (
+                  <button
+                    key={sec}
+                    type="button"
+                    onClick={() => {
+                      setActiveMobileColumn(sec);
+                      const el = document.getElementById(`kanban-col-sec-${secId}`);
+                      el?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                    }}
+                    className={`px-2.5 py-1 rounded-full text-xs whitespace-nowrap flex items-center gap-1.5 transition-colors cursor-pointer shrink-0 min-h-[32px] ${
+                      isActive
+                        ? 'bg-[var(--primary)] text-[var(--on-primary)] font-semibold shadow-xs'
+                        : 'bg-[var(--surface-container)] text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] border border-[var(--outline)]'
+                    }`}
+                  >
+                    <span>{sec}</span>
+                    <span
+                      className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
+                        isActive
+                          ? 'bg-black/20 text-white'
+                          : 'bg-[var(--surface)] text-[var(--on-surface-variant)]'
+                      }`}
+                    >
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+        </div>
+      )}
+
       {/* Columns Container with horizontal scroll or Empty States */}
       {isLoading ? (
         <div className="flex-1 w-full overflow-x-auto overflow-y-hidden p-3 sm:p-4 flex gap-3 items-stretch">
@@ -438,7 +513,7 @@ export function KanbanBoard({
           )}
         </div>
       ) : (
-        <div className="flex-1 w-full overflow-x-auto overflow-y-hidden p-3 flex gap-3 items-stretch">
+        <div className="flex-1 w-full overflow-x-auto overflow-y-hidden p-3 flex gap-3 items-stretch snap-x snap-mandatory sm:snap-none">
         {groupBy === 'status'
           ? STATUS_COLUMNS.map((col) => {
               const tasksInCol = filteredTasks.filter((t) => {
@@ -452,10 +527,11 @@ export function KanbanBoard({
               return (
                 <div
                   key={col.id}
+                  id={`kanban-col-${col.id}`}
                   onDragOver={(e) => handleDragOver(e, col.id)}
                   onDragLeave={handleDragLeave}
                   onDrop={(e) => handleDrop(e, col.id)}
-                  className={`w-72 sm:w-80 shrink-0 flex flex-col rounded-md bg-[var(--surface-container)] border transition-all duration-120 ${
+                  className={`w-[85vw] sm:w-80 shrink-0 snap-center sm:snap-align-none flex flex-col rounded-md bg-[var(--surface-container)] border transition-all duration-120 ${
                     isDropTarget
                       ? 'border-[var(--primary)] bg-[var(--primary)]/5'
                       : 'border-[var(--outline)]'
@@ -736,13 +812,16 @@ export function KanbanBoard({
               );
               const isDropTarget = dragOverColumn === sec;
 
+              const secId = sec.toLowerCase().replace(/[^a-z0-9]/g, '-');
+
               return (
                 <div
                   key={sec}
+                  id={`kanban-col-sec-${secId}`}
                   onDragOver={(e) => handleDragOver(e, sec)}
                   onDragLeave={handleDragLeave}
                   onDrop={(e) => handleDrop(e, sec)}
-                  className={`w-72 sm:w-80 shrink-0 flex flex-col rounded-md bg-[var(--surface-container)] border transition-all duration-120 ${
+                  className={`w-[85vw] sm:w-80 shrink-0 snap-center sm:snap-align-none flex flex-col rounded-md bg-[var(--surface-container)] border transition-all duration-120 ${
                     isDropTarget
                       ? 'border-[var(--primary)] bg-[var(--primary)]/5'
                       : 'border-[var(--outline)]'

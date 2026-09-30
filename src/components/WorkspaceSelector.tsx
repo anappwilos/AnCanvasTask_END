@@ -75,7 +75,7 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
 
         {/* Workspace Dropdown Menu */}
         {isWorkspaceMenuOpen && (
-          <div className="absolute left-0 top-full mt-1 w-64 sm:w-72 bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-xl py-1 z-50 animate-fade-in select-none">
+          <div className="absolute left-0 top-full mt-1 w-64 sm:w-72 max-w-[calc(100vw-1.5rem)] bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-xl py-1 z-50 animate-fade-in select-none">
             <div className="px-3 py-1.5 border-b border-[var(--outline)] flex items-center justify-between">
               <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--on-surface-variant)]">
                 Workspaces & Repositorios
@@ -175,7 +175,7 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
 
         {/* Branch Dropdown Menu */}
         {isBranchMenuOpen && (
-          <div className="absolute left-0 top-full mt-1 w-64 sm:w-72 bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-xl py-1 z-50 animate-fade-in select-none">
+          <div className="absolute left-0 top-full mt-1 w-64 sm:w-72 max-w-[calc(100vw-1.5rem)] bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-xl py-1 z-50 animate-fade-in select-none">
             <div className="px-3 py-1.5 border-b border-[var(--outline)] flex items-center justify-between">
               <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--on-surface-variant)]">
                 Ramas de Git ({workspace.branches.length})

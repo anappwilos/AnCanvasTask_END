@@ -124,7 +124,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             {isFilterPopoverOpen && (
               <div
                 onPointerDown={(e) => e.stopPropagation()}
-                className="absolute left-0 top-9 z-40 w-72 sm:w-80 bg-[var(--surface-container-high)] border border-[var(--outline)] rounded-lg shadow-lg p-3 flex flex-col gap-2.5 text-xs"
+                className="absolute left-0 top-9 z-40 w-72 sm:w-80 max-w-[calc(100vw-2rem)] bg-[var(--surface-container-high)] border border-[var(--outline)] rounded-lg shadow-lg p-3 flex flex-col gap-2.5 text-xs"
               >
                 <div className="flex items-center justify-between border-b border-[var(--outline)] pb-2">
                   <span className="font-semibold text-[var(--on-surface)] flex items-center gap-1.5">

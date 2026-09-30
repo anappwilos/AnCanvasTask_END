@@ -3567,59 +3567,81 @@ export default function App() {
       {/* Floating Bottom Navigation Bar for Mobile */}
       <nav
         aria-label="Acciones rápidas móviles"
-        className="sm:hidden fixed bottom-3 left-3 right-3 z-30 bg-[var(--surface-container)] border border-[var(--outline)] rounded-lg shadow-lg p-1.5 flex items-center justify-between gap-1 pb-safe"
+        className="sm:hidden fixed bottom-3 left-3 right-3 z-30 bg-[var(--surface-container)] border border-[var(--outline)] rounded-xl shadow-xl p-1.5 flex items-center justify-between gap-1 pb-safe backdrop-blur-md"
       >
         <button
           type="button"
           onClick={() => {
-            if (existingSections.length > 0 && !isCustomGroup) {
-              setNewTaskGroup(existingSections[0]);
+            if (activeView === 'studio') {
+              setIsSanityModalOpen(true);
+            } else {
+              if (existingSections.length > 0 && !isCustomGroup) {
+                setNewTaskGroup(existingSections[0]);
+              }
+              setIsNewTaskModalOpen(true);
             }
-            setIsNewTaskModalOpen(true);
           }}
-          className="btn-m3-primary flex-1 py-1.5 px-1 min-h-[40px] flex flex-col items-center justify-center text-[10px] cursor-pointer"
+          className="btn-m3-primary flex-1 py-1.5 px-1 min-h-[44px] flex flex-col items-center justify-center text-[10px] cursor-pointer shadow-xs"
         >
-          <span className="material-symbols-outlined text-[17px]">add</span>
-          <span>+ Tarea</span>
+          <span className="material-symbols-outlined text-[18px]">add</span>
+          <span className="font-semibold">{activeView === 'studio' ? 'Crear' : '+ Tarea'}</span>
         </button>
 
         <button
           type="button"
-          onClick={() => setActiveView(activeView === 'canvas' ? 'kanban' : 'canvas')}
-          className="btn-m3-secondary flex-1 py-1.5 px-1 min-h-[40px] flex flex-col items-center justify-center text-[10px] cursor-pointer"
+          onClick={() => {
+            if (activeView === 'canvas') setActiveView('kanban');
+            else if (activeView === 'kanban') setActiveView('studio');
+            else setActiveView('canvas');
+          }}
+          className="btn-m3-secondary flex-1 py-1.5 px-1 min-h-[44px] flex flex-col items-center justify-center text-[10px] cursor-pointer"
         >
-          <span className="material-symbols-outlined text-[17px]">
-            {activeView === 'canvas' ? 'view_kanban' : 'grid_view'}
+          <span className="material-symbols-outlined text-[18px] text-sky-400">
+            {activeView === 'canvas' ? 'grid_view' : activeView === 'kanban' ? 'view_kanban' : 'cloud_sync'}
           </span>
-          <span>{activeView === 'canvas' ? 'Kanban' : 'Canvas'}</span>
+          <span className="capitalize">{activeView}</span>
         </button>
 
-        <button
-          type="button"
-          onClick={() => setIsAutoLayoutConfirmOpen(true)}
-          className="btn-m3-secondary flex-1 py-1.5 px-1 min-h-[40px] flex flex-col items-center justify-center text-[10px] cursor-pointer text-sky-400"
-        >
-          <span className="material-symbols-outlined text-[17px]">account_tree</span>
-          <span>Organizar</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={handleZoomToFit}
-          className="btn-m3-secondary flex-1 py-1.5 px-1 min-h-[40px] flex flex-col items-center justify-center text-[10px] cursor-pointer"
-        >
-          <span className="material-symbols-outlined text-[17px]">fit_screen</span>
-          <span>Ajustar</span>
-        </button>
+        {activeView === 'canvas' ? (
+          <button
+            type="button"
+            onClick={() => setIsAutoLayoutConfirmOpen(true)}
+            className="btn-m3-secondary flex-1 py-1.5 px-1 min-h-[44px] flex flex-col items-center justify-center text-[10px] cursor-pointer text-sky-400"
+            title="Auto organizar tareas"
+          >
+            <span className="material-symbols-outlined text-[18px]">account_tree</span>
+            <span>Organizar</span>
+          </button>
+        ) : activeView === 'kanban' ? (
+          <button
+            type="button"
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className="btn-m3-secondary flex-1 py-1.5 px-1 min-h-[44px] flex flex-col items-center justify-center text-[10px] cursor-pointer"
+            title="Filtros y documentos"
+          >
+            <span className="material-symbols-outlined text-[18px]">filter_list</span>
+            <span>Filtros</span>
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setIsSyncOverrideModalOpen(true)}
+            className="btn-m3-secondary flex-1 py-1.5 px-1 min-h-[44px] flex flex-col items-center justify-center text-[10px] cursor-pointer text-amber-400"
+            title="Sincronizar con Sanity"
+          >
+            <span className="material-symbols-outlined text-[18px]">sync_problem</span>
+            <span>Sincronizar</span>
+          </button>
+        )}
 
         <button
           type="button"
           onClick={handleToggleSplitView}
-          className={`btn-m3-secondary flex-1 py-1.5 px-1 min-h-[40px] flex flex-col items-center justify-center text-[10px] cursor-pointer ${
-            isSplitViewOpen ? 'text-sky-400 font-bold border-sky-600' : ''
+          className={`btn-m3-secondary flex-1 py-1.5 px-1 min-h-[44px] flex flex-col items-center justify-center text-[10px] cursor-pointer ${
+            isSplitViewOpen ? 'text-sky-400 font-bold border-sky-600 bg-sky-950/30' : ''
           }`}
         >
-          <span className="material-symbols-outlined text-[17px]">
+          <span className="material-symbols-outlined text-[18px]">
             {isSplitViewOpen ? 'vertical_split' : 'splitscreen'}
           </span>
           <span>{isSplitViewOpen ? 'Cerrar .md' : 'Ver .md'}</span>
@@ -3628,12 +3650,12 @@ export default function App() {
         <button
           type="button"
           onClick={() => setIsMobileMenuOpen(true)}
-          className="btn-m3-secondary flex-1 py-1.5 px-1 min-h-[40px] flex flex-col items-center justify-center text-[10px] cursor-pointer relative"
+          className="btn-m3-secondary flex-1 py-1.5 px-1 min-h-[44px] flex flex-col items-center justify-center text-[10px] cursor-pointer relative"
         >
           {validationReport.issues.length > 0 && (
-            <span className="absolute top-1.5 right-2 w-2 h-2 rounded bg-rose-500" />
+            <span className="absolute top-1.5 right-2 w-2 h-2 rounded bg-rose-500 animate-pulse" />
           )}
-          <span className="material-symbols-outlined text-[17px]">menu</span>
+          <span className="material-symbols-outlined text-[18px]">menu</span>
           <span>Menú</span>
         </button>
       </nav>
@@ -3641,17 +3663,17 @@ export default function App() {
       {/* Mobile Drawer Menu */}
       {isMobileMenuOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 sm:hidden"
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 sm:hidden animate-fade-in"
           onClick={() => setIsMobileMenuOpen(false)}
         >
           <div
-            className="w-full bg-[var(--surface-container)] border-t border-[var(--outline)] rounded-t-lg shadow-xl p-4 flex flex-col gap-3 animate-slide-up max-h-[85vh] overflow-y-auto pb-safe"
+            className="w-full bg-[var(--surface-container)] border-t border-[var(--outline)] rounded-t-2xl shadow-2xl p-4 flex flex-col gap-3 animate-slide-up max-h-[88vh] overflow-y-auto pb-safe"
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
             aria-label="Opciones y herramientas"
           >
-            <div className="w-10 h-1 bg-[var(--outline)] rounded mx-auto" />
+            <div className="w-12 h-1 bg-[var(--outline)] rounded-full mx-auto" />
 
             <div className="flex items-center justify-between border-b border-[var(--outline)] pb-2.5">
               <div>
@@ -3665,42 +3687,92 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="btn-m3-icon w-7 h-7"
+                className="btn-m3-icon w-8 h-8"
               >
-                <span className="material-symbols-outlined text-[16px]">close</span>
+                <span className="material-symbols-outlined text-[18px]">close</span>
               </button>
             </div>
 
             <div className="flex flex-col gap-1.5 text-xs">
+              {/* Workspace & Repositories */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  setIsWorkspaceManagerOpen(true);
+                }}
+                className="w-full min-h-[44px] px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer"
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="material-symbols-outlined text-[18px] text-emerald-400">workspaces</span>
+                  <span>Workspaces & Repositorios GitHub</span>
+                </div>
+                <span className="text-[10px] font-mono text-[var(--on-surface-variant)]">{activeWorkspace.name} ➔</span>
+              </button>
+
+              {/* Branches & Git Sync */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  setIsGitHubSyncOpen(true);
+                }}
+                className="w-full min-h-[44px] px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer"
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="material-symbols-outlined text-[18px] text-sky-400">fork_right</span>
+                  <span>Ramas & Git Status</span>
+                </div>
+                <span className="text-[10px] font-mono text-[var(--on-surface-variant)]">{activeBranch.name} ➔</span>
+              </button>
+
+              {/* Sanity Sync & Overrides */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  setIsSyncOverrideModalOpen(true);
+                }}
+                className="w-full min-h-[44px] px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer"
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="material-symbols-outlined text-[18px] text-amber-400">sync_problem</span>
+                  <span>Sincronizar con Sanity (studio-test)</span>
+                </div>
+                <span>➔</span>
+              </button>
+
+              {/* File Open */}
               <button
                 type="button"
                 onClick={() => {
                   setIsMobileMenuOpen(false);
                   handleOpenFilePicker();
                 }}
-                className="w-full min-h-[40px] px-3 py-2 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer"
+                className="w-full min-h-[44px] px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer"
               >
                 <div className="flex items-center gap-2.5">
-                  <span className="material-symbols-outlined text-[16px] text-[var(--primary)]">folder_open</span>
+                  <span className="material-symbols-outlined text-[18px] text-[var(--primary)]">folder_open</span>
                   <span>Abrir TASKS.md</span>
                 </div>
                 <span>➔</span>
               </button>
 
+              {/* Save File */}
               <button
                 type="button"
                 onClick={() => {
                   setIsMobileMenuOpen(false);
                   handleExportFile();
                 }}
-                className={`w-full min-h-[40px] px-3 py-2 rounded border flex items-center justify-between cursor-pointer ${
+                className={`w-full min-h-[44px] px-3 py-2 rounded-lg border flex items-center justify-between cursor-pointer ${
                   hasUnsavedChanges
                     ? 'bg-emerald-950/80 border-emerald-600 text-emerald-200 font-medium'
                     : 'bg-[var(--surface)] border-[var(--outline)] text-[var(--on-surface)] hover:bg-[var(--surface-container-high)]'
                 }`}
               >
                 <div className="flex items-center gap-2.5">
-                  <span className="material-symbols-outlined text-[16px] text-[var(--primary)]">save</span>
+                  <span className="material-symbols-outlined text-[18px] text-emerald-400">save</span>
                   <span>Guardar {currentFileName}</span>
                 </div>
                 {hasUnsavedChanges && (
@@ -3710,82 +3782,109 @@ export default function App() {
                 )}
               </button>
 
+              {/* Import / Export */}
               <button
                 type="button"
                 onClick={() => {
                   setIsMobileMenuOpen(false);
                   setIsImportExportOpen(true);
                 }}
-                className="w-full min-h-[40px] px-3 py-2 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer"
+                className="w-full min-h-[44px] px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer"
               >
                 <div className="flex items-center gap-2.5">
-                  <span className="material-symbols-outlined text-[16px] text-[var(--primary)]">sync_alt</span>
-                  <span>Importar / Exportar</span>
+                  <span className="material-symbols-outlined text-[18px] text-[var(--primary)]">sync_alt</span>
+                  <span>Importar / Exportar (.md, JSON)</span>
                 </div>
                 <span>➔</span>
               </button>
 
+              {/* Theme Toggle */}
+              <button
+                type="button"
+                onClick={() => {
+                  handleUpdateSettings({
+                    ...userSettings,
+                    theme: effectiveTheme === 'dark' ? 'light' : 'dark',
+                  });
+                }}
+                className="w-full min-h-[44px] px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer"
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="material-symbols-outlined text-[18px]">
+                    {effectiveTheme === 'dark' ? 'light_mode' : 'dark_mode'}
+                  </span>
+                  <span>Tema: {effectiveTheme === 'dark' ? 'Oscuro' : 'Claro'}</span>
+                </div>
+                <span className="text-[10px] text-[var(--on-surface-variant)]">Cambiar</span>
+              </button>
+
+              {/* Settings */}
               <button
                 type="button"
                 onClick={() => {
                   setIsMobileMenuOpen(false);
                   setIsSettingsOpen(true);
                 }}
-                className="w-full min-h-[40px] px-3 py-2 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer"
+                className="w-full min-h-[44px] px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer"
               >
                 <div className="flex items-center gap-2.5">
-                  <span className="material-symbols-outlined text-[16px] text-[var(--primary)]">settings</span>
+                  <span className="material-symbols-outlined text-[18px] text-[var(--primary)]">settings</span>
                   <span>Configuración & Preferencias</span>
                 </div>
                 <span>➔</span>
               </button>
 
-              <button
-                type="button"
-                onClick={() => {
-                  setIsMobileMenuOpen(false);
-                  setIsQuickGuideOpen(true);
-                }}
-                className="w-full min-h-[40px] px-3 py-2 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer"
-              >
-                <div className="flex items-center gap-2.5">
-                  <span className="material-symbols-outlined text-[16px] text-[var(--primary)]">help</span>
-                  <span>Guía rápida y atajos</span>
-                </div>
-                <span>➔</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setIsMobileMenuOpen(false);
-                  setIsProblemsModalOpen(true);
-                }}
-                className="w-full min-h-[40px] px-3 py-2 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer"
-              >
-                <div className="flex items-center gap-2.5">
-                  <span className="text-amber-400">⚠</span>
-                  <span>Panel de problemas</span>
-                </div>
-                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[var(--surface-container-high)]">
-                  {validationReport.issues.length}
-                </span>
-              </button>
-
+              {/* Sanity Credentials */}
               <button
                 type="button"
                 onClick={() => {
                   setIsMobileMenuOpen(false);
                   setIsSanityModalOpen(true);
                 }}
-                className="w-full min-h-[40px] px-3 py-2 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer"
+                className="w-full min-h-[44px] px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer"
               >
                 <div className="flex items-center gap-2.5">
-                  <span className="w-2 h-2 rounded bg-sky-400" />
-                  <span>Persistencia visual</span>
+                  <span className="material-symbols-outlined text-[18px] text-rose-400">cloud_sync</span>
+                  <span>Ajustes de Sanity Cloud</span>
                 </div>
-                <span className="text-[10px] text-[var(--on-surface-variant)]">{syncStatus}</span>
+                <span className="text-[10px] font-mono text-emerald-400">or19faat</span>
               </button>
+
+              {/* Quick Guide */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  setIsQuickGuideOpen(true);
+                }}
+                className="w-full min-h-[44px] px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer"
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="material-symbols-outlined text-[18px] text-sky-400">help</span>
+                  <span>Guía rápida y atajos</span>
+                </div>
+                <span>➔</span>
+              </button>
+
+              {/* Problems & Validation Panel */}
+              {validationReport.issues.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    setIsProblemsModalOpen(true);
+                  }}
+                  className="w-full min-h-[44px] px-3 py-2 rounded-lg bg-amber-950/40 border border-amber-800 flex items-center justify-between text-amber-300 cursor-pointer"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <span>⚠</span>
+                    <span>Problemas detectados</span>
+                  </div>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-900/60 text-amber-200">
+                    {validationReport.issues.length}
+                  </span>
+                </button>
+              )}
             </div>
           </div>
         </div>

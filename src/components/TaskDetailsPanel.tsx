@@ -246,11 +246,20 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
   // ----------------------------------------------------
   if (isMultiSelect) {
     return (
-      <aside
-        aria-label="Panel de edición múltiple"
-        className="fixed inset-x-0 bottom-0 max-h-[85vh] sm:static sm:max-h-none sm:w-96 bg-[var(--surface-container)] border-t sm:border-t-0 sm:border-l border-[var(--outline)] flex flex-col justify-between p-4 z-20 flex-shrink-0 animate-slide-up sm:animate-none overflow-y-auto shadow-2xl sm:shadow-none"
-      >
-        <div className="flex flex-col gap-4">
+      <>
+        {/* Mobile Backdrop Overlay */}
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-xs z-30 sm:hidden animate-fade-in"
+          onClick={onClose}
+          aria-hidden="true"
+        />
+
+        <aside
+          aria-label="Panel de edición múltiple"
+          className="fixed inset-x-0 bottom-0 max-h-[85vh] sm:static sm:max-h-none sm:w-96 bg-[var(--surface-container)] border-t sm:border-t-0 sm:border-l border-[var(--outline)] rounded-t-xl sm:rounded-none flex flex-col justify-between p-4 z-40 flex-shrink-0 animate-slide-up sm:animate-none overflow-y-auto shadow-2xl sm:shadow-none pb-safe"
+        >
+          <div className="w-10 h-1 bg-[var(--outline)] rounded mx-auto mb-2 sm:hidden shrink-0" />
+          <div className="flex flex-col gap-4">
           {/* Header */}
           <div className="flex items-center justify-between border-b border-[var(--outline)] pb-3">
             <div className="flex items-center gap-2">
@@ -367,6 +376,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
           </button>
         </div>
       </aside>
+      </>
     );
   }
 
@@ -379,11 +389,20 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
   // SINGLE TASK DETAILS PANEL (DESIGN.md Section 16)
   // ----------------------------------------------------
   return (
-    <aside
-      aria-label="Panel de detalles de la tarea"
-      className="fixed inset-x-0 bottom-0 max-h-[85vh] sm:static sm:max-h-none sm:w-88 bg-[var(--surface-container)] border-t sm:border-t-0 sm:border-l border-[var(--outline)] flex flex-col justify-between p-3.5 z-20 flex-shrink-0 overflow-y-auto"
-    >
-      <div className="flex flex-col gap-3.5">
+    <>
+      {/* Mobile Backdrop Overlay */}
+      <div
+        className="fixed inset-0 bg-black/60 backdrop-blur-xs z-30 sm:hidden animate-fade-in"
+        onClick={onClose}
+        aria-hidden="true"
+      />
+
+      <aside
+        aria-label="Panel de detalles de la tarea"
+        className="fixed inset-x-0 bottom-0 max-h-[85vh] sm:static sm:max-h-none sm:w-88 bg-[var(--surface-container)] border-t sm:border-t-0 sm:border-l border-[var(--outline)] rounded-t-xl sm:rounded-none flex flex-col justify-between p-3.5 z-40 flex-shrink-0 animate-slide-up sm:animate-none overflow-y-auto shadow-2xl sm:shadow-none pb-safe"
+      >
+        <div className="w-10 h-1 bg-[var(--outline)] rounded mx-auto mb-2 sm:hidden shrink-0" />
+        <div className="flex flex-col gap-3.5">
         {/* 1. Header: #ID + Navigation + Menu + Close */}
         <div className="flex items-center justify-between border-b border-[var(--outline)] pb-2.5">
           <div className="flex items-center gap-1.5">
@@ -895,5 +914,6 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
         </button>
       </div>
     </aside>
+    </>
   );
 };

@@ -275,7 +275,7 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
           {/* Batch Actions Toolbar */}
           <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
             {/* Filter Tabs */}
-            <div className="flex items-center gap-1 bg-[var(--surface)] p-0.5 rounded border border-[var(--outline)] text-xs">
+            <div className="flex items-center gap-1 bg-[var(--surface)] p-0.5 rounded border border-[var(--outline)] text-xs overflow-x-auto max-w-full">
               <button
                 type="button"
                 onClick={() => setFilterType('all')}
