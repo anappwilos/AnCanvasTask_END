@@ -1,0 +1,428 @@
+import React, { useState } from 'react';
+import {
+  Workspace,
+  parseGitHubRepoInput,
+  TaskDocument,
+} from '../services/workspaceService';
+
+interface WorkspaceManagerModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  workspaces: Workspace[];
+  activeWorkspaceId: string;
+  onSelectWorkspace: (id: string) => void;
+  onCreateWorkspace: (workspace: Workspace) => void;
+  onDeleteWorkspace: (id: string) => void;
+  onShowToast: (message: string, type?: 'info' | 'success' | 'warning' | 'error') => void;
+}
+
+export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
+  isOpen,
+  onClose,
+  workspaces,
+  activeWorkspaceId,
+  onSelectWorkspace,
+  onCreateWorkspace,
+  onDeleteWorkspace,
+  onShowToast,
+}) => {
+  const [activeTab, setActiveTab] = useState<'list' | 'create'>('list');
+
+  // Form state for creating new workspace
+  const [name, setName] = useState('');
+  const [repoInput, setRepoInput] = useState('');
+  const [defaultBranch, setDefaultBranch] = useState('main');
+  const [template, setTemplate] = useState<'monorepo' | 'fullstack' | 'single' | 'empty'>('monorepo');
+  const [description, setDescription] = useState('');
+
+  if (!isOpen) return null;
+
+  const handleCreate = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim() || !repoInput.trim()) {
+      onShowToast('Por favor completa el nombre del workspace y el repositorio de GitHub', 'warning');
+      return;
+    }
+
+    const repoInfo = parseGitHubRepoInput(repoInput);
+    const wsId = 'ws_' + Date.now();
+    const branchName = defaultBranch.trim() || 'main';
+
+    let initialDocs: TaskDocument[] = [];
+
+    if (template === 'monorepo') {
+      initialDocs = [
+        {
+          id: `doc_root_${Date.now()}`,
+          name: 'TASKS.md',
+          folder: 'root',
+          path: 'TASKS.md',
+          content: `# ${name.trim()} - Monorepo Roadmap\n\n## Arquitectura Global\n- [ ] Definir estándares de proyecto y convenciones\n  id: core_standards\n  priority: P0\n- [ ] Configurar CI/CD y pipelines\n  id: core_cicd\n  priority: P1\n`,
+          lastSavedContent: `# ${name.trim()} - Monorepo Roadmap\n\n## Arquitectura Global\n- [ ] Definir estándares de proyecto y convenciones\n  id: core_standards\n  priority: P0\n- [ ] Configurar CI/CD y pipelines\n  id: core_cicd\n  priority: P1\n`,
+          updatedAt: new Date().toISOString(),
+        },
+        {
+          id: `doc_fe_${Date.now()}`,
+          name: 'TASKS.md',
+          folder: 'frontend',
+          path: 'frontend/TASKS.md',
+          content: `# Frontend Tasks - ${name.trim()}\n\n## UI & Componentes\n- [ ] Diseñar layout principal y navegación\n  id: fe_layout\n  priority: P0\n- [ ] Implementar soporte tema claro y oscuro\n  id: fe_theme\n  priority: P1\n`,
+          lastSavedContent: `# Frontend Tasks - ${name.trim()}\n\n## UI & Componentes\n- [ ] Diseñar layout principal y navegación\n  id: fe_layout\n  priority: P0\n- [ ] Implementar soporte tema claro y oscuro\n  id: fe_theme\n  priority: P1\n`,
+          updatedAt: new Date().toISOString(),
+        },
+        {
+          id: `doc_be_${Date.now()}`,
+          name: 'TASKS.md',
+          folder: 'backend',
+          path: 'backend/TASKS.md',
+          content: `# Backend Tasks - ${name.trim()}\n\n## APIs & Modelos\n- [ ] Diseñar modelos de datos y migraciones\n  id: be_models\n  priority: P0\n- [ ] Implementar autenticación y endpoints principales\n  id: be_auth\n  priority: P0\n`,
+          lastSavedContent: `# Backend Tasks - ${name.trim()}\n\n## APIs & Modelos\n- [ ] Diseñar modelos de datos y migraciones\n  id: be_models\n  priority: P0\n- [ ] Implementar autenticación y endpoints principales\n  id: be_auth\n  priority: P0\n`,
+          updatedAt: new Date().toISOString(),
+        },
+      ];
+    } else if (template === 'fullstack') {
+      initialDocs = [
+        {
+          id: `doc_fe_${Date.now()}`,
+          name: 'TASKS.md',
+          folder: 'frontend',
+          path: 'frontend/TASKS.md',
+          content: `# Frontend Tasks\n\n## Interfaz de Usuario\n- [ ] Crear componentes base\n  id: fe_init\n  priority: P0\n`,
+          lastSavedContent: `# Frontend Tasks\n\n## Interfaz de Usuario\n- [ ] Crear componentes base\n  id: fe_init\n  priority: P0\n`,
+          updatedAt: new Date().toISOString(),
+        },
+        {
+          id: `doc_be_${Date.now()}`,
+          name: 'TASKS.md',
+          folder: 'backend',
+          path: 'backend/TASKS.md',
+          content: `# Backend Tasks\n\n## Servicios & Base de Datos\n- [ ] Configurar base de datos\n  id: be_init\n  priority: P0\n`,
+          lastSavedContent: `# Backend Tasks\n\n## Servicios & Base de Datos\n- [ ] Configurar base de datos\n  id: be_init\n  priority: P0\n`,
+          updatedAt: new Date().toISOString(),
+        },
+      ];
+    } else if (template === 'single') {
+      initialDocs = [
+        {
+          id: `doc_root_${Date.now()}`,
+          name: 'TASKS.md',
+          folder: 'root',
+          path: 'TASKS.md',
+          content: `# ${name.trim()} - Tareas del Proyecto\n\n## Tareas Iniciales\n- [ ] Configurar estructura del proyecto\n  id: init_setup\n  priority: P0\n- [ ] Definir requisitos y alcance\n  id: init_scope\n  priority: P1\n`,
+          lastSavedContent: `# ${name.trim()} - Tareas del Proyecto\n\n## Tareas Iniciales\n- [ ] Configurar estructura del proyecto\n  id: init_setup\n  priority: P0\n- [ ] Definir requisitos y alcance\n  id: init_scope\n  priority: P1\n`,
+          updatedAt: new Date().toISOString(),
+        },
+      ];
+    } else {
+      initialDocs = [
+        {
+          id: `doc_root_${Date.now()}`,
+          name: 'TASKS.md',
+          folder: 'root',
+          path: 'TASKS.md',
+          content: `# ${name.trim()}\n\n## General\n- [ ] Nueva tarea inicial\n  id: task_1\n  priority: P1\n`,
+          lastSavedContent: `# ${name.trim()}\n\n## General\n- [ ] Nueva tarea inicial\n  id: task_1\n  priority: P1\n`,
+          updatedAt: new Date().toISOString(),
+        },
+      ];
+    }
+
+    const newWorkspace: Workspace = {
+      id: wsId,
+      name: name.trim(),
+      githubRepo: {
+        ...repoInfo,
+        defaultBranch: branchName,
+        isPrivate: false,
+        description: description.trim() || undefined,
+      },
+      activeBranchName: branchName,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      branches: [
+        {
+          name: branchName,
+          isProtected: branchName === 'main' || branchName === 'master',
+          lastCommit: {
+            hash: Math.random().toString(16).substring(2, 9),
+            message: `chore: inicializar workspace ${name.trim()} vinculado a ${repoInfo.fullName}`,
+            author: 'Developer',
+            timestamp: new Date().toISOString(),
+          },
+          activeDocumentId: initialDocs[0].id,
+          taskDocuments: initialDocs,
+        },
+      ],
+    };
+
+    onCreateWorkspace(newWorkspace);
+    onShowToast(`Workspace "${name.trim()}" creado y vinculado a GitHub`, 'success');
+    setName('');
+    setRepoInput('');
+    setDescription('');
+    setActiveTab('list');
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 animate-fade-in"
+      onClick={onClose}
+    >
+      <div
+        className="w-full sm:max-w-2xl bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-lg sm:rounded-lg shadow-xl flex flex-col overflow-hidden max-h-[90vh] pb-safe sm:pb-0"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="ws-manager-title"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <svg className="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
+              <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+            </svg>
+            <h2 id="ws-manager-title" className="text-sm font-semibold text-[var(--on-surface)] font-sans">
+              Gestión de Workspaces & Repositorios GitHub
+            </h2>
+          </div>
+          <button type="button" onClick={onClose} className="btn-m3-icon w-7 h-7 cursor-pointer">
+            <span className="material-symbols-outlined text-[16px]">close</span>
+          </button>
+        </div>
+
+        {/* Tab switcher */}
+        <div className="flex border-b border-[var(--outline)] px-4 bg-[var(--surface)]">
+          <button
+            type="button"
+            onClick={() => setActiveTab('list')}
+            className={`py-2 px-3 text-xs font-medium border-b-2 transition-colors cursor-pointer ${
+              activeTab === 'list'
+                ? 'border-[var(--primary)] text-[var(--primary)] font-semibold'
+                : 'border-transparent text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]'
+            }`}
+          >
+            Mis Workspaces ({workspaces.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('create')}
+            className={`py-2 px-3 text-xs font-medium border-b-2 transition-colors cursor-pointer ${
+              activeTab === 'create'
+                ? 'border-[var(--primary)] text-[var(--primary)] font-semibold'
+                : 'border-transparent text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]'
+            }`}
+          >
+            + Conectar / Crear Workspace
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="p-4 overflow-y-auto max-h-[60vh]">
+          {activeTab === 'list' ? (
+            <div className="flex flex-col gap-3">
+              {workspaces.map((ws) => {
+                const isActive = ws.id === activeWorkspaceId;
+                const totalDocs = ws.branches.reduce(
+                  (acc, b) => acc + b.taskDocuments.length,
+                  0
+                );
+
+                return (
+                  <div
+                    key={ws.id}
+                    className={`p-3 rounded-lg border transition-all ${
+                      isActive
+                        ? 'bg-[var(--primary-container)]/20 border-[var(--primary)]'
+                        : 'bg-[var(--surface)] border-[var(--outline)] hover:border-[var(--outline-variant)]'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex flex-col min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold text-[var(--on-surface)] font-sans truncate">
+                            {ws.name}
+                          </span>
+                          {isActive && (
+                            <span className="px-1.5 py-0.2 rounded bg-[var(--primary)] text-[var(--on-primary)] text-[10px] font-mono">
+                              Activo
+                            </span>
+                          )}
+                        </div>
+
+                        {/* GitHub Repo info */}
+                        <div className="flex items-center gap-1.5 text-xs font-mono text-[var(--on-surface-variant)] mt-1">
+                          <svg className="w-3.5 h-3.5 fill-current shrink-0 opacity-70" viewBox="0 0 24 24">
+                            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+                          </svg>
+                          <a
+                            href={ws.githubRepo.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="hover:text-[var(--primary)] hover:underline truncate"
+                          >
+                            {ws.githubRepo.fullName}
+                          </a>
+                        </div>
+
+                        {ws.githubRepo.description && (
+                          <p className="text-xs text-[var(--on-surface-variant)] mt-1 line-clamp-1">
+                            {ws.githubRepo.description}
+                          </p>
+                        )}
+
+                        {/* Stats */}
+                        <div className="flex items-center gap-3 text-[11px] font-mono text-[var(--on-surface-variant)] mt-2">
+                          <span className="flex items-center gap-1">
+                            <span className="material-symbols-outlined text-[13px] text-sky-400">fork_right</span>
+                            <span>{ws.branches.length} ramas ({ws.activeBranchName})</span>
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <span className="material-symbols-outlined text-[13px] text-amber-400">description</span>
+                            <span>{totalDocs} Task MD asociados</span>
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        {!isActive && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              onSelectWorkspace(ws.id);
+                              onClose();
+                            }}
+                            className="btn-m3-secondary px-2.5 py-1 text-xs cursor-pointer"
+                          >
+                            Abrir
+                          </button>
+                        )}
+
+                        {workspaces.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (window.confirm(`¿Eliminar workspace "${ws.name}"?`)) {
+                                onDeleteWorkspace(ws.id);
+                              }
+                            }}
+                            className="btn-m3-icon w-7 h-7 text-[var(--on-surface-variant)] hover:text-rose-400 cursor-pointer"
+                            title="Eliminar workspace"
+                          >
+                            <span className="material-symbols-outlined text-[15px]">delete</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <form onSubmit={handleCreate} className="flex flex-col gap-3.5">
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-medium text-[var(--on-surface)]">
+                  Nombre del Workspace
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="ej. Ecommerce Monorepo, SaaS Backend..."
+                  className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-2.5 py-1.5 text-xs text-[var(--on-surface)] focus:outline-none"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-medium text-[var(--on-surface)]">
+                  Repositorio de GitHub (URL o usuario/repo)
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={repoInput}
+                  onChange={(e) => setRepoInput(e.target.value)}
+                  placeholder="ej. organizacion/mi-repo o https://github.com/org/repo"
+                  className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-2.5 py-1.5 text-xs font-mono text-[var(--on-surface)] focus:outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-medium text-[var(--on-surface)]">
+                    Rama por defecto
+                  </label>
+                  <input
+                    type="text"
+                    value={defaultBranch}
+                    onChange={(e) => setDefaultBranch(e.target.value)}
+                    placeholder="main"
+                    className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-2.5 py-1.5 text-xs font-mono text-[var(--on-surface)] focus:outline-none"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-medium text-[var(--on-surface)]">
+                    Plantilla de Estructura de Tareas
+                  </label>
+                  <select
+                    value={template}
+                    onChange={(e) => setTemplate(e.target.value as any)}
+                    className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-2 py-1.5 text-xs text-[var(--on-surface)] focus:outline-none cursor-pointer"
+                  >
+                    <option value="monorepo">Monorepo (Raíz + frontend + backend)</option>
+                    <option value="fullstack">Fullstack (frontend/ + backend/)</option>
+                    <option value="single">App Individual (Raíz TASKS.md)</option>
+                    <option value="empty">En blanco</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-medium text-[var(--on-surface)]">
+                  Descripción (opcional)
+                </label>
+                <input
+                  type="text"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Breve resumen del propósito de este workspace"
+                  className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-2.5 py-1.5 text-xs text-[var(--on-surface)] focus:outline-none"
+                />
+              </div>
+
+              <div className="pt-3 flex items-center justify-end gap-2 border-t border-[var(--outline)]">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('list')}
+                  className="btn-m3-text px-3 py-1 text-xs cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={!name.trim() || !repoInput.trim()}
+                  className="btn-m3-primary px-4 py-1.5 text-xs cursor-pointer shadow-sm"
+                >
+                  Crear Workspace
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="px-4 py-2.5 bg-[var(--surface)] border-t border-[var(--outline)] flex justify-end">
+          <button
+            type="button"
+            onClick={onClose}
+            className="btn-m3-secondary px-3.5 py-1 text-xs cursor-pointer"
+          >
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};

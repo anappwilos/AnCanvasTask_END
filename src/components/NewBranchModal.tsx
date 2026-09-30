@@ -1,0 +1,125 @@
+import React, { useState } from 'react';
+import { BranchConfig } from '../services/workspaceService';
+
+interface NewBranchModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  currentBranch: BranchConfig;
+  allBranches: BranchConfig[];
+  onCreateBranch: (branchName: string, sourceBranchName: string) => void;
+  onShowToast: (message: string, type?: 'info' | 'success' | 'warning' | 'error') => void;
+}
+
+export const NewBranchModal: React.FC<NewBranchModalProps> = ({
+  isOpen,
+  onClose,
+  currentBranch,
+  allBranches,
+  onCreateBranch,
+  onShowToast,
+}) => {
+  const [branchName, setBranchName] = useState('');
+  const [sourceBranch, setSourceBranch] = useState(currentBranch.name);
+
+  if (!isOpen) return null;
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanName = branchName.trim().replace(/\s+/g, '-');
+    if (!cleanName) {
+      onShowToast('Por favor introduce un nombre válido de rama', 'warning');
+      return;
+    }
+
+    if (allBranches.some((b) => b.name.toLowerCase() === cleanName.toLowerCase())) {
+      onShowToast(`Ya existe una rama con el nombre "${cleanName}"`, 'error');
+      return;
+    }
+
+    onCreateBranch(cleanName, sourceBranch);
+    onShowToast(`Rama "${cleanName}" creada a partir de "${sourceBranch}"`, 'success');
+    onClose();
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 animate-fade-in"
+      onClick={onClose}
+    >
+      <div
+        className="w-full sm:max-w-md bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-lg sm:rounded-lg shadow-xl flex flex-col overflow-hidden pb-safe sm:pb-0"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="new-branch-title"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-[16px] text-sky-400">fork_right</span>
+            <h2 id="new-branch-title" className="text-sm font-semibold text-[var(--on-surface)] font-sans">
+              Crear Nueva Rama de Git
+            </h2>
+          </div>
+          <button type="button" onClick={onClose} className="btn-m3-icon w-7 h-7 cursor-pointer">
+            <span className="material-symbols-outlined text-[16px]">close</span>
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-4 flex flex-col gap-3.5">
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-medium text-[var(--on-surface)]">
+              Nombre de la nueva rama
+            </label>
+            <input
+              type="text"
+              required
+              autoFocus
+              value={branchName}
+              onChange={(e) => setBranchName(e.target.value)}
+              placeholder="ej. feature/auth-passkey, bugfix/canvas-zoom..."
+              className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-2.5 py-1.5 text-xs font-mono text-[var(--on-surface)] focus:outline-none"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-medium text-[var(--on-surface)]">
+              Crear a partir de la rama
+            </label>
+            <select
+              value={sourceBranch}
+              onChange={(e) => setSourceBranch(e.target.value)}
+              className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-2 py-1.5 text-xs font-mono text-[var(--on-surface)] focus:outline-none cursor-pointer"
+            >
+              {allBranches.map((b) => (
+                <option key={b.name} value={b.name}>
+                  {b.name} ({b.taskDocuments.length} Task MDs)
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="p-2.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] text-[var(--on-surface-variant)] leading-relaxed">
+            Se clonarán todos los archivos Task MD (raíz, frontend, backend, etc.) y su distribución visual hacia la nueva rama.
+          </div>
+
+          <div className="pt-2.5 flex items-center justify-end gap-2 border-t border-[var(--outline)]">
+            <button
+              type="button"
+              onClick={onClose}
+              className="btn-m3-text px-3 py-1 text-xs cursor-pointer"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={!branchName.trim()}
+              className="btn-m3-primary px-4 py-1 text-xs cursor-pointer shadow-sm"
+            >
+              Crear Rama
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};

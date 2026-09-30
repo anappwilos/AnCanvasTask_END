@@ -36,6 +36,25 @@ import { SettingsModal } from './components/SettingsModal';
 import { ImportExportModal } from './components/ImportExportModal';
 import { SanityConfigModal } from './components/SanityConfigModal';
 import { SanityStudio } from './components/SanityStudio';
+import { WorkspaceSelector } from './components/WorkspaceSelector';
+import { TaskDocumentExplorer } from './components/TaskDocumentExplorer';
+import { WorkspaceManagerModal } from './components/WorkspaceManagerModal';
+import { NewTaskDocumentModal } from './components/NewTaskDocumentModal';
+import { NewBranchModal } from './components/NewBranchModal';
+import { GitHubSyncModal } from './components/GitHubSyncModal';
+import { RenameDocumentModal } from './components/RenameDocumentModal';
+import {
+  loadWorkspaceStore,
+  saveWorkspaceStore,
+  getActiveWorkspace,
+  getActiveBranch,
+  getActiveDocument,
+  WorkspaceStoreState,
+  Workspace,
+  BranchConfig,
+  TaskDocument,
+  formatDocumentPath,
+} from './services/workspaceService';
 import {
   AppUserSettings,
   loadUserSettings,
@@ -272,10 +291,29 @@ export default function App() {
   const [customGroupInput, setCustomGroupInput] = useState<string>('');
   const [isCustomGroup, setIsCustomGroup] = useState<boolean>(false);
 
+  // Workspace and GitHub Repositories Store State
+  const [workspaceStore, setWorkspaceStore] = useState<WorkspaceStoreState>(() => loadWorkspaceStore());
+  const [isWorkspaceManagerOpen, setIsWorkspaceManagerOpen] = useState(false);
+  const [isNewTaskDocModalOpen, setIsNewTaskDocModalOpen] = useState(false);
+  const [newTaskDocPresetFolder, setNewTaskDocPresetFolder] = useState<string>('');
+  const [isNewBranchModalOpen, setIsNewBranchModalOpen] = useState(false);
+  const [isGitHubSyncOpen, setIsGitHubSyncOpen] = useState(false);
+  const [renameDocModalState, setRenameDocModalState] = useState<{
+    isOpen: boolean;
+    docId: string;
+    initialName: string;
+    initialFolder: string;
+  }>({ isOpen: false, docId: '', initialName: '', initialFolder: '' });
+
+  // Computed active entities
+  const activeWorkspace = useMemo(() => getActiveWorkspace(workspaceStore), [workspaceStore]);
+  const activeBranch = useMemo(() => getActiveBranch(activeWorkspace), [activeWorkspace]);
+  const activeDocument = useMemo(() => getActiveDocument(activeBranch), [activeBranch]);
+
   // Markdown and sync
-  const [currentFileName, setCurrentFileName] = useState<string>('TASKS.md');
-  const [markdownInput, setMarkdownInput] = useState<string>(SAMPLE_MARKDOWN);
-  const [lastSavedMarkdown, setLastSavedMarkdown] = useState<string>(SAMPLE_MARKDOWN);
+  const [currentFileName, setCurrentFileName] = useState<string>(() => activeDocument.path || 'TASKS.md');
+  const [markdownInput, setMarkdownInput] = useState<string>(() => activeDocument.content || SAMPLE_MARKDOWN);
+  const [lastSavedMarkdown, setLastSavedMarkdown] = useState<string>(() => activeDocument.lastSavedContent || SAMPLE_MARKDOWN);
   const [isDraggingOver, setIsDraggingOver] = useState<boolean>(false);
   const [copiedMarkdown, setCopiedMarkdown] = useState<boolean>(false);
   const [syncStatus, setSyncStatus] = useState<SyncStatus>('idle');
@@ -287,6 +325,500 @@ export default function App() {
   const debouncedSanityTasksRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const markdownRef = useRef<string>(markdownInput);
   markdownRef.current = markdownInput;
+
+  const triggerDebouncedVisualSave = useCallback((editorInstance: Editor) => {
+    if (debouncedSaveRef.current) {
+      clearTimeout(debouncedSaveRef.current);
+    }
+    setSyncStatus('saving');
+    debouncedSaveRef.current = setTimeout(async () => {
+      const visualState = extractVisualStateFromEditor(editorInstance);
+      if (visualState.tasks.length > 0 || visualState.groups.length > 0) {
+        const res = await saveCanvasVisualState(visualState);
+        setSyncStatus(res.remote ? 'synced' : 'local');
+      } else {
+        setSyncStatus('idle');
+      }
+    }, 700);
+  }, []);
+
+  // Keep workspaceStore synced whenever markdownInput changes
+  useEffect(() => {
+    setWorkspaceStore((prevStore) => {
+      let hasChanges = false;
+      const nextWs = prevStore.workspaces.map((ws) => {
+        if (ws.id !== prevStore.activeWorkspaceId) return ws;
+        const nextBranches = ws.branches.map((b) => {
+          if (b.name !== ws.activeBranchName) return b;
+          const nextDocs = b.taskDocuments.map((d) => {
+            if (d.id !== b.activeDocumentId) return d;
+            if (d.content === markdownInput) return d;
+            hasChanges = true;
+            return {
+              ...d,
+              content: markdownInput,
+              updatedAt: new Date().toISOString(),
+            };
+          });
+          return { ...b, taskDocuments: nextDocs };
+        });
+        return { ...ws, branches: nextBranches, updatedAt: new Date().toISOString() };
+      });
+
+      if (!hasChanges) return prevStore;
+      const nextStore = { ...prevStore, workspaces: nextWs };
+      saveWorkspaceStore(nextStore);
+      return nextStore;
+    });
+  }, [markdownInput]);
+
+  // Handle switching active document in workspace/branch
+  const activeDocIdRef = useRef(activeDocument.id);
+  useEffect(() => {
+    if (activeDocIdRef.current !== activeDocument.id) {
+      activeDocIdRef.current = activeDocument.id;
+      setCurrentFileName(activeDocument.path);
+      setMarkdownInput(activeDocument.content);
+      setLastSavedMarkdown(activeDocument.lastSavedContent);
+
+      if (editor) {
+        const { taskCount, groupCount } = loadTasksFromMarkdown(
+          editor,
+          activeDocument.content,
+          activeDocument.visualState
+        );
+        triggerDebouncedVisualSave(editor);
+      }
+    }
+  }, [activeDocument]);
+
+  // Existing folders in the active branch for autocomplete
+  const existingFoldersInBranch = useMemo(() => {
+    const folders = new Set<string>();
+    activeBranch.taskDocuments.forEach((doc) => {
+      if (doc.folder && doc.folder !== 'root' && doc.folder !== '/') {
+        folders.add(doc.folder);
+      }
+    });
+    return Array.from(folders);
+  }, [activeBranch.taskDocuments]);
+
+  // Workspace actions
+  const handleSelectWorkspace = useCallback(
+    (workspaceId: string) => {
+      setWorkspaceStore((prev) => {
+        const targetWs = prev.workspaces.find((w) => w.id === workspaceId) || prev.workspaces[0];
+        const targetBranch = getActiveBranch(targetWs);
+        const targetDoc = getActiveDocument(targetBranch);
+
+        setCurrentFileName(targetDoc.path);
+        setMarkdownInput(targetDoc.content);
+        setLastSavedMarkdown(targetDoc.lastSavedContent);
+
+        if (editor) {
+          loadTasksFromMarkdown(editor, targetDoc.content, targetDoc.visualState);
+          triggerDebouncedVisualSave(editor);
+        }
+
+        const nextStore = { ...prev, activeWorkspaceId: workspaceId };
+        saveWorkspaceStore(nextStore);
+        return nextStore;
+      });
+      const ws = workspaceStore.workspaces.find((w) => w.id === workspaceId);
+      pushToast(`Workspace "${ws?.name || workspaceId}" cargado`, 'success');
+    },
+    [editor, pushToast, triggerDebouncedVisualSave, workspaceStore.workspaces]
+  );
+
+  const handleCreateWorkspace = useCallback(
+    (newWs: Workspace) => {
+      setWorkspaceStore((prev) => {
+        const nextStore = {
+          ...prev,
+          workspaces: [...prev.workspaces, newWs],
+          activeWorkspaceId: newWs.id,
+        };
+        saveWorkspaceStore(nextStore);
+
+        const targetBranch = getActiveBranch(newWs);
+        const targetDoc = getActiveDocument(targetBranch);
+        setCurrentFileName(targetDoc.path);
+        setMarkdownInput(targetDoc.content);
+        setLastSavedMarkdown(targetDoc.lastSavedContent);
+
+        if (editor) {
+          loadTasksFromMarkdown(editor, targetDoc.content, targetDoc.visualState);
+          triggerDebouncedVisualSave(editor);
+        }
+
+        return nextStore;
+      });
+    },
+    [editor, triggerDebouncedVisualSave]
+  );
+
+  const handleDeleteWorkspace = useCallback(
+    (wsId: string) => {
+      setWorkspaceStore((prev) => {
+        if (prev.workspaces.length <= 1) {
+          pushToast('No puedes eliminar el único workspace', 'warning');
+          return prev;
+        }
+        const filtered = prev.workspaces.filter((w) => w.id !== wsId);
+        const nextActiveId = prev.activeWorkspaceId === wsId ? filtered[0].id : prev.activeWorkspaceId;
+        const nextStore = {
+          ...prev,
+          workspaces: filtered,
+          activeWorkspaceId: nextActiveId,
+        };
+        saveWorkspaceStore(nextStore);
+        pushToast('Workspace eliminado', 'info');
+
+        const activeWs = getActiveWorkspace(nextStore);
+        const activeBr = getActiveBranch(activeWs);
+        const activeDc = getActiveDocument(activeBr);
+        setCurrentFileName(activeDc.path);
+        setMarkdownInput(activeDc.content);
+        setLastSavedMarkdown(activeDc.lastSavedContent);
+
+        if (editor) {
+          loadTasksFromMarkdown(editor, activeDc.content, activeDc.visualState);
+          triggerDebouncedVisualSave(editor);
+        }
+
+        return nextStore;
+      });
+    },
+    [editor, pushToast, triggerDebouncedVisualSave]
+  );
+
+  // Branch actions
+  const handleSelectBranch = useCallback(
+    (branchName: string) => {
+      setWorkspaceStore((prev) => {
+        const nextWsList = prev.workspaces.map((ws) => {
+          if (ws.id !== prev.activeWorkspaceId) return ws;
+          return { ...ws, activeBranchName: branchName, updatedAt: new Date().toISOString() };
+        });
+        const nextStore = { ...prev, workspaces: nextWsList };
+        saveWorkspaceStore(nextStore);
+
+        const currentWs = getActiveWorkspace(nextStore);
+        const currentBr = getActiveBranch(currentWs);
+        const currentDc = getActiveDocument(currentBr);
+
+        setCurrentFileName(currentDc.path);
+        setMarkdownInput(currentDc.content);
+        setLastSavedMarkdown(currentDc.lastSavedContent);
+
+        if (editor) {
+          loadTasksFromMarkdown(editor, currentDc.content, currentDc.visualState);
+          triggerDebouncedVisualSave(editor);
+        }
+
+        return nextStore;
+      });
+      pushToast(`Rama "${branchName}" activada`, 'info');
+    },
+    [editor, pushToast, triggerDebouncedVisualSave]
+  );
+
+  const handleCreateBranch = useCallback(
+    (branchName: string, sourceBranchName: string) => {
+      setWorkspaceStore((prev) => {
+        const currentWs = getActiveWorkspace(prev);
+        const sourceBr = currentWs.branches.find((b) => b.name === sourceBranchName) || currentWs.branches[0];
+
+        // Clone documents from source branch
+        const clonedDocs = sourceBr.taskDocuments.map((doc) => ({
+          ...doc,
+          id: `doc_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+          updatedAt: new Date().toISOString(),
+        }));
+
+        const newBranch: BranchConfig = {
+          name: branchName,
+          isProtected: false,
+          lastCommit: {
+            hash: Math.random().toString(16).substring(2, 9),
+            message: `chore: crear rama ${branchName} a partir de ${sourceBranchName}`,
+            author: 'Developer',
+            timestamp: new Date().toISOString(),
+          },
+          activeDocumentId: clonedDocs[0].id,
+          taskDocuments: clonedDocs,
+        };
+
+        const nextWsList = prev.workspaces.map((ws) => {
+          if (ws.id !== prev.activeWorkspaceId) return ws;
+          return {
+            ...ws,
+            activeBranchName: branchName,
+            branches: [...ws.branches, newBranch],
+            updatedAt: new Date().toISOString(),
+          };
+        });
+
+        const nextStore = { ...prev, workspaces: nextWsList };
+        saveWorkspaceStore(nextStore);
+
+        const activeDc = clonedDocs[0];
+        setCurrentFileName(activeDc.path);
+        setMarkdownInput(activeDc.content);
+        setLastSavedMarkdown(activeDc.lastSavedContent);
+
+        if (editor) {
+          loadTasksFromMarkdown(editor, activeDc.content, activeDc.visualState);
+          triggerDebouncedVisualSave(editor);
+        }
+
+        return nextStore;
+      });
+    },
+    [editor, triggerDebouncedVisualSave]
+  );
+
+  // Task Document actions
+  const handleSelectDocument = useCallback(
+    (docId: string) => {
+      setWorkspaceStore((prev) => {
+        const nextWsList = prev.workspaces.map((ws) => {
+          if (ws.id !== prev.activeWorkspaceId) return ws;
+          const nextBranches = ws.branches.map((b) => {
+            if (b.name !== ws.activeBranchName) return b;
+            return { ...b, activeDocumentId: docId };
+          });
+          return { ...ws, branches: nextBranches };
+        });
+        const nextStore = { ...prev, workspaces: nextWsList };
+        saveWorkspaceStore(nextStore);
+
+        const activeWs = getActiveWorkspace(nextStore);
+        const activeBr = getActiveBranch(activeWs);
+        const targetDoc = activeBr.taskDocuments.find((d) => d.id === docId) || activeBr.taskDocuments[0];
+
+        setCurrentFileName(targetDoc.path);
+        setMarkdownInput(targetDoc.content);
+        setLastSavedMarkdown(targetDoc.lastSavedContent);
+
+        if (editor) {
+          loadTasksFromMarkdown(editor, targetDoc.content, targetDoc.visualState);
+          triggerDebouncedVisualSave(editor);
+        }
+
+        return nextStore;
+      });
+    },
+    [editor, triggerDebouncedVisualSave]
+  );
+
+  const handleCreateTaskDocument = useCallback(
+    (newDoc: TaskDocument) => {
+      setWorkspaceStore((prev) => {
+        const nextWsList = prev.workspaces.map((ws) => {
+          if (ws.id !== prev.activeWorkspaceId) return ws;
+          const nextBranches = ws.branches.map((b) => {
+            if (b.name !== ws.activeBranchName) return b;
+            return {
+              ...b,
+              taskDocuments: [...b.taskDocuments, newDoc],
+              activeDocumentId: newDoc.id,
+            };
+          });
+          return { ...ws, branches: nextBranches, updatedAt: new Date().toISOString() };
+        });
+        const nextStore = { ...prev, workspaces: nextWsList };
+        saveWorkspaceStore(nextStore);
+
+        setCurrentFileName(newDoc.path);
+        setMarkdownInput(newDoc.content);
+        setLastSavedMarkdown(newDoc.lastSavedContent);
+
+        if (editor) {
+          loadTasksFromMarkdown(editor, newDoc.content, newDoc.visualState);
+          triggerDebouncedVisualSave(editor);
+        }
+
+        return nextStore;
+      });
+    },
+    [editor, triggerDebouncedVisualSave]
+  );
+
+  const handleRenameTaskDocument = useCallback(
+    (docId: string, newName: string, newFolder: string) => {
+      const newPath = formatDocumentPath(newFolder, newName);
+      setWorkspaceStore((prev) => {
+        const nextWsList = prev.workspaces.map((ws) => {
+          if (ws.id !== prev.activeWorkspaceId) return ws;
+          const nextBranches = ws.branches.map((b) => {
+            if (b.name !== ws.activeBranchName) return b;
+            const nextDocs = b.taskDocuments.map((d) => {
+              if (d.id !== docId) return d;
+              return {
+                ...d,
+                name: newName,
+                folder: newFolder,
+                path: newPath,
+                updatedAt: new Date().toISOString(),
+              };
+            });
+            return { ...b, taskDocuments: nextDocs };
+          });
+          return { ...ws, branches: nextBranches, updatedAt: new Date().toISOString() };
+        });
+        const nextStore = { ...prev, workspaces: nextWsList };
+        saveWorkspaceStore(nextStore);
+
+        if (activeDocument.id === docId) {
+          setCurrentFileName(newPath);
+        }
+        return nextStore;
+      });
+    },
+    [activeDocument.id]
+  );
+
+  const handleDuplicateTaskDocument = useCallback(
+    (docId: string) => {
+      setWorkspaceStore((prev) => {
+        const activeWs = getActiveWorkspace(prev);
+        const activeBr = getActiveBranch(activeWs);
+        const targetDoc = activeBr.taskDocuments.find((d) => d.id === docId);
+        if (!targetDoc) return prev;
+
+        const copyName = targetDoc.name.replace(/\.md$/, '') + '_copy.md';
+        const copyPath = formatDocumentPath(targetDoc.folder, copyName);
+
+        const clonedDoc: TaskDocument = {
+          ...targetDoc,
+          id: `doc_${Date.now()}_${Math.random().toString(36).substring(2, 5)}`,
+          name: copyName,
+          path: copyPath,
+          updatedAt: new Date().toISOString(),
+        };
+
+        const nextWsList = prev.workspaces.map((ws) => {
+          if (ws.id !== prev.activeWorkspaceId) return ws;
+          const nextBranches = ws.branches.map((b) => {
+            if (b.name !== ws.activeBranchName) return b;
+            return {
+              ...b,
+              taskDocuments: [...b.taskDocuments, clonedDoc],
+              activeDocumentId: clonedDoc.id,
+            };
+          });
+          return { ...ws, branches: nextBranches };
+        });
+
+        const nextStore = { ...prev, workspaces: nextWsList };
+        saveWorkspaceStore(nextStore);
+
+        setCurrentFileName(clonedDoc.path);
+        setMarkdownInput(clonedDoc.content);
+        setLastSavedMarkdown(clonedDoc.lastSavedContent);
+
+        if (editor) {
+          loadTasksFromMarkdown(editor, clonedDoc.content, clonedDoc.visualState);
+          triggerDebouncedVisualSave(editor);
+        }
+
+        pushToast(`Documento duplicado como "${copyPath}"`, 'success');
+        return nextStore;
+      });
+    },
+    [editor, pushToast, triggerDebouncedVisualSave]
+  );
+
+  const handleDeleteTaskDocument = useCallback(
+    (docId: string, docPath: string) => {
+      setWorkspaceStore((prev) => {
+        const activeWs = getActiveWorkspace(prev);
+        const activeBr = getActiveBranch(activeWs);
+
+        if (activeBr.taskDocuments.length <= 1) {
+          pushToast('No puedes eliminar el único archivo Task MD de la rama', 'warning');
+          return prev;
+        }
+
+        const remainingDocs = activeBr.taskDocuments.filter((d) => d.id !== docId);
+        const nextActiveDocId = activeBr.activeDocumentId === docId ? remainingDocs[0].id : activeBr.activeDocumentId;
+
+        const nextWsList = prev.workspaces.map((ws) => {
+          if (ws.id !== prev.activeWorkspaceId) return ws;
+          const nextBranches = ws.branches.map((b) => {
+            if (b.name !== ws.activeBranchName) return b;
+            return {
+              ...b,
+              taskDocuments: remainingDocs,
+              activeDocumentId: nextActiveDocId,
+            };
+          });
+          return { ...ws, branches: nextBranches, updatedAt: new Date().toISOString() };
+        });
+
+        const nextStore = { ...prev, workspaces: nextWsList };
+        saveWorkspaceStore(nextStore);
+
+        const nextTargetDoc = remainingDocs.find((d) => d.id === nextActiveDocId) || remainingDocs[0];
+        setCurrentFileName(nextTargetDoc.path);
+        setMarkdownInput(nextTargetDoc.content);
+        setLastSavedMarkdown(nextTargetDoc.lastSavedContent);
+
+        if (editor) {
+          loadTasksFromMarkdown(editor, nextTargetDoc.content, nextTargetDoc.visualState);
+          triggerDebouncedVisualSave(editor);
+        }
+
+        pushToast(`Archivo "${docPath}" eliminado`, 'info');
+        return nextStore;
+      });
+    },
+    [editor, pushToast, triggerDebouncedVisualSave]
+  );
+
+  const handleCommitBranch = useCallback(
+    (commitMessage: string, author: string) => {
+      setWorkspaceStore((prev) => {
+        const hash = Math.random().toString(16).substring(2, 9);
+        const nextWsList = prev.workspaces.map((ws) => {
+          if (ws.id !== prev.activeWorkspaceId) return ws;
+          const nextBranches = ws.branches.map((b) => {
+            if (b.name !== ws.activeBranchName) return b;
+            const updatedDocs = b.taskDocuments.map((d) => ({
+              ...d,
+              lastSavedContent: d.content,
+            }));
+            return {
+              ...b,
+              lastCommit: {
+                hash,
+                message: commitMessage,
+                author,
+                timestamp: new Date().toISOString(),
+              },
+              taskDocuments: updatedDocs,
+            };
+          });
+          return { ...ws, branches: nextBranches, updatedAt: new Date().toISOString() };
+        });
+
+        const nextStore = { ...prev, workspaces: nextWsList };
+        saveWorkspaceStore(nextStore);
+        setLastSavedMarkdown(markdownInput);
+        return nextStore;
+      });
+    },
+    [markdownInput]
+  );
+
+  const handleSaveGitHubToken = useCallback((token: string) => {
+    setWorkspaceStore((prev) => {
+      const nextStore = { ...prev, githubToken: token || undefined };
+      saveWorkspaceStore(nextStore);
+      return nextStore;
+    });
+  }, []);
 
   const customShapeUtils = useMemo(() => [TaskGroupShapeUtil, TaskShapeUtil], []);
 
@@ -306,22 +838,6 @@ export default function App() {
     const titles = groupHeadings.map((g) => g.title);
     return titles.length > 0 ? titles : ['General'];
   }, [markdownInput]);
-
-  const triggerDebouncedVisualSave = useCallback((editorInstance: Editor) => {
-    if (debouncedSaveRef.current) {
-      clearTimeout(debouncedSaveRef.current);
-    }
-    setSyncStatus('saving');
-    debouncedSaveRef.current = setTimeout(async () => {
-      const visualState = extractVisualStateFromEditor(editorInstance);
-      if (visualState.tasks.length > 0 || visualState.groups.length > 0) {
-        const res = await saveCanvasVisualState(visualState);
-        setSyncStatus(res.remote ? 'synced' : 'local');
-      } else {
-        setSyncStatus('idle');
-      }
-    }, 700);
-  }, []);
 
   // Listen for delete requests from task cards
   useEffect(() => {
@@ -1353,6 +1869,47 @@ export default function App() {
         },
       },
       {
+        id: 'workspace-manager',
+        title: 'Administrar Workspaces & Repositorios de GitHub',
+        shortcut: 'W',
+        icon: 'source',
+        category: 'action',
+        perform: () => {
+          setIsWorkspaceManagerOpen(true);
+        },
+      },
+      {
+        id: 'new-task-doc',
+        title: 'Crear nuevo archivo Task MD (raíz, frontend, backend...)',
+        shortcut: '⇧N',
+        icon: 'note_add',
+        category: 'action',
+        perform: () => {
+          setNewTaskDocPresetFolder('');
+          setIsNewTaskDocModalOpen(true);
+        },
+      },
+      {
+        id: 'new-branch',
+        title: 'Crear nueva rama de Git para este Workspace',
+        shortcut: 'B',
+        icon: 'fork_right',
+        category: 'action',
+        perform: () => {
+          setIsNewBranchModalOpen(true);
+        },
+      },
+      {
+        id: 'github-sync',
+        title: 'Git Status & Confirmar cambios en rama (Commit)',
+        shortcut: 'G',
+        icon: 'commit',
+        category: 'action',
+        perform: () => {
+          setIsGitHubSyncOpen(true);
+        },
+      },
+      {
         id: 'view-canvas',
         title: 'Cambiar a vista Canvas',
         shortcut: 'V',
@@ -1614,7 +2171,7 @@ export default function App() {
 
       {/* Top App Bar (DESIGN.md Section 3: Lightweight, global actions, clean M3 surface) */}
       <header className="h-14 bg-[var(--surface-container)] border-b border-[var(--outline)] px-3 sm:px-4 flex items-center justify-between z-20 select-none flex-shrink-0 gap-2 sm:gap-4 transition-colors">
-        {/* Left Section: Sidebar Toggle & Project Name */}
+        {/* Left Section: Sidebar Toggle, Workspace & GitHub Repo Picker, Active File */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <button
             type="button"
@@ -1628,33 +2185,46 @@ export default function App() {
             </span>
           </button>
 
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-[var(--primary)]" />
-            <h1 className="text-sm font-semibold tracking-tight text-[var(--on-surface)] font-sans hidden md:inline-block">
-              AnTask<span className="text-[var(--primary)]">Canvas</span>
-            </h1>
-          </div>
+          {/* Workspace & GitHub Repo & Branch Selector */}
+          <WorkspaceSelector
+            workspace={activeWorkspace}
+            allWorkspaces={workspaceStore.workspaces}
+            activeBranch={activeBranch}
+            onSelectWorkspace={handleSelectWorkspace}
+            onSelectBranch={handleSelectBranch}
+            onOpenWorkspaceManager={() => setIsWorkspaceManagerOpen(true)}
+            onOpenCreateBranch={() => setIsNewBranchModalOpen(true)}
+            onOpenGitHubSync={() => setIsGitHubSyncOpen(true)}
+          />
 
           {/* Current File and Unsaved Changes Indicator */}
           <div
-            className="flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 rounded-full bg-[var(--surface)] border border-[var(--outline)] text-[11px] sm:text-xs font-mono truncate shadow-xs"
-            title={`Archivo: ${currentFileName}${hasUnsavedChanges ? ' (cambios sin guardar)' : ' (sincronizado)'}`}
+            className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] font-mono truncate shadow-xs cursor-pointer hover:bg-[var(--surface-container-high)] transition-colors"
+            onClick={() =>
+              setRenameDocModalState({
+                isOpen: true,
+                docId: activeDocument.id,
+                initialName: activeDocument.name,
+                initialFolder: activeDocument.folder,
+              })
+            }
+            title={`Documento activo: ${currentFileName} (Clic para renombrar/mover)`}
           >
-            <span className="material-symbols-outlined text-[15px] text-[var(--on-surface-variant)] hidden sm:inline">
+            <span className="material-symbols-outlined text-[14px] text-sky-400">
               description
             </span>
-            <span className="font-medium text-[var(--on-surface)] truncate max-w-[100px] sm:max-w-[140px]">
+            <span className="font-medium text-[var(--on-surface)] truncate max-w-[120px] lg:max-w-[160px]">
               {currentFileName}
             </span>
             {hasUnsavedChanges ? (
-              <span className="flex items-center gap-1 text-amber-400 text-[10px] sm:text-[11px] shrink-0 font-sans">
+              <span className="flex items-center gap-1 text-amber-400 text-[10px] shrink-0 font-sans">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                <span className="hidden lg:inline">modificado</span>
+                <span className="hidden xl:inline">modificado</span>
               </span>
             ) : (
-              <span className="flex items-center gap-1 text-emerald-400 text-[10px] sm:text-[11px] shrink-0 font-sans">
+              <span className="flex items-center gap-1 text-emerald-400 text-[10px] shrink-0 font-sans">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                <span className="hidden lg:inline">al día</span>
+                <span className="hidden xl:inline">al día</span>
               </span>
             )}
           </div>
@@ -1915,7 +2485,33 @@ export default function App() {
         {/* Collapsible Sidebar (DESIGN.md Section 3: Projects, Sections, Filters, Tools) */}
         {isSidebarOpen && (
           <aside className="w-64 bg-[var(--surface-container)] border-r border-[var(--outline)] flex flex-col justify-between p-3 select-none flex-shrink-0 z-10 transition-all duration-200">
-            <div className="flex flex-col gap-4 overflow-y-auto">
+            <div className="flex flex-col gap-3 overflow-y-auto">
+              {/* Task MD Documents Explorer (1 to N Task MD files in Root, Frontend, Backend, etc.) */}
+              <div className="p-2 rounded-lg bg-[var(--surface)] border border-[var(--outline)] shadow-2xs">
+                <TaskDocumentExplorer
+                  branch={activeBranch}
+                  activeDocumentId={activeDocument.id}
+                  onSelectDocument={handleSelectDocument}
+                  onOpenNewDocumentModal={(folder) => {
+                    setNewTaskDocPresetFolder(folder || '');
+                    setIsNewTaskDocModalOpen(true);
+                  }}
+                  onRenameDocument={(docId, currentName, currentFolder) => {
+                    setRenameDocModalState({
+                      isOpen: true,
+                      docId,
+                      initialName: currentName,
+                      initialFolder: currentFolder,
+                    });
+                  }}
+                  onDuplicateDocument={handleDuplicateTaskDocument}
+                  onDeleteDocument={handleDeleteTaskDocument}
+                  onExportDocument={(doc) => {
+                    handleExportMarkdownFromModal(doc.content, doc.name, 'md');
+                  }}
+                />
+              </div>
+
               {/* Quick Actions / New Task & File Button */}
               <div className="flex items-center gap-2">
                 <button
@@ -1925,7 +2521,7 @@ export default function App() {
                   title="Abrir TASKS.md desde el equipo"
                 >
                   <span className="material-symbols-outlined text-[16px]">folder_open</span>
-                  <span>Abrir archivo</span>
+                  <span>Importar .md</span>
                 </button>
                 <button
                   type="button"
@@ -3177,6 +3773,62 @@ export default function App() {
         onOpenSanityConfig={() => setIsSanityModalOpen(true)}
         onOpenFilePicker={handleOpenFilePicker}
         onResetCanvasLayout={handleResetLayout}
+        onShowToast={pushToast}
+      />
+
+      {/* Modal: Gestión de Workspaces & Repositorios GitHub */}
+      <WorkspaceManagerModal
+        isOpen={isWorkspaceManagerOpen}
+        onClose={() => setIsWorkspaceManagerOpen(false)}
+        workspaces={workspaceStore.workspaces}
+        activeWorkspaceId={workspaceStore.activeWorkspaceId}
+        onSelectWorkspace={handleSelectWorkspace}
+        onCreateWorkspace={handleCreateWorkspace}
+        onDeleteWorkspace={handleDeleteWorkspace}
+        onShowToast={pushToast}
+      />
+
+      {/* Modal: Crear nuevo archivo Task MD */}
+      <NewTaskDocumentModal
+        isOpen={isNewTaskDocModalOpen}
+        onClose={() => setIsNewTaskDocModalOpen(false)}
+        presetFolder={newTaskDocPresetFolder}
+        existingFolders={existingFoldersInBranch}
+        onCreateDocument={handleCreateTaskDocument}
+        onShowToast={pushToast}
+      />
+
+      {/* Modal: Crear nueva rama de Git */}
+      <NewBranchModal
+        isOpen={isNewBranchModalOpen}
+        onClose={() => setIsNewBranchModalOpen(false)}
+        currentBranch={activeBranch}
+        allBranches={activeWorkspace.branches}
+        onCreateBranch={handleCreateBranch}
+        onShowToast={pushToast}
+      />
+
+      {/* Modal: Git Status, Commits & Sincronización GitHub */}
+      <GitHubSyncModal
+        isOpen={isGitHubSyncOpen}
+        onClose={() => setIsGitHubSyncOpen(false)}
+        workspace={activeWorkspace}
+        branch={activeBranch}
+        githubToken={workspaceStore.githubToken}
+        onSaveGitHubToken={handleSaveGitHubToken}
+        onCommitBranch={handleCommitBranch}
+        onShowToast={pushToast}
+      />
+
+      {/* Modal: Renombrar / Mover archivo Task MD */}
+      <RenameDocumentModal
+        isOpen={renameDocModalState.isOpen}
+        onClose={() => setRenameDocModalState((prev) => ({ ...prev, isOpen: false }))}
+        docId={renameDocModalState.docId}
+        initialName={renameDocModalState.initialName}
+        initialFolder={renameDocModalState.initialFolder}
+        existingFolders={existingFoldersInBranch}
+        onRename={handleRenameTaskDocument}
         onShowToast={pushToast}
       />
     </div>
