@@ -2833,22 +2833,6 @@ export default function App() {
             </span>
           </button>
 
-          {/* Nueva Tarea (Primary Action) - Desktop only (mobile has + Tarea on docked bottom bar) */}
-          <button
-            type="button"
-            onClick={() => {
-              if (existingSections.length > 0 && !isCustomGroup) {
-                setNewTaskGroup(existingSections[0]);
-              }
-              setIsNewTaskModalOpen(true);
-            }}
-            className="btn-m3-primary hidden sm:inline-flex px-3.5 py-1.5 rounded-full items-center justify-center cursor-pointer shadow-sm shrink-0"
-            title="Crear nueva tarea (N)"
-          >
-            <span className="material-symbols-outlined text-[18px]">add</span>
-            <span>Nueva tarea</span>
-          </button>
-
           {/* Validation Issues Alert Chip (if any) */}
           {validationReport.issues.length > 0 && (
             <button
@@ -3571,6 +3555,22 @@ export default function App() {
               </div>
             )}
           </div>
+
+          {/* Floating Action Button (FAB) - Bottom Right Corner with plus icon */}
+          <button
+            type="button"
+            onClick={() => {
+              if (existingSections.length > 0 && !isCustomGroup) {
+                setNewTaskGroup(existingSections[0]);
+              }
+              setIsNewTaskModalOpen(true);
+            }}
+            className="absolute bottom-16 sm:bottom-6 right-6 z-30 w-12 h-12 rounded-full bg-[var(--primary)] text-[var(--on-primary)] shadow-2xl flex items-center justify-center cursor-pointer hover:scale-105 active:scale-95 transition-transform select-none"
+            title="Crear nueva tarea (N)"
+            aria-label="Crear nueva tarea"
+          >
+            <span className="material-symbols-outlined text-[26px]">add</span>
+          </button>
 
           {/* Toast notification system */}
           <ToastContainer toasts={toasts} onDismiss={handleDismissToast} />
