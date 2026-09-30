@@ -159,6 +159,21 @@ export default function App() {
   }, []);
 
   // Shell Layout State (DESIGN.md Section 3 & 16)
+  const [isMobileScreen, setIsMobileScreen] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth < 768;
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobileScreen(window.innerWidth < 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
       return window.innerWidth >= 1024;
@@ -2607,8 +2622,8 @@ export default function App() {
           </div>
         </div>
 
-        {/* Center Section: View Switcher (Canvas / Kanban) & Quick Search bar */}
-        <div className="flex items-center gap-2 sm:gap-4 flex-1 max-w-xs md:max-w-md lg:max-w-lg mx-2 justify-center">
+        {/* Center Section: View Switcher (Canvas / Kanban) & Quick Search bar - Desktop only */}
+        <div className="hidden md:flex items-center gap-2 sm:gap-4 flex-1 max-w-xs md:max-w-md lg:max-w-lg mx-2 justify-center">
           {/* View Switcher Segmented Control (Canvas / Kanban / Studio) */}
           <div className="flex items-center bg-[var(--surface)] p-0.5 rounded-full border border-[var(--outline)] shadow-xs shrink-0">
             <button
@@ -2741,7 +2756,7 @@ export default function App() {
           <button
             type="button"
             onClick={() => setIsSyncOverrideModalOpen(true)}
-            className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--outline)] hover:border-[var(--primary)] hover:bg-[var(--surface-container-high)] transition-colors cursor-pointer shadow-xs"
+            className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--outline)] hover:border-[var(--primary)] hover:bg-[var(--surface-container-high)] transition-colors cursor-pointer shadow-xs"
             title="Sincronizar y detectar diferencias, overrides y conflictos con Sanity Cloud"
             aria-label="Sincronizar con Sanity"
           >
@@ -2755,7 +2770,7 @@ export default function App() {
           <button
             type="button"
             onClick={handleToggleSplitView}
-            className={`px-2.5 py-1 text-xs font-medium rounded-full border flex items-center gap-1.5 transition-colors cursor-pointer ${
+            className={`hidden sm:flex px-2.5 py-1 text-xs font-medium rounded-full border items-center gap-1.5 transition-colors cursor-pointer ${
               isSplitViewOpen
                 ? 'bg-sky-950/80 text-sky-300 border-sky-700 shadow-xs'
                 : 'bg-[var(--surface)] text-[var(--on-surface-variant)] border-[var(--outline)] hover:text-[var(--on-surface)]'
@@ -2778,7 +2793,7 @@ export default function App() {
           <button
             type="button"
             onClick={handleExportFile}
-            className={`btn-m3-secondary px-3 py-1.5 text-xs cursor-pointer ${
+            className={`btn-m3-secondary hidden sm:flex px-3 py-1.5 text-xs cursor-pointer ${
               hasUnsavedChanges
                 ? 'border-emerald-500 text-emerald-400 bg-emerald-950/40 shadow-xs'
                 : ''
@@ -2809,7 +2824,36 @@ export default function App() {
             </span>
           </button>
 
-          {/* Nueva Tarea (Primary Action) */}
+          {/* Mobile Quick Search Button */}
+          <button
+            type="button"
+            onClick={() => setIsCommandPaletteOpen(true)}
+            className="btn-m3-icon w-8 h-8 sm:hidden shrink-0 cursor-pointer"
+            title="Buscar tarea o abrir comandos"
+            aria-label="Buscar"
+          >
+            <span className="material-symbols-outlined text-[18px]">search</span>
+          </button>
+
+          {/* Mobile Theme Toggle */}
+          <button
+            type="button"
+            onClick={() =>
+              handleUpdateSettings({
+                ...userSettings,
+                theme: effectiveTheme === 'dark' ? 'light' : 'dark',
+              })
+            }
+            className="btn-m3-icon w-8 h-8 sm:hidden shrink-0 cursor-pointer"
+            title={`Cambiar a tema ${effectiveTheme === 'dark' ? 'claro' : 'oscuro'}`}
+            aria-label="Alternar tema"
+          >
+            <span className="material-symbols-outlined text-[18px]">
+              {effectiveTheme === 'dark' ? 'light_mode' : 'dark_mode'}
+            </span>
+          </button>
+
+          {/* Nueva Tarea (Primary Action) - Desktop only (mobile has + Tarea on docked bottom bar) */}
           <button
             type="button"
             onClick={() => {
@@ -2818,11 +2862,11 @@ export default function App() {
               }
               setIsNewTaskModalOpen(true);
             }}
-            className="btn-m3-primary px-3.5 py-1.5 cursor-pointer shadow-sm"
+            className="btn-m3-primary hidden sm:inline-flex px-3.5 py-1.5 rounded-full items-center justify-center cursor-pointer shadow-sm shrink-0"
             title="Crear nueva tarea (N)"
           >
             <span className="material-symbols-outlined text-[18px]">add</span>
-            <span className="hidden xs:inline">Nueva tarea</span>
+            <span>Nueva tarea</span>
           </button>
 
           {/* Validation Issues Alert Chip (if any) */}
@@ -3245,21 +3289,25 @@ export default function App() {
             {/* Visual View Pane (Canvas / Kanban / Studio) */}
             <div
               style={{
-                width: isSplitViewOpen ? `${100 - splitRatio}%` : '100%',
-                flex: isSplitViewOpen ? `0 0 ${100 - splitRatio}%` : '1 1 0%',
+                width: isSplitViewOpen ? (isMobileScreen ? '100%' : `${100 - splitRatio}%`) : '100%',
+                height: isSplitViewOpen && isMobileScreen ? '50%' : '100%',
+                flex: isSplitViewOpen
+                  ? (isMobileScreen ? '0 0 50%' : `0 0 ${100 - splitRatio}%`)
+                  : '1 1 0%',
               }}
-              className="h-full relative overflow-hidden flex flex-col min-w-[280px] transition-all duration-75"
+              className="relative overflow-hidden flex flex-col min-w-0 md:min-w-[280px] transition-all duration-75"
             >
               {activeView === 'canvas' ? (
                 <>
                   <Tldraw
+                    hideUi={true}
                     shapeUtils={customShapeUtils}
                     onMount={handleMount}
                     autoFocus
                   />
 
                   {/* Floating Canvas Navigation Controls (DESIGN.md Section 3 & 14) */}
-                  <div className="absolute bottom-4 left-4 z-10 hidden sm:flex items-center gap-1 bg-[var(--surface-container)]/95 backdrop-blur-md border border-[var(--outline)] rounded-full p-1 shadow-lg select-none">
+                  <div className="absolute bottom-3 left-3 z-10 flex items-center gap-0.5 sm:gap-1 bg-[var(--surface-container)]/95 backdrop-blur-md border border-[var(--outline)] rounded-full p-1 shadow-md select-none">
                     <button
                       type="button"
                       onClick={handleZoomOut}
@@ -3354,7 +3402,7 @@ export default function App() {
 
                   {/* Floating Canvas Multi-Selection Action Bar (DESIGN.md Section 14) */}
                   {selectedTaskIdsOnCanvas.length > 1 && (
-                    <div className="absolute bottom-14 left-1/2 -translate-x-1/2 z-20 bg-[var(--surface-container-high)] border border-[var(--outline)] rounded-md px-3 py-1.5 shadow-lg flex items-center gap-2 select-none max-w-[95vw] overflow-x-auto">
+                    <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-20 bg-[var(--surface-container-high)] border border-[var(--outline)] rounded-lg px-2.5 sm:px-3 py-1.5 shadow-xl flex items-center gap-1.5 sm:gap-2 select-none max-w-[96vw] overflow-x-auto">
                       <div className="flex items-center gap-1.5 pr-2 border-r border-[var(--outline)] shrink-0">
                         <span className="w-2 h-2 rounded bg-[var(--primary)]" />
                         <span className="text-xs font-mono font-medium text-[var(--on-surface)]">
@@ -3510,10 +3558,10 @@ export default function App() {
               <div
                 onPointerDown={handleSplitterPointerDown}
                 onDoubleClick={() => handleSetSplitRatio(50)}
-                className="w-2 md:w-2 bg-[var(--outline)] hover:bg-[var(--primary)] cursor-col-resize transition-colors shrink-0 relative flex items-center justify-center group select-none z-20"
+                className="h-2 w-full md:h-full md:w-2 bg-[var(--outline)] hover:bg-[var(--primary)] cursor-row-resize md:cursor-col-resize transition-colors shrink-0 relative flex items-center justify-center group select-none z-20"
                 title="Arrastra para ajustar el visor en tiempo real (Doble clic para 50%)"
               >
-                <div className="w-1 h-8 rounded-full bg-[var(--on-surface-variant)] group-hover:bg-[var(--on-primary)] transition-colors" />
+                <div className="w-8 h-1 md:w-1 md:h-8 rounded-full bg-[var(--on-surface-variant)] group-hover:bg-[var(--on-primary)] transition-colors" />
               </div>
             )}
 
@@ -3521,10 +3569,11 @@ export default function App() {
             {isSplitViewOpen && (
               <div
                 style={{
-                  width: `${splitRatio}%`,
-                  flex: `0 0 ${splitRatio}%`,
+                  width: isMobileScreen ? '100%' : `${splitRatio}%`,
+                  height: isMobileScreen ? '50%' : '100%',
+                  flex: isMobileScreen ? '0 0 50%' : `0 0 ${splitRatio}%`,
                 }}
-                className="h-full relative overflow-hidden min-w-[300px] transition-all duration-75"
+                className="relative overflow-hidden min-w-0 md:min-w-[300px] transition-all duration-75"
               >
                 <MarkdownSplitEditor
                   value={markdownInput}
@@ -3594,10 +3643,10 @@ export default function App() {
         )}
       </div>
 
-      {/* Floating Bottom Navigation Bar for Mobile */}
+      {/* Mobile Bottom Navigation Bar (Docked, reliable, no button superposition) */}
       <nav
         aria-label="Acciones rápidas móviles"
-        className="sm:hidden fixed bottom-2.5 inset-x-2.5 z-30 bg-[var(--surface-container)]/95 border border-[var(--outline)] rounded-xl shadow-2xl p-1 grid grid-cols-5 gap-1 pb-safe backdrop-blur-md select-none"
+        className="sm:hidden h-14 bg-[var(--surface-container)]/98 border-t border-[var(--outline)] shrink-0 z-30 grid grid-cols-5 gap-1 px-1.5 py-1 pb-[calc(0.25rem+env(safe-area-inset-bottom,0px))] backdrop-blur-md select-none"
       >
         <button
           type="button"
@@ -3611,10 +3660,10 @@ export default function App() {
               setIsNewTaskModalOpen(true);
             }
           }}
-          className="btn-m3-primary w-full py-1 px-0.5 min-h-[42px] flex flex-col items-center justify-center text-[10px] cursor-pointer shadow-xs overflow-hidden"
+          className="btn-m3-primary py-1 px-1 rounded-lg flex flex-col items-center justify-center text-[10px] cursor-pointer shadow-xs overflow-hidden"
         >
-          <span className="material-symbols-outlined text-[17px]">add</span>
-          <span className="font-semibold truncate w-full text-center">{activeView === 'studio' ? 'Crear' : '+ Tarea'}</span>
+          <span className="material-symbols-outlined text-[18px]">add</span>
+          <span className="font-semibold truncate w-full text-center leading-none mt-0.5">{activeView === 'studio' ? 'Crear' : '+ Tarea'}</span>
         </button>
 
         <button
@@ -3624,69 +3673,75 @@ export default function App() {
             else if (activeView === 'kanban') setActiveView('studio');
             else setActiveView('canvas');
           }}
-          className="btn-m3-secondary w-full py-1 px-0.5 min-h-[42px] flex flex-col items-center justify-center text-[10px] cursor-pointer overflow-hidden"
+          className={`flex flex-col items-center justify-center py-1 px-0.5 rounded-lg text-[10px] transition-colors cursor-pointer overflow-hidden ${
+            activeView === 'canvas' || activeView === 'kanban' || activeView === 'studio'
+              ? 'text-[var(--primary)] font-semibold bg-[var(--primary-container)]/20'
+              : 'text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]'
+          }`}
         >
-          <span className="material-symbols-outlined text-[17px] text-sky-400">
+          <span className="material-symbols-outlined text-[18px]">
             {activeView === 'canvas' ? 'grid_view' : activeView === 'kanban' ? 'view_kanban' : 'cloud_sync'}
           </span>
-          <span className="capitalize truncate w-full text-center">{activeView}</span>
+          <span className="capitalize truncate w-full text-center leading-none mt-0.5">{activeView}</span>
         </button>
 
         {activeView === 'canvas' ? (
           <button
             type="button"
             onClick={() => setIsAutoLayoutConfirmOpen(true)}
-            className="btn-m3-secondary w-full py-1 px-0.5 min-h-[42px] flex flex-col items-center justify-center text-[10px] cursor-pointer text-sky-400 overflow-hidden"
+            className="flex flex-col items-center justify-center py-1 px-0.5 rounded-lg text-[10px] text-sky-400 hover:text-sky-300 transition-colors cursor-pointer overflow-hidden"
             title="Auto organizar tareas"
           >
-            <span className="material-symbols-outlined text-[17px]">account_tree</span>
-            <span className="truncate w-full text-center">Organizar</span>
+            <span className="material-symbols-outlined text-[18px]">account_tree</span>
+            <span className="truncate w-full text-center leading-none mt-0.5">Organizar</span>
           </button>
         ) : activeView === 'kanban' ? (
           <button
             type="button"
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="btn-m3-secondary w-full py-1 px-0.5 min-h-[42px] flex flex-col items-center justify-center text-[10px] cursor-pointer overflow-hidden"
+            className="flex flex-col items-center justify-center py-1 px-0.5 rounded-lg text-[10px] text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] transition-colors cursor-pointer overflow-hidden"
             title="Filtros y documentos"
           >
-            <span className="material-symbols-outlined text-[17px]">filter_list</span>
-            <span className="truncate w-full text-center">Filtros</span>
+            <span className="material-symbols-outlined text-[18px]">filter_list</span>
+            <span className="truncate w-full text-center leading-none mt-0.5">Filtros</span>
           </button>
         ) : (
           <button
             type="button"
             onClick={() => setIsSyncOverrideModalOpen(true)}
-            className="btn-m3-secondary w-full py-1 px-0.5 min-h-[42px] flex flex-col items-center justify-center text-[10px] cursor-pointer text-amber-400 overflow-hidden"
+            className="flex flex-col items-center justify-center py-1 px-0.5 rounded-lg text-[10px] text-amber-400 hover:text-amber-300 transition-colors cursor-pointer overflow-hidden"
             title="Sincronizar con Sanity"
           >
-            <span className="material-symbols-outlined text-[17px]">sync_problem</span>
-            <span className="truncate w-full text-center">Sincronizar</span>
+            <span className="material-symbols-outlined text-[18px]">sync_problem</span>
+            <span className="truncate w-full text-center leading-none mt-0.5">Sincronizar</span>
           </button>
         )}
 
         <button
           type="button"
           onClick={handleToggleSplitView}
-          className={`btn-m3-secondary w-full py-1 px-0.5 min-h-[42px] flex flex-col items-center justify-center text-[10px] cursor-pointer overflow-hidden ${
-            isSplitViewOpen ? 'text-sky-400 font-bold border-sky-600 bg-sky-950/30' : ''
+          className={`flex flex-col items-center justify-center py-1 px-0.5 rounded-lg text-[10px] transition-colors cursor-pointer overflow-hidden ${
+            isSplitViewOpen
+              ? 'text-sky-400 font-bold bg-sky-950/30 border border-sky-800/60'
+              : 'text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]'
           }`}
         >
-          <span className="material-symbols-outlined text-[17px]">
+          <span className="material-symbols-outlined text-[18px]">
             {isSplitViewOpen ? 'vertical_split' : 'splitscreen'}
           </span>
-          <span className="truncate w-full text-center">{isSplitViewOpen ? 'Cerrar' : 'Ver .md'}</span>
+          <span className="truncate w-full text-center leading-none mt-0.5">{isSplitViewOpen ? 'Cerrar' : 'Ver .md'}</span>
         </button>
 
         <button
           type="button"
           onClick={() => setIsMobileMenuOpen(true)}
-          className="btn-m3-secondary w-full py-1 px-0.5 min-h-[42px] flex flex-col items-center justify-center text-[10px] cursor-pointer relative overflow-hidden"
+          className="flex flex-col items-center justify-center py-1 px-0.5 rounded-lg text-[10px] text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] transition-colors cursor-pointer relative overflow-hidden"
         >
           {validationReport.issues.length > 0 && (
             <span className="absolute top-1 right-2 w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
           )}
-          <span className="material-symbols-outlined text-[17px]">menu</span>
-          <span className="truncate w-full text-center">Menú</span>
+          <span className="material-symbols-outlined text-[18px]">menu</span>
+          <span className="truncate w-full text-center leading-none mt-0.5">Menú</span>
         </button>
       </nav>
 

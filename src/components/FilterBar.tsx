@@ -94,17 +94,17 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   return (
     <div className="w-full bg-[var(--surface-container)] border-b border-[var(--outline)] px-3 sm:px-4 py-2 flex flex-col gap-2 select-none shrink-0 z-10">
       {/* Top row of FilterBar: Filter popover toggle + Search trigger + Quick view summary */}
-      <div className="flex items-center justify-between gap-2 flex-wrap">
-        <div className="flex items-center gap-2 flex-wrap">
+      <div className="flex items-center justify-between gap-1.5 sm:gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 flex-1 min-w-0">
           {/* Filter Popover Button */}
-          <div className="relative" ref={popoverRef}>
+          <div className="relative shrink-0" ref={popoverRef}>
             <button
               type="button"
               aria-expanded={isFilterPopoverOpen}
               aria-haspopup="true"
               aria-label="Abrir panel de filtros y ordenación"
               onClick={() => setIsFilterPopoverOpen(!isFilterPopoverOpen)}
-              className={`btn-m3-secondary px-3 py-1.5 text-xs font-medium cursor-pointer ${
+              className={`btn-m3-secondary px-2.5 sm:px-3 py-1.5 text-xs font-medium cursor-pointer ${
                 activeFiltersCount > (searchQuery ? 1 : 0)
                   ? 'border-[var(--primary)] text-[var(--primary)] bg-[var(--primary-container)]/20'
                   : ''
@@ -112,7 +112,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
               title="Abrir panel de filtros y ordenación"
             >
               <span className="material-symbols-outlined text-[16px]">tune</span>
-              <span>Filtros</span>
+              <span className="hidden xs:inline">Filtros</span>
               {activeFiltersCount > 0 && (
                 <span className="w-4 h-4 rounded-full bg-[var(--primary)] text-[var(--on-primary)] text-[10px] font-bold flex items-center justify-center font-mono">
                   {activeFiltersCount}
@@ -286,11 +286,11 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             )}
           </div>
 
-          {/* Quick Command Palette Button (Cmd + K) */}
+          {/* Quick Command Palette Button (Cmd + K) on desktop */}
           <button
             type="button"
             onClick={onOpenCommandPalette}
-            className="btn-m3-secondary px-3 py-1.5 text-xs cursor-pointer hidden sm:flex items-center gap-1.5"
+            className="btn-m3-secondary px-3 py-1.5 text-xs cursor-pointer hidden sm:flex items-center gap-1.5 shrink-0"
             title="Abrir paleta de comandos y búsqueda global (Ctrl/Cmd + K)"
           >
             <span className="material-symbols-outlined text-[16px] text-sky-400">terminal</span>
@@ -299,12 +299,36 @@ export const FilterBar: React.FC<FilterBarProps> = ({
               ⌘K
             </kbd>
           </button>
+
+          {/* Mobile Quick Search Input */}
+          <div className="relative flex-1 sm:hidden min-w-[110px] max-w-[200px]">
+            <span className="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-[14px] text-[var(--on-surface-variant)] pointer-events-none">
+              search
+            </span>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => onSearchChange(e.target.value)}
+              placeholder="Buscar..."
+              className="w-full bg-[var(--surface)] text-[var(--on-surface)] placeholder:text-[var(--on-surface-variant)] border border-[var(--outline)] rounded pl-6 pr-5 py-1 text-xs font-sans focus:outline-none focus:border-[var(--primary)]"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => onSearchChange('')}
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[13px]">close</span>
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Counter of matching tasks */}
-        <div className="flex items-center gap-2 text-xs font-mono text-[var(--on-surface-variant)]">
-          <span className="px-2 py-0.5 rounded bg-[var(--surface)] border border-[var(--outline)]">
-            {filteredTasksCount} de {totalTasksCount} tareas
+        <div className="flex items-center gap-1.5 text-xs font-mono text-[var(--on-surface-variant)] shrink-0">
+          <span className="px-2 py-0.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px]">
+            <span className="sm:hidden">{filteredTasksCount}/{totalTasksCount}</span>
+            <span className="hidden sm:inline">{filteredTasksCount} de {totalTasksCount} tareas</span>
           </span>
         </div>
       </div>

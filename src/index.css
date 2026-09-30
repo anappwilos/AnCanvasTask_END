@@ -332,11 +332,16 @@ textarea:focus-visible,
   background-color: var(--surface) !important;
 }
 
-/* Mobile responsive offsets for tldraw canvas controls */
-@media (max-width: 640px) {
-  .tlui-layout__bottom,
-  .tl-layout__bottom {
-    bottom: 4.5rem !important;
-  }
+/* Hide unneeded tldraw chrome to eliminate button superposition and maximize canvas view */
+.tlui-page-menu,
+.tlui-help-menu,
+.tlui-menu-zone,
+.tlui-navigation-zone,
+.tlui-toolbar,
+.tl-toolbar,
+.tlui-layout__bottom,
+.tl-layout__bottom {
+  display: none !important;
 }
+
 
