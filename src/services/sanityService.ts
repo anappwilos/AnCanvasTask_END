@@ -72,6 +72,9 @@ export function saveSanityConfig(config: Partial<SanityConfig>) {
     const current = getSanityConfig();
     const updated = { ...current, ...config };
     localStorage.setItem(LOCAL_STORAGE_KEY_SANITY_CONFIG, JSON.stringify(updated));
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('antask_sanity_config_updated', { detail: updated }));
+    }
     return updated;
   } catch (e) {
     console.warn('Could not save Sanity config', e);
@@ -82,6 +85,9 @@ export function saveSanityConfig(config: Partial<SanityConfig>) {
 export function clearSanityConfig() {
   try {
     localStorage.removeItem(LOCAL_STORAGE_KEY_SANITY_CONFIG);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('antask_sanity_config_updated', { detail: DEFAULT_SANITY_CONFIG }));
+    }
   } catch (e) {
     console.warn('Could not clear Sanity config', e);
   }
@@ -548,7 +554,7 @@ export async function deleteDocumentFromSanity(
  */
 export async function fetchSanityDocumentsList(
   configOverride?: Partial<SanityConfig>
-): Promise<Array<{ _id: string; _type: string; title?: string; name?: string; workspaceId?: string; taskId?: string; projectId?: string; _updatedAt?: string }>> {
+): Promise<Array<{ _id: string; _type: string; title?: string; name?: string; workspaceId?: string; taskId?: string; projectId?: string; _updatedAt?: string; updatedAt?: string; githubRepo?: any }>> {
   const config = { ...getSanityConfig(), ...configOverride };
   if (!config.projectId || !config.dataset) return [];
 
@@ -561,7 +567,7 @@ export async function fetchSanityDocumentsList(
       useCdn: false,
     });
 
-    const query = `*[_type in ["task", "canvasVisualState", "workspace"]] | order(_updatedAt desc)[0...30] {
+    const query = `*[_type in ["task", "canvasVisualState", "workspace", "studio-test"] || _id match "*workspace*" || _id match "*studio-test*" || _id == "studio-test"] | order(_updatedAt desc)[0...100] {
       _id,
       _type,
       title,
@@ -570,7 +576,8 @@ export async function fetchSanityDocumentsList(
       taskId,
       projectId,
       _updatedAt,
-      updatedAt
+      updatedAt,
+      githubRepo
     }`;
     const results = await client.fetch(query);
     return Array.isArray(results) ? results : [];
@@ -727,14 +734,16 @@ export async function saveWorkspaceToSanity(
   configOverride?: Partial<SanityConfig>
 ): Promise<{ ok: boolean; message: string; document?: any }> {
   const config = { ...getSanityConfig(), ...configOverride };
-  const docId = `workspace-${workspace.id}`;
+  const rawId = workspace.workspaceId || workspace.id || 'ws_' + Date.now();
+  const cleanId = String(rawId).replace(/^workspace-/, '');
+  const docId = `workspace-${cleanId}`;
   const now = new Date().toISOString();
 
   const docData: SanityWorkspaceDocument = {
     _id: docId,
     _type: 'workspace',
-    workspaceId: workspace.id,
-    name: workspace.name,
+    workspaceId: cleanId,
+    name: workspace.name || 'Workspace',
     githubRepo: {
       owner: workspace.githubRepo?.owner || 'owner',
       repo: workspace.githubRepo?.repo || 'repo',
@@ -746,7 +755,7 @@ export async function saveWorkspaceToSanity(
     },
     activeBranchName: workspace.activeBranchName || 'main',
     branches: (workspace.branches || []).map((b: any) => ({
-      name: b.name,
+      name: b.name || 'main',
       isProtected: Boolean(b.isProtected),
       activeDocumentId: b.activeDocumentId,
       lastCommit: b.lastCommit
@@ -758,10 +767,10 @@ export async function saveWorkspaceToSanity(
           }
         : undefined,
       taskDocuments: (b.taskDocuments || []).map((doc: any) => ({
-        id: doc.id,
-        name: doc.name,
+        id: doc.id || `doc_${Date.now()}`,
+        name: doc.name || 'TASKS.md',
         folder: doc.folder || '',
-        path: doc.path,
+        path: doc.path || (doc.folder ? `${doc.folder}/${doc.name}` : doc.name || 'TASKS.md'),
         content: doc.content || '',
         lastSavedContent: doc.lastSavedContent || doc.content || '',
         updatedAt: doc.updatedAt || now,
@@ -773,6 +782,7 @@ export async function saveWorkspaceToSanity(
 
   // Cache locally
   try {
+    localStorage.setItem(`antask_sanity_workspace_${cleanId}`, JSON.stringify(docData));
     localStorage.setItem(`antask_sanity_workspace_${workspace.id}`, JSON.stringify(docData));
   } catch (e) {
     // ignore
@@ -830,13 +840,13 @@ export async function loadWorkspacesFromSanity(
       useCdn: false,
     });
 
-    const query = `*[_type == "workspace"] | order(updatedAt desc)`;
+    const query = `*[_type == "workspace" || _id match "workspace*" || _id == "studio-test" || _id match "*studio-test*"] | order(_updatedAt desc)`;
     const results = await client.fetch<SanityWorkspaceDocument[]>(query);
     if (!Array.isArray(results)) return [];
 
-    return results.map((doc) => ({
-      id: doc.workspaceId || doc._id.replace(/^workspace-/, ''),
-      name: doc.name,
+    return results.map((doc: any) => ({
+      id: doc.workspaceId || doc._id?.replace(/^workspace-/, '') || doc._id,
+      name: doc.name || doc.title || 'Workspace',
       githubRepo: {
         owner: doc.githubRepo?.owner || 'owner',
         repo: doc.githubRepo?.repo || 'repo',
@@ -847,23 +857,23 @@ export async function loadWorkspacesFromSanity(
         description: doc.githubRepo?.description || '',
       },
       activeBranchName: doc.activeBranchName || 'main',
-      branches: (doc.branches || []).map((b) => ({
-        name: b.name,
+      branches: (doc.branches || []).map((b: any) => ({
+        name: b.name || 'main',
         isProtected: Boolean(b.isProtected),
         activeDocumentId: b.activeDocumentId || b.taskDocuments?.[0]?.id || 'doc_root',
         lastCommit: b.lastCommit,
-        taskDocuments: (b.taskDocuments || []).map((d) => ({
-          id: d.id,
-          name: d.name,
+        taskDocuments: (b.taskDocuments || []).map((d: any) => ({
+          id: d.id || `doc_${Date.now()}`,
+          name: d.name || 'TASKS.md',
           folder: d.folder || '',
-          path: d.path,
+          path: d.path || (d.folder ? `${d.folder}/${d.name}` : d.name || 'TASKS.md'),
           content: d.content || '',
           lastSavedContent: d.lastSavedContent || d.content || '',
-          updatedAt: d.updatedAt || new Date().toISOString(),
+          updatedAt: d.updatedAt || doc._updatedAt || new Date().toISOString(),
         })),
       })),
-      createdAt: doc.createdAt || new Date().toISOString(),
-      updatedAt: doc.updatedAt || new Date().toISOString(),
+      createdAt: doc.createdAt || doc._createdAt || new Date().toISOString(),
+      updatedAt: doc.updatedAt || doc._updatedAt || new Date().toISOString(),
     }));
   } catch (err) {
     console.warn('Error loading workspaces from Sanity:', err);

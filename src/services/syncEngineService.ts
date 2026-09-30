@@ -109,17 +109,41 @@ export async function analyzeSyncDifferences(
     }
   }
 
-  // Map of remote workspaces by ID
+  // Map of remote workspaces by exact ID, normalized ID, and normalized name
   const remoteWsMap = new Map<string, any>();
   for (const rw of remoteWorkspaces) {
-    remoteWsMap.set(rw.id, rw);
+    if (rw.id) {
+      remoteWsMap.set(rw.id, rw);
+      remoteWsMap.set(rw.id.replace(/^workspace-/, ''), rw);
+    }
+    if (rw.workspaceId) {
+      remoteWsMap.set(rw.workspaceId, rw);
+    }
+    if (rw.name) {
+      remoteWsMap.set(rw.name.trim().toLowerCase(), rw);
+    }
   }
 
   // 2. Compare Workspaces & Task Documents
   const processedRemoteWsIds = new Set<string>();
 
   for (const localWs of workspaceStore.workspaces) {
-    const remoteWs = remoteWsMap.get(localWs.id);
+    const cleanLocalId = localWs.id.replace(/^workspace-/, '');
+    const cleanLocalName = (localWs.name || '').trim().toLowerCase();
+
+    const remoteWs =
+      remoteWsMap.get(localWs.id) ||
+      remoteWsMap.get(cleanLocalId) ||
+      remoteWsMap.get(cleanLocalName) ||
+      remoteWorkspaces.find(
+        (rw) =>
+          rw.id === localWs.id ||
+          rw.id === cleanLocalId ||
+          (rw.name && rw.name.trim().toLowerCase() === cleanLocalName) ||
+          (rw.githubRepo?.fullName &&
+            localWs.githubRepo?.fullName &&
+            rw.githubRepo.fullName.toLowerCase() === localWs.githubRepo.fullName.toLowerCase())
+      );
 
     if (!remoteWs) {
       // Exists only locally
@@ -139,7 +163,9 @@ export async function analyzeSyncDifferences(
         resolutionStrategy: 'keep_local',
       });
     } else {
-      processedRemoteWsIds.add(localWs.id);
+      processedRemoteWsIds.add(remoteWs.id);
+      if (remoteWs.workspaceId) processedRemoteWsIds.add(remoteWs.workspaceId);
+      if (remoteWs.name) processedRemoteWsIds.add(remoteWs.name.trim().toLowerCase());
 
       // Compare local vs remote workspace
       const localTime = new Date(localWs.updatedAt || 0).getTime();
@@ -350,7 +376,12 @@ export async function resolveSyncItem(
 
       const remoteWs = item.remoteData;
       const nextWorkspaces = [...workspaceStore.workspaces];
-      const existingIdx = nextWorkspaces.findIndex((w) => w.id === remoteWs.id);
+      const existingIdx = nextWorkspaces.findIndex(
+        (w) =>
+          w.id === remoteWs.id ||
+          w.id === remoteWs.workspaceId ||
+          (w.name && remoteWs.name && w.name.trim().toLowerCase() === remoteWs.name.trim().toLowerCase())
+      );
 
       if (existingIdx >= 0) {
         nextWorkspaces[existingIdx] = remoteWs;
@@ -368,6 +399,31 @@ export async function resolveSyncItem(
         success: true,
         message: `Workspace "${remoteWs.name}" actualizado desde Sanity`,
         updatedStore,
+      };
+    }
+  }
+
+  if (item.entityType === 'task') {
+    if (strategy === 'keep_local' || (strategy === 'merge' && item.localData)) {
+      // Push individual task to Sanity
+      const taskId = item.localData.taskId || item.localData.temporaryId || item.id.replace(/^task_/, '');
+      const taskDoc = {
+        _id: `task-${taskId}`,
+        _type: 'task',
+        taskId,
+        title: item.localData.title || item.title,
+        completed: Boolean(item.localData.completed),
+        status: item.localData.status || (item.localData.completed ? 'done' : 'todo'),
+        priority: item.localData.priority || 'P1',
+        groupTitle: item.localData.groupTitle || 'General',
+        tags: item.localData.tags || [],
+        blockedBy: item.localData.blockedBy || '',
+        updatedAt: new Date().toISOString(),
+      };
+      const res = await saveSanityDocument(taskDoc, config);
+      return {
+        success: res.ok,
+        message: res.ok ? `Tarea "${taskDoc.title}" sincronizada con Sanity` : res.message,
       };
     }
   }

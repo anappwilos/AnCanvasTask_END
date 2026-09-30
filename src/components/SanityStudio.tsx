@@ -88,14 +88,23 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
     }
   }, [config, selectedDocId]);
 
-  // Initial load
+  // Initial load and listener for config updates
   useEffect(() => {
-    setConfig(getSanityConfig());
+    const updateLocalConfig = () => {
+      const latest = getSanityConfig();
+      setConfig(latest);
+    };
+
+    updateLocalConfig();
+    window.addEventListener('antask_sanity_config_updated', updateLocalConfig);
+    return () => {
+      window.removeEventListener('antask_sanity_config_updated', updateLocalConfig);
+    };
   }, []);
 
   useEffect(() => {
     loadDocuments();
-  }, [loadDocuments]);
+  }, [loadDocuments, config]);
 
   // Load selected document details
   useEffect(() => {

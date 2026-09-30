@@ -35,8 +35,15 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
   const [expandedItemId, setExpandedItemId] = useState<string | null>(null);
   const [resolvingItemId, setResolvingItemId] = useState<string | null>(null);
 
-  const sanityConfig = getSanityConfig();
+  const [sanityConfig, setSanityConfig] = useState(getSanityConfig());
   const isSanityConfigured = Boolean(sanityConfig.projectId && sanityConfig.dataset);
+
+  useEffect(() => {
+    const updateConfig = () => setSanityConfig(getSanityConfig());
+    updateConfig();
+    window.addEventListener('antask_sanity_config_updated', updateConfig);
+    return () => window.removeEventListener('antask_sanity_config_updated', updateConfig);
+  }, []);
 
   const handleRunAnalysis = useCallback(async () => {
     setIsAnalyzing(true);
