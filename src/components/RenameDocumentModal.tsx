@@ -23,30 +23,34 @@ export const RenameDocumentModal: React.FC<RenameDocumentModalProps> = ({
   onShowToast,
 }) => {
   const [name, setName] = useState(initialName);
-  const [folder, setFolder] = useState(initialFolder || 'root');
-  const [customFolder, setCustomFolder] = useState('');
-  const [isCustomFolder, setIsCustomFolder] = useState(false);
+  const [folderInput, setFolderInput] = useState(initialFolder || '');
 
   useEffect(() => {
     setName(initialName);
-    setFolder(initialFolder || 'root');
-    setCustomFolder('');
-    setIsCustomFolder(false);
+    setFolderInput(initialFolder || '');
   }, [initialName, initialFolder, isOpen]);
 
   if (!isOpen) return null;
 
+  const quickFolderChips = [
+    { label: 'Raíz (/)', value: '' },
+    { label: 'frontend/', value: 'frontend' },
+    { label: 'backend/', value: 'backend' },
+    ...existingFolders
+      .filter((f) => f && f !== 'root' && f !== '/' && f !== 'frontend' && f !== 'backend')
+      .map((f) => ({ label: `${f}/`, value: f })),
+    { label: 'packages/ui/', value: 'packages/ui' },
+    { label: 'mobile/', value: 'mobile' },
+    { label: 'docs/', value: 'docs' },
+  ];
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const cleanName = name.trim() || 'TASKS.md';
-    const finalFolder = isCustomFolder
-      ? customFolder.trim()
-      : folder === 'root' || folder === '/'
-      ? ''
-      : folder;
+    const cleanFolder = folderInput.trim().replace(/^\/+|\/+$/g, '');
 
-    const newPath = formatDocumentPath(finalFolder, cleanName);
-    onRename(docId, cleanName, finalFolder);
+    const newPath = formatDocumentPath(cleanFolder, cleanName);
+    onRename(docId, cleanName, cleanFolder);
     onShowToast(`Archivo actualizado a "${newPath}"`, 'success');
     onClose();
   };
@@ -91,50 +95,42 @@ export const RenameDocumentModal: React.FC<RenameDocumentModalProps> = ({
           </div>
 
           <div className="flex flex-col gap-1">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-medium text-[var(--on-surface)]">
-                Ubicación / Carpeta
-              </label>
-              <button
-                type="button"
-                onClick={() => setIsCustomFolder(!isCustomFolder)}
-                className="text-[11px] text-[var(--primary)] hover:underline cursor-pointer"
-              >
-                {isCustomFolder ? 'Elegir existente' : '+ Nueva carpeta'}
-              </button>
-            </div>
+            <label className="text-xs font-medium text-[var(--on-surface)]">
+              Nombre o ruta de la carpeta (ej. <code>frontend</code>, <code>backend</code>, <code>packages/ui</code>, o vacío para raíz)
+            </label>
+            <input
+              type="text"
+              value={folderInput}
+              onChange={(e) => setFolderInput(e.target.value)}
+              placeholder="frontend, backend, packages/ui, mobile..."
+              className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-2.5 py-1.5 text-xs font-mono text-[var(--on-surface)] focus:outline-none"
+            />
 
-            {isCustomFolder ? (
-              <input
-                type="text"
-                value={customFolder}
-                onChange={(e) => setCustomFolder(e.target.value)}
-                placeholder="ej. frontend, backend, packages/core..."
-                className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-2.5 py-1.5 text-xs font-mono text-[var(--on-surface)] focus:outline-none"
-              />
-            ) : (
-              <select
-                value={folder}
-                onChange={(e) => setFolder(e.target.value)}
-                className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-2 py-1.5 text-xs font-sans text-[var(--on-surface)] focus:outline-none cursor-pointer"
-              >
-                <option value="root">📁 Raíz (/)</option>
-                <option value="frontend">📁 frontend/</option>
-                <option value="backend">📁 backend/</option>
-                {existingFolders
-                  .filter((f) => f !== 'root' && f !== '/' && f !== 'frontend' && f !== 'backend' && f)
-                  .map((f) => (
-                    <option key={f} value={f}>
-                      📁 {f}/
-                    </option>
-                  ))}
-              </select>
-            )}
+            {/* Quick Folder Chips */}
+            <div className="flex items-center gap-1.5 flex-wrap mt-1">
+              {quickFolderChips.slice(0, 6).map((chip) => {
+                const isSelected = folderInput.trim().replace(/^\/+|\/+$/g, '') === chip.value;
+                return (
+                  <button
+                    key={chip.label}
+                    type="button"
+                    onClick={() => setFolderInput(chip.value)}
+                    className={`px-2 py-0.5 rounded text-[10px] font-mono transition-colors cursor-pointer border ${
+                      isSelected
+                        ? 'bg-[var(--primary)] text-[var(--on-primary)] border-[var(--primary)] font-medium'
+                        : 'bg-[var(--surface)] text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] border-[var(--outline)] hover:bg-[var(--surface-container-high)]'
+                    }`}
+                  >
+                    {chip.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           <div className="p-2.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] font-mono text-[var(--on-surface-variant)] flex items-center gap-1.5">
             <span className="material-symbols-outlined text-[14px] text-emerald-400">check_circle</span>
-            <span>Nueva ruta: <strong>{formatDocumentPath(isCustomFolder ? customFolder : folder === 'root' ? '' : folder, name)}</strong></span>
+            <span>Nueva ruta: <strong>{formatDocumentPath(folderInput, name)}</strong></span>
           </div>
 
           <div className="pt-2.5 flex items-center justify-end gap-2 border-t border-[var(--outline)]">

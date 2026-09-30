@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { formatDocumentPath, TaskDocument } from '../services/workspaceService';
 
 interface NewTaskDocumentModalProps {
@@ -19,40 +19,38 @@ export const NewTaskDocumentModal: React.FC<NewTaskDocumentModalProps> = ({
   onShowToast,
 }) => {
   const [docName, setDocName] = useState('TASKS.md');
-  const [selectedFolder, setSelectedFolder] = useState<string>(presetFolder || 'root');
-  const [customFolderInput, setCustomFolderInput] = useState('');
-  const [isCustomFolder, setIsCustomFolder] = useState(false);
-  const [template, setTemplate] = useState<'standard' | 'frontend' | 'backend' | 'bugs' | 'blank'>('standard');
+  const [folderInput, setFolderInput] = useState(presetFolder || '');
+
+  useEffect(() => {
+    setFolderInput(presetFolder || '');
+  }, [presetFolder, isOpen]);
 
   if (!isOpen) return null;
 
+  const quickFolderChips = [
+    { label: 'Raíz (/)', value: '' },
+    { label: 'frontend/', value: 'frontend' },
+    { label: 'backend/', value: 'backend' },
+    ...existingFolders
+      .filter((f) => f && f !== 'root' && f !== '/' && f !== 'frontend' && f !== 'backend')
+      .map((f) => ({ label: `${f}/`, value: f })),
+    { label: 'packages/ui/', value: 'packages/ui' },
+    { label: 'mobile/', value: 'mobile' },
+    { label: 'docs/', value: 'docs' },
+  ];
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const finalFolder = isCustomFolder
-      ? customFolderInput.trim()
-      : selectedFolder === 'root' || selectedFolder === '/'
-      ? ''
-      : selectedFolder;
-
+    const cleanFolder = folderInput.trim().replace(/^\/+|\/+$/g, '');
     const cleanName = docName.trim() || 'TASKS.md';
-    const finalPath = formatDocumentPath(finalFolder, cleanName);
+    const finalPath = formatDocumentPath(cleanFolder, cleanName);
 
-    let starterContent = `# ${cleanName}\n\n## General\n- [ ] Nueva tarea de inicio\n  id: task_1\n  priority: P1\n`;
-
-    if (template === 'frontend') {
-      starterContent = `# Frontend Tasks - ${cleanName}\n\n## Interfaz & UI\n- [ ] Maquetar vista principal\n  id: fe_view_1\n  priority: P0\n- [ ] Ajustar accesibilidad y contraste\n  id: fe_a11y\n  priority: P1\n\n## Componentes & Estado\n- [ ] Conectar estado con store\n  id: fe_state\n  priority: P1\n`;
-    } else if (template === 'backend') {
-      starterContent = `# Backend Tasks - ${cleanName}\n\n## APIs & Endpoints\n- [ ] Crear endpoints CRUD\n  id: be_crud\n  priority: P0\n- [ ] Validar esquemas y payload con Zod\n  id: be_validation\n  priority: P1\n\n## Base de Datos\n- [ ] Ejecutar migraciones e índices\n  id: be_migrations\n  priority: P1\n`;
-    } else if (template === 'bugs') {
-      starterContent = `# Bug Tracker - ${cleanName}\n\n## Alta Prioridad (P0)\n- [ ] Bug crítico en producción\n  id: bug_crit_1\n  priority: P0\n\n## Bugs Menores\n- [ ] Corregir padding en móvil\n  id: bug_ui_2\n  priority: P2\n`;
-    } else if (template === 'blank') {
-      starterContent = `# ${cleanName}\n\n## Tareas\n- [ ] Tarea inicial\n  id: init_1\n  priority: P1\n`;
-    }
+    const starterContent = `# ${cleanName}${cleanFolder ? ` - ${cleanFolder}` : ''}\n\n## General\n- [ ] Tarea inicial\n  id: task_1\n  priority: P1\n`;
 
     const newDoc: TaskDocument = {
       id: `doc_${Date.now()}`,
       name: cleanName,
-      folder: finalFolder,
+      folder: cleanFolder,
       path: finalPath,
       content: starterContent,
       lastSavedContent: starterContent,
@@ -105,71 +103,45 @@ export const NewTaskDocumentModal: React.FC<NewTaskDocumentModalProps> = ({
             />
           </div>
 
-          {/* Location / Folder */}
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-medium text-[var(--on-surface)]">
-                Ubicación / Carpeta
-              </label>
-              <button
-                type="button"
-                onClick={() => setIsCustomFolder(!isCustomFolder)}
-                className="text-[11px] text-[var(--primary)] hover:underline cursor-pointer"
-              >
-                {isCustomFolder ? 'Elegir existente' : '+ Nueva carpeta'}
-              </button>
-            </div>
-
-            {isCustomFolder ? (
-              <input
-                type="text"
-                value={customFolderInput}
-                onChange={(e) => setCustomFolderInput(e.target.value)}
-                placeholder="ej. frontend, backend, packages/ui, mobile, docs..."
-                className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-2.5 py-1.5 text-xs font-mono text-[var(--on-surface)] focus:outline-none"
-              />
-            ) : (
-              <select
-                value={selectedFolder}
-                onChange={(e) => setSelectedFolder(e.target.value)}
-                className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-2 py-1.5 text-xs font-sans text-[var(--on-surface)] focus:outline-none cursor-pointer"
-              >
-                <option value="root">📁 Raíz (/)</option>
-                <option value="frontend">📁 frontend/</option>
-                <option value="backend">📁 backend/</option>
-                {existingFolders
-                  .filter((f) => f !== 'root' && f !== '/' && f !== 'frontend' && f !== 'backend' && f)
-                  .map((f) => (
-                    <option key={f} value={f}>
-                      📁 {f}/
-                    </option>
-                  ))}
-              </select>
-            )}
-          </div>
-
-          {/* Template */}
+          {/* Folder Name - Direct user text input */}
           <div className="flex flex-col gap-1">
             <label className="text-xs font-medium text-[var(--on-surface)]">
-              Plantilla inicial de tareas
+              Carpeta (ej. <code>frontend</code>, <code>backend</code>, <code>packages/ui</code>, o vacío para raíz)
             </label>
-            <select
-              value={template}
-              onChange={(e) => setTemplate(e.target.value as any)}
-              className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-2 py-1.5 text-xs text-[var(--on-surface)] focus:outline-none cursor-pointer"
-            >
-              <option value="standard">Estándar (General + Tarea base)</option>
-              <option value="frontend">Frontend Focus (UI, Componentes, Estado)</option>
-              <option value="backend">Backend Focus (APIs, Zod, Database)</option>
-              <option value="bugs">Bug Tracker (P0 críticos, UI bugs)</option>
-              <option value="blank">En blanco</option>
-            </select>
+            <input
+              type="text"
+              value={folderInput}
+              onChange={(e) => setFolderInput(e.target.value)}
+              placeholder="Escribe la carpeta: frontend, backend, packages/ui, mobile..."
+              className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-2.5 py-1.5 text-xs font-mono text-[var(--on-surface)] focus:outline-none"
+            />
+
+            {/* Quick Folder Chips */}
+            <div className="flex items-center gap-1.5 flex-wrap mt-1">
+              {quickFolderChips.slice(0, 6).map((chip) => {
+                const isSelected = folderInput.trim().replace(/^\/+|\/+$/g, '') === chip.value;
+                return (
+                  <button
+                    key={chip.label}
+                    type="button"
+                    onClick={() => setFolderInput(chip.value)}
+                    className={`px-2 py-0.5 rounded text-[10px] font-mono transition-colors cursor-pointer border ${
+                      isSelected
+                        ? 'bg-[var(--primary)] text-[var(--on-primary)] border-[var(--primary)] font-medium'
+                        : 'bg-[var(--surface)] text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] border-[var(--outline)] hover:bg-[var(--surface-container-high)]'
+                    }`}
+                  >
+                    {chip.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {/* Preview Path */}
           <div className="p-2.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] font-mono text-[var(--on-surface-variant)] flex items-center gap-1.5">
             <span className="material-symbols-outlined text-[14px] text-emerald-400">check_circle</span>
-            <span>Ruta final: <strong>{formatDocumentPath(isCustomFolder ? customFolderInput : selectedFolder === 'root' ? '' : selectedFolder, docName)}</strong></span>
+            <span>Ruta final: <strong>{formatDocumentPath(folderInput, docName)}</strong></span>
           </div>
 
           <div className="pt-2.5 flex items-center justify-end gap-2 border-t border-[var(--outline)]">

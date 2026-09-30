@@ -7,6 +7,8 @@ interface TaskDocumentExplorerProps {
   activeDocumentId: string;
   onSelectDocument: (docId: string) => void;
   onOpenNewDocumentModal: (presetFolder?: string) => void;
+  onOpenNewFolderModal: () => void;
+  onOpenRenameFolderModal: (folder: string, count: number) => void;
   onRenameDocument: (docId: string, currentName: string, currentFolder: string) => void;
   onDuplicateDocument: (docId: string) => void;
   onDeleteDocument: (docId: string, docPath: string) => void;
@@ -18,6 +20,8 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
   activeDocumentId,
   onSelectDocument,
   onOpenNewDocumentModal,
+  onOpenNewFolderModal,
+  onOpenRenameFolderModal,
   onRenameDocument,
   onDuplicateDocument,
   onDeleteDocument,
@@ -26,6 +30,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
   // Collapsed folders state (all open by default)
   const [collapsedFolders, setCollapsedFolders] = useState<Record<string, boolean>>({});
   const [activeMenuDocId, setActiveMenuDocId] = useState<string | null>(null);
+  const [activeMenuFolder, setActiveMenuFolder] = useState<string | null>(null);
 
   // Group documents by folder
   const groupedDocuments = useMemo(() => {
@@ -61,7 +66,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
 
   return (
     <div className="flex flex-col gap-1 select-none">
-      {/* Header with Title and Add Button */}
+      {/* Header with Title and Quick Add Buttons */}
       <div className="flex items-center justify-between px-2 py-1">
         <div className="flex items-center gap-1.5">
           <span className="material-symbols-outlined text-[15px] text-[var(--primary)]">
@@ -72,15 +77,27 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
           </span>
         </div>
 
-        <button
-          type="button"
-          onClick={() => onOpenNewDocumentModal()}
-          className="text-[11px] text-[var(--primary)] hover:underline cursor-pointer flex items-center gap-0.5 font-medium"
-          title="Crear un nuevo archivo Task MD en la rama actual"
-        >
-          <span className="material-symbols-outlined text-[13px]">add</span>
-          <span>Añadir</span>
-        </button>
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={onOpenNewFolderModal}
+            className="text-[11px] text-amber-400 hover:underline cursor-pointer flex items-center gap-0.5 font-medium"
+            title="Crear una nueva carpeta con nombre personalizado"
+          >
+            <span className="material-symbols-outlined text-[13px]">create_new_folder</span>
+            <span>+ Carpeta</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onOpenNewDocumentModal()}
+            className="text-[11px] text-[var(--primary)] hover:underline cursor-pointer flex items-center gap-0.5 font-medium"
+            title="Crear un nuevo archivo Task MD en la rama actual"
+          >
+            <span className="material-symbols-outlined text-[13px]">note_add</span>
+            <span>+ Archivo</span>
+          </button>
+        </div>
       </div>
 
       {/* Folder Tree */}
@@ -88,7 +105,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
         {groupedDocuments.map(({ folder, documents }) => {
           const isCollapsed = Boolean(collapsedFolders[folder]);
           const isRoot = folder === '/';
-          const folderLabel = isRoot ? 'Raíz (/)' : folder;
+          const folderLabel = isRoot ? 'Raíz (/)' : `${folder}/`;
 
           return (
             <div key={folder} className="flex flex-col">
@@ -108,7 +125,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
                   <span className="truncate text-[var(--on-surface)]">{folderLabel}</span>
                 </button>
 
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
                     type="button"
                     onClick={(e) => {
@@ -120,6 +137,41 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
                   >
                     <span className="material-symbols-outlined text-[13px]">add</span>
                   </button>
+
+                  {!isRoot && (
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveMenuFolder(activeMenuFolder === folder ? null : folder);
+                        }}
+                        className="btn-m3-icon w-5 h-5 text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] cursor-pointer"
+                        title="Opciones de carpeta"
+                      >
+                        <span className="material-symbols-outlined text-[13px]">more_horiz</span>
+                      </button>
+
+                      {activeMenuFolder === folder && (
+                        <div
+                          className="absolute right-0 top-full mt-1 w-44 bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-xl py-1 z-50 animate-fade-in"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setActiveMenuFolder(null);
+                              onOpenRenameFolderModal(folder, documents.length);
+                            }}
+                            className="w-full px-2.5 py-1 text-left text-xs text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] flex items-center gap-1.5 cursor-pointer"
+                          >
+                            <span className="material-symbols-outlined text-[14px]">drive_file_rename_outline</span>
+                            <span>Renombrar carpeta</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
 

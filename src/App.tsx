@@ -43,6 +43,8 @@ import { NewTaskDocumentModal } from './components/NewTaskDocumentModal';
 import { NewBranchModal } from './components/NewBranchModal';
 import { GitHubSyncModal } from './components/GitHubSyncModal';
 import { RenameDocumentModal } from './components/RenameDocumentModal';
+import { NewFolderModal } from './components/NewFolderModal';
+import { RenameFolderModal } from './components/RenameFolderModal';
 import {
   loadWorkspaceStore,
   saveWorkspaceStore,
@@ -296,6 +298,12 @@ export default function App() {
   const [isWorkspaceManagerOpen, setIsWorkspaceManagerOpen] = useState(false);
   const [isNewTaskDocModalOpen, setIsNewTaskDocModalOpen] = useState(false);
   const [newTaskDocPresetFolder, setNewTaskDocPresetFolder] = useState<string>('');
+  const [isNewFolderModalOpen, setIsNewFolderModalOpen] = useState(false);
+  const [renameFolderModalState, setRenameFolderModalState] = useState<{
+    isOpen: boolean;
+    currentFolder: string;
+    docCount: number;
+  }>({ isOpen: false, currentFolder: '', docCount: 0 });
   const [isNewBranchModalOpen, setIsNewBranchModalOpen] = useState(false);
   const [isGitHubSyncOpen, setIsGitHubSyncOpen] = useState(false);
   const [renameDocModalState, setRenameDocModalState] = useState<{
@@ -775,6 +783,40 @@ export default function App() {
       });
     },
     [editor, pushToast, triggerDebouncedVisualSave]
+  );
+
+  const handleRenameFolder = useCallback(
+    (oldFolder: string, newFolder: string) => {
+      setWorkspaceStore((prev) => {
+        const nextWsList = prev.workspaces.map((ws) => {
+          if (ws.id !== prev.activeWorkspaceId) return ws;
+          const nextBranches = ws.branches.map((b) => {
+            if (b.name !== ws.activeBranchName) return b;
+            const nextDocs = b.taskDocuments.map((d) => {
+              if (d.folder !== oldFolder) return d;
+              const nextPath = formatDocumentPath(newFolder, d.name);
+              return {
+                ...d,
+                folder: newFolder,
+                path: nextPath,
+                updatedAt: new Date().toISOString(),
+              };
+            });
+            return { ...b, taskDocuments: nextDocs };
+          });
+          return { ...ws, branches: nextBranches, updatedAt: new Date().toISOString() };
+        });
+
+        const nextStore = { ...prev, workspaces: nextWsList };
+        saveWorkspaceStore(nextStore);
+
+        const currentActiveDoc = getActiveDocument(getActiveBranch(getActiveWorkspace(nextStore)));
+        setCurrentFileName(currentActiveDoc.path);
+
+        return nextStore;
+      });
+    },
+    []
   );
 
   const handleCommitBranch = useCallback(
@@ -2496,6 +2538,14 @@ export default function App() {
                     setNewTaskDocPresetFolder(folder || '');
                     setIsNewTaskDocModalOpen(true);
                   }}
+                  onOpenNewFolderModal={() => setIsNewFolderModalOpen(true)}
+                  onOpenRenameFolderModal={(folder, count) => {
+                    setRenameFolderModalState({
+                      isOpen: true,
+                      currentFolder: folder,
+                      docCount: count,
+                    });
+                  }}
                   onRenameDocument={(docId, currentName, currentFolder) => {
                     setRenameDocModalState({
                       isOpen: true,
@@ -3829,6 +3879,25 @@ export default function App() {
         initialFolder={renameDocModalState.initialFolder}
         existingFolders={existingFoldersInBranch}
         onRename={handleRenameTaskDocument}
+        onShowToast={pushToast}
+      />
+
+      {/* Modal: Crear nueva carpeta para Task MDs */}
+      <NewFolderModal
+        isOpen={isNewFolderModalOpen}
+        onClose={() => setIsNewFolderModalOpen(false)}
+        existingFolders={existingFoldersInBranch}
+        onCreateFolderWithDoc={handleCreateTaskDocument}
+        onShowToast={pushToast}
+      />
+
+      {/* Modal: Renombrar carpeta completa */}
+      <RenameFolderModal
+        isOpen={renameFolderModalState.isOpen}
+        onClose={() => setRenameFolderModalState((prev) => ({ ...prev, isOpen: false }))}
+        currentFolder={renameFolderModalState.currentFolder}
+        docCount={renameFolderModalState.docCount}
+        onRenameFolder={handleRenameFolder}
         onShowToast={pushToast}
       />
     </div>

@@ -32,7 +32,6 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
   const [name, setName] = useState('');
   const [repoInput, setRepoInput] = useState('');
   const [defaultBranch, setDefaultBranch] = useState('main');
-  const [template, setTemplate] = useState<'monorepo' | 'fullstack' | 'single' | 'empty'>('monorepo');
   const [description, setDescription] = useState('');
 
   if (!isOpen) return null;
@@ -48,84 +47,17 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
     const wsId = 'ws_' + Date.now();
     const branchName = defaultBranch.trim() || 'main';
 
-    let initialDocs: TaskDocument[] = [];
-
-    if (template === 'monorepo') {
-      initialDocs = [
-        {
-          id: `doc_root_${Date.now()}`,
-          name: 'TASKS.md',
-          folder: 'root',
-          path: 'TASKS.md',
-          content: `# ${name.trim()} - Monorepo Roadmap\n\n## Arquitectura Global\n- [ ] Definir estándares de proyecto y convenciones\n  id: core_standards\n  priority: P0\n- [ ] Configurar CI/CD y pipelines\n  id: core_cicd\n  priority: P1\n`,
-          lastSavedContent: `# ${name.trim()} - Monorepo Roadmap\n\n## Arquitectura Global\n- [ ] Definir estándares de proyecto y convenciones\n  id: core_standards\n  priority: P0\n- [ ] Configurar CI/CD y pipelines\n  id: core_cicd\n  priority: P1\n`,
-          updatedAt: new Date().toISOString(),
-        },
-        {
-          id: `doc_fe_${Date.now()}`,
-          name: 'TASKS.md',
-          folder: 'frontend',
-          path: 'frontend/TASKS.md',
-          content: `# Frontend Tasks - ${name.trim()}\n\n## UI & Componentes\n- [ ] Diseñar layout principal y navegación\n  id: fe_layout\n  priority: P0\n- [ ] Implementar soporte tema claro y oscuro\n  id: fe_theme\n  priority: P1\n`,
-          lastSavedContent: `# Frontend Tasks - ${name.trim()}\n\n## UI & Componentes\n- [ ] Diseñar layout principal y navegación\n  id: fe_layout\n  priority: P0\n- [ ] Implementar soporte tema claro y oscuro\n  id: fe_theme\n  priority: P1\n`,
-          updatedAt: new Date().toISOString(),
-        },
-        {
-          id: `doc_be_${Date.now()}`,
-          name: 'TASKS.md',
-          folder: 'backend',
-          path: 'backend/TASKS.md',
-          content: `# Backend Tasks - ${name.trim()}\n\n## APIs & Modelos\n- [ ] Diseñar modelos de datos y migraciones\n  id: be_models\n  priority: P0\n- [ ] Implementar autenticación y endpoints principales\n  id: be_auth\n  priority: P0\n`,
-          lastSavedContent: `# Backend Tasks - ${name.trim()}\n\n## APIs & Modelos\n- [ ] Diseñar modelos de datos y migraciones\n  id: be_models\n  priority: P0\n- [ ] Implementar autenticación y endpoints principales\n  id: be_auth\n  priority: P0\n`,
-          updatedAt: new Date().toISOString(),
-        },
-      ];
-    } else if (template === 'fullstack') {
-      initialDocs = [
-        {
-          id: `doc_fe_${Date.now()}`,
-          name: 'TASKS.md',
-          folder: 'frontend',
-          path: 'frontend/TASKS.md',
-          content: `# Frontend Tasks\n\n## Interfaz de Usuario\n- [ ] Crear componentes base\n  id: fe_init\n  priority: P0\n`,
-          lastSavedContent: `# Frontend Tasks\n\n## Interfaz de Usuario\n- [ ] Crear componentes base\n  id: fe_init\n  priority: P0\n`,
-          updatedAt: new Date().toISOString(),
-        },
-        {
-          id: `doc_be_${Date.now()}`,
-          name: 'TASKS.md',
-          folder: 'backend',
-          path: 'backend/TASKS.md',
-          content: `# Backend Tasks\n\n## Servicios & Base de Datos\n- [ ] Configurar base de datos\n  id: be_init\n  priority: P0\n`,
-          lastSavedContent: `# Backend Tasks\n\n## Servicios & Base de Datos\n- [ ] Configurar base de datos\n  id: be_init\n  priority: P0\n`,
-          updatedAt: new Date().toISOString(),
-        },
-      ];
-    } else if (template === 'single') {
-      initialDocs = [
-        {
-          id: `doc_root_${Date.now()}`,
-          name: 'TASKS.md',
-          folder: 'root',
-          path: 'TASKS.md',
-          content: `# ${name.trim()} - Tareas del Proyecto\n\n## Tareas Iniciales\n- [ ] Configurar estructura del proyecto\n  id: init_setup\n  priority: P0\n- [ ] Definir requisitos y alcance\n  id: init_scope\n  priority: P1\n`,
-          lastSavedContent: `# ${name.trim()} - Tareas del Proyecto\n\n## Tareas Iniciales\n- [ ] Configurar estructura del proyecto\n  id: init_setup\n  priority: P0\n- [ ] Definir requisitos y alcance\n  id: init_scope\n  priority: P1\n`,
-          updatedAt: new Date().toISOString(),
-        },
-      ];
-    } else {
-      initialDocs = [
-        {
-          id: `doc_root_${Date.now()}`,
-          name: 'TASKS.md',
-          folder: 'root',
-          path: 'TASKS.md',
-          content: `# ${name.trim()}\n\n## General\n- [ ] Nueva tarea inicial\n  id: task_1\n  priority: P1\n`,
-          lastSavedContent: `# ${name.trim()}\n\n## General\n- [ ] Nueva tarea inicial\n  id: task_1\n  priority: P1\n`,
-          updatedAt: new Date().toISOString(),
-        },
-      ];
-    }
+    const initialDocs: TaskDocument[] = [
+      {
+        id: `doc_root_${Date.now()}`,
+        name: 'TASKS.md',
+        folder: 'root',
+        path: 'TASKS.md',
+        content: `# ${name.trim()} - Tareas del Repositorio\n\n## Tareas Iniciales\n- [ ] Configurar entorno y estructura del proyecto\n  id: init_task_1\n  priority: P0\n- [ ] Definir arquitectura y dependencias\n  id: init_task_2\n  priority: P1\n`,
+        lastSavedContent: `# ${name.trim()} - Tareas del Repositorio\n\n## Tareas Iniciales\n- [ ] Configurar entorno y estructura del proyecto\n  id: init_task_1\n  priority: P0\n- [ ] Definir arquitectura y dependencias\n  id: init_task_2\n  priority: P1\n`,
+        updatedAt: new Date().toISOString(),
+      },
+    ];
 
     const newWorkspace: Workspace = {
       id: wsId,
@@ -348,35 +280,17 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-medium text-[var(--on-surface)]">
-                    Rama por defecto
-                  </label>
-                  <input
-                    type="text"
-                    value={defaultBranch}
-                    onChange={(e) => setDefaultBranch(e.target.value)}
-                    placeholder="main"
-                    className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-2.5 py-1.5 text-xs font-mono text-[var(--on-surface)] focus:outline-none"
-                  />
-                </div>
-
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-medium text-[var(--on-surface)]">
-                    Plantilla de Estructura de Tareas
-                  </label>
-                  <select
-                    value={template}
-                    onChange={(e) => setTemplate(e.target.value as any)}
-                    className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-2 py-1.5 text-xs text-[var(--on-surface)] focus:outline-none cursor-pointer"
-                  >
-                    <option value="monorepo">Monorepo (Raíz + frontend + backend)</option>
-                    <option value="fullstack">Fullstack (frontend/ + backend/)</option>
-                    <option value="single">App Individual (Raíz TASKS.md)</option>
-                    <option value="empty">En blanco</option>
-                  </select>
-                </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-medium text-[var(--on-surface)]">
+                  Rama por defecto
+                </label>
+                <input
+                  type="text"
+                  value={defaultBranch}
+                  onChange={(e) => setDefaultBranch(e.target.value)}
+                  placeholder="main"
+                  className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-2.5 py-1.5 text-xs font-mono text-[var(--on-surface)] focus:outline-none"
+                />
               </div>
 
               <div className="flex flex-col gap-1">
