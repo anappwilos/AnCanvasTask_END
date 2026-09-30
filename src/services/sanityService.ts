@@ -318,6 +318,91 @@ export interface SanityTestingTaskDocument {
   updatedAt: string;
 }
 
+/**
+ * Automatically syncs a list of tasks from TASKS.md to Sanity.
+ * Creates or updates a _type: 'task' document for each task in the active dataset.
+ */
+export async function syncAllTasksToSanity(
+  tasks: Array<{
+    id: string;
+    title: string;
+    completed: boolean;
+    priority?: string;
+    status?: string;
+    groupTitle?: string;
+    blockedBy?: string;
+    tags?: string[];
+    subtasks?: Array<{ title: string; completed?: boolean }>;
+    description?: string;
+  }>,
+  configOverride?: Partial<SanityConfig>
+): Promise<{ ok: boolean; syncedCount: number; message: string }> {
+  const config = { ...getSanityConfig(), ...configOverride };
+  if (!config.projectId || !config.dataset) {
+    return { ok: false, syncedCount: 0, message: 'Falta configuración de Sanity (Project ID y Dataset)' };
+  }
+
+  if (!config.token) {
+    return {
+      ok: false,
+      syncedCount: 0,
+      message: 'Se requiere API Token con rol Editor para guardar automáticamente en Sanity',
+    };
+  }
+
+  const client = createClient({
+    projectId: config.projectId,
+    dataset: config.dataset,
+    apiVersion: config.apiVersion || '2024-03-01',
+    token: config.token,
+    useCdn: false,
+  });
+
+  try {
+    const now = new Date().toISOString();
+    let tx = client.transaction();
+
+    for (const t of tasks) {
+      const docId = `task-${t.id}`;
+      const doc: SanityTestingTaskDocument = {
+        _id: docId,
+        _type: 'task',
+        taskId: t.id,
+        title: t.title,
+        completed: Boolean(t.completed),
+        status: (t.status as any) || (t.completed ? 'done' : 'todo'),
+        priority: (t.priority as any) || 'P1',
+        groupTitle: t.groupTitle || 'General',
+        blockedBy: t.blockedBy || '',
+        tags: t.tags || [],
+        subtasks: (t.subtasks || []).map((s) => ({
+          title: s.title,
+          completed: Boolean(s.completed),
+        })),
+        description: t.description || '',
+        updatedAt: now,
+      };
+
+      tx = tx.createOrReplace(doc as any);
+    }
+
+    await tx.commit();
+
+    return {
+      ok: true,
+      syncedCount: tasks.length,
+      message: `${tasks.length} tareas sincronizadas con éxito en Sanity (${config.dataset})`,
+    };
+  } catch (err: any) {
+    console.warn('Error syncing tasks to Sanity:', err);
+    return {
+      ok: false,
+      syncedCount: 0,
+      message: err?.message || 'Error al sincronizar tareas con Sanity',
+    };
+  }
+}
+
 export interface SanityWriteTestResult {
   ok: boolean;
   message: string;

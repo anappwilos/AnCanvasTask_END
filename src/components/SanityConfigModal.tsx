@@ -17,6 +17,7 @@ export interface SanityConfigModalProps {
   onClose: () => void;
   onConfigSaved: (config: SanityConfig) => void;
   onShowToast: (msg: string, type?: 'success' | 'info' | 'warning' | 'error') => void;
+  onSyncAllToSanity?: () => Promise<void>;
 }
 
 type ModalTab = 'config' | 'write-test' | 'schemas';
@@ -26,6 +27,7 @@ export const SanityConfigModal: React.FC<SanityConfigModalProps> = ({
   onClose,
   onConfigSaved,
   onShowToast,
+  onSyncAllToSanity,
 }) => {
   const [activeTab, setActiveTab] = useState<ModalTab>('config');
 
@@ -42,6 +44,7 @@ export const SanityConfigModal: React.FC<SanityConfigModalProps> = ({
 
   // Write test state
   const [isWritingTest, setIsWritingTest] = useState<boolean>(false);
+  const [isSyncingAll, setIsSyncingAll] = useState<boolean>(false);
   const [writeTestResult, setWriteTestResult] = useState<SanityWriteTestResult | null>(null);
   const [isDeletingTestDoc, setIsDeletingTestDoc] = useState<boolean>(false);
 
@@ -654,6 +657,57 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
                   </button>
                 </div>
               </div>
+
+              {/* Automatic Sync Info & Manual Sync All Button */}
+              {onSyncAllToSanity && (
+                <div className="p-3 rounded bg-sky-950/20 border border-sky-800/50 flex flex-col gap-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 font-semibold text-xs text-sky-300">
+                      <span className="material-symbols-outlined text-[16px]">sync</span>
+                      <span>Sincronización Automática Bidireccional</span>
+                    </div>
+                    <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-sky-900/40 text-sky-200 border border-sky-700/60">
+                      Auto-Sync Activo
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-[var(--on-surface-variant)] leading-relaxed">
+                    Todas las tareas que crees, edites, marques como completadas o muevas en el canvas/kanban se sincronizan automáticamente en tu dataset <strong className="text-sky-300 font-mono">"{dataset}"</strong> de Sanity con <code className="font-mono text-sky-200">_type: 'task'</code>.
+                  </p>
+                  <div>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        if (!token.trim()) {
+                          onShowToast('Se requiere API Token con rol Editor para guardar en Sanity', 'warning');
+                          setActiveTab('config');
+                          return;
+                        }
+                        setIsSyncingAll(true);
+                        try {
+                          await onSyncAllToSanity();
+                          await handleFetchRemoteDocs();
+                        } finally {
+                          setIsSyncingAll(false);
+                        }
+                      }}
+                      disabled={isSyncingAll || !projectId.trim() || !dataset.trim() || !token.trim()}
+                      className="btn-m3-primary px-3.5 py-1.5 text-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                    >
+                      {isSyncingAll ? (
+                        <>
+                          <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          <span>Sincronizando todas las tareas a Sanity...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="material-symbols-outlined text-[15px]">cloud_upload</span>
+                          <span>Sincronizar todas las tareas actuales a Sanity ahora</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* Write Test Result Card */}
               {writeTestResult && (

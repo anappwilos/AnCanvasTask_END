@@ -10,6 +10,7 @@ import {
   getSanityConfig,
   loadCanvasVisualState,
   saveCanvasVisualState,
+  syncAllTasksToSanity,
   SanityConfig,
 } from './services/sanityService';
 import {
@@ -282,7 +283,8 @@ export default function App() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const dragCounterRef = useRef<number>(0);
 
-  const debouncedSaveRef = useRef<NodeJS.Timeout | null>(null);
+  const debouncedSaveRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const debouncedSanityTasksRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const markdownRef = useRef<string>(markdownInput);
   markdownRef.current = markdownInput;
 
@@ -1027,13 +1029,113 @@ export default function App() {
             triggerDebouncedVisualSave(editor);
           }
         }
-        setSyncStatus(newConfig.token ? 'synced' : 'local');
+        if (newConfig.token) {
+          setSyncStatus('synced');
+          // Perform full task sync immediately
+          const { taskBlocks } = scanTaskBlocks(markdownInput);
+          const tasksToSync = taskBlocks.map((b) => {
+            const isCompleted = b.rawTaskLine.includes('[x]') || b.rawTaskLine.includes('[X]');
+            return {
+              id: b.detectedId || b.temporaryId,
+              title: b.detectedTitle,
+              completed: isCompleted,
+              priority: b.detectedPriority || 'P1',
+              status: b.detectedStatus || (isCompleted ? 'done' : 'todo'),
+              groupTitle: b.groupTitle || 'General',
+              blockedBy: b.detectedBlockedBy || '',
+              tags: b.detectedTags || [],
+            };
+          });
+          syncAllTasksToSanity(tasksToSync, newConfig).then((res) => {
+            if (res.ok) {
+              pushToast(`Sincronización activa: ${res.syncedCount} tareas registradas en Sanity`, 'success');
+            }
+          });
+        } else {
+          setSyncStatus('local');
+        }
       } else {
         setSyncStatus('local');
       }
     },
-    [editor, triggerDebouncedVisualSave, pushToast]
+    [editor, markdownInput, triggerDebouncedVisualSave, pushToast]
   );
+
+  const handleSyncAllTasksToSanity = useCallback(async () => {
+    const config = getSanityConfig();
+    if (!config.projectId || !config.dataset || !config.token) {
+      pushToast('Configura el API Token de Sanity para guardar en producción', 'warning');
+      setIsSanityModalOpen(true);
+      return;
+    }
+
+    setSyncStatus('loading');
+    const { taskBlocks } = scanTaskBlocks(markdownInput);
+    const tasksToSync = taskBlocks.map((b) => {
+      const isCompleted = b.rawTaskLine.includes('[x]') || b.rawTaskLine.includes('[X]');
+      return {
+        id: b.detectedId || b.temporaryId,
+        title: b.detectedTitle,
+        completed: isCompleted,
+        priority: b.detectedPriority || 'P1',
+        status: b.detectedStatus || (isCompleted ? 'done' : 'todo'),
+        groupTitle: b.groupTitle || 'General',
+        blockedBy: b.detectedBlockedBy || '',
+        tags: b.detectedTags || [],
+      };
+    });
+
+    const res = await syncAllTasksToSanity(tasksToSync, config);
+    if (res.ok) {
+      setSyncStatus('synced');
+      pushToast(res.message, 'success');
+    } else {
+      setSyncStatus('local');
+      pushToast(res.message, 'error');
+    }
+  }, [markdownInput, pushToast]);
+
+  // Automatic debounced synchronization of tasks to Sanity on markdown/tasks update
+  useEffect(() => {
+    const config = getSanityConfig();
+    if (!config.projectId || !config.dataset || !config.token) {
+      return;
+    }
+
+    if (debouncedSanityTasksRef.current) {
+      clearTimeout(debouncedSanityTasksRef.current);
+    }
+
+    debouncedSanityTasksRef.current = setTimeout(async () => {
+      const { taskBlocks } = scanTaskBlocks(markdownInput);
+      if (taskBlocks.length === 0) return;
+
+      const tasksToSync = taskBlocks.map((b) => {
+        const isCompleted = b.rawTaskLine.includes('[x]') || b.rawTaskLine.includes('[X]');
+        return {
+          id: b.detectedId || b.temporaryId,
+          title: b.detectedTitle,
+          completed: isCompleted,
+          priority: b.detectedPriority || 'P1',
+          status: b.detectedStatus || (isCompleted ? 'done' : 'todo'),
+          groupTitle: b.groupTitle || 'General',
+          blockedBy: b.detectedBlockedBy || '',
+          tags: b.detectedTags || [],
+        };
+      });
+
+      const res = await syncAllTasksToSanity(tasksToSync);
+      if (res.ok) {
+        setSyncStatus('synced');
+      }
+    }, 1200);
+
+    return () => {
+      if (debouncedSanityTasksRef.current) {
+        clearTimeout(debouncedSanityTasksRef.current);
+      }
+    };
+  }, [markdownInput]);
 
   const handleImportTaskFromSanity = useCallback(
     (taskDoc: any) => {
@@ -1650,6 +1752,43 @@ export default function App() {
               <span className="hidden sm:inline">Offline</span>
             </span>
           )}
+
+          {/* Sanity Live Sync Status Badge */}
+          <button
+            type="button"
+            onClick={() => setIsSanityModalOpen(true)}
+            className={`hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-mono border transition-colors cursor-pointer ${
+              syncStatus === 'synced'
+                ? 'bg-emerald-950/40 text-emerald-300 border-emerald-800/60 hover:bg-emerald-950/70'
+                : syncStatus === 'saving' || syncStatus === 'loading'
+                ? 'bg-sky-950/40 text-sky-300 border-sky-800/60 hover:bg-sky-950/70'
+                : 'bg-[var(--surface)] text-[var(--on-surface-variant)] border-[var(--outline)] hover:text-[var(--on-surface)]'
+            }`}
+            title={
+              syncStatus === 'synced'
+                ? 'Sincronización activa con Sanity (Dataset: production). Clic para ver opciones.'
+                : syncStatus === 'saving'
+                ? 'Guardando cambios en Sanity...'
+                : 'Sincronización local. Añade un API Token para guardar automáticamente en Sanity.'
+            }
+          >
+            <span
+              className={`w-2 h-2 rounded-full ${
+                syncStatus === 'synced'
+                  ? 'bg-emerald-400'
+                  : syncStatus === 'saving' || syncStatus === 'loading'
+                  ? 'bg-sky-400 animate-pulse'
+                  : 'bg-cyan-400'
+              }`}
+            />
+            <span className="truncate max-w-[130px]">
+              {syncStatus === 'synced'
+                ? 'Sanity Sync'
+                : syncStatus === 'saving'
+                ? 'Guardando...'
+                : 'Sanity Local'}
+            </span>
+          </button>
 
           {/* Quick Save Button */}
           <button
@@ -2998,6 +3137,7 @@ export default function App() {
         onClose={() => setIsSanityModalOpen(false)}
         onConfigSaved={handleSanityConfigSaved}
         onShowToast={pushToast}
+        onSyncAllToSanity={handleSyncAllTasksToSanity}
       />
 
       {/* Global Command Palette & Search Modal (Ctrl/Cmd + K) */}
