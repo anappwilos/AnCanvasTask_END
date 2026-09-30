@@ -51,6 +51,7 @@ import {
   getActiveWorkspace,
   getActiveBranch,
   getActiveDocument,
+  getInitialDefaultWorkspaces,
   WorkspaceStoreState,
   Workspace,
   BranchConfig,
@@ -468,19 +469,40 @@ export default function App() {
   const handleDeleteWorkspace = useCallback(
     (wsId: string) => {
       setWorkspaceStore((prev) => {
-        if (prev.workspaces.length <= 1) {
-          pushToast('No puedes eliminar el único workspace', 'warning');
-          return prev;
-        }
         const filtered = prev.workspaces.filter((w) => w.id !== wsId);
-        const nextActiveId = prev.activeWorkspaceId === wsId ? filtered[0].id : prev.activeWorkspaceId;
-        const nextStore = {
+        let nextWorkspaces = filtered;
+        let nextActiveId = prev.activeWorkspaceId;
+
+        if (nextWorkspaces.length === 0) {
+          const freshDefaults = getInitialDefaultWorkspaces();
+          const cleanWs: Workspace = {
+            ...freshDefaults[0],
+            id: 'ws_' + Date.now(),
+            name: 'Mi Workspace',
+            githubRepo: {
+              owner: 'usuario',
+              repo: 'mi-repositorio',
+              fullName: 'usuario/mi-repositorio',
+              url: 'https://github.com/usuario/mi-repositorio',
+              defaultBranch: 'main',
+            },
+          };
+          nextWorkspaces = [cleanWs];
+          nextActiveId = cleanWs.id;
+          pushToast('Workspace eliminado. Se ha inicializado un nuevo workspace limpio.', 'info');
+        } else {
+          if (prev.activeWorkspaceId === wsId) {
+            nextActiveId = nextWorkspaces[0].id;
+          }
+          pushToast('Workspace eliminado', 'info');
+        }
+
+        const nextStore: WorkspaceStoreState = {
           ...prev,
-          workspaces: filtered,
+          workspaces: nextWorkspaces,
           activeWorkspaceId: nextActiveId,
         };
         saveWorkspaceStore(nextStore);
-        pushToast('Workspace eliminado', 'info');
 
         const activeWs = getActiveWorkspace(nextStore);
         const activeBr = getActiveBranch(activeWs);

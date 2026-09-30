@@ -34,6 +34,9 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
   const [defaultBranch, setDefaultBranch] = useState('main');
   const [description, setDescription] = useState('');
 
+  // Inline delete confirmation state (workspace id to delete)
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+
   if (!isOpen) return null;
 
   const handleCreate = (e: React.FormEvent) => {
@@ -51,7 +54,7 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
       {
         id: `doc_root_${Date.now()}`,
         name: 'TASKS.md',
-        folder: 'root',
+        folder: '',
         path: 'TASKS.md',
         content: `# ${name.trim()} - Tareas del Repositorio\n\n## Tareas Iniciales\n- [ ] Configurar entorno y estructura del proyecto\n  id: init_task_1\n  priority: P0\n- [ ] Definir arquitectura y dependencias\n  id: init_task_2\n  priority: P1\n`,
         lastSavedContent: `# ${name.trim()} - Tareas del Repositorio\n\n## Tareas Iniciales\n- [ ] Configurar entorno y estructura del proyecto\n  id: init_task_1\n  priority: P0\n- [ ] Definir arquitectura y dependencias\n  id: init_task_2\n  priority: P1\n`,
@@ -93,6 +96,11 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
     setRepoInput('');
     setDescription('');
     setActiveTab('list');
+  };
+
+  const handleConfirmDelete = (wsId: string) => {
+    onDeleteWorkspace(wsId);
+    setConfirmDeleteId(null);
   };
 
   return (
@@ -158,6 +166,7 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
                   (acc, b) => acc + b.taskDocuments.length,
                   0
                 );
+                const isConfirmingThis = confirmDeleteId === ws.id;
 
                 return (
                   <div
@@ -169,7 +178,7 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
                     }`}
                   >
                     <div className="flex items-start justify-between gap-3">
-                      <div className="flex flex-col min-w-0">
+                      <div className="flex flex-col min-w-0 flex-1">
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-semibold text-[var(--on-surface)] font-sans truncate">
                             {ws.name}
@@ -210,7 +219,7 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
                           </span>
                           <span className="flex items-center gap-1">
                             <span className="material-symbols-outlined text-[13px] text-amber-400">description</span>
-                            <span>{totalDocs} Task MD asociados</span>
+                            <span>{totalDocs} Task MD</span>
                           </span>
                         </div>
                       </div>
@@ -230,22 +239,43 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
                           </button>
                         )}
 
-                        {workspaces.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              if (window.confirm(`¿Eliminar workspace "${ws.name}"?`)) {
-                                onDeleteWorkspace(ws.id);
-                              }
-                            }}
-                            className="btn-m3-icon w-7 h-7 text-[var(--on-surface-variant)] hover:text-rose-400 cursor-pointer"
-                            title="Eliminar workspace"
-                          >
-                            <span className="material-symbols-outlined text-[15px]">delete</span>
-                          </button>
-                        )}
+                        <button
+                          type="button"
+                          onClick={() => setConfirmDeleteId(isConfirmingThis ? null : ws.id)}
+                          className="btn-m3-icon w-7 h-7 text-[var(--on-surface-variant)] hover:text-rose-400 cursor-pointer"
+                          title="Eliminar workspace"
+                        >
+                          <span className="material-symbols-outlined text-[15px]">delete</span>
+                        </button>
                       </div>
                     </div>
+
+                    {/* Inline Delete Confirmation (No window.confirm, 100% iframe safe) */}
+                    {isConfirmingThis && (
+                      <div className="mt-3 p-2.5 rounded bg-rose-950/30 border border-rose-800/40 flex items-center justify-between gap-2 animate-fade-in">
+                        <div className="flex items-center gap-1.5 text-xs text-rose-300">
+                          <span className="material-symbols-outlined text-[15px]">warning</span>
+                          <span>¿Eliminar este workspace y todos sus archivos?</span>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => setConfirmDeleteId(null)}
+                            className="px-2 py-0.5 rounded text-xs text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer"
+                          >
+                            Cancelar
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleConfirmDelete(ws.id)}
+                            className="px-2.5 py-0.5 rounded bg-rose-600 hover:bg-rose-700 text-white text-xs font-medium cursor-pointer shadow-sm"
+                          >
+                            Sí, eliminar
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 );
               })}

@@ -33,7 +33,7 @@ export const RenameDocumentModal: React.FC<RenameDocumentModalProps> = ({
   if (!isOpen) return null;
 
   const quickFolderChips = [
-    { label: 'Raíz (/)', value: '' },
+    { label: 'Directorio raíz', value: '' },
     { label: 'frontend/', value: 'frontend' },
     { label: 'backend/', value: 'backend' },
     ...existingFolders
