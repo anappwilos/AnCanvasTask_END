@@ -2622,14 +2622,14 @@ export default function App() {
           </div>
         </div>
 
-        {/* Center Section: View Switcher (Canvas / Kanban) & Quick Search bar - Desktop only */}
-        <div className="hidden md:flex items-center gap-2 sm:gap-4 flex-1 max-w-xs md:max-w-md lg:max-w-lg mx-2 justify-center">
+        {/* Center Section: View Switcher (Canvas / Kanban / Studio) & Quick Search bar */}
+        <div className="hidden md:flex items-center gap-2 flex-1 max-w-sm lg:max-w-md mx-2 justify-center min-w-0">
           {/* View Switcher Segmented Control (Canvas / Kanban / Studio) */}
           <div className="flex items-center bg-[var(--surface)] p-0.5 rounded-full border border-[var(--outline)] shadow-xs shrink-0">
             <button
               type="button"
               onClick={() => setActiveView('canvas')}
-              className={`px-2.5 sm:px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer ${
+              className={`px-2.5 py-1 rounded-full text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer ${
                 activeView === 'canvas'
                   ? 'bg-[var(--primary)] text-[var(--on-primary)] shadow-xs'
                   : 'text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]'
@@ -2637,13 +2637,13 @@ export default function App() {
               title="Vista espacial en Canvas interactivo"
             >
               <span className="material-symbols-outlined text-[16px]">grid_view</span>
-              <span className="hidden sm:inline">Canvas</span>
+              <span className="hidden xl:inline">Canvas</span>
             </button>
 
             <button
               type="button"
               onClick={() => setActiveView('kanban')}
-              className={`px-2.5 sm:px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer ${
+              className={`px-2.5 py-1 rounded-full text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer ${
                 activeView === 'kanban'
                   ? 'bg-[var(--primary)] text-[var(--on-primary)] shadow-xs'
                   : 'text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]'
@@ -2651,13 +2651,13 @@ export default function App() {
               title="Vista de Tablero Kanban por columnas"
             >
               <span className="material-symbols-outlined text-[16px]">view_kanban</span>
-              <span className="hidden sm:inline">Kanban</span>
+              <span className="hidden xl:inline">Kanban</span>
             </button>
 
             <button
               type="button"
               onClick={() => setActiveView('studio')}
-              className={`px-2.5 sm:px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer ${
+              className={`px-2.5 py-1 rounded-full text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer ${
                 activeView === 'studio'
                   ? 'bg-[var(--primary)] text-[var(--on-primary)] shadow-xs'
                   : 'text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]'
@@ -2665,35 +2665,35 @@ export default function App() {
               title="Sanity Studio: Explorar y editar documentos _type: 'task'"
             >
               <span className="material-symbols-outlined text-[16px] text-rose-400">cloud_sync</span>
-              <span className="hidden sm:inline">Studio</span>
+              <span className="hidden xl:inline">Studio</span>
             </button>
           </div>
 
-          <div className="relative w-full hidden md:block">
-            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-[var(--on-surface-variant)] pointer-events-none">
+          <div className="relative w-full hidden lg:block max-w-[180px] xl:max-w-[220px]">
+            <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[16px] text-[var(--on-surface-variant)] pointer-events-none">
               search
             </span>
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Buscar tarea por título o #ID..."
-              className="w-full bg-[var(--surface)] text-[var(--on-surface)] placeholder:text-[var(--on-surface-variant)] border border-[var(--outline)] rounded-full pl-9 pr-14 py-1.5 text-xs font-sans focus:outline-none focus:border-[var(--primary)] transition-all"
+              placeholder="Buscar (#ID, título)..."
+              className="w-full bg-[var(--surface)] text-[var(--on-surface)] placeholder:text-[var(--on-surface-variant)] border border-[var(--outline)] rounded-full pl-8 pr-10 py-1 text-xs font-sans focus:outline-none focus:border-[var(--primary)] transition-all"
             />
             {searchQuery ? (
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] cursor-pointer"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] cursor-pointer"
                 title="Limpiar búsqueda"
               >
-                <span className="material-symbols-outlined text-[16px]">close</span>
+                <span className="material-symbols-outlined text-[14px]">close</span>
               </button>
             ) : (
               <button
                 type="button"
                 onClick={() => setIsCommandPaletteOpen(true)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 px-1.5 py-0.5 rounded bg-[var(--surface-container)] border border-[var(--outline)] text-[10px] font-mono text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] cursor-pointer"
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 px-1 py-0.2 rounded bg-[var(--surface-container)] border border-[var(--outline)] text-[9px] font-mono text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] cursor-pointer"
                 title="Abrir paleta de comandos (⌘K)"
               >
                 ⌘K
@@ -2703,11 +2703,11 @@ export default function App() {
         </div>
 
         {/* Right Section: Global Actions (Primary CTA, Auto Layout, Save, View .md, Help, Theme) */}
-        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
           {/* Offline indicator badge */}
           {!isOnline && (
             <span
-              className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-950/80 border border-amber-700/60 text-amber-300 text-[10px] sm:text-[11px] font-sans"
+              className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-950/80 border border-amber-700/60 text-amber-300 text-[10px] font-sans"
               title="Sin conexión a internet. Los cambios se guardarán localmente."
             >
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
@@ -2719,7 +2719,7 @@ export default function App() {
           <button
             type="button"
             onClick={() => setIsSanityModalOpen(true)}
-            className={`hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-mono border transition-colors cursor-pointer ${
+            className={`hidden xl:flex items-center gap-1.5 px-2 py-1 rounded-full text-[11px] font-mono border transition-colors cursor-pointer ${
               syncStatus === 'synced'
                 ? 'bg-emerald-950/40 text-emerald-300 border-emerald-800/60 hover:bg-emerald-950/70'
                 : syncStatus === 'saving' || syncStatus === 'loading'
@@ -2743,7 +2743,7 @@ export default function App() {
                   : 'bg-cyan-400'
               }`}
             />
-            <span className="truncate max-w-[130px]">
+            <span className="truncate max-w-[100px]">
               {syncStatus === 'synced'
                 ? 'Sanity Sync'
                 : syncStatus === 'saving'
@@ -2756,21 +2756,21 @@ export default function App() {
           <button
             type="button"
             onClick={() => setIsSyncOverrideModalOpen(true)}
-            className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--outline)] hover:border-[var(--primary)] hover:bg-[var(--surface-container-high)] transition-colors cursor-pointer shadow-xs"
+            className="hidden 2xl:flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--outline)] hover:border-[var(--primary)] hover:bg-[var(--surface-container-high)] transition-colors cursor-pointer shadow-xs"
             title="Sincronizar y detectar diferencias, overrides y conflictos con Sanity Cloud"
             aria-label="Sincronizar con Sanity"
           >
             <span className="material-symbols-outlined text-[15px] text-amber-400">
               sync_problem
             </span>
-            <span className="hidden lg:inline">Sincronizar</span>
+            <span>Sincronizar</span>
           </button>
 
-          {/* Split View (Visor en tiempo real bidireccional) Toggle */}
+          {/* Split View Toggle */}
           <button
             type="button"
             onClick={handleToggleSplitView}
-            className={`hidden sm:flex px-2.5 py-1 text-xs font-medium rounded-full border items-center gap-1.5 transition-colors cursor-pointer ${
+            className={`hidden sm:flex px-2 sm:px-2.5 py-1 text-xs font-medium rounded-full border items-center gap-1 transition-colors cursor-pointer ${
               isSplitViewOpen
                 ? 'bg-sky-950/80 text-sky-300 border-sky-700 shadow-xs'
                 : 'bg-[var(--surface)] text-[var(--on-surface-variant)] border-[var(--outline)] hover:text-[var(--on-surface)]'
@@ -2784,7 +2784,7 @@ export default function App() {
             <span className="material-symbols-outlined text-[16px] text-sky-400">
               {isSplitViewOpen ? 'vertical_split' : 'splitscreen'}
             </span>
-            <span className="hidden sm:inline">
+            <span className="hidden xl:inline">
               {isSplitViewOpen ? 'Visor .md activo' : 'Visor .md'}
             </span>
           </button>
@@ -2793,7 +2793,7 @@ export default function App() {
           <button
             type="button"
             onClick={handleExportFile}
-            className={`btn-m3-secondary hidden sm:flex px-3 py-1.5 text-xs cursor-pointer ${
+            className={`btn-m3-secondary hidden sm:flex px-2.5 py-1 text-xs cursor-pointer ${
               hasUnsavedChanges
                 ? 'border-emerald-500 text-emerald-400 bg-emerald-950/40 shadow-xs'
                 : ''
@@ -2801,7 +2801,7 @@ export default function App() {
             title="Guardar archivo TASKS.md en disco (⌘S)"
           >
             <span className="material-symbols-outlined text-[16px]">save</span>
-            <span className="hidden sm:inline">Guardar</span>
+            <span className="hidden xl:inline">Guardar</span>
           </button>
 
           {/* Auto Organizar Button with loading feedback */}
@@ -2809,7 +2809,7 @@ export default function App() {
             type="button"
             disabled={isAutoOrganizing}
             onClick={() => setIsAutoLayoutConfirmOpen(true)}
-            className="btn-m3-secondary hidden sm:inline-flex px-3 py-1.5 text-xs cursor-pointer text-sky-400 border-sky-800/60 bg-sky-950/30"
+            className="btn-m3-secondary hidden lg:inline-flex px-2.5 py-1 text-xs cursor-pointer text-sky-400 border-sky-800/60 bg-sky-950/30"
             title="Organizar automáticamente dependencias y grupos jerárquicamente (DAG)"
           >
             <span
@@ -2819,7 +2819,7 @@ export default function App() {
             >
               {isAutoOrganizing ? 'progress_activity' : 'account_tree'}
             </span>
-            <span className="hidden md:inline">
+            <span className="hidden xl:inline">
               {isAutoOrganizing ? 'Organizando...' : 'Auto organizar'}
             </span>
           </button>
