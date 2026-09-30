@@ -2802,23 +2802,7 @@ export default function App() {
             <span className="material-symbols-outlined text-[18px]">search</span>
           </button>
 
-          {/* Mobile Theme Toggle */}
-          <button
-            type="button"
-            onClick={() =>
-              handleUpdateSettings({
-                ...userSettings,
-                theme: effectiveTheme === 'dark' ? 'light' : 'dark',
-              })
-            }
-            className="btn-m3-icon w-8 h-8 sm:hidden shrink-0 cursor-pointer"
-            title={`Cambiar a tema ${effectiveTheme === 'dark' ? 'claro' : 'oscuro'}`}
-            aria-label="Alternar tema"
-          >
-            <span className="material-symbols-outlined text-[18px]">
-              {effectiveTheme === 'dark' ? 'light_mode' : 'dark_mode'}
-            </span>
-          </button>
+
 
           {/* Validation Issues Alert Chip (if any) */}
           {validationReport.issues.length > 0 && (
@@ -2859,23 +2843,7 @@ export default function App() {
             <span className="material-symbols-outlined text-[18px]">settings</span>
           </button>
 
-          {/* Theme Toggle (DESIGN.md Section 4: Light & Dark Theme) */}
-          <button
-            type="button"
-            onClick={() =>
-              handleUpdateSettings({
-                ...userSettings,
-                theme: effectiveTheme === 'dark' ? 'light' : 'dark',
-              })
-            }
-            className="btn-m3-icon shrink-0 cursor-pointer hidden sm:inline-flex"
-            title={`Cambiar a tema ${effectiveTheme === 'dark' ? 'claro' : 'oscuro'} (T)`}
-            aria-label="Alternar tema"
-          >
-            <span className="material-symbols-outlined text-[18px]">
-              {effectiveTheme === 'dark' ? 'light_mode' : 'dark_mode'}
-            </span>
-          </button>
+
 
           {/* Mobile Menu Trigger */}
           <button
@@ -3156,6 +3124,22 @@ export default function App() {
               >
                 <span className="material-symbols-outlined text-[18px] text-[var(--primary)]">settings</span>
                 <span>Configuración</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() =>
+                  handleUpdateSettings({
+                    ...userSettings,
+                    theme: effectiveTheme === 'dark' ? 'light' : 'dark',
+                  })
+                }
+                className="btn-m3-text w-full py-1.5 text-xs justify-start px-2 cursor-pointer text-[var(--on-surface)]"
+              >
+                <span className="material-symbols-outlined text-[18px] text-[var(--primary)]">
+                  {effectiveTheme === 'dark' ? 'light_mode' : 'dark_mode'}
+                </span>
+                <span>Cambiar a tema {effectiveTheme === 'dark' ? 'claro' : 'oscuro'}</span>
               </button>
 
               <button

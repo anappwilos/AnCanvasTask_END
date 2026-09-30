@@ -25,6 +25,8 @@ interface FilterBarProps {
   onOpenCommandPalette: () => void;
   onAutoOrganize?: () => void;
   isAutoOrganizing?: boolean;
+  isSplitViewOpen?: boolean;
+  onToggleSplitView?: () => void;
 }
 
 export const FilterBar: React.FC<FilterBarProps> = ({
@@ -40,6 +42,8 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   onOpenCommandPalette,
   onAutoOrganize,
   isAutoOrganizing,
+  isSplitViewOpen,
+  onToggleSplitView,
 }) => {
   const [isFilterPopoverOpen, setIsFilterPopoverOpen] = useState(false);
   const popoverRef = useRef<HTMLDivElement>(null);
@@ -322,6 +326,31 @@ export const FilterBar: React.FC<FilterBarProps> = ({
               </span>
               <span className="hidden lg:inline">
                 {isAutoOrganizing ? 'Organizando...' : 'Auto organizar'}
+              </span>
+            </button>
+          )}
+
+          {/* Split View Toggle Button */}
+          {onToggleSplitView && (
+            <button
+              type="button"
+              onClick={onToggleSplitView}
+              className={`hidden sm:flex px-2.5 py-1 text-xs font-medium rounded border items-center gap-1 transition-colors cursor-pointer shrink-0 ${
+                isSplitViewOpen
+                  ? 'bg-sky-950/80 text-sky-300 border-sky-700 shadow-xs'
+                  : 'bg-[var(--surface)] text-[var(--on-surface-variant)] border-[var(--outline)] hover:text-[var(--on-surface)]'
+              }`}
+              title={
+                isSplitViewOpen
+                  ? 'Ocultar visor / editor Markdown en tiempo real'
+                  : 'Abrir visor / editor Markdown en tiempo real bidireccional'
+              }
+            >
+              <span className="material-symbols-outlined text-[15px] text-sky-400">
+                {isSplitViewOpen ? 'vertical_split' : 'splitscreen'}
+              </span>
+              <span className="hidden lg:inline">
+                {isSplitViewOpen ? 'Visor .md activo' : 'Visor .md'}
               </span>
             </button>
           )}
