@@ -25,8 +25,9 @@ interface FilterBarProps {
   onOpenCommandPalette: () => void;
   onAutoOrganize?: () => void;
   isAutoOrganizing?: boolean;
-  isSplitViewOpen?: boolean;
-  onToggleSplitView?: () => void;
+  currentFileName?: string;
+  hasUnsavedChanges?: boolean;
+  onRenameDocument?: () => void;
 }
 
 export const FilterBar: React.FC<FilterBarProps> = ({
@@ -42,8 +43,9 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   onOpenCommandPalette,
   onAutoOrganize,
   isAutoOrganizing,
-  isSplitViewOpen,
-  onToggleSplitView,
+  currentFileName,
+  hasUnsavedChanges,
+  onRenameDocument,
 }) => {
   const [isFilterPopoverOpen, setIsFilterPopoverOpen] = useState(false);
   const popoverRef = useRef<HTMLDivElement>(null);
@@ -330,31 +332,6 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             </button>
           )}
 
-          {/* Split View Toggle Button */}
-          {onToggleSplitView && (
-            <button
-              type="button"
-              onClick={onToggleSplitView}
-              className={`hidden sm:flex px-2.5 py-1 text-xs font-medium rounded border items-center gap-1 transition-colors cursor-pointer shrink-0 ${
-                isSplitViewOpen
-                  ? 'bg-sky-950/80 text-sky-300 border-sky-700 shadow-xs'
-                  : 'bg-[var(--surface)] text-[var(--on-surface-variant)] border-[var(--outline)] hover:text-[var(--on-surface)]'
-              }`}
-              title={
-                isSplitViewOpen
-                  ? 'Ocultar visor / editor Markdown en tiempo real'
-                  : 'Abrir visor / editor Markdown en tiempo real bidireccional'
-              }
-            >
-              <span className="material-symbols-outlined text-[15px] text-sky-400">
-                {isSplitViewOpen ? 'vertical_split' : 'splitscreen'}
-              </span>
-              <span className="hidden lg:inline">
-                {isSplitViewOpen ? 'Visor .md activo' : 'Visor .md'}
-              </span>
-            </button>
-          )}
-
           {/* Mobile Quick Search Input */}
           <div className="relative flex-1 sm:hidden min-w-[110px] max-w-[200px]">
             <span className="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-[14px] text-[var(--on-surface-variant)] pointer-events-none">
@@ -379,8 +356,34 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           </div>
         </div>
 
-        {/* Counter of matching tasks */}
-        <div className="flex items-center gap-1.5 text-xs font-mono text-[var(--on-surface-variant)] shrink-0">
+        {/* Current Document Indicator & Counter of matching tasks */}
+        <div className="flex items-center gap-2 text-xs font-mono text-[var(--on-surface-variant)] shrink-0">
+          {currentFileName && onRenameDocument && (
+            <div
+              className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] font-mono truncate shadow-xs cursor-pointer hover:bg-[var(--surface-container-high)] transition-colors"
+              onClick={onRenameDocument}
+              title={`Documento activo: ${currentFileName} (Clic para renombrar/mover)`}
+            >
+              <span className="material-symbols-outlined text-[14px] text-sky-400">
+                description
+              </span>
+              <span className="font-medium text-[var(--on-surface)] truncate max-w-[120px] lg:max-w-[160px]">
+                {currentFileName}
+              </span>
+              {hasUnsavedChanges ? (
+                <span className="flex items-center gap-1 text-amber-400 text-[10px] shrink-0 font-sans">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                  <span className="hidden xl:inline">modificado</span>
+                </span>
+              ) : (
+                <span className="flex items-center gap-1 text-emerald-400 text-[10px] shrink-0 font-sans">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  <span className="hidden xl:inline">al día</span>
+                </span>
+              )}
+            </div>
+          )}
+
           <span className="px-2 py-0.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px]">
             <span className="sm:hidden">{filteredTasksCount}/{totalTasksCount}</span>
             <span className="hidden sm:inline">{filteredTasksCount} de {totalTasksCount} tareas</span>

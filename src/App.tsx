@@ -2589,37 +2589,7 @@ export default function App() {
             onOpenGitHubSync={() => setIsGitHubSyncOpen(true)}
           />
 
-          {/* Current File and Unsaved Changes Indicator */}
-          <div
-            className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] font-mono truncate shadow-xs cursor-pointer hover:bg-[var(--surface-container-high)] transition-colors"
-            onClick={() =>
-              setRenameDocModalState({
-                isOpen: true,
-                docId: activeDocument.id,
-                initialName: activeDocument.name,
-                initialFolder: activeDocument.folder,
-              })
-            }
-            title={`Documento activo: ${currentFileName} (Clic para renombrar/mover)`}
-          >
-            <span className="material-symbols-outlined text-[14px] text-sky-400">
-              description
-            </span>
-            <span className="font-medium text-[var(--on-surface)] truncate max-w-[120px] lg:max-w-[160px]">
-              {currentFileName}
-            </span>
-            {hasUnsavedChanges ? (
-              <span className="flex items-center gap-1 text-amber-400 text-[10px] shrink-0 font-sans">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                <span className="hidden xl:inline">modificado</span>
-              </span>
-            ) : (
-              <span className="flex items-center gap-1 text-emerald-400 text-[10px] shrink-0 font-sans">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                <span className="hidden xl:inline">al día</span>
-              </span>
-            )}
-          </div>
+
         </div>
 
         {/* Center Section: View Switcher (Canvas / Kanban / Studio) & Quick Search bar */}
@@ -3216,6 +3186,16 @@ export default function App() {
             onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
             onAutoOrganize={() => setIsAutoLayoutConfirmOpen(true)}
             isAutoOrganizing={isAutoOrganizing}
+            currentFileName={currentFileName}
+            hasUnsavedChanges={hasUnsavedChanges}
+            onRenameDocument={() =>
+              setRenameDocModalState({
+                isOpen: true,
+                docId: activeDocument.id,
+                initialName: activeDocument.name,
+                initialFolder: activeDocument.folder,
+              })
+            }
           />
 
           {/* Main View Area: Split between Visual View (Canvas / Kanban / Studio) and Markdown Split Editor */}
