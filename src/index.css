@@ -332,3 +332,11 @@ textarea:focus-visible,
   background-color: var(--surface) !important;
 }
 
+/* Mobile responsive offsets for tldraw canvas controls */
+@media (max-width: 640px) {
+  .tlui-layout__bottom,
+  .tl-layout__bottom {
+    bottom: 4.5rem !important;
+  }
+}
+

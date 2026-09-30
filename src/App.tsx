@@ -159,7 +159,12 @@ export default function App() {
   }, []);
 
   // Shell Layout State (DESIGN.md Section 3 & 16)
-  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth >= 1024;
+    }
+    return false;
+  });
   const [activeView, setActiveView] = useState<'canvas' | 'kanban' | 'studio'>(() => userSettings.defaultView || 'canvas');
   const [selectedTaskShapeId, setSelectedTaskShapeId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -2891,9 +2896,34 @@ export default function App() {
 
       {/* Main App Body: Sidebar + Workspace (Canvas) + Details Panel (DESIGN.md Section 3 & 16) */}
       <div className="flex-1 w-full flex overflow-hidden relative">
-        {/* Collapsible Sidebar (DESIGN.md Section 3: Projects, Sections, Filters, Tools) */}
+        {/* Mobile Sidebar Overlay Backdrop */}
         {isSidebarOpen && (
-          <aside className="w-64 bg-[var(--surface-container)] border-r border-[var(--outline)] flex flex-col justify-between p-3 select-none flex-shrink-0 z-10 transition-all duration-200">
+          <div
+            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs lg:hidden animate-fade-in"
+            onClick={() => setIsSidebarOpen(false)}
+            aria-hidden="true"
+          />
+        )}
+
+        {/* Collapsible Sidebar (Offcanvas on mobile/tablet, Static Column on desktop) */}
+        {isSidebarOpen && (
+          <aside className="fixed inset-y-0 left-0 z-50 w-72 lg:static lg:z-10 lg:w-64 bg-[var(--surface-container)] border-r border-[var(--outline)] flex flex-col justify-between p-3 select-none flex-shrink-0 transition-transform duration-200 shadow-2xl lg:shadow-none animate-slide-right lg:animate-none">
+            {/* Mobile Sidebar Header with Close Button */}
+            <div className="flex items-center justify-between lg:hidden pb-2 border-b border-[var(--outline)] mb-1">
+              <div className="flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-sky-400 text-[18px]">folder_open</span>
+                <span className="font-semibold text-xs text-[var(--on-surface)]">Explorador de Archivos</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsSidebarOpen(false)}
+                className="btn-m3-icon w-7 h-7 cursor-pointer"
+                aria-label="Cerrar explorador"
+              >
+                <span className="material-symbols-outlined text-[16px]">close</span>
+              </button>
+            </div>
+
             <div className="flex flex-col gap-3 overflow-y-auto">
               {/* Task MD Documents Explorer (1 to N Task MD files in Root, Frontend, Backend, etc.) */}
               <div className="p-2 rounded-lg bg-[var(--surface)] border border-[var(--outline)] shadow-2xs">
@@ -3567,7 +3597,7 @@ export default function App() {
       {/* Floating Bottom Navigation Bar for Mobile */}
       <nav
         aria-label="Acciones rápidas móviles"
-        className="sm:hidden fixed bottom-3 left-3 right-3 z-30 bg-[var(--surface-container)] border border-[var(--outline)] rounded-xl shadow-xl p-1.5 flex items-center justify-between gap-1 pb-safe backdrop-blur-md"
+        className="sm:hidden fixed bottom-2.5 inset-x-2.5 z-30 bg-[var(--surface-container)]/95 border border-[var(--outline)] rounded-xl shadow-2xl p-1 grid grid-cols-5 gap-1 pb-safe backdrop-blur-md select-none"
       >
         <button
           type="button"
@@ -3581,10 +3611,10 @@ export default function App() {
               setIsNewTaskModalOpen(true);
             }
           }}
-          className="btn-m3-primary flex-1 py-1.5 px-1 min-h-[44px] flex flex-col items-center justify-center text-[10px] cursor-pointer shadow-xs"
+          className="btn-m3-primary w-full py-1 px-0.5 min-h-[42px] flex flex-col items-center justify-center text-[10px] cursor-pointer shadow-xs overflow-hidden"
         >
-          <span className="material-symbols-outlined text-[18px]">add</span>
-          <span className="font-semibold">{activeView === 'studio' ? 'Crear' : '+ Tarea'}</span>
+          <span className="material-symbols-outlined text-[17px]">add</span>
+          <span className="font-semibold truncate w-full text-center">{activeView === 'studio' ? 'Crear' : '+ Tarea'}</span>
         </button>
 
         <button
@@ -3594,69 +3624,69 @@ export default function App() {
             else if (activeView === 'kanban') setActiveView('studio');
             else setActiveView('canvas');
           }}
-          className="btn-m3-secondary flex-1 py-1.5 px-1 min-h-[44px] flex flex-col items-center justify-center text-[10px] cursor-pointer"
+          className="btn-m3-secondary w-full py-1 px-0.5 min-h-[42px] flex flex-col items-center justify-center text-[10px] cursor-pointer overflow-hidden"
         >
-          <span className="material-symbols-outlined text-[18px] text-sky-400">
+          <span className="material-symbols-outlined text-[17px] text-sky-400">
             {activeView === 'canvas' ? 'grid_view' : activeView === 'kanban' ? 'view_kanban' : 'cloud_sync'}
           </span>
-          <span className="capitalize">{activeView}</span>
+          <span className="capitalize truncate w-full text-center">{activeView}</span>
         </button>
 
         {activeView === 'canvas' ? (
           <button
             type="button"
             onClick={() => setIsAutoLayoutConfirmOpen(true)}
-            className="btn-m3-secondary flex-1 py-1.5 px-1 min-h-[44px] flex flex-col items-center justify-center text-[10px] cursor-pointer text-sky-400"
+            className="btn-m3-secondary w-full py-1 px-0.5 min-h-[42px] flex flex-col items-center justify-center text-[10px] cursor-pointer text-sky-400 overflow-hidden"
             title="Auto organizar tareas"
           >
-            <span className="material-symbols-outlined text-[18px]">account_tree</span>
-            <span>Organizar</span>
+            <span className="material-symbols-outlined text-[17px]">account_tree</span>
+            <span className="truncate w-full text-center">Organizar</span>
           </button>
         ) : activeView === 'kanban' ? (
           <button
             type="button"
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="btn-m3-secondary flex-1 py-1.5 px-1 min-h-[44px] flex flex-col items-center justify-center text-[10px] cursor-pointer"
+            className="btn-m3-secondary w-full py-1 px-0.5 min-h-[42px] flex flex-col items-center justify-center text-[10px] cursor-pointer overflow-hidden"
             title="Filtros y documentos"
           >
-            <span className="material-symbols-outlined text-[18px]">filter_list</span>
-            <span>Filtros</span>
+            <span className="material-symbols-outlined text-[17px]">filter_list</span>
+            <span className="truncate w-full text-center">Filtros</span>
           </button>
         ) : (
           <button
             type="button"
             onClick={() => setIsSyncOverrideModalOpen(true)}
-            className="btn-m3-secondary flex-1 py-1.5 px-1 min-h-[44px] flex flex-col items-center justify-center text-[10px] cursor-pointer text-amber-400"
+            className="btn-m3-secondary w-full py-1 px-0.5 min-h-[42px] flex flex-col items-center justify-center text-[10px] cursor-pointer text-amber-400 overflow-hidden"
             title="Sincronizar con Sanity"
           >
-            <span className="material-symbols-outlined text-[18px]">sync_problem</span>
-            <span>Sincronizar</span>
+            <span className="material-symbols-outlined text-[17px]">sync_problem</span>
+            <span className="truncate w-full text-center">Sincronizar</span>
           </button>
         )}
 
         <button
           type="button"
           onClick={handleToggleSplitView}
-          className={`btn-m3-secondary flex-1 py-1.5 px-1 min-h-[44px] flex flex-col items-center justify-center text-[10px] cursor-pointer ${
+          className={`btn-m3-secondary w-full py-1 px-0.5 min-h-[42px] flex flex-col items-center justify-center text-[10px] cursor-pointer overflow-hidden ${
             isSplitViewOpen ? 'text-sky-400 font-bold border-sky-600 bg-sky-950/30' : ''
           }`}
         >
-          <span className="material-symbols-outlined text-[18px]">
+          <span className="material-symbols-outlined text-[17px]">
             {isSplitViewOpen ? 'vertical_split' : 'splitscreen'}
           </span>
-          <span>{isSplitViewOpen ? 'Cerrar .md' : 'Ver .md'}</span>
+          <span className="truncate w-full text-center">{isSplitViewOpen ? 'Cerrar' : 'Ver .md'}</span>
         </button>
 
         <button
           type="button"
           onClick={() => setIsMobileMenuOpen(true)}
-          className="btn-m3-secondary flex-1 py-1.5 px-1 min-h-[44px] flex flex-col items-center justify-center text-[10px] cursor-pointer relative"
+          className="btn-m3-secondary w-full py-1 px-0.5 min-h-[42px] flex flex-col items-center justify-center text-[10px] cursor-pointer relative overflow-hidden"
         >
           {validationReport.issues.length > 0 && (
-            <span className="absolute top-1.5 right-2 w-2 h-2 rounded bg-rose-500 animate-pulse" />
+            <span className="absolute top-1 right-2 w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
           )}
-          <span className="material-symbols-outlined text-[18px]">menu</span>
-          <span>Menú</span>
+          <span className="material-symbols-outlined text-[17px]">menu</span>
+          <span className="truncate w-full text-center">Menú</span>
         </button>
       </nav>
 
