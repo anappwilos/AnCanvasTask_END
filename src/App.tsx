@@ -45,6 +45,7 @@ import { GitHubSyncModal } from './components/GitHubSyncModal';
 import { RenameDocumentModal } from './components/RenameDocumentModal';
 import { NewFolderModal } from './components/NewFolderModal';
 import { RenameFolderModal } from './components/RenameFolderModal';
+import { MarkdownSplitEditor } from './components/MarkdownSplitEditor';
 import {
   loadWorkspaceStore,
   saveWorkspaceStore,
@@ -335,6 +336,81 @@ export default function App() {
   const markdownRef = useRef<string>(markdownInput);
   markdownRef.current = markdownInput;
 
+  // Split View State: Live bidirectional split between Canvas/Kanban and Markdown Editor
+  const [isSplitViewOpen, setIsSplitViewOpen] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('antask_split_view');
+      return saved !== null ? JSON.parse(saved) : true;
+    } catch {
+      return true;
+    }
+  });
+
+  const [splitRatio, setSplitRatio] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem('antask_split_ratio');
+      return saved ? Number(saved) : 50;
+    } catch {
+      return 50;
+    }
+  });
+
+  const isDraggingSplitterRef = useRef(false);
+  const markdownEditorDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleToggleSplitView = useCallback(() => {
+    setIsSplitViewOpen((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('antask_split_view', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  }, []);
+
+  const handleSetSplitRatio = useCallback((ratio: number) => {
+    const safe = Math.max(20, Math.min(80, ratio));
+    setSplitRatio(safe);
+    try {
+      localStorage.setItem('antask_split_ratio', String(safe));
+    } catch {}
+  }, []);
+
+  const handleSplitterPointerDown = useCallback(
+    (e: React.PointerEvent) => {
+      e.preventDefault();
+      isDraggingSplitterRef.current = true;
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+
+      const handlePointerMove = (ev: PointerEvent) => {
+        if (!isDraggingSplitterRef.current) return;
+        const container = document.getElementById('antask-split-container');
+        if (!container) return;
+        const rect = container.getBoundingClientRect();
+        const offsetX = ev.clientX - rect.left;
+        const percentage = 100 - (offsetX / rect.width) * 100;
+        const safeRatio = Math.max(20, Math.min(80, percentage));
+        setSplitRatio(safeRatio);
+      };
+
+      const handlePointerUp = () => {
+        isDraggingSplitterRef.current = false;
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        window.removeEventListener('pointermove', handlePointerMove);
+        window.removeEventListener('pointerup', handlePointerUp);
+        try {
+          localStorage.setItem('antask_split_ratio', String(splitRatio));
+        } catch {}
+      };
+
+      window.addEventListener('pointermove', handlePointerMove);
+      window.addEventListener('pointerup', handlePointerUp);
+    },
+    [splitRatio]
+  );
+
   const triggerDebouncedVisualSave = useCallback((editorInstance: Editor) => {
     if (debouncedSaveRef.current) {
       clearTimeout(debouncedSaveRef.current);
@@ -350,6 +426,28 @@ export default function App() {
       }
     }, 700);
   }, []);
+
+  const handleMarkdownEditorChange = useCallback(
+    (newMarkdown: string) => {
+      setMarkdownInput(newMarkdown);
+
+      if (markdownEditorDebounceRef.current) {
+        clearTimeout(markdownEditorDebounceRef.current);
+      }
+
+      markdownEditorDebounceRef.current = setTimeout(() => {
+        if (editor) {
+          const currentVisual = extractVisualStateFromEditor(editor);
+          loadTasksFromMarkdown(editor, newMarkdown, {
+            ...currentVisual,
+            updatedAt: new Date().toISOString(),
+          });
+          triggerDebouncedVisualSave(editor);
+        }
+      }, 250);
+    },
+    [editor, triggerDebouncedVisualSave]
+  );
 
   // Keep workspaceStore synced whenever markdownInput changes
   useEffect(() => {
@@ -2424,6 +2522,29 @@ export default function App() {
             </span>
           </button>
 
+          {/* Split View (Visor en tiempo real bidireccional) Toggle */}
+          <button
+            type="button"
+            onClick={handleToggleSplitView}
+            className={`px-2.5 py-1 text-xs font-medium rounded-full border flex items-center gap-1.5 transition-colors cursor-pointer ${
+              isSplitViewOpen
+                ? 'bg-sky-950/80 text-sky-300 border-sky-700 shadow-xs'
+                : 'bg-[var(--surface)] text-[var(--on-surface-variant)] border-[var(--outline)] hover:text-[var(--on-surface)]'
+            }`}
+            title={
+              isSplitViewOpen
+                ? 'Ocultar visor / editor Markdown en tiempo real'
+                : 'Abrir visor / editor Markdown en tiempo real bidireccional'
+            }
+          >
+            <span className="material-symbols-outlined text-[16px] text-sky-400">
+              {isSplitViewOpen ? 'vertical_split' : 'splitscreen'}
+            </span>
+            <span className="hidden sm:inline">
+              {isSplitViewOpen ? 'Visor .md activo' : 'Visor .md'}
+            </span>
+          </button>
+
           {/* Quick Save Button */}
           <button
             type="button"
@@ -2790,11 +2911,15 @@ export default function App() {
 
               <button
                 type="button"
-                onClick={() => setIsViewMarkdownOpen(true)}
-                className="btn-m3-text w-full py-1.5 text-xs justify-start px-2 cursor-pointer"
+                onClick={handleToggleSplitView}
+                className={`btn-m3-text w-full py-1.5 text-xs justify-start px-2 cursor-pointer ${
+                  isSplitViewOpen ? 'text-sky-400 font-semibold bg-[var(--surface-container-high)]' : ''
+                }`}
               >
-                <span className="material-symbols-outlined text-[18px] text-sky-400">code</span>
-                <span>Ver TASKS.md en vivo</span>
+                <span className="material-symbols-outlined text-[18px] text-sky-400">
+                  {isSplitViewOpen ? 'vertical_split' : 'splitscreen'}
+                </span>
+                <span>{isSplitViewOpen ? 'Ocultar Visor .md' : 'Visor .md en tiempo real'}</span>
               </button>
 
               <button
@@ -2858,256 +2983,304 @@ export default function App() {
             onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
           />
 
-          <div className="flex-1 relative overflow-hidden w-full h-full">
-            {activeView === 'canvas' ? (
-              <>
-                <Tldraw
-                  shapeUtils={customShapeUtils}
-                  onMount={handleMount}
-                  autoFocus
-                />
+          {/* Main View Area: Split between Visual View (Canvas / Kanban / Studio) and Markdown Split Editor */}
+          <div
+            id="antask-split-container"
+            className="flex-1 relative overflow-hidden w-full h-full flex flex-col md:flex-row"
+          >
+            {/* Visual View Pane (Canvas / Kanban / Studio) */}
+            <div
+              style={{
+                width: isSplitViewOpen ? `${100 - splitRatio}%` : '100%',
+                flex: isSplitViewOpen ? `0 0 ${100 - splitRatio}%` : '1 1 0%',
+              }}
+              className="h-full relative overflow-hidden flex flex-col min-w-[280px] transition-all duration-75"
+            >
+              {activeView === 'canvas' ? (
+                <>
+                  <Tldraw
+                    shapeUtils={customShapeUtils}
+                    onMount={handleMount}
+                    autoFocus
+                  />
 
-                {/* Floating Canvas Navigation Controls (DESIGN.md Section 3 & 14) */}
-                <div className="absolute bottom-4 left-4 z-10 hidden sm:flex items-center gap-1 bg-[var(--surface-container)]/95 backdrop-blur-md border border-[var(--outline)] rounded-full p-1 shadow-lg select-none">
-                  <button
-                    type="button"
-                    onClick={handleZoomOut}
-                    className="btn-m3-icon w-7 h-7 cursor-pointer"
-                    title="Alejar zoom (Zoom Out)"
-                    aria-label="Zoom out"
-                  >
-                    <span className="material-symbols-outlined text-[16px]">remove</span>
-                  </button>
+                  {/* Floating Canvas Navigation Controls (DESIGN.md Section 3 & 14) */}
+                  <div className="absolute bottom-4 left-4 z-10 hidden sm:flex items-center gap-1 bg-[var(--surface-container)]/95 backdrop-blur-md border border-[var(--outline)] rounded-full p-1 shadow-lg select-none">
+                    <button
+                      type="button"
+                      onClick={handleZoomOut}
+                      className="btn-m3-icon w-7 h-7 cursor-pointer"
+                      title="Alejar zoom (Zoom Out)"
+                      aria-label="Zoom out"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">remove</span>
+                    </button>
 
-                  <button
-                    type="button"
-                    onClick={handleResetZoom}
-                    className="px-2 py-0.5 text-xs font-mono font-medium text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] rounded-full transition-colors cursor-pointer"
-                    title="Clic para restablecer zoom al 100%"
-                  >
-                    {canvasZoom}%
-                  </button>
+                    <button
+                      type="button"
+                      onClick={handleResetZoom}
+                      className="px-2 py-0.5 text-xs font-mono font-medium text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] rounded-full transition-colors cursor-pointer"
+                      title="Clic para restablecer zoom al 100%"
+                    >
+                      {canvasZoom}%
+                    </button>
 
-                  <button
-                    type="button"
-                    onClick={handleZoomIn}
-                    className="btn-m3-icon w-7 h-7 cursor-pointer"
-                    title="Acercar zoom (Zoom In)"
-                    aria-label="Zoom in"
-                  >
-                    <span className="material-symbols-outlined text-[16px]">add</span>
-                  </button>
+                    <button
+                      type="button"
+                      onClick={handleZoomIn}
+                      className="btn-m3-icon w-7 h-7 cursor-pointer"
+                      title="Acercar zoom (Zoom In)"
+                      aria-label="Zoom in"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">add</span>
+                    </button>
 
-                  <div className="w-px h-4 bg-[var(--outline)] my-auto mx-0.5" />
+                    <div className="w-px h-4 bg-[var(--outline)] my-auto mx-0.5" />
 
-                  <button
-                    type="button"
-                    onClick={handleZoomToFit}
-                    className="btn-m3-icon w-7 h-7 cursor-pointer"
-                    title="Ajustar zoom al contenido (Zoom to Fit)"
-                    aria-label="Zoom to fit"
-                  >
-                    <span className="material-symbols-outlined text-[16px]">fit_screen</span>
-                  </button>
+                    <button
+                      type="button"
+                      onClick={handleZoomToFit}
+                      className="btn-m3-icon w-7 h-7 cursor-pointer"
+                      title="Ajustar zoom al contenido (Zoom to Fit)"
+                      aria-label="Zoom to fit"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">fit_screen</span>
+                    </button>
 
-                  <button
-                    type="button"
-                    onClick={() => setIsAutoLayoutConfirmOpen(true)}
-                    className="btn-m3-icon w-7 h-7 cursor-pointer text-sky-400"
-                    title="Auto organizar canvas jerárquicamente (DAG)"
-                    aria-label="Auto organizar"
-                  >
-                    <span className="material-symbols-outlined text-[16px]">account_tree</span>
-                  </button>
-                </div>
-
-                {/* Canvas Empty State Overlay */}
-                {allParsedTasks.length === 0 && (
-                  <div className="absolute inset-0 pointer-events-none flex items-center justify-center p-6 z-10">
-                    <div className="pointer-events-auto bg-[var(--surface-container)] border border-[var(--outline)] rounded-lg p-6 max-w-md text-center shadow-lg flex flex-col items-center">
-                      <div className="w-10 h-10 rounded bg-[var(--primary-container)]/30 border border-[var(--primary)]/30 flex items-center justify-center text-[var(--primary)] mb-3">
-                        <span className="material-symbols-outlined text-[22px]">grid_view</span>
-                      </div>
-                      <h3 className="text-sm font-semibold text-[var(--on-surface)] font-sans mb-1">
-                        Lienzo vacío
-                      </h3>
-                      <p className="text-xs text-[var(--on-surface-variant)] mb-4 leading-relaxed">
-                        No hay tareas en este archivo TASKS.md. Comienza añadiendo una tarea o carga un proyecto de ejemplo.
-                      </p>
-                      <div className="flex items-center gap-2 flex-wrap justify-center">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (existingSections.length > 0 && !isCustomGroup) {
-                              setNewTaskGroup(existingSections[0]);
-                            }
-                            setIsNewTaskModalOpen(true);
-                          }}
-                          className="btn-m3-primary px-3.5 py-1.5 text-xs cursor-pointer shadow-sm"
-                        >
-                          <span className="material-symbols-outlined text-[15px]">add</span>
-                          <span>Crear primera tarea</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={handleLoadSampleProject}
-                          className="btn-m3-secondary px-3 py-1.5 text-xs cursor-pointer"
-                        >
-                          <span className="material-symbols-outlined text-[15px]">refresh</span>
-                          <span>Cargar ejemplo</span>
-                        </button>
-                      </div>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsAutoLayoutConfirmOpen(true)}
+                      className="btn-m3-icon w-7 h-7 cursor-pointer text-sky-400"
+                      title="Auto organizar canvas jerárquicamente (DAG)"
+                      aria-label="Auto organizar"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">account_tree</span>
+                    </button>
                   </div>
-                )}
 
-                {/* Floating Canvas Multi-Selection Action Bar (DESIGN.md Section 14) */}
-                {selectedTaskIdsOnCanvas.length > 1 && (
-                  <div className="absolute bottom-14 left-1/2 -translate-x-1/2 z-20 bg-[var(--surface-container-high)] border border-[var(--outline)] rounded-md px-3 py-1.5 shadow-lg flex items-center gap-2 select-none max-w-[95vw] overflow-x-auto">
-                    <div className="flex items-center gap-1.5 pr-2 border-r border-[var(--outline)] shrink-0">
-                      <span className="w-2 h-2 rounded bg-[var(--primary)]" />
-                      <span className="text-xs font-mono font-medium text-[var(--on-surface)]">
-                        {selectedTaskIdsOnCanvas.length} seleccionadas
-                      </span>
+                  {/* Canvas Empty State Overlay */}
+                  {allParsedTasks.length === 0 && (
+                    <div className="absolute inset-0 pointer-events-none flex items-center justify-center p-6 z-10">
+                      <div className="pointer-events-auto bg-[var(--surface-container)] border border-[var(--outline)] rounded-lg p-6 max-w-md text-center shadow-lg flex flex-col items-center">
+                        <div className="w-10 h-10 rounded bg-[var(--primary-container)]/30 border border-[var(--primary)]/30 flex items-center justify-center text-[var(--primary)] mb-3">
+                          <span className="material-symbols-outlined text-[22px]">grid_view</span>
+                        </div>
+                        <h3 className="text-sm font-semibold text-[var(--on-surface)] font-sans mb-1">
+                          Lienzo vacío
+                        </h3>
+                        <p className="text-xs text-[var(--on-surface-variant)] mb-4 leading-relaxed">
+                          No hay tareas en este archivo TASKS.md. Comienza añadiendo una tarea o carga un proyecto de ejemplo.
+                        </p>
+                        <div className="flex items-center gap-2 flex-wrap justify-center">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (existingSections.length > 0 && !isCustomGroup) {
+                                setNewTaskGroup(existingSections[0]);
+                              }
+                              setIsNewTaskModalOpen(true);
+                            }}
+                            className="btn-m3-primary px-3.5 py-1.5 text-xs cursor-pointer shadow-sm"
+                          >
+                            <span className="material-symbols-outlined text-[15px]">add</span>
+                            <span>Crear primera tarea</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleLoadSampleProject}
+                            className="btn-m3-secondary px-3 py-1.5 text-xs cursor-pointer"
+                          >
+                            <span className="material-symbols-outlined text-[15px]">refresh</span>
+                            <span>Cargar ejemplo</span>
+                          </button>
+                        </div>
+                      </div>
                     </div>
+                  )}
 
-                    <button
-                      type="button"
-                      onClick={() =>
-                        handleBatchUpdateTasksFromKanban(selectedTaskIdsOnCanvas, {
-                          completed: true,
-                          status: 'done',
-                        })
-                      }
-                      className="btn-m3-secondary px-2 py-1 text-xs text-emerald-400 border-emerald-800/60 bg-emerald-950/30 cursor-pointer shrink-0"
-                      title="Marcar seleccionadas como completadas"
-                    >
-                      <span className="material-symbols-outlined text-[15px]">check_circle</span>
-                      <span className="hidden sm:inline">Completar</span>
-                    </button>
+                  {/* Floating Canvas Multi-Selection Action Bar (DESIGN.md Section 14) */}
+                  {selectedTaskIdsOnCanvas.length > 1 && (
+                    <div className="absolute bottom-14 left-1/2 -translate-x-1/2 z-20 bg-[var(--surface-container-high)] border border-[var(--outline)] rounded-md px-3 py-1.5 shadow-lg flex items-center gap-2 select-none max-w-[95vw] overflow-x-auto">
+                      <div className="flex items-center gap-1.5 pr-2 border-r border-[var(--outline)] shrink-0">
+                        <span className="w-2 h-2 rounded bg-[var(--primary)]" />
+                        <span className="text-xs font-mono font-medium text-[var(--on-surface)]">
+                          {selectedTaskIdsOnCanvas.length} seleccionadas
+                        </span>
+                      </div>
 
-                    <button
-                      type="button"
-                      onClick={() =>
-                        handleBatchUpdateTasksFromKanban(selectedTaskIdsOnCanvas, {
-                          completed: false,
-                          status: 'todo',
-                        })
-                      }
-                      className="btn-m3-secondary px-2 py-1 text-xs text-amber-400 border-amber-800/60 bg-amber-950/30 cursor-pointer shrink-0"
-                      title="Marcar seleccionadas como pendientes"
-                    >
-                      <span className="material-symbols-outlined text-[15px]">pending</span>
-                      <span className="hidden sm:inline">Pendiente</span>
-                    </button>
-
-                    {/* Quick Priorities */}
-                    <div className="flex items-center gap-1 shrink-0 border-l border-r border-[var(--outline)] px-1.5">
-                      {(['P0', 'P1', 'P2', 'P3'] as TaskPriority[]).map((p) => (
-                        <button
-                          key={p}
-                          type="button"
-                          onClick={() =>
-                            handleBatchUpdateTasksFromKanban(selectedTaskIdsOnCanvas, { priority: p })
-                          }
-                          className="px-1.5 py-0.5 text-[10px] font-mono font-medium rounded border border-[var(--outline)] text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer"
-                          title={`Establecer prioridad ${p}`}
-                        >
-                          {p}
-                        </button>
-                      ))}
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        handleBatchDeleteTasksFromKanban(selectedTaskIdsOnCanvas);
-                      }}
-                      className="btn-m3-secondary px-2 py-1 text-xs text-[var(--error)] border-rose-800/60 bg-rose-950/30 cursor-pointer shrink-0"
-                      title="Eliminar tareas seleccionadas"
-                    >
-                      <span className="material-symbols-outlined text-[15px]">delete</span>
-                      <span className="hidden sm:inline">Eliminar</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (editor) {
-                          editor.selectNone();
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleBatchUpdateTasksFromKanban(selectedTaskIdsOnCanvas, {
+                            completed: true,
+                            status: 'done',
+                          })
                         }
-                        setSelectedTaskIdsOnCanvas([]);
-                        setSelectedTaskShapeId(null);
-                      }}
-                      className="btn-m3-icon w-6 h-6 shrink-0 cursor-pointer"
-                      title="Deseleccionar"
-                    >
-                      <span className="material-symbols-outlined text-[14px]">close</span>
-                    </button>
+                        className="btn-m3-secondary px-2 py-1 text-xs text-emerald-400 border-emerald-800/60 bg-emerald-950/30 cursor-pointer shrink-0"
+                        title="Marcar seleccionadas como completadas"
+                      >
+                        <span className="material-symbols-outlined text-[15px]">check_circle</span>
+                        <span className="hidden sm:inline">Completar</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleBatchUpdateTasksFromKanban(selectedTaskIdsOnCanvas, {
+                            completed: false,
+                            status: 'todo',
+                          })
+                        }
+                        className="btn-m3-secondary px-2 py-1 text-xs text-amber-400 border-amber-800/60 bg-amber-950/30 cursor-pointer shrink-0"
+                        title="Marcar seleccionadas como pendientes"
+                      >
+                        <span className="material-symbols-outlined text-[15px]">pending</span>
+                        <span className="hidden sm:inline">Pendiente</span>
+                      </button>
+
+                      {/* Quick Priorities */}
+                      <div className="flex items-center gap-1 shrink-0 border-l border-r border-[var(--outline)] px-1.5">
+                        {(['P0', 'P1', 'P2', 'P3'] as TaskPriority[]).map((p) => (
+                          <button
+                            key={p}
+                            type="button"
+                            onClick={() =>
+                              handleBatchUpdateTasksFromKanban(selectedTaskIdsOnCanvas, { priority: p })
+                            }
+                            className="px-1.5 py-0.5 text-[10px] font-mono font-medium rounded border border-[var(--outline)] text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer"
+                            title={`Establecer prioridad ${p}`}
+                          >
+                            {p}
+                          </button>
+                        ))}
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          handleBatchDeleteTasksFromKanban(selectedTaskIdsOnCanvas);
+                        }}
+                        className="btn-m3-secondary px-2 py-1 text-xs text-[var(--error)] border-rose-800/60 bg-rose-950/30 cursor-pointer shrink-0"
+                        title="Eliminar tareas seleccionadas"
+                      >
+                        <span className="material-symbols-outlined text-[15px]">delete</span>
+                        <span className="hidden sm:inline">Eliminar</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (editor) {
+                            editor.selectNone();
+                          }
+                          setSelectedTaskIdsOnCanvas([]);
+                          setSelectedTaskShapeId(null);
+                        }}
+                        className="btn-m3-icon w-6 h-6 shrink-0 cursor-pointer"
+                        title="Deseleccionar"
+                      >
+                        <span className="material-symbols-outlined text-[14px]">close</span>
+                      </button>
+                    </div>
+                  )}
+                </>
+              ) : activeView === 'kanban' ? (
+                <KanbanBoard
+                  markdown={markdownInput}
+                  isLoading={isLoadingDocument}
+                  onOpenSampleProject={handleLoadSampleProject}
+                  onUpdateTask={handleUpdateTaskFromKanban}
+                  onBatchUpdateTasks={handleBatchUpdateTasksFromKanban}
+                  onDeleteTask={(taskId, title) => {
+                    const dependents = findDependentTasks(markdownInput, taskId);
+                    setDeleteWarningState({
+                      shapeId: taskId,
+                      taskId,
+                      title,
+                      dependents,
+                    });
+                  }}
+                  onBatchDeleteTasks={handleBatchDeleteTasksFromKanban}
+                  onSelectTask={(id) => setSelectedTaskShapeId(id)}
+                  selectedTaskId={selectedTaskShapeId}
+                  onOpenNewTaskModalWithGroup={(groupOrStatus) => {
+                    if (existingSections.includes(groupOrStatus)) {
+                      setNewTaskGroup(groupOrStatus);
+                    }
+                    setIsNewTaskModalOpen(true);
+                  }}
+                  searchQuery={searchQuery}
+                  activeFilter={activeFilter}
+                  filters={taskFilters}
+                  onResetFilters={() => {
+                    setSearchQuery('');
+                    setTaskFilters({
+                      status: 'all',
+                      priority: 'all',
+                      section: 'all',
+                      tag: 'all',
+                      onlyBlocked: false,
+                      sortBy: 'default',
+                    });
+                    setActiveFilter('all');
+                  }}
+                />
+              ) : (
+                <SanityStudio
+                  onOpenSanityConfig={() => setIsSanityModalOpen(true)}
+                  onImportTaskToMarkdown={handleImportTaskFromSanity}
+                  onShowToast={pushToast}
+                />
+              )}
+
+              {/* Drag & Drop Discrete Overlay */}
+              {isDraggingOver && (
+                <div className="absolute inset-0 z-50 pointer-events-none bg-black/80 backdrop-blur-xs flex flex-col items-center justify-center animate-fade-in p-6">
+                  <div className="w-16 h-16 rounded-2xl bg-sky-950/80 border border-sky-600 flex items-center justify-center text-sky-400 mb-4 shadow-xl">
+                    <span className="material-symbols-outlined text-[32px]">upload_file</span>
                   </div>
-                )}
-              </>
-            ) : activeView === 'kanban' ? (
-              <KanbanBoard
-                markdown={markdownInput}
-                isLoading={isLoadingDocument}
-                onOpenSampleProject={handleLoadSampleProject}
-                onUpdateTask={handleUpdateTaskFromKanban}
-                onBatchUpdateTasks={handleBatchUpdateTasksFromKanban}
-                onDeleteTask={(taskId, title) => {
-                  const dependents = findDependentTasks(markdownInput, taskId);
-                  setDeleteWarningState({
-                    shapeId: taskId,
-                    taskId,
-                    title,
-                    dependents,
-                  });
-                }}
-                onBatchDeleteTasks={handleBatchDeleteTasksFromKanban}
-                onSelectTask={(id) => setSelectedTaskShapeId(id)}
-                selectedTaskId={selectedTaskShapeId}
-                onOpenNewTaskModalWithGroup={(groupOrStatus) => {
-                  if (existingSections.includes(groupOrStatus)) {
-                    setNewTaskGroup(groupOrStatus);
-                  }
-                  setIsNewTaskModalOpen(true);
-                }}
-                searchQuery={searchQuery}
-                activeFilter={activeFilter}
-                filters={taskFilters}
-                onResetFilters={() => {
-                  setSearchQuery('');
-                  setTaskFilters({
-                    status: 'all',
-                    priority: 'all',
-                    section: 'all',
-                    tag: 'all',
-                    onlyBlocked: false,
-                    sortBy: 'default',
-                  });
-                  setActiveFilter('all');
-                }}
-              />
-            ) : (
-              <SanityStudio
-                onOpenSanityConfig={() => setIsSanityModalOpen(true)}
-                onImportTaskToMarkdown={handleImportTaskFromSanity}
-                onShowToast={pushToast}
-              />
+                  <h3 className="text-base font-semibold text-white font-sans mb-1">
+                    Suelta tu archivo TASKS.md aquí
+                  </h3>
+                  <p className="text-xs text-slate-400 font-sans">
+                    Se parseará automáticamente manteniendo coordenadas y jerarquía
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Split Resizer Divider Bar */}
+            {isSplitViewOpen && (
+              <div
+                onPointerDown={handleSplitterPointerDown}
+                onDoubleClick={() => handleSetSplitRatio(50)}
+                className="w-2 md:w-2 bg-[var(--outline)] hover:bg-[var(--primary)] cursor-col-resize transition-colors shrink-0 relative flex items-center justify-center group select-none z-20"
+                title="Arrastra para ajustar el visor en tiempo real (Doble clic para 50%)"
+              >
+                <div className="w-1 h-8 rounded-full bg-[var(--on-surface-variant)] group-hover:bg-[var(--on-primary)] transition-colors" />
+              </div>
             )}
 
-            {/* Drag & Drop Discrete Overlay */}
-            {isDraggingOver && (
-              <div className="absolute inset-0 z-50 pointer-events-none bg-black/80 backdrop-blur-xs flex flex-col items-center justify-center animate-fade-in p-6">
-                <div className="w-16 h-16 rounded-2xl bg-sky-950/80 border border-sky-600 flex items-center justify-center text-sky-400 mb-4 shadow-xl">
-                  <span className="material-symbols-outlined text-[32px]">upload_file</span>
-                </div>
-                <h3 className="text-base font-semibold text-white font-sans mb-1">
-                  Suelta tu archivo TASKS.md aquí
-                </h3>
-                <p className="text-xs text-slate-400 font-sans">
-                  Se parseará automáticamente manteniendo coordenadas y jerarquía
-                </p>
+            {/* Real-time Bidirectional Markdown Editor Pane */}
+            {isSplitViewOpen && (
+              <div
+                style={{
+                  width: `${splitRatio}%`,
+                  flex: `0 0 ${splitRatio}%`,
+                }}
+                className="h-full relative overflow-hidden min-w-[300px] transition-all duration-75"
+              >
+                <MarkdownSplitEditor
+                  value={markdownInput}
+                  fileName={currentFileName}
+                  theme={effectiveTheme}
+                  onChange={handleMarkdownEditorChange}
+                  onClose={() => setIsSplitViewOpen(false)}
+                  onExport={handleExportFile}
+                  onShowToast={pushToast}
+                  splitRatio={splitRatio}
+                  onChangeSplitRatio={handleSetSplitRatio}
+                />
               </div>
             )}
           </div>
@@ -3215,11 +3388,15 @@ export default function App() {
 
         <button
           type="button"
-          onClick={() => setIsViewMarkdownOpen(true)}
-          className="btn-m3-secondary flex-1 py-1.5 px-1 min-h-[40px] flex flex-col items-center justify-center text-[10px] cursor-pointer"
+          onClick={handleToggleSplitView}
+          className={`btn-m3-secondary flex-1 py-1.5 px-1 min-h-[40px] flex flex-col items-center justify-center text-[10px] cursor-pointer ${
+            isSplitViewOpen ? 'text-sky-400 font-bold border-sky-600' : ''
+          }`}
         >
-          <span className="material-symbols-outlined text-[17px]">code</span>
-          <span>Ver .md</span>
+          <span className="material-symbols-outlined text-[17px]">
+            {isSplitViewOpen ? 'vertical_split' : 'splitscreen'}
+          </span>
+          <span>{isSplitViewOpen ? 'Cerrar .md' : 'Ver .md'}</span>
         </button>
 
         <button
