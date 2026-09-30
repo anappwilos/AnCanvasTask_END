@@ -114,230 +114,234 @@ export const FilterBar: React.FC<FilterBarProps> = ({
       {/* Top row of FilterBar: Filter popover toggle + Search trigger + Quick view summary */}
       <div className="flex items-center justify-between gap-1.5 sm:gap-2">
         <div className="flex items-center gap-1.5 sm:gap-2 flex-1 min-w-0">
-          {/* Filter Popover Button */}
-          <div className="relative shrink-0" ref={popoverRef}>
-            <button
-              type="button"
-              aria-expanded={isFilterPopoverOpen}
-              aria-haspopup="true"
-              aria-label="Abrir panel de filtros y ordenación"
-              onClick={() => setIsFilterPopoverOpen(!isFilterPopoverOpen)}
-              className={`btn-m3-secondary px-2.5 sm:px-3 py-1.5 text-xs font-medium cursor-pointer ${
-                activeFiltersCount > (searchQuery ? 1 : 0)
-                  ? 'border-[var(--primary)] text-[var(--primary)] bg-[var(--primary-container)]/20'
-                  : ''
-              }`}
-              title="Abrir panel de filtros y ordenación"
-            >
-              <span className="material-symbols-outlined text-[16px]">tune</span>
-              <span className="hidden xs:inline">Filtros</span>
-              {activeFiltersCount > 0 && (
-                <span className="w-4 h-4 rounded-full bg-[var(--primary)] text-[var(--on-primary)] text-[10px] font-bold flex items-center justify-center font-mono">
-                  {activeFiltersCount}
-                </span>
-              )}
-            </button>
+          {activeView !== 'studio' && (
+            <>
+              {/* Filter Popover Button */}
+              <div className="relative shrink-0" ref={popoverRef}>
+                <button
+                  type="button"
+                  aria-expanded={isFilterPopoverOpen}
+                  aria-haspopup="true"
+                  aria-label="Abrir panel de filtros y ordenación"
+                  onClick={() => setIsFilterPopoverOpen(!isFilterPopoverOpen)}
+                  className={`btn-m3-secondary px-2.5 sm:px-3 py-1.5 text-xs font-medium cursor-pointer ${
+                    activeFiltersCount > (searchQuery ? 1 : 0)
+                      ? 'border-[var(--primary)] text-[var(--primary)] bg-[var(--primary-container)]/20'
+                      : ''
+                  }`}
+                  title="Abrir panel de filtros y ordenación"
+                >
+                  <span className="material-symbols-outlined text-[16px]">tune</span>
+                  <span className="hidden xs:inline">Filtros</span>
+                  {activeFiltersCount > 0 && (
+                    <span className="w-4 h-4 rounded-full bg-[var(--primary)] text-[var(--on-primary)] text-[10px] font-bold flex items-center justify-center font-mono">
+                      {activeFiltersCount}
+                    </span>
+                  )}
+                </button>
 
-            {/* Filter Popover Content */}
-            {isFilterPopoverOpen && (
-              <div
-                onPointerDown={(e) => e.stopPropagation()}
-                className="absolute left-0 top-9 z-40 w-72 sm:w-80 max-w-[calc(100vw-2rem)] bg-[var(--surface-container-high)] border border-[var(--outline)] rounded-lg shadow-lg p-3 flex flex-col gap-2.5 text-xs"
-              >
-                <div className="flex items-center justify-between border-b border-[var(--outline)] pb-2">
-                  <span className="font-semibold text-[var(--on-surface)] flex items-center gap-1.5">
-                    <span className="material-symbols-outlined text-[16px] text-sky-400">filter_list</span>
-                    <span>Filtros avanzados</span>
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setIsFilterPopoverOpen(false)}
-                    className="btn-m3-icon w-6 h-6 cursor-pointer"
+                {/* Filter Popover Content */}
+                {isFilterPopoverOpen && (
+                  <div
+                    onPointerDown={(e) => e.stopPropagation()}
+                    className="absolute left-0 top-9 z-40 w-72 sm:w-80 max-w-[calc(100vw-2rem)] bg-[var(--surface-container-high)] border border-[var(--outline)] rounded-lg shadow-lg p-3 flex flex-col gap-2.5 text-xs"
                   >
-                    <span className="material-symbols-outlined text-[16px]">close</span>
-                  </button>
-                </div>
+                    <div className="flex items-center justify-between border-b border-[var(--outline)] pb-2">
+                      <span className="font-semibold text-[var(--on-surface)] flex items-center gap-1.5">
+                        <span className="material-symbols-outlined text-[16px] text-sky-400">filter_list</span>
+                        <span>Filtros avanzados</span>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setIsFilterPopoverOpen(false)}
+                        className="btn-m3-icon w-6 h-6 cursor-pointer"
+                      >
+                        <span className="material-symbols-outlined text-[16px]">close</span>
+                      </button>
+                    </div>
 
-                {/* 1. Estado */}
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
-                    Estado
-                  </label>
-                  <select
-                    value={filters.status}
-                    onChange={(e) =>
-                      onFilterChange({ ...filters, status: e.target.value as any })
-                    }
-                    className="w-full bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--outline)] rounded px-2.5 py-1 text-xs font-sans focus:outline-none focus:border-[var(--primary)] cursor-pointer"
-                  >
-                    {statusOptions.map((opt) => (
-                      <option key={opt.id} value={opt.id}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                    {/* 1. Estado */}
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
+                        Estado
+                      </label>
+                      <select
+                        value={filters.status}
+                        onChange={(e) =>
+                          onFilterChange({ ...filters, status: e.target.value as any })
+                        }
+                        className="w-full bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--outline)] rounded px-2.5 py-1 text-xs font-sans focus:outline-none focus:border-[var(--primary)] cursor-pointer"
+                      >
+                        {statusOptions.map((opt) => (
+                          <option key={opt.id} value={opt.id}>
+                            {opt.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
 
-                {/* 2. Prioridad */}
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
-                    Prioridad
-                  </label>
-                  <select
-                    value={filters.priority}
-                    onChange={(e) =>
-                      onFilterChange({ ...filters, priority: e.target.value as any })
-                    }
-                    className="w-full bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--outline)] rounded px-2.5 py-1 text-xs font-sans focus:outline-none focus:border-[var(--primary)] cursor-pointer"
-                  >
-                    {priorityOptions.map((opt) => (
-                      <option key={opt.id} value={opt.id}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                    {/* 2. Prioridad */}
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
+                        Prioridad
+                      </label>
+                      <select
+                        value={filters.priority}
+                        onChange={(e) =>
+                          onFilterChange({ ...filters, priority: e.target.value as any })
+                        }
+                        className="w-full bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--outline)] rounded px-2.5 py-1 text-xs font-sans focus:outline-none focus:border-[var(--primary)] cursor-pointer"
+                      >
+                        {priorityOptions.map((opt) => (
+                          <option key={opt.id} value={opt.id}>
+                            {opt.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
 
-                {/* 3. Sección */}
-                {availableSections.length > 0 && (
-                  <div className="flex flex-col gap-1">
-                    <label className="text-[10px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
-                      Sección (Grupo)
+                    {/* 3. Sección */}
+                    {availableSections.length > 0 && (
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
+                          Sección (Grupo)
+                        </label>
+                        <select
+                          value={filters.section}
+                          onChange={(e) =>
+                            onFilterChange({ ...filters, section: e.target.value })
+                          }
+                          className="w-full bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--outline)] rounded px-2.5 py-1 text-xs font-sans focus:outline-none focus:border-[var(--primary)] cursor-pointer"
+                        >
+                          <option value="all">Todas las secciones</option>
+                          {availableSections.map((sec) => (
+                            <option key={sec} value={sec}>
+                              ## {sec}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+
+                    {/* 4. Etiqueta */}
+                    {availableTags.length > 0 && (
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
+                          Etiqueta
+                        </label>
+                        <select
+                          value={filters.tag}
+                          onChange={(e) =>
+                            onFilterChange({ ...filters, tag: e.target.value })
+                          }
+                          className="w-full bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--outline)] rounded px-2.5 py-1 text-xs font-sans focus:outline-none focus:border-[var(--primary)] cursor-pointer"
+                        >
+                          <option value="all">Todas las etiquetas</option>
+                          {availableTags.map((tag) => (
+                            <option key={tag} value={tag}>
+                              #{tag}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+
+                    {/* 5. Solo bloqueadas */}
+                    <label className="flex items-center gap-2 cursor-pointer pt-0.5">
+                      <input
+                        type="checkbox"
+                        checked={filters.onlyBlocked}
+                        onChange={(e) =>
+                          onFilterChange({ ...filters, onlyBlocked: e.target.checked })
+                        }
+                        className="w-3.5 h-3.5 rounded text-[var(--primary)] focus:ring-0 cursor-pointer"
+                      />
+                      <span className="text-xs text-[var(--on-surface)] font-medium">
+                        Mostrar únicamente tareas bloqueadas
+                      </span>
                     </label>
-                    <select
-                      value={filters.section}
-                      onChange={(e) =>
-                        onFilterChange({ ...filters, section: e.target.value })
-                      }
-                      className="w-full bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--outline)] rounded px-2.5 py-1 text-xs font-sans focus:outline-none focus:border-[var(--primary)] cursor-pointer"
-                    >
-                      <option value="all">Todas las secciones</option>
-                      {availableSections.map((sec) => (
-                        <option key={sec} value={sec}>
-                          ## {sec}
-                        </option>
-                      ))}
-                    </select>
+
+                    {/* 6. Ordenación */}
+                    <div className="flex flex-col gap-1 pt-1 border-t border-[var(--outline)]">
+                      <label className="text-[10px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
+                        Ordenar por
+                      </label>
+                      <select
+                        value={filters.sortBy}
+                        onChange={(e) =>
+                          onFilterChange({ ...filters, sortBy: e.target.value as any })
+                        }
+                        className="w-full bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--outline)] rounded px-2.5 py-1 text-xs font-sans focus:outline-none focus:border-[var(--primary)] cursor-pointer"
+                      >
+                        {sortOptions.map((s) => (
+                          <option key={s.id} value={s.id}>
+                            {s.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Footer Buttons */}
+                    <div className="flex items-center justify-between pt-2 border-t border-[var(--outline)] mt-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onResetFilters();
+                          setIsFilterPopoverOpen(false);
+                        }}
+                        className="btn-m3-text py-1 text-[11px] text-[var(--on-surface-variant)] hover:text-rose-400 cursor-pointer"
+                      >
+                        Restablecer
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setIsFilterPopoverOpen(false)}
+                        className="btn-m3-primary px-3 py-1 text-xs cursor-pointer"
+                      >
+                        Listo
+                      </button>
+                    </div>
                   </div>
                 )}
-
-                {/* 4. Etiqueta */}
-                {availableTags.length > 0 && (
-                  <div className="flex flex-col gap-1">
-                    <label className="text-[10px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
-                      Etiqueta
-                    </label>
-                    <select
-                      value={filters.tag}
-                      onChange={(e) =>
-                        onFilterChange({ ...filters, tag: e.target.value })
-                      }
-                      className="w-full bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--outline)] rounded px-2.5 py-1 text-xs font-sans focus:outline-none focus:border-[var(--primary)] cursor-pointer"
-                    >
-                      <option value="all">Todas las etiquetas</option>
-                      {availableTags.map((tag) => (
-                        <option key={tag} value={tag}>
-                          #{tag}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-
-                {/* 5. Solo bloqueadas */}
-                <label className="flex items-center gap-2 cursor-pointer pt-0.5">
-                  <input
-                    type="checkbox"
-                    checked={filters.onlyBlocked}
-                    onChange={(e) =>
-                      onFilterChange({ ...filters, onlyBlocked: e.target.checked })
-                    }
-                    className="w-3.5 h-3.5 rounded text-[var(--primary)] focus:ring-0 cursor-pointer"
-                  />
-                  <span className="text-xs text-[var(--on-surface)] font-medium">
-                    Mostrar únicamente tareas bloqueadas
-                  </span>
-                </label>
-
-                {/* 6. Ordenación */}
-                <div className="flex flex-col gap-1 pt-1 border-t border-[var(--outline)]">
-                  <label className="text-[10px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
-                    Ordenar por
-                  </label>
-                  <select
-                    value={filters.sortBy}
-                    onChange={(e) =>
-                      onFilterChange({ ...filters, sortBy: e.target.value as any })
-                    }
-                    className="w-full bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--outline)] rounded px-2.5 py-1 text-xs font-sans focus:outline-none focus:border-[var(--primary)] cursor-pointer"
-                  >
-                    {sortOptions.map((s) => (
-                      <option key={s.id} value={s.id}>
-                        {s.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Footer Buttons */}
-                <div className="flex items-center justify-between pt-2 border-t border-[var(--outline)] mt-1">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onResetFilters();
-                      setIsFilterPopoverOpen(false);
-                    }}
-                    className="btn-m3-text py-1 text-[11px] text-[var(--on-surface-variant)] hover:text-rose-400 cursor-pointer"
-                  >
-                    Restablecer
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setIsFilterPopoverOpen(false)}
-                    className="btn-m3-primary px-3 py-1 text-xs cursor-pointer"
-                  >
-                    Listo
-                  </button>
-                </div>
               </div>
-            )}
-          </div>
 
-          {/* Quick Command Palette Button (Cmd + K) on desktop */}
-          <button
-            type="button"
-            onClick={onOpenCommandPalette}
-            className="btn-m3-secondary px-3 py-1.5 text-xs cursor-pointer hidden sm:flex items-center gap-1.5 shrink-0"
-            title="Abrir paleta de comandos y búsqueda global (Ctrl/Cmd + K)"
-          >
-            <span className="material-symbols-outlined text-[16px] text-sky-400">terminal</span>
-            <span>Comandos</span>
-            <kbd className="px-1.5 py-0.2 rounded bg-[var(--surface)] border border-[var(--outline)] font-mono text-[10px] text-[var(--on-surface-variant)]">
-              ⌘K
-            </kbd>
-          </button>
-
-          {/* Auto Organizar Button */}
-          {onAutoOrganize && (
-            <button
-              type="button"
-              disabled={isAutoOrganizing}
-              onClick={onAutoOrganize}
-              className="btn-m3-secondary hidden md:inline-flex px-2.5 py-1 text-xs cursor-pointer text-sky-400 border-sky-800/60 bg-sky-950/30 shrink-0"
-              title="Organizar automáticamente dependencias y grupos jerárquicamente (DAG)"
-            >
-              <span
-                className={`material-symbols-outlined text-[15px] ${
-                  isAutoOrganizing ? 'animate-spin' : ''
-                }`}
+              {/* Quick Command Palette Button (Cmd + K) on desktop */}
+              <button
+                type="button"
+                onClick={onOpenCommandPalette}
+                className="btn-m3-secondary px-3 py-1.5 text-xs cursor-pointer hidden sm:flex items-center gap-1.5 shrink-0"
+                title="Abrir paleta de comandos y búsqueda global (Ctrl/Cmd + K)"
               >
-                {isAutoOrganizing ? 'progress_activity' : 'account_tree'}
-              </span>
-              <span className="hidden lg:inline">
-                {isAutoOrganizing ? 'Organizando...' : 'Auto organizar'}
-              </span>
-            </button>
+                <span className="material-symbols-outlined text-[16px] text-sky-400">terminal</span>
+                <span>Comandos</span>
+                <kbd className="px-1.5 py-0.2 rounded bg-[var(--surface)] border border-[var(--outline)] font-mono text-[10px] text-[var(--on-surface-variant)]">
+                  ⌘K
+                </kbd>
+              </button>
+
+              {/* Auto Organizar Button */}
+              {onAutoOrganize && (
+                <button
+                  type="button"
+                  disabled={isAutoOrganizing}
+                  onClick={onAutoOrganize}
+                  className="btn-m3-secondary hidden md:inline-flex px-2.5 py-1 text-xs cursor-pointer text-sky-400 border-sky-800/60 bg-sky-950/30 shrink-0"
+                  title="Organizar automáticamente dependencias y grupos jerárquicamente (DAG)"
+                >
+                  <span
+                    className={`material-symbols-outlined text-[15px] ${
+                      isAutoOrganizing ? 'animate-spin' : ''
+                    }`}
+                  >
+                    {isAutoOrganizing ? 'progress_activity' : 'account_tree'}
+                  </span>
+                  <span className="hidden lg:inline">
+                    {isAutoOrganizing ? 'Organizando...' : 'Auto organizar'}
+                  </span>
+                </button>
+              )}
+            </>
           )}
 
           {/* Mobile Quick Search Input */}
@@ -366,7 +370,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
 
         {/* Current Document Indicator & Counter of matching tasks */}
         <div className="flex items-center gap-2 text-xs font-mono text-[var(--on-surface-variant)] shrink-0">
-          {activeView === 'studio' && (
+          {activeView === 'studio' ? (
             <div className="flex items-center gap-1.5 shrink-0">
               {onOpenSanityModal && (
                 <button
@@ -408,38 +412,40 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                 </button>
               )}
             </div>
-          )}
-
-          {currentFileName && onRenameDocument && (
-            <div
-              className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] font-mono truncate shadow-xs cursor-pointer hover:bg-[var(--surface-container-high)] transition-colors"
-              onClick={onRenameDocument}
-              title={`Documento activo: ${currentFileName} (Clic para renombrar/mover)`}
-            >
-              <span className="material-symbols-outlined text-[14px] text-sky-400">
-                description
-              </span>
-              <span className="font-medium text-[var(--on-surface)] truncate max-w-[120px] lg:max-w-[160px]">
-                {currentFileName}
-              </span>
-              {hasUnsavedChanges ? (
-                <span className="flex items-center gap-1 text-amber-400 text-[10px] shrink-0 font-sans">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                  <span className="hidden xl:inline">modificado</span>
-                </span>
-              ) : (
-                <span className="flex items-center gap-1 text-emerald-400 text-[10px] shrink-0 font-sans">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                  <span className="hidden xl:inline">al día</span>
-                </span>
+          ) : (
+            <>
+              {currentFileName && onRenameDocument && (
+                <div
+                  className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] font-mono truncate shadow-xs cursor-pointer hover:bg-[var(--surface-container-high)] transition-colors"
+                  onClick={onRenameDocument}
+                  title={`Documento activo: ${currentFileName} (Clic para renombrar/mover)`}
+                >
+                  <span className="material-symbols-outlined text-[14px] text-sky-400">
+                    description
+                  </span>
+                  <span className="font-medium text-[var(--on-surface)] truncate max-w-[120px] lg:max-w-[160px]">
+                    {currentFileName}
+                  </span>
+                  {hasUnsavedChanges ? (
+                    <span className="flex items-center gap-1 text-amber-400 text-[10px] shrink-0 font-sans">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                      <span className="hidden xl:inline">modificado</span>
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1 text-emerald-400 text-[10px] shrink-0 font-sans">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                      <span className="hidden xl:inline">al día</span>
+                    </span>
+                  )}
+                </div>
               )}
-            </div>
-          )}
 
-          <span className="px-2 py-0.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px]">
-            <span className="sm:hidden">{filteredTasksCount}/{totalTasksCount}</span>
-            <span className="hidden sm:inline">{filteredTasksCount} de {totalTasksCount} tareas</span>
-          </span>
+              <span className="px-2 py-0.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px]">
+                <span className="sm:hidden">{filteredTasksCount}/{totalTasksCount}</span>
+                <span className="hidden sm:inline">{filteredTasksCount} de {totalTasksCount} tareas</span>
+              </span>
+            </>
+          )}
         </div>
       </div>
 
