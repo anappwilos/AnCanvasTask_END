@@ -14,6 +14,19 @@ export const task = defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
+      name: 'workspace',
+      title: 'Workspace Asociado',
+      type: 'reference',
+      to: [{ type: 'workspace' }],
+      description: 'Workspace o repositorio al que pertenece esta tarea',
+    }),
+    defineField({
+      name: 'workspaceId',
+      title: 'Workspace ID',
+      type: 'string',
+      description: 'Identificador del workspace padre (ej. "ws_antask_monorepo")',
+    }),
+    defineField({
       name: 'title',
       title: 'Título',
       type: 'string',

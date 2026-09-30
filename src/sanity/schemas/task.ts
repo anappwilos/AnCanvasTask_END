@@ -15,6 +15,19 @@ export const taskSchema = {
       validation: (Rule: any) => Rule.required(),
     },
     {
+      name: 'workspace',
+      title: 'Workspace Asociado',
+      type: 'reference',
+      to: [{ type: 'workspace' }],
+      description: 'Workspace o repositorio al que pertenece esta tarea',
+    },
+    {
+      name: 'workspaceId',
+      title: 'Workspace ID',
+      type: 'string',
+      description: 'Identificador del workspace padre (ej. "ws_antask_monorepo")',
+    },
+    {
       name: 'title',
       title: 'Título',
       type: 'string',

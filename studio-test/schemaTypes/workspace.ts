@@ -190,6 +190,13 @@ export const workspace = defineType({
       ],
     }),
     defineField({
+      name: 'tasks',
+      title: 'Tareas Directas del Workspace (Tasks)',
+      type: 'array',
+      description: 'Tareas asociadas directamente a este workspace',
+      of: [{ type: 'reference', to: [{ type: 'task' }] }],
+    }),
+    defineField({
       name: 'createdAt',
       title: 'Fecha de Creación',
       type: 'datetime',
