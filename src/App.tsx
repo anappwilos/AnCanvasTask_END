@@ -2789,20 +2789,7 @@ export default function App() {
             </span>
           </button>
 
-          {/* Quick Save Button */}
-          <button
-            type="button"
-            onClick={handleExportFile}
-            className={`btn-m3-secondary hidden sm:flex px-2.5 py-1 text-xs cursor-pointer ${
-              hasUnsavedChanges
-                ? 'border-emerald-500 text-emerald-400 bg-emerald-950/40 shadow-xs'
-                : ''
-            }`}
-            title="Guardar archivo TASKS.md en disco (⌘S)"
-          >
-            <span className="material-symbols-outlined text-[16px]">save</span>
-            <span className="hidden xl:inline">Guardar</span>
-          </button>
+
 
           {/* Mobile Quick Search Button */}
           <button
