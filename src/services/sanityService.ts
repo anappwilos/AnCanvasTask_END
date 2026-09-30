@@ -544,11 +544,11 @@ export async function deleteDocumentFromSanity(
 }
 
 /**
- * Fetches recent documents stored in Sanity dataset (both task and canvasVisualState).
+ * Fetches recent documents stored in Sanity dataset (task, canvasVisualState, and workspace).
  */
 export async function fetchSanityDocumentsList(
   configOverride?: Partial<SanityConfig>
-): Promise<Array<{ _id: string; _type: string; title?: string; taskId?: string; projectId?: string; _updatedAt?: string }>> {
+): Promise<Array<{ _id: string; _type: string; title?: string; name?: string; workspaceId?: string; taskId?: string; projectId?: string; _updatedAt?: string }>> {
   const config = { ...getSanityConfig(), ...configOverride };
   if (!config.projectId || !config.dataset) return [];
 
@@ -561,10 +561,12 @@ export async function fetchSanityDocumentsList(
       useCdn: false,
     });
 
-    const query = `*[_type in ["task", "canvasVisualState"]] | order(_updatedAt desc)[0...15] {
+    const query = `*[_type in ["task", "canvasVisualState", "workspace"]] | order(_updatedAt desc)[0...30] {
       _id,
       _type,
       title,
+      name,
+      workspaceId,
       taskId,
       projectId,
       _updatedAt,
@@ -677,3 +679,294 @@ export function extractVisualStateFromEditor(editor: Editor): {
 
   return { tasks, groups };
 }
+
+export interface SanityWorkspaceDocument {
+  _id: string;
+  _type: 'workspace';
+  workspaceId: string;
+  name: string;
+  githubRepo: {
+    owner: string;
+    repo: string;
+    fullName: string;
+    url: string;
+    defaultBranch: string;
+    isPrivate?: boolean;
+    description?: string;
+  };
+  activeBranchName: string;
+  branches: Array<{
+    name: string;
+    isProtected?: boolean;
+    activeDocumentId?: string;
+    lastCommit?: {
+      hash: string;
+      message: string;
+      author: string;
+      timestamp: string;
+    };
+    taskDocuments: Array<{
+      id: string;
+      name: string;
+      folder: string;
+      path: string;
+      content: string;
+      lastSavedContent?: string;
+      updatedAt?: string;
+    }>;
+  }>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Saves a single workspace document to Sanity with local fallback cache.
+ */
+export async function saveWorkspaceToSanity(
+  workspace: any,
+  configOverride?: Partial<SanityConfig>
+): Promise<{ ok: boolean; message: string; document?: any }> {
+  const config = { ...getSanityConfig(), ...configOverride };
+  const docId = `workspace-${workspace.id}`;
+  const now = new Date().toISOString();
+
+  const docData: SanityWorkspaceDocument = {
+    _id: docId,
+    _type: 'workspace',
+    workspaceId: workspace.id,
+    name: workspace.name,
+    githubRepo: {
+      owner: workspace.githubRepo?.owner || 'owner',
+      repo: workspace.githubRepo?.repo || 'repo',
+      fullName: workspace.githubRepo?.fullName || `${workspace.githubRepo?.owner || 'owner'}/${workspace.githubRepo?.repo || 'repo'}`,
+      url: workspace.githubRepo?.url || `https://github.com/${workspace.githubRepo?.fullName || 'repo'}`,
+      defaultBranch: workspace.githubRepo?.defaultBranch || 'main',
+      isPrivate: Boolean(workspace.githubRepo?.isPrivate),
+      description: workspace.githubRepo?.description || '',
+    },
+    activeBranchName: workspace.activeBranchName || 'main',
+    branches: (workspace.branches || []).map((b: any) => ({
+      name: b.name,
+      isProtected: Boolean(b.isProtected),
+      activeDocumentId: b.activeDocumentId,
+      lastCommit: b.lastCommit
+        ? {
+            hash: b.lastCommit.hash,
+            message: b.lastCommit.message,
+            author: b.lastCommit.author,
+            timestamp: b.lastCommit.timestamp,
+          }
+        : undefined,
+      taskDocuments: (b.taskDocuments || []).map((doc: any) => ({
+        id: doc.id,
+        name: doc.name,
+        folder: doc.folder || '',
+        path: doc.path,
+        content: doc.content || '',
+        lastSavedContent: doc.lastSavedContent || doc.content || '',
+        updatedAt: doc.updatedAt || now,
+      })),
+    })),
+    createdAt: workspace.createdAt || now,
+    updatedAt: now,
+  };
+
+  // Cache locally
+  try {
+    localStorage.setItem(`antask_sanity_workspace_${workspace.id}`, JSON.stringify(docData));
+  } catch (e) {
+    // ignore
+  }
+
+  if (!config.projectId || !config.dataset || !config.token) {
+    return {
+      ok: true,
+      message: 'Workspace guardado en caché local (agrega API Token para persistir en Sanity)',
+      document: docData,
+    };
+  }
+
+  try {
+    const client = createClient({
+      projectId: config.projectId,
+      dataset: config.dataset,
+      apiVersion: config.apiVersion || '2024-03-01',
+      token: config.token,
+      useCdn: false,
+    });
+
+    const result = await client.createOrReplace(docData as any);
+    return {
+      ok: true,
+      message: `Workspace "${workspace.name}" sincronizado con éxito en Sanity (${config.dataset})`,
+      document: result,
+    };
+  } catch (err: any) {
+    console.warn('Error saving workspace to Sanity:', err);
+    return {
+      ok: false,
+      message: err?.message || 'Error al persistir workspace en Sanity',
+    };
+  }
+}
+
+/**
+ * Loads all workspaces from Sanity dataset.
+ */
+export async function loadWorkspacesFromSanity(
+  configOverride?: Partial<SanityConfig>
+): Promise<any[]> {
+  const config = { ...getSanityConfig(), ...configOverride };
+  if (!config.projectId || !config.dataset) {
+    return [];
+  }
+
+  try {
+    const client = createClient({
+      projectId: config.projectId,
+      dataset: config.dataset,
+      apiVersion: config.apiVersion || '2024-03-01',
+      token: config.token || undefined,
+      useCdn: false,
+    });
+
+    const query = `*[_type == "workspace"] | order(updatedAt desc)`;
+    const results = await client.fetch<SanityWorkspaceDocument[]>(query);
+    if (!Array.isArray(results)) return [];
+
+    return results.map((doc) => ({
+      id: doc.workspaceId || doc._id.replace(/^workspace-/, ''),
+      name: doc.name,
+      githubRepo: {
+        owner: doc.githubRepo?.owner || 'owner',
+        repo: doc.githubRepo?.repo || 'repo',
+        fullName: doc.githubRepo?.fullName || `${doc.githubRepo?.owner || 'owner'}/${doc.githubRepo?.repo || 'repo'}`,
+        url: doc.githubRepo?.url || `https://github.com/${doc.githubRepo?.fullName || 'repo'}`,
+        defaultBranch: doc.githubRepo?.defaultBranch || 'main',
+        isPrivate: Boolean(doc.githubRepo?.isPrivate),
+        description: doc.githubRepo?.description || '',
+      },
+      activeBranchName: doc.activeBranchName || 'main',
+      branches: (doc.branches || []).map((b) => ({
+        name: b.name,
+        isProtected: Boolean(b.isProtected),
+        activeDocumentId: b.activeDocumentId || b.taskDocuments?.[0]?.id || 'doc_root',
+        lastCommit: b.lastCommit,
+        taskDocuments: (b.taskDocuments || []).map((d) => ({
+          id: d.id,
+          name: d.name,
+          folder: d.folder || '',
+          path: d.path,
+          content: d.content || '',
+          lastSavedContent: d.lastSavedContent || d.content || '',
+          updatedAt: d.updatedAt || new Date().toISOString(),
+        })),
+      })),
+      createdAt: doc.createdAt || new Date().toISOString(),
+      updatedAt: doc.updatedAt || new Date().toISOString(),
+    }));
+  } catch (err) {
+    console.warn('Error loading workspaces from Sanity:', err);
+    return [];
+  }
+}
+
+/**
+ * Synchronizes a list of workspaces in batch to Sanity.
+ */
+export async function syncAllWorkspacesToSanity(
+  workspaces: any[],
+  configOverride?: Partial<SanityConfig>
+): Promise<{ ok: boolean; syncedCount: number; message: string }> {
+  const config = { ...getSanityConfig(), ...configOverride };
+  if (!config.projectId || !config.dataset) {
+    return { ok: false, syncedCount: 0, message: 'Falta configuración de Sanity (Project ID y Dataset)' };
+  }
+
+  if (!config.token) {
+    return {
+      ok: false,
+      syncedCount: 0,
+      message: 'Se requiere API Token con rol Editor para sincronizar workspaces en Sanity',
+    };
+  }
+
+  const client = createClient({
+    projectId: config.projectId,
+    dataset: config.dataset,
+    apiVersion: config.apiVersion || '2024-03-01',
+    token: config.token,
+    useCdn: false,
+  });
+
+  try {
+    const now = new Date().toISOString();
+    let tx = client.transaction();
+
+    for (const ws of workspaces) {
+      const docId = `workspace-${ws.id}`;
+      const docData: SanityWorkspaceDocument = {
+        _id: docId,
+        _type: 'workspace',
+        workspaceId: ws.id,
+        name: ws.name,
+        githubRepo: {
+          owner: ws.githubRepo?.owner || 'owner',
+          repo: ws.githubRepo?.repo || 'repo',
+          fullName: ws.githubRepo?.fullName || `${ws.githubRepo?.owner || 'owner'}/${ws.githubRepo?.repo || 'repo'}`,
+          url: ws.githubRepo?.url || `https://github.com/${ws.githubRepo?.fullName || 'repo'}`,
+          defaultBranch: ws.githubRepo?.defaultBranch || 'main',
+          isPrivate: Boolean(ws.githubRepo?.isPrivate),
+          description: ws.githubRepo?.description || '',
+        },
+        activeBranchName: ws.activeBranchName || 'main',
+        branches: (ws.branches || []).map((b: any) => ({
+          name: b.name,
+          isProtected: Boolean(b.isProtected),
+          activeDocumentId: b.activeDocumentId,
+          lastCommit: b.lastCommit,
+          taskDocuments: (b.taskDocuments || []).map((d: any) => ({
+            id: d.id,
+            name: d.name,
+            folder: d.folder || '',
+            path: d.path,
+            content: d.content || '',
+            lastSavedContent: d.lastSavedContent || d.content || '',
+            updatedAt: d.updatedAt || now,
+          })),
+        })),
+        createdAt: ws.createdAt || now,
+        updatedAt: now,
+      };
+
+      tx = tx.createOrReplace(docData as any);
+    }
+
+    await tx.commit();
+
+    return {
+      ok: true,
+      syncedCount: workspaces.length,
+      message: `${workspaces.length} workspace(s) sincronizado(s) con éxito en Sanity (${config.dataset})`,
+    };
+  } catch (err: any) {
+    console.warn('Error syncing workspaces to Sanity:', err);
+    return {
+      ok: false,
+      syncedCount: 0,
+      message: err?.message || 'Error al sincronizar workspaces con Sanity',
+    };
+  }
+}
+
+/**
+ * Deletes a workspace document from Sanity.
+ */
+export async function deleteWorkspaceFromSanity(
+  workspaceId: string,
+  configOverride?: Partial<SanityConfig>
+): Promise<{ ok: boolean; message: string }> {
+  const docId = `workspace-${workspaceId}`;
+  return deleteDocumentFromSanity(docId, configOverride);
+}
+

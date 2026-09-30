@@ -11,6 +11,10 @@ import {
   loadCanvasVisualState,
   saveCanvasVisualState,
   syncAllTasksToSanity,
+  saveWorkspaceToSanity,
+  loadWorkspacesFromSanity,
+  syncAllWorkspacesToSanity,
+  deleteWorkspaceFromSanity,
   SanityConfig,
 } from './services/sanityService';
 import {
@@ -558,6 +562,16 @@ export default function App() {
           triggerDebouncedVisualSave(editor);
         }
 
+        // Persist to Sanity if configured
+        const config = getSanityConfig();
+        if (config.projectId && config.dataset && config.token) {
+          saveWorkspaceToSanity(newWs, config).then((res) => {
+            if (res.ok) {
+              console.log('Workspace persisted to Sanity:', res.message);
+            }
+          });
+        }
+
         return nextStore;
       });
     },
@@ -614,10 +628,194 @@ export default function App() {
           triggerDebouncedVisualSave(editor);
         }
 
+        // Remove from Sanity if configured
+        const config = getSanityConfig();
+        if (config.projectId && config.dataset && config.token) {
+          deleteWorkspaceFromSanity(wsId, config).catch((e) => {
+            console.warn('Error deleting workspace from Sanity:', e);
+          });
+        }
+
         return nextStore;
       });
     },
     [editor, pushToast, triggerDebouncedVisualSave]
+  );
+
+  // Activate a workspace document imported directly from Sanity Studio or Sanity Cloud
+  const handleActivateWorkspaceFromSanity = useCallback(
+    (sanityWs: any) => {
+      const wsId =
+        sanityWs.workspaceId || sanityWs._id?.replace(/^workspace-/, '') || 'ws_' + Date.now();
+
+      const normalizedBranches: BranchConfig[] = (sanityWs.branches || []).map((b: any) => ({
+        name: b.name || 'main',
+        isProtected: Boolean(b.isProtected),
+        activeDocumentId: b.activeDocumentId || b.taskDocuments?.[0]?.id || `doc_${Date.now()}`,
+        lastCommit: b.lastCommit,
+        taskDocuments: (b.taskDocuments || []).map((d: any) => ({
+          id: d.id || `doc_${Date.now()}`,
+          name: d.name || 'TASKS.md',
+          folder: d.folder || '',
+          path: d.path || (d.folder ? `${d.folder}/${d.name || 'TASKS.md'}` : d.name || 'TASKS.md'),
+          content:
+            d.content ||
+            `# ${sanityWs.name || 'Workspace'}\n\n## Tareas Principales\n- [ ] Tarea inicial en Sanity\n  id: task_sanity_init\n  priority: P0\n`,
+          lastSavedContent: d.lastSavedContent || d.content || '',
+          updatedAt: d.updatedAt || new Date().toISOString(),
+        })),
+      }));
+
+      const activeBranchName = sanityWs.activeBranchName || normalizedBranches[0]?.name || 'main';
+
+      const targetWorkspace: Workspace = {
+        id: wsId,
+        name: sanityWs.name || 'Workspace Sanity',
+        githubRepo: {
+          owner: sanityWs.githubRepo?.owner || 'usuario',
+          repo: sanityWs.githubRepo?.repo || 'proyecto',
+          fullName:
+            sanityWs.githubRepo?.fullName ||
+            `${sanityWs.githubRepo?.owner || 'usuario'}/${sanityWs.githubRepo?.repo || 'proyecto'}`,
+          url: sanityWs.githubRepo?.url || `https://github.com/${sanityWs.githubRepo?.fullName || 'proyecto'}`,
+          defaultBranch: sanityWs.githubRepo?.defaultBranch || 'main',
+          isPrivate: Boolean(sanityWs.githubRepo?.isPrivate),
+          description: sanityWs.githubRepo?.description || '',
+        },
+        activeBranchName,
+        createdAt: sanityWs.createdAt || new Date().toISOString(),
+        updatedAt: sanityWs.updatedAt || new Date().toISOString(),
+        branches:
+          normalizedBranches.length > 0
+            ? normalizedBranches
+            : [
+                {
+                  name: 'main',
+                  isProtected: true,
+                  activeDocumentId: `doc_${Date.now()}`,
+                  taskDocuments: [
+                    {
+                      id: `doc_${Date.now()}`,
+                      name: 'TASKS.md',
+                      folder: '',
+                      path: 'TASKS.md',
+                      content: `# ${sanityWs.name || 'Workspace'}\n\n## Tareas Principales\n- [ ] Tarea inicial en Sanity\n  id: task_sanity_init\n  priority: P0\n`,
+                      lastSavedContent: `# ${sanityWs.name || 'Workspace'}\n\n## Tareas Principales\n- [ ] Tarea inicial en Sanity\n  id: task_sanity_init\n  priority: P0\n`,
+                      updatedAt: new Date().toISOString(),
+                    },
+                  ],
+                },
+              ],
+      };
+
+      setWorkspaceStore((prev) => {
+        const otherWorkspaces = prev.workspaces.filter((w) => w.id !== wsId);
+        const nextStore = {
+          ...prev,
+          workspaces: [...otherWorkspaces, targetWorkspace],
+          activeWorkspaceId: targetWorkspace.id,
+        };
+        saveWorkspaceStore(nextStore);
+
+        const currentBr = getActiveBranch(targetWorkspace);
+        const currentDoc = getActiveDocument(currentBr);
+
+        setCurrentFileName(currentDoc.path);
+        setMarkdownInput(currentDoc.content);
+        setLastSavedMarkdown(currentDoc.lastSavedContent);
+
+        if (editor) {
+          loadTasksFromMarkdown(editor, currentDoc.content, currentDoc.visualState);
+          triggerDebouncedVisualSave(editor);
+        }
+
+        return nextStore;
+      });
+
+      setActiveView('canvas');
+      pushToast(`Workspace "${targetWorkspace.name}" cargado desde Sanity`, 'success');
+    },
+    [editor, pushToast, triggerDebouncedVisualSave]
+  );
+
+  // Sincronizar todos los workspaces locales con el dataset de Sanity
+  const handleSyncAllWorkspacesToSanity = useCallback(async () => {
+    const config = getSanityConfig();
+    if (!config.projectId || !config.dataset || !config.token) {
+      pushToast('Configura el API Token de Sanity para sincronizar workspaces', 'warning');
+      setIsSanityModalOpen(true);
+      return;
+    }
+
+    const res = await syncAllWorkspacesToSanity(workspaceStore.workspaces, config);
+    if (res.ok) {
+      pushToast(res.message, 'success');
+    } else {
+      pushToast(res.message, 'error');
+    }
+  }, [workspaceStore.workspaces, pushToast]);
+
+  // Importar y combinar workspaces almacenados en el dataset de Sanity
+  const handleImportWorkspacesFromSanity = useCallback(async () => {
+    const config = getSanityConfig();
+    if (!config.projectId || !config.dataset) {
+      pushToast('Configura Sanity (Project ID y Dataset) para importar workspaces', 'warning');
+      setIsSanityModalOpen(true);
+      return;
+    }
+
+    try {
+      const remoteWorkspaces = await loadWorkspacesFromSanity(config);
+      if (remoteWorkspaces.length === 0) {
+        pushToast('No se encontraron documentos _type: "workspace" en Sanity', 'info');
+        return;
+      }
+
+      setWorkspaceStore((prev) => {
+        const existingIds = new Set(prev.workspaces.map((w) => w.id));
+        const merged = [...prev.workspaces];
+
+        for (const rw of remoteWorkspaces) {
+          if (existingIds.has(rw.id)) {
+            const idx = merged.findIndex((w) => w.id === rw.id);
+            if (idx >= 0) merged[idx] = rw;
+          } else {
+            merged.push(rw);
+          }
+        }
+
+        const nextStore = {
+          ...prev,
+          workspaces: merged,
+        };
+        saveWorkspaceStore(nextStore);
+        return nextStore;
+      });
+
+      pushToast(`${remoteWorkspaces.length} workspace(s) importado(s) desde Sanity`, 'success');
+    } catch (err) {
+      pushToast('Error al importar workspaces desde Sanity', 'error');
+    }
+  }, [pushToast]);
+
+  // Persistir un workspace individual hacia Sanity
+  const handleSaveSingleWorkspaceToSanity = useCallback(
+    async (ws: Workspace) => {
+      const config = getSanityConfig();
+      if (!config.projectId || !config.dataset || !config.token) {
+        pushToast('Configura el API Token de Sanity para guardar el workspace', 'warning');
+        setIsSanityModalOpen(true);
+        return;
+      }
+
+      const res = await saveWorkspaceToSanity(ws, config);
+      if (res.ok) {
+        pushToast(res.message, 'success');
+      } else {
+        pushToast(res.message, 'error');
+      }
+    },
+    [pushToast]
   );
 
   // Branch actions
@@ -3229,6 +3427,7 @@ export default function App() {
                 <SanityStudio
                   onOpenSanityConfig={() => setIsSanityModalOpen(true)}
                   onImportTaskToMarkdown={handleImportTaskFromSanity}
+                  onActivateWorkspace={handleActivateWorkspaceFromSanity}
                   onShowToast={pushToast}
                 />
               )}
@@ -4035,6 +4234,10 @@ export default function App() {
         onCreateWorkspace={handleCreateWorkspace}
         onDeleteWorkspace={handleDeleteWorkspace}
         onShowToast={pushToast}
+        onSyncWorkspacesToSanity={handleSyncAllWorkspacesToSanity}
+        onImportWorkspacesFromSanity={handleImportWorkspacesFromSanity}
+        onSaveSingleWorkspaceToSanity={handleSaveSingleWorkspaceToSanity}
+        isSanityConfigured={Boolean(getSanityConfig().projectId && getSanityConfig().dataset)}
       />
 
       {/* Modal: Crear nuevo archivo Task MD */}

@@ -14,6 +14,10 @@ interface WorkspaceManagerModalProps {
   onCreateWorkspace: (workspace: Workspace) => void;
   onDeleteWorkspace: (id: string) => void;
   onShowToast: (message: string, type?: 'info' | 'success' | 'warning' | 'error') => void;
+  onSyncWorkspacesToSanity?: () => Promise<void>;
+  onImportWorkspacesFromSanity?: () => Promise<void>;
+  onSaveSingleWorkspaceToSanity?: (ws: Workspace) => Promise<void>;
+  isSanityConfigured?: boolean;
 }
 
 export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
@@ -25,8 +29,15 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
   onCreateWorkspace,
   onDeleteWorkspace,
   onShowToast,
+  onSyncWorkspacesToSanity,
+  onImportWorkspacesFromSanity,
+  onSaveSingleWorkspaceToSanity,
+  isSanityConfigured = false,
 }) => {
   const [activeTab, setActiveTab] = useState<'list' | 'create'>('list');
+  const [isSyncingSanity, setIsSyncingSanity] = useState<boolean>(false);
+  const [isImportingSanity, setIsImportingSanity] = useState<boolean>(false);
+  const [savingWsId, setSavingWsId] = useState<string | null>(null);
 
   // Form state for creating new workspace
   const [name, setName] = useState('');
@@ -160,6 +171,78 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
         <div className="p-4 overflow-y-auto max-h-[60vh]">
           {activeTab === 'list' ? (
             <div className="flex flex-col gap-3">
+              {/* Sanity Cloud Persistence Bar */}
+              <div className="p-3 rounded-lg bg-[var(--surface)] border border-[var(--outline)] flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="w-6 h-6 rounded bg-rose-600 flex items-center justify-center text-white font-bold text-[10px] shadow-xs shrink-0">
+                    S
+                  </div>
+                  <div className="flex flex-col min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-semibold text-xs text-[var(--on-surface)]">Estructura en Sanity</span>
+                      <span
+                        className={`px-1.5 py-0.2 rounded text-[9px] font-mono border ${
+                          isSanityConfigured
+                            ? 'bg-emerald-950/60 text-emerald-300 border-emerald-800'
+                            : 'bg-slate-800 text-slate-400 border-slate-700'
+                        }`}
+                      >
+                        {isSanityConfigured ? 'Conectado' : 'Sin configurar'}
+                      </span>
+                    </div>
+                    <span className="text-[10px] text-[var(--on-surface-variant)] truncate">
+                      Sincroniza y almacena tus workspaces como esquemas nativos en Sanity
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {onSyncWorkspacesToSanity && (
+                    <button
+                      type="button"
+                      disabled={isSyncingSanity || !isSanityConfigured}
+                      onClick={async () => {
+                        setIsSyncingSanity(true);
+                        try {
+                          await onSyncWorkspacesToSanity();
+                        } finally {
+                          setIsSyncingSanity(false);
+                        }
+                      }}
+                      className="btn-m3-secondary px-2.5 py-1 text-xs flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                      title="Guardar todos los workspaces en Sanity Cloud"
+                    >
+                      <span className={`material-symbols-outlined text-[14px] ${isSyncingSanity ? 'animate-spin' : ''}`}>
+                        {isSyncingSanity ? 'refresh' : 'cloud_upload'}
+                      </span>
+                      <span>{isSyncingSanity ? 'Sincronizando...' : 'Guardar en Sanity'}</span>
+                    </button>
+                  )}
+
+                  {onImportWorkspacesFromSanity && (
+                    <button
+                      type="button"
+                      disabled={isImportingSanity || !isSanityConfigured}
+                      onClick={async () => {
+                        setIsImportingSanity(true);
+                        try {
+                          await onImportWorkspacesFromSanity();
+                        } finally {
+                          setIsImportingSanity(false);
+                        }
+                      }}
+                      className="btn-m3-secondary px-2.5 py-1 text-xs flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                      title="Cargar workspaces remotos desde Sanity Cloud"
+                    >
+                      <span className={`material-symbols-outlined text-[14px] ${isImportingSanity ? 'animate-spin' : ''}`}>
+                        {isImportingSanity ? 'refresh' : 'cloud_download'}
+                      </span>
+                      <span>{isImportingSanity ? 'Importando...' : 'Cargar de Sanity'}</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+
               {workspaces.map((ws) => {
                 const isActive = ws.id === activeWorkspaceId;
                 const totalDocs = ws.branches.reduce(
@@ -226,6 +309,27 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
 
                       {/* Actions */}
                       <div className="flex items-center gap-1.5 shrink-0">
+                        {onSaveSingleWorkspaceToSanity && isSanityConfigured && (
+                          <button
+                            type="button"
+                            disabled={savingWsId === ws.id}
+                            onClick={async () => {
+                              setSavingWsId(ws.id);
+                              try {
+                                await onSaveSingleWorkspaceToSanity(ws);
+                              } finally {
+                                setSavingWsId(null);
+                              }
+                            }}
+                            className="btn-m3-icon w-7 h-7 text-[var(--on-surface-variant)] hover:text-emerald-400 cursor-pointer"
+                            title="Guardar este workspace en Sanity"
+                          >
+                            <span className={`material-symbols-outlined text-[15px] ${savingWsId === ws.id ? 'animate-spin' : ''}`}>
+                              {savingWsId === ws.id ? 'refresh' : 'cloud_upload'}
+                            </span>
+                          </button>
+                        )}
+
                         {!isActive && (
                           <button
                             type="button"

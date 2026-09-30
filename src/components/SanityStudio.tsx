@@ -12,15 +12,17 @@ import {
 export interface SanityStudioProps {
   onOpenSanityConfig: () => void;
   onImportTaskToMarkdown?: (task: any) => void;
+  onActivateWorkspace?: (workspace: any) => void;
   onShowToast: (msg: string, type?: 'success' | 'info' | 'warning' | 'error') => void;
 }
 
-type DocumentTypeFilter = 'all' | 'task' | 'canvasVisualState';
+type DocumentTypeFilter = 'all' | 'workspace' | 'task' | 'canvasVisualState';
 type InspectorViewMode = 'form' | 'json' | 'preview';
 
 export const SanityStudio: React.FC<SanityStudioProps> = ({
   onOpenSanityConfig,
   onImportTaskToMarkdown,
+  onActivateWorkspace,
   onShowToast,
 }) => {
   const [config, setConfig] = useState<SanityConfig>(() => getSanityConfig());
@@ -46,6 +48,18 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
 
   // Mobile navigation pane state: 'structure' | 'list' | 'inspector'
   const [mobilePane, setMobilePane] = useState<'structure' | 'list' | 'inspector'>('list');
+
+  // Inline non-blocking modals (No window.alert/prompt/confirm)
+  const [isCreateWsOpen, setIsCreateWsOpen] = useState<boolean>(false);
+  const [newWsName, setNewWsName] = useState<string>('');
+  const [newWsRepo, setNewWsRepo] = useState<string>('');
+  const [newWsBranch, setNewWsBranch] = useState<string>('main');
+
+  const [isCreateTaskOpen, setIsCreateTaskOpen] = useState<boolean>(false);
+  const [newTaskTitleInput, setNewTaskTitleInput] = useState<string>('');
+  const [newTaskPriorityInput, setNewTaskPriorityInput] = useState<'P0' | 'P1' | 'P2' | 'P3'>('P1');
+
+  const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState<boolean>(false);
 
   const isConfigured = Boolean(config.projectId && config.dataset);
 
@@ -118,10 +132,13 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
         const matchTitle = (doc.title || '').toLowerCase().includes(q);
+        const matchName = (doc.name || '').toLowerCase().includes(q);
         const matchTaskId = (doc.taskId || '').toLowerCase().includes(q);
+        const matchWsId = (doc.workspaceId || '').toLowerCase().includes(q);
+        const matchRepo = (doc.githubRepo?.fullName || '').toLowerCase().includes(q);
         const matchId = (doc._id || '').toLowerCase().includes(q);
         const matchProject = (doc.projectId || '').toLowerCase().includes(q);
-        if (!matchTitle && !matchTaskId && !matchId && !matchProject) return false;
+        if (!matchTitle && !matchName && !matchTaskId && !matchWsId && !matchRepo && !matchId && !matchProject) return false;
       }
 
       if (statusFilter !== 'all' && doc._type === 'task') {
@@ -134,6 +151,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
   }, [documents, activeDocType, searchQuery, statusFilter]);
 
   const taskCount = documents.filter((d) => d._type === 'task').length;
+  const workspaceCount = documents.filter((d) => d._type === 'workspace').length;
   const canvasCount = documents.filter((d) => d._type === 'canvasVisualState').length;
 
   const handleFormFieldChange = (field: string, value: any) => {
@@ -165,12 +183,9 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
     }
   };
 
-  const handleDeleteDocument = async () => {
+  const handleConfirmDelete = async () => {
     if (!selectedDocId) return;
-    if (!window.confirm(`¿Estás seguro de eliminar el documento "${formState.title || selectedDocId}" de Sanity?`)) {
-      return;
-    }
-
+    setIsConfirmDeleteOpen(false);
     setIsDeleting(true);
     try {
       const res = await deleteDocumentFromSanity(selectedDocId, config);
@@ -191,21 +206,113 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
     }
   };
 
-  const handleCreateNewTestTask = async () => {
-    const customTitle = prompt('Título para la nueva tarea en Sanity:', 'Nueva Tarea Sanity Studio');
-    if (!customTitle) return;
+  const handleOpenCreateWorkspaceModal = () => {
+    setNewWsName('Nuevo Proyecto Web');
+    setNewWsRepo('usuario/nuevo-proyecto');
+    setNewWsBranch('main');
+    setIsCreateWsOpen(true);
+  };
 
+  const handleExecuteCreateWorkspace = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newWsName.trim() || !newWsRepo.trim()) {
+      onShowToast('Ingresa un nombre y repositorio para el workspace', 'warning');
+      return;
+    }
+
+    setIsCreateWsOpen(false);
+    try {
+      const now = new Date().toISOString();
+      const wsId = 'ws_' + Date.now();
+      const cleanRepo = newWsRepo.trim().replace(/^https?:\/\/github\.com\//, '').replace(/\/$/, '');
+      const parts = cleanRepo.split('/');
+      const owner = parts[0] || 'usuario';
+      const repo = parts[1] || parts[0] || 'proyecto';
+      const fullName = `${owner}/${repo}`;
+      const branchName = newWsBranch.trim() || 'main';
+
+      const initialMd = `# ${newWsName.trim()} - TASKS.md\n\n## Tareas Principales\n- [ ] Configurar entorno y dependencias del proyecto\n  id: setup_env\n  priority: P0\n  status: in_progress\n- [ ] Conectar persistencia estructurada con Sanity CMS\n  id: sanity_struct\n  priority: P1\n  status: todo\n`;
+
+      const newWs = {
+        _id: `workspace-${wsId}`,
+        _type: 'workspace',
+        workspaceId: wsId,
+        name: newWsName.trim(),
+        githubRepo: {
+          owner,
+          repo,
+          fullName,
+          url: `https://github.com/${fullName}`,
+          defaultBranch: branchName,
+          isPrivate: false,
+          description: `Workspace para ${fullName} administrado desde Sanity Studio`,
+        },
+        activeBranchName: branchName,
+        branches: [
+          {
+            name: branchName,
+            isProtected: true,
+            activeDocumentId: `doc_${Date.now()}`,
+            lastCommit: {
+              hash: Math.random().toString(16).substring(2, 9),
+              message: `chore: inicializar estructura de workspace ${newWsName.trim()} en Sanity`,
+              author: 'Sanity Studio',
+              timestamp: now,
+            },
+            taskDocuments: [
+              {
+                id: `doc_${Date.now()}`,
+                name: 'TASKS.md',
+                folder: '',
+                path: 'TASKS.md',
+                content: initialMd,
+                lastSavedContent: initialMd,
+                updatedAt: now,
+              },
+            ],
+          },
+        ],
+        createdAt: now,
+        updatedAt: now,
+      };
+
+      const res = await saveSanityDocument(newWs, config);
+      if (res.ok) {
+        onShowToast(`Workspace "${newWsName.trim()}" creado y guardado en Sanity`, 'success');
+        await loadDocuments();
+        setSelectedDocId(newWs._id);
+        setActiveDocType('workspace');
+        setMobilePane('inspector');
+      } else {
+        onShowToast(res.message, 'error');
+      }
+    } catch (err: any) {
+      onShowToast('Error al crear workspace en Sanity', 'error');
+    }
+  };
+
+  const handleOpenCreateTaskModal = () => {
+    setNewTaskTitleInput('Nueva tarea de Sanity');
+    setNewTaskPriorityInput('P1');
+    setIsCreateTaskOpen(true);
+  };
+
+  const handleExecuteCreateTask = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTaskTitleInput.trim()) return;
+
+    setIsCreateTaskOpen(false);
     try {
       const res = await writeTestingTaskToSanity(config, {
-        title: customTitle.trim(),
+        title: newTaskTitleInput.trim(),
         taskId: 'task-' + Date.now().toString(36),
-        priority: 'P1',
+        priority: newTaskPriorityInput,
         status: 'todo',
         groupTitle: 'General',
       });
 
       if (res.ok && res.document) {
-        onShowToast('Nuevo documento _type: "task" creado en Sanity', 'success');
+        onShowToast('Documento _type: "task" creado en Sanity', 'success');
         await loadDocuments();
         setSelectedDocId(res.document._id);
         setActiveDocType('task');
@@ -330,6 +437,28 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
             Tipos de Contenido
           </span>
 
+          {/* Workspace Document Type */}
+          <button
+            type="button"
+            onClick={() => {
+              setActiveDocType('workspace');
+              setMobilePane('list');
+            }}
+            className={`w-full px-2.5 py-2 rounded text-xs font-medium flex items-center justify-between text-left transition-colors cursor-pointer ${
+              activeDocType === 'workspace'
+                ? 'bg-[var(--surface-container-high)] text-[var(--on-surface)] font-semibold border-l-2 border-l-[var(--primary)]'
+                : 'text-[var(--on-surface-variant)] hover:bg-[var(--surface-container-high)] hover:text-[var(--on-surface)]'
+            }`}
+          >
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="material-symbols-outlined text-[17px] text-emerald-400">workspaces</span>
+              <span className="truncate">Workspaces</span>
+            </div>
+            <span className="px-1.5 py-0.2 rounded text-[10px] font-mono bg-[var(--surface-container)] text-[var(--on-surface)] border border-[var(--outline)]">
+              {workspaceCount}
+            </span>
+          </button>
+
           {/* Task Document Type */}
           <button
             type="button"
@@ -432,6 +561,8 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
               <h3 className="font-semibold text-xs text-[var(--on-surface)] truncate">
                 {activeDocType === 'task'
                   ? 'Documentos de Tarea'
+                  : activeDocType === 'workspace'
+                  ? 'Workspaces de Proyecto'
                   : activeDocType === 'canvasVisualState'
                   ? 'Estados de Lienzo'
                   : 'Todos los Documentos'}
@@ -442,15 +573,27 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={handleCreateNewTestTask}
-            className="btn-m3-primary px-2.5 py-1 text-[11px] flex items-center gap-1 cursor-pointer shrink-0 shadow-xs"
-            title="Crear un nuevo documento de tipo task en Sanity"
-          >
-            <span className="material-symbols-outlined text-[14px]">add</span>
-            <span>+ Crear Task</span>
-          </button>
+          {activeDocType === 'workspace' ? (
+            <button
+              type="button"
+              onClick={handleOpenCreateWorkspaceModal}
+              className="btn-m3-primary px-2.5 py-1 text-[11px] flex items-center gap-1 cursor-pointer shrink-0 shadow-xs"
+              title="Crear un nuevo workspace estructurado en Sanity"
+            >
+              <span className="material-symbols-outlined text-[14px]">add</span>
+              <span>+ Crear Workspace</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleOpenCreateTaskModal}
+              className="btn-m3-primary px-2.5 py-1 text-[11px] flex items-center gap-1 cursor-pointer shrink-0 shadow-xs"
+              title="Crear un nuevo documento de tipo task en Sanity"
+            >
+              <span className="material-symbols-outlined text-[14px]">add</span>
+              <span>+ Crear Task</span>
+            </button>
+          )}
         </div>
 
         {/* Search & Quick Filters */}
@@ -463,7 +606,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Buscar por título, ID o tag..."
+              placeholder="Buscar por título, ID, repo o tag..."
               className="w-full bg-[var(--surface-container)] border border-[var(--outline)] rounded pl-8 pr-7 py-1 text-xs text-[var(--on-surface)] placeholder:text-[var(--on-surface-variant)] focus:outline-none focus:border-[var(--primary)]"
             />
             {searchQuery && (
@@ -512,18 +655,37 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
             <div className="p-6 text-center text-[var(--on-surface-variant)] flex flex-col items-center gap-2">
               <span className="material-symbols-outlined text-[24px] text-slate-500">inventory_2</span>
               <span>No hay documentos que coincidan con el filtro.</span>
-              <button
-                type="button"
-                onClick={handleCreateNewTestTask}
-                className="btn-m3-secondary px-3 py-1 text-xs text-sky-400 cursor-pointer mt-1"
-              >
-                Crear primer Task en Sanity
-              </button>
+              {activeDocType === 'workspace' ? (
+                <button
+                  type="button"
+                  onClick={handleOpenCreateWorkspaceModal}
+                  className="btn-m3-secondary px-3 py-1 text-xs text-emerald-400 cursor-pointer mt-1"
+                >
+                  Crear primer Workspace en Sanity
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleOpenCreateTaskModal}
+                  className="btn-m3-secondary px-3 py-1 text-xs text-sky-400 cursor-pointer mt-1"
+                >
+                  Crear primer Task en Sanity
+                </button>
+              )}
             </div>
           ) : (
             filteredDocuments.map((doc) => {
               const isSelected = selectedDocId === doc._id;
               const isTask = doc._type === 'task';
+              const isWorkspace = doc._type === 'workspace';
+              const isCanvas = doc._type === 'canvasVisualState';
+
+              const docTitle = isWorkspace
+                ? doc.name || doc.title || doc._id
+                : isTask
+                ? doc.title || doc._id
+                : doc.projectId || doc.title || doc._id;
+
               return (
                 <div
                   key={doc._id}
@@ -531,7 +693,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
                     setSelectedDocId(doc._id);
                     setMobilePane('inspector');
                   }}
-                  className={`p-3 flex flex-col gap-1 transition-colors cursor-pointer border-l-2 ${
+                  className={`p-3 flex flex-col gap-1.5 transition-colors cursor-pointer border-l-2 ${
                     isSelected
                       ? 'bg-[var(--surface-container-high)] border-l-[var(--primary)]'
                       : 'border-l-transparent hover:bg-[var(--surface-container)]'
@@ -541,13 +703,17 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
                     <div className="flex items-center gap-1.5 min-w-0">
                       <span
                         className={`material-symbols-outlined text-[16px] shrink-0 ${
-                          isTask ? 'text-sky-400' : 'text-purple-400'
+                          isWorkspace
+                            ? 'text-emerald-400'
+                            : isTask
+                            ? 'text-sky-400'
+                            : 'text-purple-400'
                         }`}
                       >
-                        {isTask ? 'check_box' : 'grid_view'}
+                        {isWorkspace ? 'workspaces' : isTask ? 'check_box' : 'grid_view'}
                       </span>
                       <span className="font-semibold text-xs text-[var(--on-surface)] truncate">
-                        {doc.title || doc.projectId || doc._id}
+                        {docTitle}
                       </span>
                     </div>
 
@@ -556,11 +722,37 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
                         {doc.priority}
                       </span>
                     )}
+
+                    {isWorkspace && onActivateWorkspace && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onActivateWorkspace(doc);
+                        }}
+                        className="px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-950/70 border border-emerald-700/80 text-emerald-300 hover:bg-emerald-800 hover:text-white transition-colors cursor-pointer shrink-0"
+                        title="Activar este workspace en el lienzo de la app"
+                      >
+                        Activar
+                      </button>
+                    )}
                   </div>
+
+                  {isWorkspace && doc.githubRepo?.fullName && (
+                    <div className="flex items-center gap-1 text-[11px] font-mono text-[var(--on-surface-variant)] truncate">
+                      <span className="material-symbols-outlined text-[12px] opacity-70">source</span>
+                      <span className="truncate">{doc.githubRepo.fullName}</span>
+                      {doc.branches?.length > 0 && (
+                        <span className="text-[10px] opacity-60">· {doc.branches.length} ramas</span>
+                      )}
+                    </div>
+                  )}
 
                   <div className="flex items-center justify-between text-[10px] text-[var(--on-surface-variant)] font-mono">
                     <span className="truncate max-w-[140px]">
-                      {doc.taskId ? `#${doc.taskId}` : `_id: ${doc._id}`}
+                      {isWorkspace
+                        ? doc.workspaceId ? `ws: ${doc.workspaceId}` : `_id: ${doc._id}`
+                        : doc.taskId ? `#${doc.taskId}` : `_id: ${doc._id}`}
                     </span>
                     <span className="shrink-0">
                       {doc._updatedAt ? new Date(doc._updatedAt).toLocaleDateString() : ''}
@@ -644,7 +836,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
 
                 <button
                   type="button"
-                  onClick={handleDeleteDocument}
+                  onClick={() => setIsConfirmDeleteOpen(true)}
                   disabled={isDeleting}
                   className="btn-m3-secondary px-2.5 py-1 text-xs text-rose-400 border-rose-900/60 hover:bg-rose-950/40 cursor-pointer"
                   title="Eliminar documento de Sanity"
@@ -694,6 +886,254 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
                   <pre className="p-3 rounded bg-black/60 border border-[var(--outline)] font-mono text-[11px] text-emerald-300 overflow-x-auto leading-relaxed select-text whitespace-pre-wrap">
                     {JSON.stringify(formState, null, 2)}
                   </pre>
+                </div>
+              ) : formState._type === 'workspace' ? (
+                /* WORKSPACE STRUCTURE FORM INSPECTOR */
+                <div className="flex flex-col gap-4 max-w-3xl">
+                  {/* Workspace Top Banner & App Activation */}
+                  <div className="p-4 rounded-lg bg-emerald-950/30 border border-emerald-800/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-10 h-10 rounded-lg bg-emerald-900/60 border border-emerald-600/70 flex items-center justify-center text-emerald-400 shrink-0">
+                        <span className="material-symbols-outlined text-[24px]">workspaces</span>
+                      </div>
+                      <div className="flex flex-col min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-sm text-[var(--on-surface)] truncate">
+                            {formState.name || 'Workspace sin nombre'}
+                          </span>
+                          <span className="px-1.5 py-0.2 rounded text-[10px] font-mono bg-emerald-900/40 text-emerald-300 border border-emerald-700/60 shrink-0">
+                            Sanity Workspace
+                          </span>
+                        </div>
+                        <span className="text-xs text-[var(--on-surface-variant)] truncate font-mono">
+                          {formState.githubRepo?.fullName || 'Sin repositorio vinculado'} · {formState.branches?.length || 0} ramas
+                        </span>
+                      </div>
+                    </div>
+
+                    {onActivateWorkspace && (
+                      <button
+                        type="button"
+                        onClick={() => onActivateWorkspace(formState)}
+                        className="btn-m3-primary bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-1.5 text-xs flex items-center gap-1.5 cursor-pointer shadow-sm shrink-0"
+                      >
+                        <span className="material-symbols-outlined text-[16px]">play_circle</span>
+                        <span>Cargar este Workspace en la App</span>
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Section 1: General Info */}
+                  <div className="p-3.5 rounded-lg border border-[var(--outline)] bg-[var(--surface-container)] flex flex-col gap-3">
+                    <div className="flex items-center gap-2 border-b border-[var(--outline)] pb-2">
+                      <span className="material-symbols-outlined text-[16px] text-sky-400">info</span>
+                      <span className="font-semibold text-xs text-[var(--on-surface)]">Información General</span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="flex flex-col gap-1">
+                        <label className="font-semibold text-xs text-[var(--on-surface)]">Nombre del Workspace</label>
+                        <input
+                          type="text"
+                          value={formState.name || ''}
+                          onChange={(e) => handleFormFieldChange('name', e.target.value)}
+                          className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-3 py-1.5 text-xs text-[var(--on-surface)] focus:outline-none"
+                        />
+                      </div>
+
+                      <div className="flex flex-col gap-1">
+                        <label className="font-semibold text-xs text-[var(--on-surface)]">Workspace ID</label>
+                        <input
+                          type="text"
+                          value={formState.workspaceId || ''}
+                          onChange={(e) => handleFormFieldChange('workspaceId', e.target.value)}
+                          className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-3 py-1.5 text-xs font-mono text-[var(--on-surface)] focus:outline-none"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Section 2: GitHub Repository */}
+                  <div className="p-3.5 rounded-lg border border-[var(--outline)] bg-[var(--surface-container)] flex flex-col gap-3">
+                    <div className="flex items-center justify-between border-b border-[var(--outline)] pb-2">
+                      <div className="flex items-center gap-2">
+                        <svg className="w-4 h-4 fill-current text-[var(--on-surface)] shrink-0" viewBox="0 0 24 24">
+                          <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+                        </svg>
+                        <span className="font-semibold text-xs text-[var(--on-surface)]">Repositorio GitHub Vinculado</span>
+                      </div>
+                      {formState.githubRepo?.url && (
+                        <a
+                          href={formState.githubRepo.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[11px] text-[var(--primary)] hover:underline flex items-center gap-1 font-mono"
+                        >
+                          <span>Ver en GitHub</span>
+                          <span className="material-symbols-outlined text-[12px]">open_in_new</span>
+                        </a>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="flex flex-col gap-1">
+                        <label className="font-semibold text-xs text-[var(--on-surface)]">Repositorio (owner/repo)</label>
+                        <input
+                          type="text"
+                          value={formState.githubRepo?.fullName || ''}
+                          onChange={(e) => {
+                            const full = e.target.value;
+                            const [owner, repo] = full.split('/');
+                            handleFormFieldChange('githubRepo', {
+                              ...formState.githubRepo,
+                              fullName: full,
+                              owner: owner || formState.githubRepo?.owner || '',
+                              repo: repo || formState.githubRepo?.repo || '',
+                              url: `https://github.com/${full}`,
+                            });
+                          }}
+                          placeholder="usuario/repositorio"
+                          className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-3 py-1.5 text-xs font-mono text-[var(--on-surface)] focus:outline-none"
+                        />
+                      </div>
+
+                      <div className="flex flex-col gap-1">
+                        <label className="font-semibold text-xs text-[var(--on-surface)]">Rama principal por defecto</label>
+                        <input
+                          type="text"
+                          value={formState.githubRepo?.defaultBranch || 'main'}
+                          onChange={(e) =>
+                            handleFormFieldChange('githubRepo', {
+                              ...formState.githubRepo,
+                              defaultBranch: e.target.value,
+                            })
+                          }
+                          placeholder="main"
+                          className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-3 py-1.5 text-xs font-mono text-[var(--on-surface)] focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-1">
+                      <label className="font-semibold text-xs text-[var(--on-surface)]">Descripción del repositorio</label>
+                      <input
+                        type="text"
+                        value={formState.githubRepo?.description || ''}
+                        onChange={(e) =>
+                          handleFormFieldChange('githubRepo', {
+                            ...formState.githubRepo,
+                            description: e.target.value,
+                          })
+                        }
+                        placeholder="Descripción del proyecto..."
+                        className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-3 py-1.5 text-xs text-[var(--on-surface)] focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Section 3: Branches & Task Documents in Sanity */}
+                  <div className="p-3.5 rounded-lg border border-[var(--outline)] bg-[var(--surface-container)] flex flex-col gap-3">
+                    <div className="flex items-center justify-between border-b border-[var(--outline)] pb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="material-symbols-outlined text-[16px] text-amber-400">fork_right</span>
+                        <span className="font-semibold text-xs text-[var(--on-surface)]">
+                          Estructura de Ramas & Archivos Task MD ({formState.branches?.length || 0})
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-xs">
+                        <span className="text-[var(--on-surface-variant)]">Rama activa:</span>
+                        <select
+                          value={formState.activeBranchName || 'main'}
+                          onChange={(e) => handleFormFieldChange('activeBranchName', e.target.value)}
+                          className="bg-[var(--surface)] border border-[var(--outline)] rounded px-2 py-0.5 text-xs font-mono text-[var(--on-surface)] focus:outline-none cursor-pointer"
+                        >
+                          {(formState.branches || []).map((b: any) => (
+                            <option key={b.name} value={b.name}>
+                              {b.name} {b.isProtected ? '(protegida)' : ''}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-2.5">
+                      {(formState.branches || []).map((branch: any, bIdx: number) => {
+                        const isCurrentActive = branch.name === formState.activeBranchName;
+                        return (
+                          <div
+                            key={branch.name || bIdx}
+                            className={`p-3 rounded border flex flex-col gap-2 transition-colors ${
+                              isCurrentActive
+                                ? 'bg-[var(--surface)] border-[var(--primary)]/60'
+                                : 'bg-[var(--surface)]/60 border-[var(--outline)]'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <span className="material-symbols-outlined text-[16px] text-sky-400">fork_right</span>
+                                <span className="font-mono font-semibold text-xs text-[var(--on-surface)] truncate">
+                                  {branch.name}
+                                </span>
+                                {isCurrentActive && (
+                                  <span className="px-1.5 py-0.2 rounded bg-sky-950 text-sky-300 text-[9px] font-mono border border-sky-800">
+                                    Activa
+                                  </span>
+                                )}
+                                {branch.isProtected && (
+                                  <span className="px-1.5 py-0.2 rounded bg-amber-950 text-amber-300 text-[9px] font-mono border border-amber-800">
+                                    Protegida
+                                  </span>
+                                )}
+                              </div>
+
+                              <span className="text-[10px] font-mono text-[var(--on-surface-variant)]">
+                                {branch.taskDocuments?.length || 0} archivo(s) .md
+                              </span>
+                            </div>
+
+                            {branch.lastCommit && (
+                              <div className="flex items-center gap-1.5 text-[10px] font-mono text-[var(--on-surface-variant)] bg-[var(--surface-container)] p-1.5 rounded">
+                                <span className="material-symbols-outlined text-[12px] text-purple-400">commit</span>
+                                <span className="text-purple-300">[{branch.lastCommit.hash?.substring(0, 7)}]</span>
+                                <span className="truncate">{branch.lastCommit.message}</span>
+                              </div>
+                            )}
+
+                            {/* Task Documents List */}
+                            <div className="flex flex-col gap-1.5 mt-1">
+                              {(branch.taskDocuments || []).map((doc: any, dIdx: number) => (
+                                <div
+                                  key={doc.id || dIdx}
+                                  className="p-2 rounded bg-[var(--surface-container-high)]/60 border border-[var(--outline)] flex items-start justify-between gap-2 text-xs"
+                                >
+                                  <div className="flex flex-col min-w-0 flex-1">
+                                    <div className="flex items-center gap-1.5">
+                                      <span className="material-symbols-outlined text-[14px] text-amber-400">description</span>
+                                      <span className="font-mono font-medium text-[var(--on-surface)] truncate">
+                                        {doc.path || doc.name}
+                                      </span>
+                                      {doc.folder && (
+                                        <span className="text-[10px] font-mono px-1 rounded bg-[var(--surface)] text-[var(--on-surface-variant)]">
+                                          📁 {doc.folder}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <span className="text-[10px] font-mono text-[var(--on-surface-variant)] mt-0.5">
+                                      {(doc.content || '').split('\n').length} líneas · {(doc.content || '').length} bytes
+                                    </span>
+                                  </div>
+
+                                  <div className="text-[10px] font-mono text-[var(--on-surface-variant)] shrink-0">
+                                    {doc.updatedAt ? new Date(doc.updatedAt).toLocaleDateString() : ''}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
               ) : formState._type === 'task' ? (
                 /* TASK FORM FIELDS (Matching Task Schema) */
@@ -934,6 +1374,236 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
           </div>
         )}
       </main>
+
+      {/* Modal: Crear Workspace Estructurado en Sanity */}
+      {isCreateWsOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 animate-fade-in"
+          onClick={() => setIsCreateWsOpen(false)}
+        >
+          <div
+            className="w-full max-w-md bg-[var(--surface-container)] border border-[var(--outline)] rounded-lg shadow-xl flex flex-col overflow-hidden"
+            role="dialog"
+            aria-modal="true"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-[18px] text-emerald-400">workspaces</span>
+                <h3 className="text-xs font-semibold text-[var(--on-surface)]">
+                  Nuevo Workspace en Sanity Studio
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsCreateWsOpen(false)}
+                className="btn-m3-icon w-6 h-6 cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[15px]">close</span>
+              </button>
+            </div>
+
+            <form onSubmit={handleExecuteCreateWorkspace} className="p-4 flex flex-col gap-3">
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-semibold text-[var(--on-surface)]">
+                  Nombre del Workspace
+                </label>
+                <input
+                  type="text"
+                  required
+                  autoFocus
+                  value={newWsName}
+                  onChange={(e) => setNewWsName(e.target.value)}
+                  placeholder="ej. Ecommerce Platform, Backend API..."
+                  className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-2.5 py-1.5 text-xs text-[var(--on-surface)] focus:outline-none"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-semibold text-[var(--on-surface)]">
+                  Repositorio de GitHub (owner/repo)
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={newWsRepo}
+                  onChange={(e) => setNewWsRepo(e.target.value)}
+                  placeholder="ej. org/mi-proyecto o https://github.com/..."
+                  className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-2.5 py-1.5 text-xs font-mono text-[var(--on-surface)] focus:outline-none"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-semibold text-[var(--on-surface)]">
+                  Rama principal
+                </label>
+                <input
+                  type="text"
+                  value={newWsBranch}
+                  onChange={(e) => setNewWsBranch(e.target.value)}
+                  placeholder="main"
+                  className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-2.5 py-1.5 text-xs font-mono text-[var(--on-surface)] focus:outline-none"
+                />
+              </div>
+
+              <div className="pt-2 flex items-center justify-end gap-2 border-t border-[var(--outline)]">
+                <button
+                  type="button"
+                  onClick={() => setIsCreateWsOpen(false)}
+                  className="btn-m3-text px-3 py-1 text-xs cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={!newWsName.trim() || !newWsRepo.trim()}
+                  className="btn-m3-primary bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-1.5 text-xs cursor-pointer shadow-sm disabled:opacity-50"
+                >
+                  Crear en Sanity
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Crear Tarea en Sanity */}
+      {isCreateTaskOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 animate-fade-in"
+          onClick={() => setIsCreateTaskOpen(false)}
+        >
+          <div
+            className="w-full max-w-sm bg-[var(--surface-container)] border border-[var(--outline)] rounded-lg shadow-xl flex flex-col overflow-hidden"
+            role="dialog"
+            aria-modal="true"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-[18px] text-sky-400">check_box</span>
+                <h3 className="text-xs font-semibold text-[var(--on-surface)]">
+                  Nuevo Documento de Tarea en Sanity
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsCreateTaskOpen(false)}
+                className="btn-m3-icon w-6 h-6 cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[15px]">close</span>
+              </button>
+            </div>
+
+            <form onSubmit={handleExecuteCreateTask} className="p-4 flex flex-col gap-3">
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-semibold text-[var(--on-surface)]">
+                  Título de la tarea
+                </label>
+                <input
+                  type="text"
+                  required
+                  autoFocus
+                  value={newTaskTitleInput}
+                  onChange={(e) => setNewTaskTitleInput(e.target.value)}
+                  placeholder="ej. Implementar OAuth..."
+                  className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-2.5 py-1.5 text-xs text-[var(--on-surface)] focus:outline-none"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-semibold text-[var(--on-surface)]">Prioridad</label>
+                <div className="grid grid-cols-4 gap-1.5">
+                  {(['P0', 'P1', 'P2', 'P3'] as const).map((p) => (
+                    <button
+                      key={p}
+                      type="button"
+                      onClick={() => setNewTaskPriorityInput(p)}
+                      className={`py-1 rounded font-mono text-xs border text-center cursor-pointer ${
+                        newTaskPriorityInput === p
+                          ? 'bg-[var(--primary)] text-[var(--on-primary)] font-bold border-[var(--primary)]'
+                          : 'bg-[var(--surface)] text-[var(--on-surface-variant)] border-[var(--outline)]'
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="pt-2 flex items-center justify-end gap-2 border-t border-[var(--outline)]">
+                <button
+                  type="button"
+                  onClick={() => setIsCreateTaskOpen(false)}
+                  className="btn-m3-text px-3 py-1 text-xs cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={!newTaskTitleInput.trim()}
+                  className="btn-m3-primary px-3.5 py-1.5 text-xs cursor-pointer shadow-sm disabled:opacity-50"
+                >
+                  Crear Tarea
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Confirmación de Eliminación Seguro */}
+      {isConfirmDeleteOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 animate-fade-in"
+          onClick={() => setIsConfirmDeleteOpen(false)}
+        >
+          <div
+            className="w-full max-w-sm bg-[var(--surface-container)] border border-[var(--outline)] rounded-lg shadow-xl flex flex-col overflow-hidden"
+            role="dialog"
+            aria-modal="true"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
+              <div className="flex items-center gap-2 text-rose-400">
+                <span className="material-symbols-outlined text-[18px]">warning</span>
+                <h3 className="text-xs font-semibold">Eliminar de Sanity</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsConfirmDeleteOpen(false)}
+                className="btn-m3-icon w-6 h-6 cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[15px]">close</span>
+              </button>
+            </div>
+
+            <div className="p-4 flex flex-col gap-2 text-xs text-[var(--on-surface-variant)]">
+              <p>
+                ¿Estás seguro de eliminar el documento <strong className="text-[var(--on-surface)]">"{formState.name || formState.title || selectedDocId}"</strong> ({formState._type}) de Sanity?
+              </p>
+              <p className="text-[11px] text-rose-400/80">Esta acción no se puede deshacer en el dataset remoto.</p>
+            </div>
+
+            <div className="px-4 py-2.5 bg-[var(--surface)] border-t border-[var(--outline)] flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setIsConfirmDeleteOpen(false)}
+                className="btn-m3-text px-3 py-1 text-xs cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDelete}
+                className="px-3 py-1 rounded bg-rose-600 hover:bg-rose-500 text-white text-xs font-medium cursor-pointer shadow-sm"
+              >
+                Eliminar definitivamente
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
