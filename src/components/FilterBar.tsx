@@ -28,6 +28,10 @@ interface FilterBarProps {
   currentFileName?: string;
   hasUnsavedChanges?: boolean;
   onRenameDocument?: () => void;
+  activeView?: string;
+  syncStatus?: string;
+  onOpenSanityModal?: () => void;
+  onOpenSyncOverrideModal?: () => void;
 }
 
 export const FilterBar: React.FC<FilterBarProps> = ({
@@ -46,6 +50,10 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   currentFileName,
   hasUnsavedChanges,
   onRenameDocument,
+  activeView,
+  syncStatus,
+  onOpenSanityModal,
+  onOpenSyncOverrideModal,
 }) => {
   const [isFilterPopoverOpen, setIsFilterPopoverOpen] = useState(false);
   const popoverRef = useRef<HTMLDivElement>(null);
@@ -358,6 +366,50 @@ export const FilterBar: React.FC<FilterBarProps> = ({
 
         {/* Current Document Indicator & Counter of matching tasks */}
         <div className="flex items-center gap-2 text-xs font-mono text-[var(--on-surface-variant)] shrink-0">
+          {activeView === 'studio' && (
+            <div className="flex items-center gap-1.5 shrink-0">
+              {onOpenSanityModal && (
+                <button
+                  type="button"
+                  onClick={onOpenSanityModal}
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-mono border transition-colors cursor-pointer bg-[var(--surface)] border-[var(--outline)] text-[var(--on-surface)] hover:bg-[var(--surface-container-high)]"
+                  title="Estado y configuración de Sanity"
+                >
+                  <span
+                    className={`w-2 h-2 rounded-full ${
+                      syncStatus === 'synced'
+                        ? 'bg-emerald-400'
+                        : syncStatus === 'saving' || syncStatus === 'loading'
+                        ? 'bg-sky-400 animate-pulse'
+                        : 'bg-cyan-400'
+                    }`}
+                  />
+                  <span>
+                    {syncStatus === 'synced'
+                      ? 'Sanity Sync'
+                      : syncStatus === 'saving'
+                      ? 'Guardando...'
+                      : 'Sanity Local'}
+                  </span>
+                </button>
+              )}
+
+              {onOpenSyncOverrideModal && (
+                <button
+                  type="button"
+                  onClick={onOpenSyncOverrideModal}
+                  className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--outline)] hover:border-[var(--primary)] hover:bg-[var(--surface-container-high)] transition-colors cursor-pointer shadow-xs"
+                  title="Sincronizar y detectar diferencias, overrides y conflictos con Sanity Cloud"
+                >
+                  <span className="material-symbols-outlined text-[15px] text-amber-400">
+                    sync_problem
+                  </span>
+                  <span>Sincronizar</span>
+                </button>
+              )}
+            </div>
+          )}
+
           {currentFileName && onRenameDocument && (
             <div
               className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] font-mono truncate shadow-xs cursor-pointer hover:bg-[var(--surface-container-high)] transition-colors"

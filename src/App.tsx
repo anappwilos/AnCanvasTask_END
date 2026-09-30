@@ -2685,56 +2685,7 @@ export default function App() {
             </span>
           )}
 
-          {/* Sanity Live Sync Status Badge */}
-          <button
-            type="button"
-            onClick={() => setIsSanityModalOpen(true)}
-            className={`hidden xl:flex items-center gap-1.5 px-2 py-1 rounded-full text-[11px] font-mono border transition-colors cursor-pointer ${
-              syncStatus === 'synced'
-                ? 'bg-emerald-950/40 text-emerald-300 border-emerald-800/60 hover:bg-emerald-950/70'
-                : syncStatus === 'saving' || syncStatus === 'loading'
-                ? 'bg-sky-950/40 text-sky-300 border-sky-800/60 hover:bg-sky-950/70'
-                : 'bg-[var(--surface)] text-[var(--on-surface-variant)] border-[var(--outline)] hover:text-[var(--on-surface)]'
-            }`}
-            title={
-              syncStatus === 'synced'
-                ? 'Sincronización activa con Sanity (Dataset: production). Clic para ver opciones.'
-                : syncStatus === 'saving'
-                ? 'Guardando cambios en Sanity...'
-                : 'Sincronización local. Añade un API Token para guardar automáticamente en Sanity.'
-            }
-          >
-            <span
-              className={`w-2 h-2 rounded-full ${
-                syncStatus === 'synced'
-                  ? 'bg-emerald-400'
-                  : syncStatus === 'saving' || syncStatus === 'loading'
-                  ? 'bg-sky-400 animate-pulse'
-                  : 'bg-cyan-400'
-              }`}
-            />
-            <span className="truncate max-w-[100px]">
-              {syncStatus === 'synced'
-                ? 'Sanity Sync'
-                : syncStatus === 'saving'
-                ? 'Guardando...'
-                : 'Sanity Local'}
-            </span>
-          </button>
 
-          {/* Dedicated Sync with Overrides Detection Button */}
-          <button
-            type="button"
-            onClick={() => setIsSyncOverrideModalOpen(true)}
-            className="hidden 2xl:flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--outline)] hover:border-[var(--primary)] hover:bg-[var(--surface-container-high)] transition-colors cursor-pointer shadow-xs"
-            title="Sincronizar y detectar diferencias, overrides y conflictos con Sanity Cloud"
-            aria-label="Sincronizar con Sanity"
-          >
-            <span className="material-symbols-outlined text-[15px] text-amber-400">
-              sync_problem
-            </span>
-            <span>Sincronizar</span>
-          </button>
 
           {/* Split View Toggle */}
           <button
@@ -3196,6 +3147,10 @@ export default function App() {
                 initialFolder: activeDocument.folder,
               })
             }
+            activeView={activeView}
+            syncStatus={syncStatus}
+            onOpenSanityModal={() => setIsSanityModalOpen(true)}
+            onOpenSyncOverrideModal={() => setIsSyncOverrideModalOpen(true)}
           />
 
           {/* Main View Area: Split between Visual View (Canvas / Kanban / Studio) and Markdown Split Editor */}
