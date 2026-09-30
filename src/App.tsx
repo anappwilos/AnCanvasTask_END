@@ -43,6 +43,7 @@ import { SanityStudio } from './components/SanityStudio';
 import { WorkspaceSelector } from './components/WorkspaceSelector';
 import { TaskDocumentExplorer } from './components/TaskDocumentExplorer';
 import { WorkspaceManagerModal } from './components/WorkspaceManagerModal';
+import { SyncOverrideModal } from './components/SyncOverrideModal';
 import { NewTaskDocumentModal } from './components/NewTaskDocumentModal';
 import { NewBranchModal } from './components/NewBranchModal';
 import { GitHubSyncModal } from './components/GitHubSyncModal';
@@ -235,6 +236,7 @@ export default function App() {
   const [isNewTaskModalOpen, setIsNewTaskModalOpen] = useState<boolean>(false);
   const [isViewMarkdownOpen, setIsViewMarkdownOpen] = useState<boolean>(false);
   const [isSanityModalOpen, setIsSanityModalOpen] = useState<boolean>(false);
+  const [isSyncOverrideModalOpen, setIsSyncOverrideModalOpen] = useState<boolean>(false);
   const [isAutoLayoutConfirmOpen, setIsAutoLayoutConfirmOpen] = useState<boolean>(false);
   const [isProblemsModalOpen, setIsProblemsModalOpen] = useState<boolean>(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
@@ -2323,6 +2325,16 @@ export default function App() {
         },
       },
       {
+        id: 'sync-sanity-diff',
+        title: 'Sincronizar con Sanity (Detectar Overrides y Conflictos)',
+        shortcut: '⌘Y',
+        icon: 'sync_problem',
+        category: 'action',
+        perform: () => {
+          setIsSyncOverrideModalOpen(true);
+        },
+      },
+      {
         id: 'import-export-modal',
         title: 'Importar / Exportar TASKS.md o JSON',
         shortcut: '⌘E',
@@ -2718,6 +2730,20 @@ export default function App() {
                 ? 'Guardando...'
                 : 'Sanity Local'}
             </span>
+          </button>
+
+          {/* Dedicated Sync with Overrides Detection Button */}
+          <button
+            type="button"
+            onClick={() => setIsSyncOverrideModalOpen(true)}
+            className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--outline)] hover:border-[var(--primary)] hover:bg-[var(--surface-container-high)] transition-colors cursor-pointer shadow-xs"
+            title="Sincronizar y detectar diferencias, overrides y conflictos con Sanity Cloud"
+            aria-label="Sincronizar con Sanity"
+          >
+            <span className="material-symbols-outlined text-[15px] text-amber-400">
+              sync_problem
+            </span>
+            <span className="hidden lg:inline">Sincronizar</span>
           </button>
 
           {/* Split View (Visor en tiempo real bidireccional) Toggle */}
@@ -3428,6 +3454,7 @@ export default function App() {
                   onOpenSanityConfig={() => setIsSanityModalOpen(true)}
                   onImportTaskToMarkdown={handleImportTaskFromSanity}
                   onActivateWorkspace={handleActivateWorkspaceFromSanity}
+                  onOpenSyncDiffModal={() => setIsSyncOverrideModalOpen(true)}
                   onShowToast={pushToast}
                 />
               )}
@@ -4237,7 +4264,21 @@ export default function App() {
         onSyncWorkspacesToSanity={handleSyncAllWorkspacesToSanity}
         onImportWorkspacesFromSanity={handleImportWorkspacesFromSanity}
         onSaveSingleWorkspaceToSanity={handleSaveSingleWorkspaceToSanity}
+        onOpenSyncDiffModal={() => setIsSyncOverrideModalOpen(true)}
         isSanityConfigured={Boolean(getSanityConfig().projectId && getSanityConfig().dataset)}
+      />
+
+      {/* Modal: Sincronización & Detección de Overrides con Sanity */}
+      <SyncOverrideModal
+        isOpen={isSyncOverrideModalOpen}
+        onClose={() => setIsSyncOverrideModalOpen(false)}
+        workspaceStore={workspaceStore}
+        onUpdateWorkspaceStore={(newStore) => {
+          setWorkspaceStore(newStore);
+          saveWorkspaceStore(newStore);
+        }}
+        onShowToast={pushToast}
+        onOpenSanityConfig={() => setIsSanityModalOpen(true)}
       />
 
       {/* Modal: Crear nuevo archivo Task MD */}

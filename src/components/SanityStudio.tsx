@@ -13,6 +13,7 @@ export interface SanityStudioProps {
   onOpenSanityConfig: () => void;
   onImportTaskToMarkdown?: (task: any) => void;
   onActivateWorkspace?: (workspace: any) => void;
+  onOpenSyncDiffModal?: () => void;
   onShowToast: (msg: string, type?: 'success' | 'info' | 'warning' | 'error') => void;
 }
 
@@ -23,6 +24,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
   onOpenSanityConfig,
   onImportTaskToMarkdown,
   onActivateWorkspace,
+  onOpenSyncDiffModal,
   onShowToast,
 }) => {
   const [config, setConfig] = useState<SanityConfig>(() => getSanityConfig());
@@ -528,10 +530,22 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
 
         {/* Structure Footer */}
         <div className="p-2.5 border-t border-[var(--outline)] bg-[var(--surface)] flex flex-col gap-1.5">
+          {onOpenSyncDiffModal && (
+            <button
+              type="button"
+              onClick={onOpenSyncDiffModal}
+              className="btn-m3-primary w-full py-1.5 text-xs justify-start px-2.5 cursor-pointer shadow-xs flex items-center gap-1.5"
+              title="Comparar y sincronizar diferencias / overrides con Sanity Cloud"
+            >
+              <span className="material-symbols-outlined text-[16px]">sync_problem</span>
+              <span>Sincronizar & Overrides</span>
+            </button>
+          )}
+
           <button
             type="button"
             onClick={onOpenSanityConfig}
-            className="btn-m3-secondary w-full py-1.5 text-xs justify-start px-2.5 cursor-pointer"
+            className="btn-m3-secondary w-full py-1.5 text-xs justify-start px-2.5 cursor-pointer flex items-center gap-1.5"
           >
             <span className="material-symbols-outlined text-[16px]">settings</span>
             <span>Ajustes de conexión</span>

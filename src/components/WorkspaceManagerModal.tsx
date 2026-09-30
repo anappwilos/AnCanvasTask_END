@@ -17,6 +17,7 @@ interface WorkspaceManagerModalProps {
   onSyncWorkspacesToSanity?: () => Promise<void>;
   onImportWorkspacesFromSanity?: () => Promise<void>;
   onSaveSingleWorkspaceToSanity?: (ws: Workspace) => Promise<void>;
+  onOpenSyncDiffModal?: () => void;
   isSanityConfigured?: boolean;
 }
 
@@ -32,6 +33,7 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
   onSyncWorkspacesToSanity,
   onImportWorkspacesFromSanity,
   onSaveSingleWorkspaceToSanity,
+  onOpenSyncDiffModal,
   isSanityConfigured = false,
 }) => {
   const [activeTab, setActiveTab] = useState<'list' | 'create'>('list');
@@ -196,7 +198,20 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1.5 shrink-0">
+                <div className="flex items-center gap-1.5 shrink-0 flex-wrap">
+                  {onOpenSyncDiffModal && (
+                    <button
+                      type="button"
+                      disabled={!isSanityConfigured}
+                      onClick={onOpenSyncDiffModal}
+                      className="btn-m3-primary px-2.5 py-1 text-xs flex items-center gap-1 cursor-pointer disabled:opacity-50 shadow-xs"
+                      title="Analizar y resolver diferencias, overrides y conflictos con Sanity Cloud"
+                    >
+                      <span className="material-symbols-outlined text-[14px]">sync_problem</span>
+                      <span>Sincronizar & Overrides</span>
+                    </button>
+                  )}
+
                   {onSyncWorkspacesToSanity && (
                     <button
                       type="button"
@@ -215,7 +230,7 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
                       <span className={`material-symbols-outlined text-[14px] ${isSyncingSanity ? 'animate-spin' : ''}`}>
                         {isSyncingSanity ? 'refresh' : 'cloud_upload'}
                       </span>
-                      <span>{isSyncingSanity ? 'Sincronizando...' : 'Guardar en Sanity'}</span>
+                      <span>{isSyncingSanity ? 'Sincronizando...' : 'Guardar'}</span>
                     </button>
                   )}
 
@@ -237,7 +252,7 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
                       <span className={`material-symbols-outlined text-[14px] ${isImportingSanity ? 'animate-spin' : ''}`}>
                         {isImportingSanity ? 'refresh' : 'cloud_download'}
                       </span>
-                      <span>{isImportingSanity ? 'Importando...' : 'Cargar de Sanity'}</span>
+                      <span>{isImportingSanity ? 'Importando...' : 'Cargar'}</span>
                     </button>
                   )}
                 </div>
