@@ -23,6 +23,8 @@ interface FilterBarProps {
   totalTasksCount: number;
   filteredTasksCount: number;
   onOpenCommandPalette: () => void;
+  onAutoOrganize?: () => void;
+  isAutoOrganizing?: boolean;
 }
 
 export const FilterBar: React.FC<FilterBarProps> = ({
@@ -36,6 +38,8 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   totalTasksCount,
   filteredTasksCount,
   onOpenCommandPalette,
+  onAutoOrganize,
+  isAutoOrganizing,
 }) => {
   const [isFilterPopoverOpen, setIsFilterPopoverOpen] = useState(false);
   const popoverRef = useRef<HTMLDivElement>(null);
@@ -299,6 +303,28 @@ export const FilterBar: React.FC<FilterBarProps> = ({
               ⌘K
             </kbd>
           </button>
+
+          {/* Auto Organizar Button */}
+          {onAutoOrganize && (
+            <button
+              type="button"
+              disabled={isAutoOrganizing}
+              onClick={onAutoOrganize}
+              className="btn-m3-secondary hidden md:inline-flex px-2.5 py-1 text-xs cursor-pointer text-sky-400 border-sky-800/60 bg-sky-950/30 shrink-0"
+              title="Organizar automáticamente dependencias y grupos jerárquicamente (DAG)"
+            >
+              <span
+                className={`material-symbols-outlined text-[15px] ${
+                  isAutoOrganizing ? 'animate-spin' : ''
+                }`}
+              >
+                {isAutoOrganizing ? 'progress_activity' : 'account_tree'}
+              </span>
+              <span className="hidden lg:inline">
+                {isAutoOrganizing ? 'Organizando...' : 'Auto organizar'}
+              </span>
+            </button>
+          )}
 
           {/* Mobile Quick Search Input */}
           <div className="relative flex-1 sm:hidden min-w-[110px] max-w-[200px]">

@@ -2804,26 +2804,6 @@ export default function App() {
             <span className="hidden xl:inline">Guardar</span>
           </button>
 
-          {/* Auto Organizar Button with loading feedback */}
-          <button
-            type="button"
-            disabled={isAutoOrganizing}
-            onClick={() => setIsAutoLayoutConfirmOpen(true)}
-            className="btn-m3-secondary hidden lg:inline-flex px-2.5 py-1 text-xs cursor-pointer text-sky-400 border-sky-800/60 bg-sky-950/30"
-            title="Organizar automáticamente dependencias y grupos jerárquicamente (DAG)"
-          >
-            <span
-              className={`material-symbols-outlined text-[16px] ${
-                isAutoOrganizing ? 'animate-spin' : ''
-              }`}
-            >
-              {isAutoOrganizing ? 'progress_activity' : 'account_tree'}
-            </span>
-            <span className="hidden xl:inline">
-              {isAutoOrganizing ? 'Organizando...' : 'Auto organizar'}
-            </span>
-          </button>
-
           {/* Mobile Quick Search Button */}
           <button
             type="button"
@@ -3279,6 +3259,8 @@ export default function App() {
             totalTasksCount={allParsedTasks.length}
             filteredTasksCount={filteredTasksCount}
             onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
+            onAutoOrganize={() => setIsAutoLayoutConfirmOpen(true)}
+            isAutoOrganizing={isAutoOrganizing}
           />
 
           {/* Main View Area: Split between Visual View (Canvas / Kanban / Studio) and Markdown Split Editor */}
