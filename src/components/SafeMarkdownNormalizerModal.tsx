@@ -446,9 +446,25 @@ export function SafeMarkdownNormalizerModal({
                         </button>
                       </div>
 
-                      <p className="text-[11px] text-[var(--on-surface-variant)] mt-1 truncate">
+                      <p className="text-[11px] text-[var(--on-surface-variant)] mt-1">
                         {change.description}
                       </p>
+
+                      {/* Visual Inline Space / Text Diff Preview */}
+                      <div className="mt-1.5 p-1.5 rounded bg-[var(--surface-container-highest)] border border-[var(--outline)] font-mono text-[10px] space-y-1">
+                        <div className="text-rose-400 flex items-start gap-1 overflow-x-auto">
+                          <span className="font-bold text-rose-500 select-none">-</span>
+                          <span className="break-all whitespace-pre-wrap">
+                            {change.originalLines.map((l) => l.replace(/ /g, '·').replace(/\t/g, '→ ')).join('\n') || '(vacío)'}
+                          </span>
+                        </div>
+                        <div className="text-emerald-400 flex items-start gap-1 overflow-x-auto">
+                          <span className="font-bold text-emerald-500 select-none">+</span>
+                          <span className="break-all whitespace-pre-wrap">
+                            {change.proposedLines.map((l) => l.replace(/ /g, '·').replace(/\t/g, '→ ')).join('\n') || '(vacío)'}
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   );
                 })
@@ -460,9 +476,17 @@ export function SafeMarkdownNormalizerModal({
           <main className="flex-1 flex flex-col min-w-0 bg-[var(--surface)] overflow-hidden">
             {/* Diff Header */}
             <div className="h-7 px-3 bg-[var(--surface-container-high)] border-b border-[var(--outline)] flex items-center justify-between shrink-0 text-[11px] font-mono text-[var(--on-surface-variant)]">
-              <span className="text-rose-400">Original</span>
-              <span>➔</span>
-              <span className="text-emerald-400">Propuesta con cambios seleccionados</span>
+              <div className="flex items-center gap-2">
+                <span className="text-rose-400 font-semibold">Original</span>
+                <span>➔</span>
+                <span className="text-emerald-400 font-semibold">Propuesta</span>
+              </div>
+              {showInvisibles && (
+                <div className="text-[10px] text-[var(--on-surface-variant)] hidden sm:flex items-center gap-2">
+                  <span className="bg-[var(--surface)] px-1.5 py-0.2 rounded border border-[var(--outline)] font-mono">· espacio</span>
+                  <span className="bg-[var(--surface)] px-1.5 py-0.2 rounded border border-[var(--outline)] font-mono">→ tab</span>
+                </div>
+              )}
             </div>
 
             {/* Monaco DiffEditor */}
@@ -479,6 +503,7 @@ export function SafeMarkdownNormalizerModal({
                 options={{
                   readOnly: true,
                   renderSideBySide: renderSideBySide,
+                  ignoreTrimWhitespace: false,
                   renderWhitespace: showInvisibles ? 'all' : 'selection',
                   renderControlCharacters: showInvisibles,
                   unicodeHighlight: {

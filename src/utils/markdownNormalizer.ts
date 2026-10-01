@@ -329,10 +329,33 @@ function classifyChange(
   const propNormalized = proposedLines.map(normalizeForFormatCheck).join(' ').trim();
 
   if (origNormalized === propNormalized) {
+    // Determine specific formatting type for clarity
+    const hadTrailingSpaces = originalLines.some((l) => /\s+$/.test(l));
+    const hadStarBullet = originalLines.some((l) => /^\s*[*]\s+/.test(l));
+    const hadCheckboxSpacing = originalLines.some((l) => /^\s*[-*]\s*\[([ xX])\]/.test(l) && !/^\s*[-*]\s\[([ xX])\]\s/.test(l));
+    const hadIndentDiff = originalLines.some((l, idx) => {
+      const origInd = l.match(/^\s*/)?.[0].length || 0;
+      const propInd = proposedLines[idx]?.match(/^\s*/)?.[0].length || 0;
+      return origInd !== propInd;
+    });
+
+    let specificDesc = 'Alineación de espacios y formato';
+    if (hadTrailingSpaces) {
+      specificDesc = 'Espacios sobrantes al final de línea eliminados';
+    } else if (hadStarBullet) {
+      specificDesc = 'Estandarización de viñeta (* ➔ -)';
+    } else if (hadCheckboxSpacing) {
+      specificDesc = 'Espaciado uniforme de casilla (- [ ])';
+    } else if (hadIndentDiff) {
+      specificDesc = 'Alineación de sangría (2 espacios estándar)';
+    } else if (originalLines.length !== proposedLines.length) {
+      specificDesc = 'Normalización de líneas vacías redundantes';
+    }
+
     return {
       category: 'formato_seguro',
       categoryLabel: 'Formato seguro',
-      description: 'Alineación de espacios, normalización de viñetas o espaciado de casillas',
+      description: specificDesc,
     };
   }
 
