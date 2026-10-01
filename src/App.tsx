@@ -596,11 +596,7 @@ export default function App() {
         // Persist to Sanity if configured
         const config = getSanityConfig();
         if (config.projectId && config.dataset && config.token) {
-          saveWorkspaceToSanity(newWs, config).then((res) => {
-            if (res.ok) {
-              console.log('Workspace persisted to Sanity:', res.message);
-            }
-          });
+          saveWorkspaceToSanity(newWs, config);
         }
 
         return nextStore;
@@ -3866,7 +3862,7 @@ export default function App() {
               >
                 <div className="flex items-center gap-2.5">
                   <span className="material-symbols-outlined text-[18px] text-amber-400">sync_problem</span>
-                  <span>Sincronizar con Sanity (studio-test)</span>
+                  <span>Sincronizar con Sanity</span>
                 </div>
                 <span>➔</span>
               </button>

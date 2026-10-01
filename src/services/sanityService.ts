@@ -571,7 +571,7 @@ export async function fetchSanityDocumentsList(
       useCdn: false,
     });
 
-    const query = `*[_type in ["task", "canvasVisualState", "workspace", "studio-test"] || _id match "*workspace*" || _id match "*studio-test*" || _id == "studio-test"] | order(_updatedAt desc)[0...100] {
+    const query = `*[_type in ["task", "canvasVisualState", "workspace"] || _id match "*workspace*"] | order(_updatedAt desc)[0...100] {
       _id,
       _type,
       title,
@@ -920,7 +920,7 @@ export async function loadWorkspacesFromSanity(
       useCdn: false,
     });
 
-    const query = `*[_type == "workspace" || _id match "workspace*" || _id == "studio-test" || _id match "*studio-test*"] | order(_updatedAt desc)`;
+    const query = `*[_type == "workspace" || _id match "workspace*"] | order(_updatedAt desc)`;
     const results = await client.fetch<SanityWorkspaceDocument[]>(query);
     if (!Array.isArray(results)) return [];
 

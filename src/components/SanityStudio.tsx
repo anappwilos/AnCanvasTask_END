@@ -534,7 +534,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" title="Sincronizado en vivo" />
               </div>
               <span className="text-[10px] font-mono text-[var(--primary)] truncate">
-                studio-test • {config.dataset}
+                {config.projectId || 'Sanity'} • {config.dataset}
               </span>
             </div>
           </div>
@@ -543,7 +543,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
             type="button"
             onClick={loadDocuments}
             className="btn-m3-icon w-6 h-6 cursor-pointer shrink-0"
-            title="Sincronizar y recargar datos de Sanity (studio-test)"
+            title="Sincronizar y recargar datos de Sanity"
           >
             <span className={`material-symbols-outlined text-[15px] ${isLoadingList ? 'animate-spin' : ''}`}>
               refresh
