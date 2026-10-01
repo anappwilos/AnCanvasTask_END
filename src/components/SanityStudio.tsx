@@ -8,6 +8,7 @@ import {
   writeTestingTaskToSanity,
   SanityConfig,
 } from '../services/sanityService';
+import { SanitySdkExplorer } from './SanitySdkExplorer';
 
 export interface SanityStudioProps {
   onOpenSanityConfig: () => void;
@@ -28,6 +29,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
   onShowToast,
 }) => {
   const [config, setConfig] = useState<SanityConfig>(() => getSanityConfig());
+  const [studioMode, setStudioMode] = useState<'sdk' | 'desk'>('sdk');
   const [activeDocType, setActiveDocType] = useState<DocumentTypeFilter>('task');
   const [documents, setDocuments] = useState<any[]>([]);
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
@@ -429,15 +431,71 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
   }
 
   return (
-    <div className="flex-1 h-full flex overflow-hidden bg-[var(--surface)] text-xs select-none">
-      {/* ========================================================= */}
-      {/* PANE 1: STRUCTURE TREE (Desk Tool Navigation) */}
-      {/* ========================================================= */}
-      <aside
-        className={`w-full sm:w-56 md:w-64 bg-[var(--surface-container)] border-r border-[var(--outline)] flex flex-col justify-between shrink-0 ${
-          mobilePane === 'structure' ? 'flex' : 'hidden sm:flex'
-        }`}
-      >
+    <div className="flex-1 h-full flex flex-col overflow-hidden bg-[var(--surface)] text-xs select-none">
+      {/* Top App Bar: SDK Mode Switcher */}
+      <div className="px-3.5 py-2 border-b border-[var(--outline)] bg-[var(--surface-container)] flex items-center justify-between gap-3 shrink-0">
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => setStudioMode('sdk')}
+            className={`px-3 py-1 rounded text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer ${
+              studioMode === 'sdk'
+                ? 'bg-emerald-800 text-white font-semibold shadow-xs'
+                : 'text-[var(--on-surface-variant)] hover:bg-[var(--surface-container-high)] hover:text-[var(--on-surface)]'
+            }`}
+          >
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span>Sanity App SDK (@sanity/sdk-react)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setStudioMode('desk')}
+            className={`px-3 py-1 rounded text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer ${
+              studioMode === 'desk'
+                ? 'bg-[var(--primary)] text-[var(--on-primary)] font-semibold shadow-xs'
+                : 'text-[var(--on-surface-variant)] hover:bg-[var(--surface-container-high)] hover:text-[var(--on-surface)]'
+            }`}
+          >
+            <span className="material-symbols-outlined text-[15px]">table_rows</span>
+            <span>Desk Tool Clásico (@sanity/client)</span>
+          </button>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] font-mono text-[var(--on-surface-variant)] hidden sm:inline">
+            {config.projectId} · {config.dataset}
+          </span>
+          <button
+            type="button"
+            onClick={onOpenSanityConfig}
+            className="px-2 py-0.5 text-[11px] text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] border border-[var(--outline)] hover:border-[var(--on-surface-variant)] transition cursor-pointer"
+          >
+            Ajustes
+          </button>
+        </div>
+      </div>
+
+      {studioMode === 'sdk' ? (
+        <div className="flex-1 overflow-y-auto p-4 bg-neutral-950 text-neutral-100">
+          <SanitySdkExplorer
+            onOpenSanityConfig={onOpenSanityConfig}
+            onSwitchToDeskTool={() => setStudioMode('desk')}
+            onImportTaskToMarkdown={onImportTaskToMarkdown}
+            onActivateWorkspace={onActivateWorkspace}
+            onShowToast={onShowToast}
+          />
+        </div>
+      ) : (
+        <div className="flex-1 h-full flex overflow-hidden">
+          {/* ========================================================= */}
+          {/* PANE 1: STRUCTURE TREE (Desk Tool Navigation) */}
+          {/* ========================================================= */}
+          <aside
+            className={`w-full sm:w-56 md:w-64 bg-[var(--surface-container)] border-r border-[var(--outline)] flex flex-col justify-between shrink-0 ${
+              mobilePane === 'structure' ? 'flex' : 'hidden sm:flex'
+            }`}
+          >
         {/* Studio Brand Header */}
         <div className="px-3.5 py-3 border-b border-[var(--outline)] flex items-center justify-between bg-[var(--surface)]">
           <div className="flex items-center gap-2 min-w-0">
@@ -469,6 +527,21 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
 
         {/* Structure Hierarchy Tree */}
         <div className="flex-1 p-2 overflow-y-auto flex flex-col gap-1">
+          <button
+            type="button"
+            onClick={() => setStudioMode('sdk')}
+            className="w-full px-2.5 py-2 mb-1.5 rounded text-xs font-medium flex items-center justify-between text-left transition-colors cursor-pointer bg-emerald-950/60 border border-emerald-800/80 text-emerald-300 hover:bg-emerald-900/60"
+            title="Ir al explorador reactivo de Sanity App SDK (@sanity/sdk-react)"
+          >
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="material-symbols-outlined text-[17px] text-emerald-400">bolt</span>
+              <span className="truncate font-semibold">Sanity App SDK</span>
+            </div>
+            <span className="px-1.5 py-0.2 rounded text-[9px] font-mono bg-emerald-900 text-emerald-200 uppercase">
+              Live
+            </span>
+          </button>
+
           <span className="px-2 py-1 text-[10px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
             Tipos de Contenido
           </span>
@@ -1785,6 +1858,8 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
               </button>
             </div>
           </div>
+        </div>
+      )}
         </div>
       )}
     </div>
