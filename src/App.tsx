@@ -15,6 +15,8 @@ import {
   loadWorkspacesFromSanity,
   syncAllWorkspacesToSanity,
   deleteWorkspaceFromSanity,
+  subscribeToSanityLiveChanges,
+  SanityLiveChangeEvent,
   SanityConfig,
 } from './services/sanityService';
 import {
@@ -277,6 +279,11 @@ export default function App() {
 
   // Toast System State
   const [toasts, setToasts] = useState<ToastItem[]>([]);
+
+  // Sanity Live Bidirectional Synchronization State
+  const [isLiveSyncActive, setIsLiveSyncActive] = useState<boolean>(false);
+  const [lastLiveSyncAt, setLastLiveSyncAt] = useState<string | null>(null);
+  const isRemoteMutationInProgressRef = useRef<boolean>(false);
 
   const pushToast = useCallback(
     (message: string, type: ToastType = 'info', action?: { label: string; onClick: () => void }) => {
@@ -2002,6 +2009,11 @@ export default function App() {
       return;
     }
 
+    // Skip outbound sync if we are applying an inbound remote mutation from Sanity
+    if (isRemoteMutationInProgressRef.current) {
+      return;
+    }
+
     if (debouncedSanityTasksRef.current) {
       clearTimeout(debouncedSanityTasksRef.current);
     }
@@ -2036,6 +2048,79 @@ export default function App() {
       }
     };
   }, [markdownInput]);
+
+  // Sanity Live Bidirectional Listener: receives mutations from Sanity Content Lake
+  useEffect(() => {
+    const config = getSanityConfig();
+    if (!config.projectId || !config.dataset) {
+      setIsLiveSyncActive(false);
+      return;
+    }
+
+    setIsLiveSyncActive(true);
+
+    const unsubscribe = subscribeToSanityLiveChanges((event: SanityLiveChangeEvent) => {
+      setLastLiveSyncAt(new Date().toLocaleTimeString());
+
+      if (event.type === 'task' && event.document) {
+        const taskDoc = event.document;
+        const targetId = taskDoc.taskId || (taskDoc._id ? taskDoc._id.replace(/^task-/, '') : null);
+        if (!targetId) return;
+
+        const currentMd = markdownRef.current;
+        const { taskBlocks } = scanTaskBlocks(currentMd);
+        const existing = taskBlocks.find(
+          (b) =>
+            (b.detectedId && b.detectedId.toLowerCase() === targetId.toLowerCase()) ||
+            b.temporaryId.toLowerCase() === targetId.toLowerCase()
+        );
+
+        if (existing) {
+          const isDone = taskDoc.status === 'done' || Boolean(taskDoc.completed);
+          const currentIsDone =
+            existing.rawTaskLine.includes('[x]') || existing.rawTaskLine.includes('[X]');
+          const currentTitle = existing.detectedTitle;
+          const currentPriority = existing.detectedPriority || 'P1';
+          const newPriority = taskDoc.priority || 'P1';
+
+          if (
+            isDone !== currentIsDone ||
+            (taskDoc.title && taskDoc.title !== currentTitle) ||
+            newPriority !== currentPriority
+          ) {
+            isRemoteMutationInProgressRef.current = true;
+            const updated = updateTaskInMarkdown(currentMd, targetId, {
+              title: taskDoc.title || currentTitle,
+              completed: isDone,
+              priority: newPriority,
+              status: taskDoc.status || (isDone ? 'done' : 'todo'),
+            });
+            setMarkdownInput(updated);
+            setSyncStatus('synced');
+            pushToast(`Sanity: Tarea #${targetId} sincronizada en vivo`, 'info');
+            setTimeout(() => {
+              isRemoteMutationInProgressRef.current = false;
+            }, 1800);
+          }
+        } else if (event.transition === 'appear') {
+          pushToast(
+            `Sanity Studio: Nueva tarea "${taskDoc.title || targetId}" creada remotamente`,
+            'info'
+          );
+        }
+      } else if (event.type === 'workspace' && event.document) {
+        pushToast(
+          `Sanity: Espacio de trabajo "${event.document.name || 'Workspace'}" sincronizado`,
+          'info'
+        );
+      }
+    });
+
+    return () => {
+      unsubscribe();
+      setIsLiveSyncActive(false);
+    };
+  }, [pushToast]);
 
   const handleImportTaskFromSanity = useCallback(
     (taskDoc: any) => {
@@ -2646,20 +2731,59 @@ export default function App() {
               <span className="hidden xl:inline">Kanban</span>
             </button>
 
-            <button
-              type="button"
-              onClick={() => setActiveView('studio')}
-              className={`px-2.5 py-1 rounded-full text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer ${
-                activeView === 'studio'
-                  ? 'bg-[var(--primary)] text-[var(--on-primary)] shadow-xs'
-                  : 'text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]'
-              }`}
-              title="Sanity Studio: Explorar y editar documentos _type: 'task'"
-            >
-              <span className="material-symbols-outlined text-[16px] text-rose-400">cloud_sync</span>
-              <span className="hidden xl:inline">Studio</span>
-            </button>
+            <div className="flex items-center gap-0.5">
+              <button
+                type="button"
+                onClick={() => setActiveView('studio')}
+                className={`px-2.5 py-1 rounded-full text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer ${
+                  activeView === 'studio'
+                    ? 'bg-[var(--primary)] text-[var(--on-primary)] shadow-xs'
+                    : 'text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]'
+                }`}
+                title="Sanity Studio: Pestaña nativa para explorar y editar documentos de contenido"
+              >
+                <span className="material-symbols-outlined text-[16px] text-rose-400">cloud_sync</span>
+                <span className="hidden xl:inline">Studio</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsNativeStudioModalOpen(true)}
+                className="p-1 rounded-full text-[var(--on-surface-variant)] hover:text-rose-400 hover:bg-[var(--surface-container-high)] transition cursor-pointer"
+                title="Abrir Sanity Studio Nativo en ventana flotante / modal (Shift+S)"
+              >
+                <span className="material-symbols-outlined text-[14px]">open_in_new</span>
+              </button>
+            </div>
           </div>
+
+          {/* Sanity Live Bidirectional Sync Status Badge & Action */}
+          <button
+            type="button"
+            onClick={() => setIsSyncOverrideModalOpen(true)}
+            className={`hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border transition cursor-pointer ${
+              isLiveSyncActive
+                ? 'bg-emerald-950/70 border-emerald-800 text-emerald-300 hover:bg-emerald-900/60'
+                : 'bg-[var(--surface-container)] border-[var(--outline)] text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]'
+            }`}
+            title={
+              isLiveSyncActive
+                ? `Sincronía bidireccional Sanity activa en vivo. Última actualización: ${lastLiveSyncAt || 'Conectado'}. Clic para comparar diferencias y sincronizar.`
+                : 'Configurar sincronización bidireccional con Sanity'
+            }
+          >
+            <span
+              className={`w-2 h-2 rounded-full ${
+                isLiveSyncActive ? 'bg-emerald-400 animate-pulse' : 'bg-neutral-500'
+              }`}
+            />
+            <span className="hidden 2xl:inline">
+              {isLiveSyncActive ? 'Sincronía Bidireccional' : 'Sanity Desconectado'}
+            </span>
+            <span className="material-symbols-outlined text-[14px] text-[var(--on-surface-variant)]">
+              sync_alt
+            </span>
+          </button>
 
           <div className="relative w-full hidden lg:block max-w-[180px] xl:max-w-[220px]">
             <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[16px] text-[var(--on-surface-variant)] pointer-events-none">

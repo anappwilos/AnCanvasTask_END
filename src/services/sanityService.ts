@@ -650,6 +650,82 @@ export async function fetchSanityDocumentById(
   }
 }
 
+export interface SanityLiveChangeEvent {
+  type: 'task' | 'workspace' | 'canvasVisualState' | 'other';
+  transition: 'appear' | 'update' | 'disappear';
+  documentId: string;
+  document?: any;
+}
+
+/**
+ * Subscribes to real-time document mutations from Sanity Content Lake.
+ * Automatically receives live updates created in Sanity Studio Embed, Sanity Cloud,
+ * or other clients, enabling true bidirectional live synchronization.
+ */
+export function subscribeToSanityLiveChanges(
+  onMutation: (event: SanityLiveChangeEvent) => void,
+  configOverride?: Partial<SanityConfig>
+): () => void {
+  const config = { ...getSanityConfig(), ...configOverride };
+  if (!config.projectId || !config.dataset) {
+    return () => {};
+  }
+
+  try {
+    const client = createClient({
+      projectId: config.projectId,
+      dataset: config.dataset,
+      apiVersion: config.apiVersion || '2024-03-01',
+      token: config.token || undefined,
+      useCdn: false,
+    });
+
+    const subscription = client
+      .listen(
+        `*[_type in ["task", "workspace", "canvasVisualState"]]`,
+        {},
+        { includeResult: true, visibility: 'query' }
+      )
+      .subscribe({
+        next: (update: any) => {
+          if (!update) return;
+          const doc = update.result;
+          let docType: 'task' | 'workspace' | 'canvasVisualState' | 'other' = 'other';
+          if (doc?._type) {
+            docType = doc._type as any;
+          } else if (update.documentId?.startsWith('task-')) {
+            docType = 'task';
+          } else if (update.documentId?.startsWith('workspace-')) {
+            docType = 'workspace';
+          } else if (update.documentId === 'canvas-visual-state' || update.documentId?.includes('canvasVisualState')) {
+            docType = 'canvasVisualState';
+          }
+
+          onMutation({
+            type: docType,
+            transition: update.transition,
+            documentId: update.documentId,
+            document: doc,
+          });
+        },
+        error: (err: any) => {
+          console.warn('Sanity live subscription warning:', err);
+        },
+      });
+
+    return () => {
+      try {
+        subscription.unsubscribe();
+      } catch {
+        // ignore cleanup errors
+      }
+    };
+  } catch (err) {
+    console.warn('Could not initialize Sanity live listener:', err);
+    return () => {};
+  }
+}
+
 /**
  * Extracts current visual positions and dimensions of all task cards and groups from tldraw editor.
  */
