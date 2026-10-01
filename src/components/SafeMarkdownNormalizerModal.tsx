@@ -429,11 +429,20 @@ export function SafeMarkdownNormalizerModal({
             {/* Changes List */}
             <div className="flex-1 overflow-y-auto p-2 space-y-2">
               {filteredChanges.length === 0 ? (
-                <div className="p-6 text-center text-xs text-[var(--on-surface-variant)]">
-                  <span className="material-symbols-outlined text-[28px] opacity-40 mb-1">
+                <div className="p-6 text-center text-xs text-[var(--on-surface-variant)] flex flex-col items-center justify-center h-48">
+                  <span className="material-symbols-outlined text-[32px] text-emerald-400/80 mb-2">
                     check_circle
                   </span>
-                  <p>No hay cambios en esta categoría.</p>
+                  <p className="font-medium text-[var(--on-surface)]">
+                    {changes.length === 0
+                      ? 'Documento ya normalizado'
+                      : 'Sin cambios en esta categoría'}
+                  </p>
+                  <p className="text-[11px] text-[var(--on-surface-variant)] mt-1 max-w-[200px]">
+                    {changes.length === 0
+                      ? 'El archivo cumple todas las normas de formato y estructura.'
+                      : 'Selecciona otro filtro para revisar los cambios restantes.'}
+                  </p>
                 </div>
               ) : (
                 filteredChanges.map((change) => {
