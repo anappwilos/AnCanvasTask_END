@@ -40,6 +40,7 @@ import { SettingsModal } from './components/SettingsModal';
 import { ImportExportModal } from './components/ImportExportModal';
 import { SanityConfigModal } from './components/SanityConfigModal';
 import { SanityStudio } from './components/SanityStudio';
+import { SanityStudioEmbed } from './components/SanityStudioEmbed';
 import { WorkspaceSelector } from './components/WorkspaceSelector';
 import { TaskDocumentExplorer } from './components/TaskDocumentExplorer';
 import { WorkspaceManagerModal } from './components/WorkspaceManagerModal';
@@ -256,6 +257,7 @@ export default function App() {
   const [isNewTaskModalOpen, setIsNewTaskModalOpen] = useState<boolean>(false);
   const [isViewMarkdownOpen, setIsViewMarkdownOpen] = useState<boolean>(false);
   const [isSanityModalOpen, setIsSanityModalOpen] = useState<boolean>(false);
+  const [isNativeStudioModalOpen, setIsNativeStudioModalOpen] = useState<boolean>(false);
   const [isSyncOverrideModalOpen, setIsSyncOverrideModalOpen] = useState<boolean>(false);
   const [isAutoLayoutConfirmOpen, setIsAutoLayoutConfirmOpen] = useState<boolean>(false);
   const [isProblemsModalOpen, setIsProblemsModalOpen] = useState<boolean>(false);
@@ -2312,6 +2314,26 @@ export default function App() {
         },
       },
       {
+        id: 'view-sanity-studio',
+        title: 'Cambiar a vista Sanity Studio (Nativo / SDK)',
+        shortcut: 'S',
+        icon: 'cloud_sync',
+        category: 'view',
+        perform: () => {
+          setActiveView('studio');
+        },
+      },
+      {
+        id: 'open-sanity-studio-embed',
+        title: 'Abrir Sanity Studio Nativo Embebido (Ventana Modal)',
+        shortcut: '⇧S',
+        icon: 'dataset',
+        category: 'action',
+        perform: () => {
+          setIsNativeStudioModalOpen(true);
+        },
+      },
+      {
         id: 'auto-organize',
         title: 'Auto organizar Canvas jerárquicamente (DAG)',
         shortcut: 'A',
@@ -3083,6 +3105,16 @@ export default function App() {
               >
                 <span className="material-symbols-outlined text-[18px]">cloud_sync</span>
                 <span>Abrir Sanity Studio</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsNativeStudioModalOpen(true)}
+                className="btn-m3-text w-full py-1.5 text-xs justify-start px-2 cursor-pointer text-rose-300"
+                title="Abrir interfaz nativa completa de Sanity Studio en ventana flotante"
+              >
+                <span className="material-symbols-outlined text-[18px]">dataset</span>
+                <span>Studio Embebido (Modal)</span>
               </button>
 
               <button
@@ -4282,6 +4314,23 @@ export default function App() {
         onShowToast={pushToast}
         onSyncAllToSanity={handleSyncAllTasksToSanity}
       />
+
+      {/* Modal: Sanity Studio Nativo Embebido (Formularios y Esquemas en vivo) */}
+      {isNativeStudioModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4">
+          <div className="w-full max-w-6xl h-[90vh] bg-neutral-950 border border-neutral-800 rounded-lg shadow-2xl overflow-hidden flex flex-col">
+            <SanityStudioEmbed
+              isModal={true}
+              onClose={() => setIsNativeStudioModalOpen(false)}
+              onOpenSanityConfig={() => {
+                setIsNativeStudioModalOpen(false);
+                setIsSanityModalOpen(true);
+              }}
+              onShowToast={pushToast}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Global Command Palette & Search Modal (Ctrl/Cmd + K) */}
       <CommandPalette

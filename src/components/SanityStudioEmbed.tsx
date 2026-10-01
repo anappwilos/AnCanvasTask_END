@@ -1,0 +1,192 @@
+import React, { useState, useMemo, useEffect } from 'react';
+import { Studio, defineConfig } from 'sanity';
+import { structureTool } from 'sanity/structure';
+import { visionTool } from '@sanity/vision';
+import 'sanity/bundle.css';
+import { schemaTypes } from '../sanity/schemas';
+import { getSanityConfig, SanityConfig } from '../services/sanityService';
+import {
+  ExternalLink,
+  Settings,
+  Maximize2,
+  Minimize2,
+  X,
+  Layers,
+  Sparkles,
+  Database,
+  AlertCircle,
+  RefreshCw,
+} from 'lucide-react';
+
+export interface SanityStudioEmbedProps {
+  onOpenSanityConfig: () => void;
+  onClose?: () => void;
+  isModal?: boolean;
+  onShowToast?: (msg: string, type?: 'success' | 'info' | 'warning' | 'error') => void;
+}
+
+export const SanityStudioEmbed: React.FC<SanityStudioEmbedProps> = ({
+  onOpenSanityConfig,
+  onClose,
+  isModal = false,
+  onShowToast,
+}) => {
+  const [config, setConfig] = useState<SanityConfig>(() => getSanityConfig());
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const [renderKey, setRenderKey] = useState<number>(0);
+
+  // Listen for config updates
+  useEffect(() => {
+    const handleUpdate = () => {
+      setConfig(getSanityConfig());
+      setRenderKey((k) => k + 1);
+    };
+    window.addEventListener('antask_sanity_config_updated', handleUpdate);
+    return () => {
+      window.removeEventListener('antask_sanity_config_updated', handleUpdate);
+    };
+  }, []);
+
+  const isConfigured = Boolean(config.projectId && config.dataset);
+
+  const studioConfig = useMemo(() => {
+    const projectId = config.projectId?.trim() || 'or19faat';
+    const dataset = config.dataset?.trim() || 'production';
+
+    return defineConfig({
+      name: 'antask-studio',
+      title: 'AnTask Canvas Content Studio',
+      projectId,
+      dataset,
+      basePath: '/',
+      plugins: [
+        structureTool({
+          title: 'Contenido',
+        }),
+        visionTool({
+          title: 'Vision (GROQ)',
+          defaultApiVersion: config.apiVersion || '2024-03-01',
+          defaultDataset: dataset,
+        }),
+      ],
+      schema: {
+        types: schemaTypes,
+      },
+    });
+  }, [config.projectId, config.dataset, config.apiVersion, renderKey]);
+
+  if (!isConfigured) {
+    return (
+      <div className="flex-1 h-full flex flex-col items-center justify-center p-8 text-center bg-neutral-950 text-neutral-200">
+        <div className="w-14 h-14 rounded-2xl bg-rose-950/80 border border-rose-800/60 flex items-center justify-center text-rose-400 mb-3 shadow-md">
+          <Database className="w-7 h-7" />
+        </div>
+        <h2 className="text-base font-semibold text-neutral-100 mb-1">
+          Sanity Studio Nativo no configurado
+        </h2>
+        <p className="text-xs text-neutral-400 max-w-md mb-4 leading-relaxed">
+          Para cargar la interfaz nativa de Sanity Studio con formularios enriquecidos y validación de esquemas en tiempo real, configura tu Project ID y Dataset.
+        </p>
+        <button
+          onClick={onOpenSanityConfig}
+          className="px-4 py-2 bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-medium transition cursor-pointer"
+        >
+          Configurar Credenciales de Sanity
+        </button>
+      </div>
+    );
+  }
+
+  const containerClasses = isFullscreen
+    ? 'fixed inset-0 z-50 flex flex-col bg-neutral-950'
+    : isModal
+    ? 'flex-1 h-full flex flex-col bg-neutral-950 overflow-hidden'
+    : 'flex-1 h-full flex flex-col bg-neutral-950 overflow-hidden';
+
+  return (
+    <div className={containerClasses}>
+      {/* Native Studio Control Bar */}
+      <div className="px-3.5 py-2 bg-neutral-900 border-b border-neutral-800 flex items-center justify-between gap-3 shrink-0 select-none">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="w-6 h-6 rounded bg-rose-600 flex items-center justify-center text-white font-bold text-xs shadow-xs shrink-0">
+            S
+          </div>
+          <div className="flex flex-col min-w-0">
+            <div className="flex items-center gap-1.5">
+              <span className="font-semibold text-xs text-neutral-100 truncate">
+                Sanity Studio Nativo Embebido
+              </span>
+              <span className="px-1.5 py-0.2 rounded text-[10px] font-mono bg-rose-950 border border-rose-800 text-rose-300">
+                v6.17
+              </span>
+            </div>
+            <span className="text-[10px] font-mono text-neutral-400 truncate">
+              {config.projectId} · dataset: {config.dataset}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-1.5 shrink-0">
+          <button
+            type="button"
+            onClick={() => setRenderKey((k) => k + 1)}
+            className="p-1.5 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800 rounded transition cursor-pointer"
+            title="Recargar Sanity Studio"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIsFullscreen(!isFullscreen)}
+            className="p-1.5 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800 rounded transition cursor-pointer"
+            title={isFullscreen ? 'Salir de pantalla completa' : 'Pantalla completa'}
+          >
+            {isFullscreen ? (
+              <Minimize2 className="w-3.5 h-3.5" />
+            ) : (
+              <Maximize2 className="w-3.5 h-3.5" />
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={onOpenSanityConfig}
+            className="px-2.5 py-1 text-xs bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700 flex items-center gap-1 transition cursor-pointer"
+            title="Configurar credenciales de Sanity"
+          >
+            <Settings className="w-3 h-3 text-neutral-400" />
+            <span className="hidden sm:inline">Ajustes</span>
+          </button>
+
+          <a
+            href={`https://${config.projectId}.sanity.studio/`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-2.5 py-1 text-xs bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700 flex items-center gap-1 transition cursor-pointer"
+            title="Abrir Studio hosteado en Sanity Cloud"
+          >
+            <span className="hidden sm:inline">Studio Cloud</span>
+            <ExternalLink className="w-3 h-3 text-neutral-400" />
+          </a>
+
+          {onClose && (
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-1.5 text-neutral-400 hover:text-rose-400 hover:bg-neutral-800 rounded transition cursor-pointer"
+              title="Cerrar Studio"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Embedded Sanity Studio Engine */}
+      <div className="flex-1 w-full h-full overflow-hidden relative">
+        <Studio key={renderKey} config={studioConfig} scheme="dark" />
+      </div>
+    </div>
+  );
+};

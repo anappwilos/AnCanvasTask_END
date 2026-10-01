@@ -36,6 +36,7 @@ import {
 export interface SanitySdkExplorerProps {
   onOpenSanityConfig: () => void;
   onSwitchToDeskTool?: () => void;
+  onSwitchToNativeStudio?: () => void;
   onImportTaskToMarkdown?: (task: any) => void;
   onActivateWorkspace?: (workspace: any) => void;
   onShowToast: (msg: string, type?: 'success' | 'info' | 'warning' | 'error') => void;
@@ -546,6 +547,7 @@ function SdkExplorerInner({
   config,
   onOpenSanityConfig,
   onSwitchToDeskTool,
+  onSwitchToNativeStudio,
   onImportTaskToMarkdown,
   onActivateWorkspace,
   onShowToast,
@@ -553,6 +555,7 @@ function SdkExplorerInner({
   config: SanityConfig;
   onOpenSanityConfig: () => void;
   onSwitchToDeskTool?: () => void;
+  onSwitchToNativeStudio?: () => void;
   onImportTaskToMarkdown?: (task: any) => void;
   onActivateWorkspace?: (workspace: any) => void;
   onShowToast: (msg: string, type?: any) => void;
@@ -607,14 +610,24 @@ function SdkExplorerInner({
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          {onSwitchToNativeStudio && (
+            <button
+              onClick={onSwitchToNativeStudio}
+              className="px-3 py-1.5 text-xs bg-rose-950 hover:bg-rose-900 text-rose-200 border border-rose-800/80 flex items-center gap-1.5 transition cursor-pointer"
+              title="Abrir interfaz nativa de Sanity Studio con formularios enriquecidos"
+            >
+              <div className="w-3.5 h-3.5 rounded bg-rose-600 flex items-center justify-center text-white font-bold text-[9px]">S</div>
+              <span>Studio Nativo Embebido</span>
+            </button>
+          )}
           {onSwitchToDeskTool && (
             <button
               onClick={onSwitchToDeskTool}
-              className="px-3 py-1.5 text-xs bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700 flex items-center gap-1.5 transition"
+              className="px-3 py-1.5 text-xs bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700 flex items-center gap-1.5 transition cursor-pointer"
               title="Abrir el Desk Tool clásico de 3 paneles"
             >
-              <Layers className="w-3.5 h-3.5 text-rose-400" />
+              <Layers className="w-3.5 h-3.5 text-neutral-400" />
               <span>Desk Tool Clásico</span>
             </button>
           )}
@@ -826,6 +839,7 @@ function SdkExplorerInner({
 export const SanitySdkExplorer: React.FC<SanitySdkExplorerProps> = ({
   onOpenSanityConfig,
   onSwitchToDeskTool,
+  onSwitchToNativeStudio,
   onImportTaskToMarkdown,
   onActivateWorkspace,
   onShowToast,
@@ -924,6 +938,7 @@ export const SanitySdkExplorer: React.FC<SanitySdkExplorerProps> = ({
           config={config}
           onOpenSanityConfig={onOpenSanityConfig}
           onSwitchToDeskTool={onSwitchToDeskTool}
+          onSwitchToNativeStudio={onSwitchToNativeStudio}
           onImportTaskToMarkdown={onImportTaskToMarkdown}
           onActivateWorkspace={onActivateWorkspace}
           onShowToast={onShowToast}

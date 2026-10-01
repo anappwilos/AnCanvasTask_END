@@ -17,6 +17,7 @@
     "@google/genai": "^2.4.0",
     "@sanity/client": "^8.7.0",
     "@sanity/sdk-react": "^3.7.0",
+    "@sanity/vision": "^6.17.0",
     "@tailwindcss/vite": "^4.3.3",
     "@types/dagre": "^0.7.54",
     "@uiw/react-codemirror": "^4.25.12",
@@ -28,6 +29,8 @@
     "motion": "^12.23.24",
     "react": "^19.0.1",
     "react-dom": "^19.0.1",
+    "sanity": "^6.17.0",
+    "styled-components": "^6.5.3",
     "tldraw": "^5.4.2",
     "vite": "^8.3.0"
   },
