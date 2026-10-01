@@ -34,6 +34,7 @@ export function SafeMarkdownNormalizerModal({
   const [changes, setChanges] = useState<NormalizedChange[]>([]);
   const [selectedFilter, setSelectedFilter] = useState<FilterTab>('all');
   const [renderSideBySide, setRenderSideBySide] = useState<boolean>(true);
+  const [showInvisibles, setShowInvisibles] = useState<boolean>(true);
   const [hasAcknowledgedRisk, setHasAcknowledgedRisk] = useState<boolean>(false);
   const [selectedChangeId, setSelectedChangeId] = useState<string | null>(null);
   const diffEditorRef = useRef<any>(null);
@@ -192,6 +193,26 @@ export function SafeMarkdownNormalizerModal({
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Toggle Hidden / Invisible Characters */}
+            <button
+              type="button"
+              onClick={() => setShowInvisibles((prev) => !prev)}
+              className={`px-2 py-0.5 rounded text-[11px] font-mono border cursor-pointer transition-colors flex items-center gap-1 ${
+                showInvisibles
+                  ? 'bg-[var(--primary)] text-[var(--on-primary)] border-[var(--primary)] font-medium shadow-xs'
+                  : 'bg-[var(--surface)] text-[var(--on-surface-variant)] border-[var(--outline)] hover:text-[var(--on-surface)]'
+              }`}
+              title={
+                showInvisibles
+                  ? 'Ocultar caracteres invisibles (espacios, tabs, saltos de línea)'
+                  : 'Mostrar caracteres ocultos (espacios, tabs, saltos de línea)'
+              }
+              aria-label="Alternar caracteres ocultos"
+            >
+              <span className="font-bold text-[11px] leading-none">¶</span>
+              <span className="hidden sm:inline">Invisibles</span>
+            </button>
+
             {/* View Mode Toggle */}
             <div className="flex items-center bg-[var(--surface)] p-0.5 rounded border border-[var(--outline)] text-[11px]">
               <button
@@ -458,6 +479,12 @@ export function SafeMarkdownNormalizerModal({
                 options={{
                   readOnly: true,
                   renderSideBySide: renderSideBySide,
+                  renderWhitespace: showInvisibles ? 'all' : 'selection',
+                  renderControlCharacters: showInvisibles,
+                  unicodeHighlight: {
+                    invisibleCharacters: showInvisibles,
+                    ambiguousCharacters: true,
+                  },
                   minimap: { enabled: false },
                   scrollBeyondLastLine: false,
                   fontSize: 13,
