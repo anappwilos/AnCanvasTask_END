@@ -54,6 +54,7 @@ import { RenameDocumentModal } from './components/RenameDocumentModal';
 import { NewFolderModal } from './components/NewFolderModal';
 import { RenameFolderModal } from './components/RenameFolderModal';
 import { MarkdownSplitEditor } from './components/MarkdownSplitEditor';
+import { SafeMarkdownNormalizerModal } from './components/SafeMarkdownNormalizerModal';
 import {
   loadWorkspaceStore,
   saveWorkspaceStore,
@@ -265,6 +266,7 @@ export default function App() {
   const [isProblemsModalOpen, setIsProblemsModalOpen] = useState<boolean>(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const [isQuickGuideOpen, setIsQuickGuideOpen] = useState<boolean>(false);
+  const [isSafeNormalizerOpen, setIsSafeNormalizerOpen] = useState<boolean>(false);
   const [deleteWarningState, setDeleteWarningState] = useState<DeleteWarningInfo | null>(null);
 
   // Operations and Loading state (DESIGN.md Section 1 & 3)
@@ -2498,6 +2500,16 @@ export default function App() {
         },
       },
       {
+        id: 'safe-normalize-markdown',
+        title: 'Normalizar Markdown (Normalización Segura con Diff Git)',
+        shortcut: '⇧⌘N',
+        icon: 'verified',
+        category: 'action',
+        perform: () => {
+          setIsSafeNormalizerOpen(true);
+        },
+      },
+      {
         id: 'quick-guide',
         title: 'Guía rápida y atajos de teclado',
         shortcut: '?',
@@ -2828,6 +2840,17 @@ export default function App() {
           )}
 
 
+
+          {/* Normalización Segura de Markdown Button */}
+          <button
+            type="button"
+            onClick={() => setIsSafeNormalizerOpen(true)}
+            className="hidden sm:flex px-2 sm:px-2.5 py-1 text-xs font-medium rounded-full border items-center gap-1 transition-colors cursor-pointer bg-sky-950/60 text-sky-300 border-sky-800/80 hover:bg-sky-900/80 shadow-xs"
+            title="Normalización segura de Markdown (Diff Git, remark/unified y prevención de pérdida)"
+          >
+            <span className="material-symbols-outlined text-[15px] text-sky-400">verified</span>
+            <span className="hidden xl:inline">Normalizar .md</span>
+          </button>
 
           {/* Split View Toggle */}
           <button
@@ -3609,6 +3632,7 @@ export default function App() {
                   onShowToast={pushToast}
                   splitRatio={splitRatio}
                   onChangeSplitRatio={handleSetSplitRatio}
+                  onOpenNormalizer={() => setIsSafeNormalizerOpen(true)}
                 />
               </div>
             )}
@@ -4582,6 +4606,19 @@ export default function App() {
         currentFolder={renameFolderModalState.currentFolder}
         docCount={renameFolderModalState.docCount}
         onRenameFolder={handleRenameFolder}
+        onShowToast={pushToast}
+      />
+
+      {/* Modal: Normalización Segura de Markdown (Diff Git + remark/unified + Prevención de Pérdidas) */}
+      <SafeMarkdownNormalizerModal
+        isOpen={isSafeNormalizerOpen}
+        documentTitle={currentFileName}
+        originalMarkdown={markdownInput}
+        theme={effectiveTheme}
+        onClose={() => setIsSafeNormalizerOpen(false)}
+        onApply={(confirmedMarkdown) => {
+          handleMarkdownEditorChange(confirmedMarkdown);
+        }}
         onShowToast={pushToast}
       />
     </div>

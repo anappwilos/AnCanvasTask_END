@@ -23,6 +23,7 @@ export const QuickGuideModal: React.FC<QuickGuideModalProps> = ({
     { key: 'T', label: 'Alternar tema claro / oscuro' },
     { key: 'P', label: 'Ver problemas de sintaxis y diagnóstico' },
     { key: 'M', label: 'Ver archivo TASKS.md en vivo' },
+    { key: '⌘ / Ctrl + ⇧ + N', label: 'Normalización segura de Markdown (Diff Git)' },
     { key: 'ESC', label: 'Limpiar filtros activos o cerrar modal' },
   ];
 

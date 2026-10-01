@@ -8,6 +8,7 @@ import {
   MarkdownValidationReport,
   validateMarkdownDocument,
 } from '../utils/markdownSync';
+import { SafeMarkdownNormalizerModal } from './SafeMarkdownNormalizerModal';
 
 interface MarkdownSplitEditorProps {
   value: string;
@@ -19,6 +20,7 @@ interface MarkdownSplitEditorProps {
   onShowToast: (msg: string, type?: 'info' | 'success' | 'warning' | 'error') => void;
   splitRatio: number;
   onChangeSplitRatio?: (ratio: number) => void;
+  onOpenNormalizer?: () => void;
 }
 
 export function MarkdownSplitEditor({
@@ -31,10 +33,12 @@ export function MarkdownSplitEditor({
   onShowToast,
   splitRatio,
   onChangeSplitRatio,
+  onOpenNormalizer,
 }: MarkdownSplitEditorProps) {
   const editorRef = useRef<ReactCodeMirrorRef>(null);
   const [copied, setCopied] = useState(false);
   const [showIssuesPanel, setShowIssuesPanel] = useState(false);
+  const [isLocalNormalizerOpen, setIsLocalNormalizerOpen] = useState(false);
   const [cursorPos, setCursorPos] = useState<{ line: number; col: number }>({ line: 1, col: 1 });
   const [isTyping, setIsTyping] = useState(false);
   const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -128,31 +132,14 @@ export function MarkdownSplitEditor({
     }
   }, [value, onShowToast]);
 
-  // Format and clean markdown
-  const handleFormatMarkdown = useCallback(() => {
-    const lines = value.split(/\r?\n/);
-    const cleaned: string[] = [];
-    let prevEmpty = false;
-
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      const trimmed = line.trim();
-
-      if (trimmed === '') {
-        if (!prevEmpty && cleaned.length > 0) {
-          cleaned.push('');
-          prevEmpty = true;
-        }
-      } else {
-        prevEmpty = false;
-        cleaned.push(line.replace(/\s+$/, ''));
-      }
+  // Open safe normalization dialog
+  const handleOpenNormalizer = useCallback(() => {
+    if (onOpenNormalizer) {
+      onOpenNormalizer();
+    } else {
+      setIsLocalNormalizerOpen(true);
     }
-
-    const formatted = cleaned.join('\n').trim() + '\n';
-    onChange(formatted);
-    onShowToast('Markdown formateado y normalizado', 'info');
-  }, [value, onChange, onShowToast]);
+  }, [onOpenNormalizer]);
 
   // CodeMirror extensions
   const extensions = useMemo(() => {
@@ -245,15 +232,16 @@ export function MarkdownSplitEditor({
             </div>
           )}
 
-          {/* Format button */}
+          {/* Normalización Segura button */}
           <button
             type="button"
-            onClick={handleFormatMarkdown}
-            className="btn-m3-icon w-7 h-7 text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] cursor-pointer"
-            title="Formatear y alinear Markdown"
-            aria-label="Format Markdown"
+            onClick={handleOpenNormalizer}
+            className="px-2 py-0.5 rounded text-[11px] font-semibold bg-sky-950/60 text-sky-300 border border-sky-800/80 hover:bg-sky-900/80 cursor-pointer transition-colors flex items-center gap-1 shadow-xs"
+            title="Normalización segura de Markdown (Diff Git, AST y prevención de pérdidas)"
+            aria-label="Normalización segura"
           >
-            <span className="material-symbols-outlined text-[15px]">format_align_left</span>
+            <span className="material-symbols-outlined text-[14px] text-sky-400">verified</span>
+            <span className="hidden sm:inline">Normalizar</span>
           </button>
 
           {/* Copy Markdown */}
@@ -506,6 +494,21 @@ export function MarkdownSplitEditor({
           <span className="hidden md:inline">Markdown</span>
         </div>
       </div>
+
+      {/* Safe Markdown Normalizer Modal */}
+      {isLocalNormalizerOpen && (
+        <SafeMarkdownNormalizerModal
+          isOpen={isLocalNormalizerOpen}
+          documentTitle={fileName}
+          originalMarkdown={value}
+          theme={theme}
+          onClose={() => setIsLocalNormalizerOpen(false)}
+          onApply={(normalizedMd) => {
+            onChange(normalizedMd);
+          }}
+          onShowToast={onShowToast}
+        />
+      )}
     </aside>
   );
 }
