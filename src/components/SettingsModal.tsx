@@ -64,14 +64,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   };
 
   const sectionsList: Array<{ id: SettingsSection; label: string; icon: string; desc: string }> = [
-    { id: 'general', label: 'General', icon: 'settings', desc: 'Vista inicial y confirmaciones' },
-    { id: 'appearance', label: 'Apariencia', icon: 'palette', desc: 'Tema y densidad visual' },
-    { id: 'workspace', label: 'Workspace', icon: 'space_dashboard', desc: 'Comportamiento de paneles' },
-    { id: 'canvas', label: 'Canvas', icon: 'grid_view', desc: 'Cuadrícula, zoom y snapping' },
-    { id: 'kanban', label: 'Kanban', icon: 'view_kanban', desc: 'Columnas, etiquetas y checklist' },
-    { id: 'files', label: 'Archivos', icon: 'folder_open', desc: 'Historial reciente y nube' },
-    { id: 'accessibility', label: 'Accesibilidad', icon: 'accessibility_new', desc: 'Movimiento y atajos' },
-    { id: 'advanced', label: 'Avanzado', icon: 'tune', desc: 'Zona de mantenimiento y reset' },
+    { id: 'general', label: t('settings.sections.general'), icon: 'settings', desc: 'Vista inicial y confirmaciones' },
+    { id: 'appearance', label: t('settings.sections.appearance'), icon: 'palette', desc: 'Tema y densidad visual' },
+    { id: 'workspace', label: t('settings.sections.workspace'), icon: 'space_dashboard', desc: 'Comportamiento de paneles' },
+    { id: 'canvas', label: t('settings.sections.canvas'), icon: 'grid_view', desc: 'Cuadrícula, zoom y snapping' },
+    { id: 'kanban', label: t('settings.sections.kanban'), icon: 'view_kanban', desc: 'Columnas, etiquetas y checklist' },
+    { id: 'files', label: t('settings.sections.files'), icon: 'folder_open', desc: 'Historial reciente y nube' },
+    { id: 'accessibility', label: t('settings.sections.accessibility'), icon: 'accessibility_new', desc: 'Movimiento y atajos' },
+    { id: 'advanced', label: t('settings.sections.advanced'), icon: 'tune', desc: 'Zona de mantenimiento y reset' },
   ];
 
   const filteredSections = searchFilter.trim()
@@ -103,12 +103,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <span className="material-symbols-outlined text-[17px]">settings</span>
             </div>
             <div>
-              <h2 id="settings-dialog-title" className="text-sm font-semibold text-[var(--on-surface)]">
-                Configuración & Preferencias
-              </h2>
-              <p className="text-[11px] text-[var(--on-surface-variant)]">
-                Personaliza la interfaz, el comportamiento del espacio de trabajo y persistencia
-              </p>
+              <h2 id="settings-dialog-title" className="text-sm font-semibold text-[var(--on-surface)]">{t('settings.title')}</h2>
+              <p className="text-[11px] text-[var(--on-surface-variant)]">{t('settings.subtitle')}</p>
             </div>
           </div>
 
@@ -198,7 +194,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             {activeSection === 'general' && (
               <div className="flex flex-col gap-3">
                 <div>
-                  <h3 className="text-sm font-semibold text-[var(--on-surface)]">General</h3>
+                  <h3 className="text-sm font-semibold text-[var(--on-surface)]">{t('settings.sections.general')}</h3>
                   <p className="text-[var(--on-surface-variant)] mt-0.5">
                     Comportamiento inicial y confirmaciones de seguridad
                   </p>
@@ -232,8 +228,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 {/* Default View */}
                 <div className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between gap-4">
                   <div className="flex flex-col gap-0.5">
-                    <span className="font-medium text-[var(--on-surface)]">Vista inicial al abrir</span>
-                    <span className="text-[var(--on-surface-variant)] text-[11px]">Selecciona el modo predeterminado de inicio</span>
+                    <span className="font-medium text-[var(--on-surface)]">{t('settings.defaultView')}</span>
+                    <span className="text-[var(--on-surface-variant)] text-[11px]">{t('settings.defaultViewDesc')}</span>
                   </div>
                   <select
                     value={settings.defaultView}
@@ -248,9 +244,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 {/* Confirm Delete with Dependents */}
                 <div className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between gap-4">
                   <div className="flex flex-col gap-0.5">
-                    <span className="font-medium text-[var(--on-surface)]">Confirmar eliminación con dependencias</span>
+                    <span className="font-medium text-[var(--on-surface)]">{t('settings.confirmDelete')}</span>
                     <span className="text-[var(--on-surface-variant)] text-[11px]">
-                      Avisa con diálogo explícito si la tarea eliminada bloquea a otras tareas
+                      {t('settings.confirmDeleteDesc')}
                     </span>
                   </div>
                   <input
@@ -267,7 +263,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             {activeSection === 'appearance' && (
               <div className="flex flex-col gap-4">
                 <div>
-                  <h3 className="text-sm font-semibold text-[var(--on-surface)]">Apariencia</h3>
+                  <h3 className="text-sm font-semibold text-[var(--on-surface)]">{t('settings.sections.appearance')}</h3>
                   <p className="text-[var(--on-surface-variant)] mt-0.5">
                     Tema visual y escala de densidad conforme a DESIGN.md
                   </p>
@@ -275,12 +271,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
                 {/* Theme Selection */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="font-semibold text-[var(--on-surface)]">Tema de color</label>
+                  <label className="font-semibold text-[var(--on-surface)]">{t('settings.themeLabel')}</label>
                   <div className="grid grid-cols-3 gap-2">
                     {[
-                      { id: 'dark', label: 'Oscuro', icon: 'dark_mode' },
-                      { id: 'light', label: 'Claro', icon: 'light_mode' },
-                      { id: 'system', label: 'Seguir Sistema', icon: 'devices' },
+                      { id: 'dark', label: t('settings.themes.dark'), icon: 'dark_mode' },
+                      { id: 'light', label: t('settings.themes.light'), icon: 'light_mode' },
+                      { id: 'system', label: t('settings.themes.system'), icon: 'devices' },
                     ].map((t) => {
                       const isSelected = settings.theme === t.id;
                       return (
@@ -304,12 +300,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
                 {/* Density Selection */}
                 <div className="flex flex-col gap-1.5 pt-1">
-                  <label className="font-semibold text-[var(--on-surface)]">Densidad de la interfaz</label>
+                  <label className="font-semibold text-[var(--on-surface)]">{t('settings.densityLabel')}</label>
                   <div className="grid grid-cols-3 gap-2">
                     {[
-                      { id: 'compact', label: 'Compacta', desc: 'Menor padding y alturas para más datos' },
-                      { id: 'normal', label: 'Normal', desc: 'Equilibrio estándar de productividad' },
-                      { id: 'comfortable', label: 'Cómoda', desc: 'Mayor separación táctil y amplitud' },
+                      { id: 'compact', label: t('settings.densities.compact'), desc: 'Menor padding y alturas para más datos' },
+                      { id: 'normal', label: t('settings.densities.normal'), desc: 'Equilibrio estándar de productividad' },
+                      { id: 'comfortable', label: t('settings.densities.comfortable'), desc: 'Mayor separación táctil y amplitud' },
                     ].map((d) => {
                       const isSelected = settings.density === d.id;
                       return (
@@ -372,8 +368,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 {/* Show Grid */}
                 <div className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between gap-4">
                   <div className="flex flex-col gap-0.5">
-                    <span className="font-medium text-[var(--on-surface)]">Mostrar cuadrícula de fondo</span>
-                    <span className="text-[var(--on-surface-variant)] text-[11px]">Guía visual de puntos en el lienzo infinito</span>
+                    <span className="font-medium text-[var(--on-surface)]">{t('settings.showGrid')}</span>
+                    <span className="text-[var(--on-surface-variant)] text-[11px]">{t('settings.showGridDesc')}</span>
                   </div>
                   <input
                     type="checkbox"
@@ -386,8 +382,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 {/* Snap to Grid */}
                 <div className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between gap-4">
                   <div className="flex flex-col gap-0.5">
-                    <span className="font-medium text-[var(--on-surface)]">Alineación magnética (Snapping)</span>
-                    <span className="text-[var(--on-surface-variant)] text-[11px]">Alinear tarjetas automáticamente con los ejes</span>
+                    <span className="font-medium text-[var(--on-surface)]">{t('settings.snapToGrid')}</span>
+                    <span className="text-[var(--on-surface-variant)] text-[11px]">{t('settings.snapToGridDesc')}</span>
                   </div>
                   <input
                     type="checkbox"
@@ -596,8 +592,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 {/* Reset Layout */}
                 <div className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between gap-4">
                   <div className="flex flex-col gap-0.5">
-                    <span className="font-medium text-[var(--on-surface)]">Reiniciar lienzo del Canvas</span>
-                    <span className="text-[var(--on-surface-variant)] text-[11px]">Restaura la distribución espacial de las tarjetas</span>
+                    <span className="font-medium text-[var(--on-surface)]">{t('settings.resetCanvas')}</span>
+                    <span className="text-[var(--on-surface-variant)] text-[11px]">{t('settings.resetCanvasDesc')}</span>
                   </div>
                   <button
                     type="button"
@@ -615,10 +611,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 <div className="p-3 rounded bg-rose-950/20 border border-rose-900/40 flex flex-col gap-2 mt-1">
                   <div className="flex items-center gap-2 text-rose-400 font-semibold">
                     <span className="material-symbols-outlined text-[16px]">warning</span>
-                    <span>Restablecer preferencias</span>
+                    <span>{t('settings.resetDefaults')}</span>
                   </div>
                   <p className="text-[var(--on-surface-variant)] leading-relaxed text-[11px]">
-                    Se restablecerán los ajustes visuales y de comportamiento a sus valores de fábrica.
+                    {t('settings.resetDefaultsDesc')}
                     <strong className="text-[var(--on-surface)]"> Tus tareas y archivos TASKS.md no se modificarán.</strong>
                   </p>
                   <div className="flex justify-end pt-1">
@@ -666,7 +662,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           >
             <h4 id="confirm-reset-title" className="font-semibold text-xs text-rose-400 flex items-center gap-1.5">
               <span className="material-symbols-outlined text-[16px]">restart_alt</span>
-              <span>¿Restablecer preferencias?</span>
+              <span>¿{t('settings.resetDefaults')}?</span>
             </h4>
             <p className="text-xs text-[var(--on-surface-variant)] leading-relaxed">
               Se restablecerán los ajustes visuales y de comportamiento. Tus tareas y archivos no se modificarán.
