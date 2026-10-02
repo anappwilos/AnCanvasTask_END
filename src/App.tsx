@@ -2678,7 +2678,7 @@ export default function App() {
 
       {/* Top App Bar (DESIGN.md Section 3: Lightweight, global actions, clean M3 surface) */}
       <header className="h-14 bg-[var(--surface-container)] border-b border-[var(--outline)] px-3 sm:px-4 flex items-center justify-between z-20 select-none flex-shrink-0 gap-2 sm:gap-4 transition-colors">
-        {/* Left Section: Sidebar Toggle, Workspace & GitHub Repo Picker, Active File */}
+        {/* Left Section: Sidebar Toggle, Brand & Active File Breadcrumb */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <button
             type="button"
@@ -2692,19 +2692,17 @@ export default function App() {
             </span>
           </button>
 
-          {/* Workspace & GitHub Repo & Branch Selector */}
-          <WorkspaceSelector
-            workspace={activeWorkspace}
-            allWorkspaces={workspaceStore.workspaces}
-            activeBranch={activeBranch}
-            onSelectWorkspace={handleSelectWorkspace}
-            onSelectBranch={handleSelectBranch}
-            onOpenWorkspaceManager={() => setIsWorkspaceManagerOpen(true)}
-            onOpenCreateBranch={() => setIsNewBranchModalOpen(true)}
-            onOpenGitHubSync={() => setIsGitHubSyncOpen(true)}
-          />
-
-
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="flex items-center gap-1.5 font-semibold text-xs text-[var(--on-surface)] shrink-0">
+              <span className="material-symbols-outlined text-[18px] text-[var(--primary)]">splitscreen_left</span>
+              <span className="hidden sm:inline">Tasks Canvas</span>
+            </div>
+            <span className="text-[var(--outline)] hidden sm:inline">/</span>
+            <span className="text-xs text-[var(--on-surface-variant)] truncate max-w-[140px] sm:max-w-[200px] flex items-center gap-1" title={`${activeWorkspace.name} · ${activeBranch.name} · ${activeDocument.name}`}>
+              <span className="material-symbols-outlined text-[14px]">description</span>
+              <span className="truncate font-mono">{activeDocument.name}</span>
+            </span>
+          </div>
         </div>
 
         {/* Center Section: View Switcher (Canvas / Kanban / Studio) & Quick Search bar */}
@@ -2906,10 +2904,17 @@ export default function App() {
 
             <div className="flex flex-col gap-3 overflow-y-auto">
               {/* Task MD Documents Explorer (1 to N Task MD files in Root, Frontend, Backend, etc.) */}
-              <div className="p-2 rounded-lg bg-[var(--surface)] border border-[var(--outline)] shadow-2xs">
+              <div className="rounded-lg bg-[var(--surface)] border border-[var(--outline)] shadow-2xs overflow-hidden">
                 <TaskDocumentExplorer
-                  branch={activeBranch}
+                  workspace={activeWorkspace}
+                  allWorkspaces={workspaceStore.workspaces}
+                  activeBranch={activeBranch}
                   activeDocumentId={activeDocument.id}
+                  onSelectWorkspace={handleSelectWorkspace}
+                  onSelectBranch={handleSelectBranch}
+                  onOpenWorkspaceManager={() => setIsWorkspaceManagerOpen(true)}
+                  onOpenCreateBranch={() => setIsNewBranchModalOpen(true)}
+                  onOpenGitHubSync={() => setIsGitHubSyncOpen(true)}
                   onSelectDocument={handleSelectDocument}
                   onOpenNewDocumentModal={(folder) => {
                     setNewTaskDocPresetFolder(folder || '');
