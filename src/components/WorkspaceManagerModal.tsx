@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from "react-i18next";
 import {
   Workspace,
   parseGitHubRepoInput,
@@ -37,6 +38,7 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
   onOpenSyncDiffModal,
   isSanityConfigured = false,
 }) => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'list' | 'create'>('list');
   const [isSyncingSanity, setIsSyncingSanity] = useState<boolean>(false);
   const [isImportingSanity, setIsImportingSanity] = useState<boolean>(false);
@@ -56,7 +58,7 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !repoInput.trim()) {
-      onShowToast('Por favor completa el nombre del workspace y el repositorio de GitHub', 'warning');
+      onShowToast(t('toast.completeWorkspaceDetails'), 'warning');
       return;
     }
 

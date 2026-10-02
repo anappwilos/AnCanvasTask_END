@@ -1,4 +1,5 @@
 import React, { Suspense, useState, useMemo, useCallback } from 'react';
+import { useTranslation } from "react-i18next";
 import {
   SanityApp,
   useDocuments,
@@ -109,6 +110,7 @@ function SdkDocumentInspector({
   onActivateWorkspace?: (workspace: any) => void;
   onShowToast: (msg: string, type?: 'success' | 'info' | 'warning' | 'error') => void;
 }) {
+  const { t } = useTranslation();
   const { data: document } = useDocument<any>({
     documentId: handle.documentId,
     documentType: handle.documentType,
@@ -153,7 +155,7 @@ function SdkDocumentInspector({
         updatedAt: new Date().toISOString(),
       }));
       setIsEditing(false);
-      onShowToast('Documento actualizado reactivamente vía useEditDocument', 'success');
+      onShowToast(t('toast.reactiveDocUpdated'), 'success');
     } catch (err: any) {
       onShowToast(err?.message || 'Error al actualizar', 'error');
     } finally {
@@ -481,6 +483,7 @@ function SdkDocumentCreator({
   onCreated: (handle: DocumentHandle) => void;
   onShowToast: (msg: string, type?: any) => void;
 }) {
+  const { t } = useTranslation();
   const createTask = useCreateDocument<any>({ documentType: 'task' });
   const [title, setTitle] = useState<string>('');
   const [priority, setPriority] = useState<string>('P1');
@@ -490,7 +493,7 @@ function SdkDocumentCreator({
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) {
-      onShowToast('Ingresa un título para la tarea', 'warning');
+      onShowToast(t('toast.enterTaskTitle'), 'warning');
       return;
     }
 
@@ -509,7 +512,7 @@ function SdkDocumentCreator({
         updatedAt: now,
       });
 
-      onShowToast('Documento creado exitosamente mediante Sanity App SDK', 'success');
+      onShowToast(t('toast.docCreatedSdk'), 'success');
       setTitle('');
       if (newHandle) {
         onCreated(newHandle);
@@ -879,6 +882,7 @@ export const SanitySdkExplorer: React.FC<SanitySdkExplorerProps> = ({
   onActivateWorkspace,
   onShowToast,
 }) => {
+  const { t } = useTranslation();
   const [config, setConfig] = useState<SanityConfig>(() => getSanityConfig());
 
   // Listen for configuration updates

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from "react-i18next";
 import { formatDocumentPath, TaskDocument } from '../services/workspaceService';
 
 interface NewFolderModalProps {
@@ -16,6 +17,7 @@ export const NewFolderModal: React.FC<NewFolderModalProps> = ({
   onCreateFolderWithDoc,
   onShowToast,
 }) => {
+  const { t } = useTranslation();
   const [folderName, setFolderName] = useState('');
   const [docName, setDocName] = useState('TASKS.md');
 
@@ -27,7 +29,7 @@ export const NewFolderModal: React.FC<NewFolderModalProps> = ({
     e.preventDefault();
     const cleanFolder = folderName.trim().replace(/^\/+|\/+$/g, '');
     if (!cleanFolder) {
-      onShowToast('Por favor introduce un nombre para la carpeta', 'warning');
+      onShowToast(t('toast.enterFolderName'), 'warning');
       return;
     }
 

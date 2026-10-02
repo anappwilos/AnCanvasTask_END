@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from "react-i18next";
 import { Workspace, BranchConfig } from '../services/workspaceService';
 
 interface GitHubSyncModalProps {
@@ -22,6 +23,7 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
   onCommitBranch,
   onShowToast,
 }) => {
+  const { t } = useTranslation();
   const [tokenInput, setTokenInput] = useState(githubToken || '');
   const [isSavingToken, setIsSavingToken] = useState(false);
   const [commitMessage, setCommitMessage] = useState('');
@@ -38,7 +40,7 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
   const handleCommit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!commitMessage.trim()) {
-      onShowToast('Por favor escribe un mensaje de commit', 'warning');
+      onShowToast(t('toast.writeCommitMessage'), 'warning');
       return;
     }
 

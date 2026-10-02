@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from "react-i18next";
 import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror';
 import { markdown } from '@codemirror/lang-markdown';
 import { oneDark } from '@codemirror/theme-one-dark';
@@ -35,6 +36,7 @@ export function MarkdownSplitEditor({
   onChangeSplitRatio,
   onOpenNormalizer,
 }: MarkdownSplitEditorProps) {
+  const { t } = useTranslation();
   const editorRef = useRef<ReactCodeMirrorRef>(null);
   const [copied, setCopied] = useState(false);
   const [showIssuesPanel, setShowIssuesPanel] = useState(false);
@@ -125,10 +127,10 @@ export function MarkdownSplitEditor({
     try {
       await navigator.clipboard.writeText(value);
       setCopied(true);
-      onShowToast('Markdown copiado al portapapeles', 'success');
+      onShowToast(t('toast.markdownCopied'), 'success');
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      onShowToast('Error al copiar al portapapeles', 'error');
+      onShowToast(t('toast.markdownCopyError'), 'error');
     }
   }, [value, onShowToast]);
 

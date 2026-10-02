@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from "react-i18next";
 import {
   getSanityConfig,
   saveSanityConfig,
@@ -29,6 +30,7 @@ export const SanityConfigModal: React.FC<SanityConfigModalProps> = ({
   onShowToast,
   onSyncAllToSanity,
 }) => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<ModalTab>('config');
 
   // Config fields
@@ -116,7 +118,7 @@ export const SanityConfigModal: React.FC<SanityConfigModalProps> = ({
         message: 'Error inesperado durante la verificación',
         details: err?.message || String(err),
       });
-      onShowToast('Error al verificar conexión con Sanity', 'error');
+      onShowToast(t('toast.errorVerifyingSanity'), 'error');
     } finally {
       setIsTesting(false);
     }
@@ -124,13 +126,13 @@ export const SanityConfigModal: React.FC<SanityConfigModalProps> = ({
 
   const handleExecuteWriteTest = async () => {
     if (!projectId.trim() || !dataset.trim()) {
-      onShowToast('Configura primero el Project ID y Dataset', 'warning');
+      onShowToast(t('toast.configureSanityProject'), 'warning');
       setActiveTab('config');
       return;
     }
 
     if (!token.trim()) {
-      onShowToast('Se requiere un API Token con permisos de Editor para escribir datos', 'warning');
+      onShowToast(t('toast.requireApiTokenEditor'), 'warning');
       setActiveTab('config');
       return;
     }
@@ -158,7 +160,7 @@ export const SanityConfigModal: React.FC<SanityConfigModalProps> = ({
         message: 'Error al ejecutar prueba de escritura',
         details: err?.message || String(err),
       });
-      onShowToast('Fallo al escribir en Sanity', 'error');
+      onShowToast(t('toast.failedWritingSanity'), 'error');
     } finally {
       setIsWritingTest(false);
     }
@@ -180,7 +182,7 @@ export const SanityConfigModal: React.FC<SanityConfigModalProps> = ({
         onShowToast(res.message, 'error');
       }
     } catch (err) {
-      onShowToast('Error al eliminar documento de prueba', 'error');
+      onShowToast(t('toast.errorDeletingTestDoc'), 'error');
     } finally {
       setIsDeletingTestDoc(false);
     }
@@ -211,7 +213,7 @@ export const SanityConfigModal: React.FC<SanityConfigModalProps> = ({
       token: token.trim(),
     });
     onConfigSaved(updated);
-    onShowToast('Configuración de Sanity guardada y aplicada', 'success');
+    onShowToast(t('toast.sanityConfigSaved'), 'success');
     onClose();
   };
 
@@ -224,7 +226,7 @@ export const SanityConfigModal: React.FC<SanityConfigModalProps> = ({
     setWriteTestResult(null);
     setRemoteDocs([]);
     onConfigSaved(cleared);
-    onShowToast('Conexión con Sanity eliminada. Operando en modo local.', 'info');
+    onShowToast(t('toast.sanityConnectionRemoved'), 'info');
     onClose();
   };
 
@@ -233,7 +235,7 @@ export const SanityConfigModal: React.FC<SanityConfigModalProps> = ({
       navigator.clipboard.writeText(window.location.origin);
       setCopiedOrigin(true);
       setTimeout(() => setCopiedOrigin(false), 2000);
-      onShowToast('Origen copiado al portapapeles', 'info');
+      onShowToast(t('toast.originCopied'), 'info');
     }
   };
 
@@ -345,7 +347,7 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
     navigator.clipboard.writeText(code);
     setCopiedSchema(true);
     setTimeout(() => setCopiedSchema(false), 2000);
-    onShowToast('Código de Schema copiado al portapapeles', 'info');
+    onShowToast(t('toast.schemaCodeCopied'), 'info');
   };
 
   const hasConfig = Boolean(projectId.trim());
@@ -678,7 +680,7 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
                       type="button"
                       onClick={async () => {
                         if (!token.trim()) {
-                          onShowToast('Se requiere API Token con rol Editor para guardar en Sanity', 'warning');
+                          onShowToast(t('toast.requireApiTokenSave'), 'warning');
                           setActiveTab('config');
                           return;
                         }

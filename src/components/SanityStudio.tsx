@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useTranslation } from "react-i18next";
 import {
   getSanityConfig,
   fetchSanityDocumentsList,
@@ -30,6 +31,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
   onOpenSyncDiffModal,
   onShowToast,
 }) => {
+  const { t } = useTranslation();
   const [config, setConfig] = useState<SanityConfig>(() => getSanityConfig());
   const [studioMode, setStudioMode] = useState<StudioMode>('native');
   const [activeDocType, setActiveDocType] = useState<DocumentTypeFilter>('task');
@@ -197,7 +199,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
     try {
       const res = await saveSanityDocument(formState, config);
       if (res.ok) {
-        onShowToast('Documento publicado con éxito en Sanity', 'success');
+        onShowToast(t('toast.documentPublishedSanity'), 'success');
         setSelectedDoc(res.document || formState);
         setIsDirty(false);
         loadDocuments();
@@ -218,7 +220,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
     try {
       const res = await deleteDocumentFromSanity(selectedDocId, config);
       if (res.ok) {
-        onShowToast('Documento eliminado de Sanity', 'info');
+        onShowToast(t('toast.documentDeletedSanity'), 'info');
         setSelectedDocId(null);
         setSelectedDoc(null);
         setFormState({});
@@ -228,7 +230,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
         onShowToast(res.message, 'error');
       }
     } catch (err) {
-      onShowToast('Error al eliminar', 'error');
+      onShowToast(t('toast.deleteError'), 'error');
     } finally {
       setIsDeleting(false);
     }
@@ -244,7 +246,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
   const handleExecuteCreateWorkspace = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newWsName.trim() || !newWsRepo.trim()) {
-      onShowToast('Ingresa un nombre y repositorio para el workspace', 'warning');
+      onShowToast(t('toast.enterWorkspaceDetails'), 'warning');
       return;
     }
 
@@ -315,7 +317,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
         onShowToast(res.message, 'error');
       }
     } catch (err: any) {
-      onShowToast('Error al crear workspace en Sanity', 'error');
+      onShowToast(t('toast.errorCreatingWorkspaceSanity'), 'error');
     }
   };
 
@@ -347,7 +349,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
       });
 
       if (res.ok && res.document) {
-        onShowToast('Documento _type: "task" creado en Sanity', 'success');
+        onShowToast(t('toast.taskCreatedSanity'), 'success');
         await loadDocuments();
         setSelectedDocId(res.document._id);
         setActiveDocType('task');
@@ -356,7 +358,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
         onShowToast(res.message, 'error');
       }
     } catch (err) {
-      onShowToast('Error al crear tarea', 'error');
+      onShowToast(t('toast.errorCreatingTask'), 'error');
     }
   };
 
@@ -1024,7 +1026,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
                       type="button"
                       onClick={() => {
                         navigator.clipboard.writeText(JSON.stringify(formState, null, 2));
-                        onShowToast('JSON copiado al portapapeles', 'info');
+                        onShowToast(t('toast.jsonCopied'), 'info');
                       }}
                       className="text-sky-400 hover:underline flex items-center gap-1 cursor-pointer text-[11px]"
                     >

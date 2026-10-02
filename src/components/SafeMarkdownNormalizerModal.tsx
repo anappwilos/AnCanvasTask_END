@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useCallback, useEffect, useRef } from 'react';
+import { useTranslation } from "react-i18next";
 import { DiffEditor } from '@monaco-editor/react';
 import {
   analyzeMarkdownNormalization,
@@ -30,6 +31,7 @@ export function SafeMarkdownNormalizerModal({
   onApply,
   onShowToast,
 }: SafeMarkdownNormalizerModalProps) {
+  const { t } = useTranslation();
   const [analysis, setAnalysis] = useState<NormalizationAnalysisResult | null>(null);
   const [changes, setChanges] = useState<NormalizedChange[]>([]);
   const [selectedFilter, setSelectedFilter] = useState<FilterTab>('all');
@@ -126,9 +128,9 @@ export function SafeMarkdownNormalizerModal({
   const handleCopyResult = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(effectiveMarkdown);
-      onShowToast('Copiado al portapapeles', 'success');
+      onShowToast(t('toast.copiedToClipboard'), 'success');
     } catch {
-      onShowToast('Error al copiar', 'error');
+      onShowToast(t('toast.copyError'), 'error');
     }
   }, [effectiveMarkdown, onShowToast]);
 

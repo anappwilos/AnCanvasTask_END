@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from "react-i18next";
 import {
   SyncComparisonResult,
   SyncItemDiff,
@@ -28,6 +29,7 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
   onShowToast,
   onOpenSanityConfig,
 }) => {
+  const { t } = useTranslation();
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [result, setResult] = useState<SyncComparisonResult | null>(null);
@@ -53,7 +55,7 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
       if (res.hasPendingChanges) {
         onShowToast(`Detección completada: ${res.counts.localOverrides + res.counts.remoteOverrides + res.counts.conflicts} overrides/diferencias encontrados`, 'info');
       } else {
-        onShowToast('Todo está al día y sincronizado con Sanity', 'success');
+        onShowToast(t('toast.syncOverrideSuccess'), 'success');
       }
     } catch (err: any) {
       onShowToast(err?.message || 'Error al analizar diferencias', 'error');
