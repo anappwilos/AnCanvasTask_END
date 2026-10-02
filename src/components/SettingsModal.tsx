@@ -334,16 +334,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <div className="flex flex-col gap-3">
                 <div>
                   <h3 className="text-sm font-semibold text-[var(--on-surface)]">Workspace</h3>
-                  <p className="text-[var(--on-surface-variant)] mt-0.5">
-                    Organización de paneles laterales y distribución del espacio
-                  </p>
+                  <p className="text-[var(--on-surface-variant)] mt-0.5">{t('settings.workspaceDesc')}</p>
                 </div>
 
                 {/* Show Sidebar Default */}
                 <div className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between gap-4">
                   <div className="flex flex-col gap-0.5">
-                    <span className="font-medium text-[var(--on-surface)]">Mostrar panel lateral de inicio</span>
-                    <span className="text-[var(--on-surface-variant)] text-[11px]">Mantener la barra de navegación abierta en desktop</span>
+                    <span className="font-medium text-[var(--on-surface)]">{t('settings.showSidebar')}</span>
+                    <span className="text-[var(--on-surface-variant)] text-[11px]">{t('settings.showSidebarDesc')}</span>
                   </div>
                   <input
                     type="checkbox"
@@ -360,9 +358,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <div className="flex flex-col gap-3">
                 <div>
                   <h3 className="text-sm font-semibold text-[var(--on-surface)]">Canvas</h3>
-                  <p className="text-[var(--on-surface-variant)] mt-0.5">
-                    Comportamiento visual del lienzo y alineación interactiva
-                  </p>
+                  <p className="text-[var(--on-surface-variant)] mt-0.5">{t('settings.canvasDesc')}</p>
                 </div>
 
                 {/* Show Grid */}
@@ -400,32 +396,30 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <div className="flex flex-col gap-3">
                 <div>
                   <h3 className="text-sm font-semibold text-[var(--on-surface)]">Kanban</h3>
-                  <p className="text-[var(--on-surface-variant)] mt-0.5">
-                    Opciones de visualización de columnas y tarjetas del tablero
-                  </p>
+                  <p className="text-[var(--on-surface-variant)] mt-0.5">{t('settings.kanbanDesc')}</p>
                 </div>
 
                 {/* Default Group By */}
                 <div className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between gap-4">
                   <div className="flex flex-col gap-0.5">
-                    <span className="font-medium text-[var(--on-surface)]">Agrupación predeterminada</span>
-                    <span className="text-[var(--on-surface-variant)] text-[11px]">Cómo se distribuyen las columnas en el tablero</span>
+                    <span className="font-medium text-[var(--on-surface)]">{t('settings.kanbanDefaultGroupBy')}</span>
+                    <span className="text-[var(--on-surface-variant)] text-[11px]">{t('settings.kanbanDefaultGroupByDesc')}</span>
                   </div>
                   <select
                     value={settings.kanbanDefaultGroupBy}
                     onChange={(e) => handleUpdate('kanbanDefaultGroupBy', e.target.value as 'status' | 'section')}
                     className="bg-[var(--surface-container)] text-[var(--on-surface)] border border-[var(--outline)] rounded px-2.5 py-1 text-xs focus:outline-none focus:border-[var(--primary)] cursor-pointer"
                   >
-                    <option value="status">Por Estados (Backlog, Todo, In Progress...)</option>
-                    <option value="section">Por Secciones de TASKS.md</option>
+                    <option value="status">{t('settings.kanbanGroupByStatus')}</option>
+                    <option value="section">{t('settings.kanbanGroupBySection')}</option>
                   </select>
                 </div>
 
                 {/* Show Tags in Kanban Cards */}
                 <div className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between gap-4">
                   <div className="flex flex-col gap-0.5">
-                    <span className="font-medium text-[var(--on-surface)]">Mostrar etiquetas (#tags)</span>
-                    <span className="text-[var(--on-surface-variant)] text-[11px]">Mostrar etiquetas en las tarjetas Kanban</span>
+                    <span className="font-medium text-[var(--on-surface)]">{t('settings.kanbanShowTags')}</span>
+                    <span className="text-[var(--on-surface-variant)] text-[11px]">{t('settings.kanbanShowTagsDesc')}</span>
                   </div>
                   <input
                     type="checkbox"
@@ -438,8 +432,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 {/* Show Subtasks in Kanban */}
                 <div className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between gap-4">
                   <div className="flex flex-col gap-0.5">
-                    <span className="font-medium text-[var(--on-surface)]">Mostrar progreso de subtareas</span>
-                    <span className="text-[var(--on-surface-variant)] text-[11px]">Indicador de checklist (ej. 2/4) en tarjetas</span>
+                    <span className="font-medium text-[var(--on-surface)]">{t('settings.kanbanShowSubtasks')}</span>
+                    <span className="text-[var(--on-surface-variant)] text-[11px]">{t('settings.kanbanShowSubtasksDesc')}</span>
                   </div>
                   <input
                     type="checkbox"
@@ -456,7 +450,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-sm font-semibold text-[var(--on-surface)]">Archivos Recientes</h3>
+                    <h3 className="text-sm font-semibold text-[var(--on-surface)]">{t('settings.recentFiles')}</h3>
                     <p className="text-[var(--on-surface-variant)] mt-0.5">
                       Historial de documentos TASKS.md abiertos recientemente
                     </p>
@@ -500,8 +494,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 {/* Cloud Persistence */}
                 <div className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between gap-4 mt-1">
                   <div className="flex flex-col gap-0.5">
-                    <span className="font-medium text-[var(--on-surface)]">Persistencia Visual en la Nube (Sanity)</span>
-                    <span className="text-[var(--on-surface-variant)] text-[11px]">Guarda las coordenadas espaciales del canvas</span>
+                    <span className="font-medium text-[var(--on-surface)]">{t('settings.cloudPersistence')}</span>
+                    <span className="text-[var(--on-surface-variant)] text-[11px]">{t('settings.cloudPersistenceDesc')}</span>
                   </div>
                   <button
                     type="button"
@@ -510,9 +504,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       onOpenSanityConfig();
                     }}
                     className="btn-m3-secondary px-3 py-1 text-xs cursor-pointer shrink-0"
-                  >
-                    Configurar
-                  </button>
+                  >{t('settings.configure')}</button>
                 </div>
               </div>
             )}
@@ -530,8 +522,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 {/* Reduced Motion */}
                 <div className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between gap-4">
                   <div className="flex flex-col gap-0.5">
-                    <span className="font-medium text-[var(--on-surface)]">Reducir animaciones (Reduced Motion)</span>
-                    <span className="text-[var(--on-surface-variant)] text-[11px]">Minimiza o desactiva transiciones y efectos de movimiento</span>
+                    <span className="font-medium text-[var(--on-surface)]">{t('settings.reducedMotion')}</span>
+                    <span className="text-[var(--on-surface-variant)] text-[11px]">{t('settings.reducedMotionDesc')}</span>
                   </div>
                   <input
                     type="checkbox"
@@ -544,8 +536,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 {/* High Contrast */}
                 <div className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between gap-4">
                   <div className="flex flex-col gap-0.5">
-                    <span className="font-medium text-[var(--on-surface)]">Modo de alto contraste</span>
-                    <span className="text-[var(--on-surface-variant)] text-[11px]">Refuerza bordes y separadores de la interfaz</span>
+                    <span className="font-medium text-[var(--on-surface)]">{t('settings.highContrast')}</span>
+                    <span className="text-[var(--on-surface-variant)] text-[11px]">{t('settings.highContrastDesc')}</span>
                   </div>
                   <input
                     type="checkbox"
@@ -557,7 +549,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
                 {/* Keyboard Shortcuts Reference Table */}
                 <div className="flex flex-col gap-1.5 pt-1">
-                  <span className="font-semibold text-xs text-[var(--on-surface)]">Atajos de Teclado Principales</span>
+                  <span className="font-semibold text-xs text-[var(--on-surface)]">{t('settings.keyboardShortcuts')}</span>
                   <div className="rounded border border-[var(--outline)] bg-[var(--surface)] overflow-hidden divide-y divide-[var(--outline)]">
                     {[
                       { key: 'Ctrl/Cmd + K', desc: 'Búsqueda global y Command Palette' },
@@ -615,7 +607,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   </div>
                   <p className="text-[var(--on-surface-variant)] leading-relaxed text-[11px]">
                     {t('settings.resetDefaultsDesc')}
-                    <strong className="text-[var(--on-surface)]"> Tus tareas y archivos TASKS.md no se modificarán.</strong>
+                    <strong className="text-[var(--on-surface)]"> {t('settings.resetDefaultsWarning')}</strong>
                   </p>
                   <div className="flex justify-end pt-1">
                     <button
