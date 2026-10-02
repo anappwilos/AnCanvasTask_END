@@ -42,81 +42,45 @@ export const QuickGuideModal: React.FC<QuickGuideModalProps> = ({
         <div className="w-10 h-1 bg-[var(--outline)] rounded mx-auto my-2 sm:hidden" />
 
         {/* Header */}
-        <div className="px-5 py-3 border-b border-[var(--outline)] flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded bg-[var(--surface-container-high)] border border-[var(--outline)] flex items-center justify-center text-[var(--primary)]">
-              <span className="material-symbols-outlined text-[17px]">help</span>
-            </div>
-            <div>
-              <h2 id="guide-title" className="text-sm font-semibold text-[var(--on-surface)] font-sans">
-                Guía de Inicio Rápido & Atajos
-              </h2>
-              <p className="text-xs text-[var(--on-surface-variant)]">
-                Todo lo que necesitas saber sobre AnTaskCanvas
-              </p>
-            </div>
+        <div className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-[18px] text-[var(--primary)]">keyboard</span>
+            <h2 id="guide-title" className="text-sm font-semibold text-[var(--on-surface)] font-sans">
+              Atajos de Teclado y Formato TASKS.md
+            </h2>
           </div>
           <button
             type="button"
             onClick={onClose}
             className="btn-m3-icon w-7 h-7 cursor-pointer"
-            aria-label="Cerrar guía"
+            aria-label="Cerrar"
           >
             <span className="material-symbols-outlined text-[16px]">close</span>
           </button>
         </div>
 
         {/* Body */}
-        <div className="p-4 sm:p-5 overflow-y-auto flex flex-col gap-3 text-xs">
-          {/* Section 1: Concept & Single Source of Truth */}
-          <div className="rounded-md bg-[var(--surface)] border border-[var(--outline)] p-3 flex flex-col gap-2">
-            <h3 className="font-semibold text-xs text-[var(--on-surface)] flex items-center gap-2">
-              <span className="material-symbols-outlined text-[16px] text-sky-400">description</span>
-              <span>1. Single Source of Truth: TASKS.md</span>
-            </h3>
-            <p className="text-[var(--on-surface-variant)] leading-relaxed text-[11px]">
-              El archivo <code className="text-[var(--primary)] font-mono font-medium">TASKS.md</code> es la verdad absoluta de tus tareas.
-              Las secciones <code className="text-[var(--on-surface)] font-mono">## Nombre</code> definen grupos, y las líneas <code className="text-[var(--on-surface)] font-mono">- [ ] Título</code> definen tareas.
-            </p>
-            <div className="mt-0.5 p-2 rounded bg-[var(--surface-container)] font-mono text-[11px] text-[var(--on-surface)] border border-[var(--outline)] leading-relaxed">
-              ## Mi Sección<br />
-              - [ ] Tarea importante<br />
-              &nbsp;&nbsp;id: tarea-1<br />
+        <div className="p-4 overflow-y-auto flex flex-col gap-3 text-xs">
+          {/* Section 1: Formato TASKS.md */}
+          <div className="rounded bg-[var(--surface)] border border-[var(--outline)] p-2.5 flex flex-col gap-1.5">
+            <span className="font-semibold text-xs text-[var(--on-surface)]">
+              Formato de tareas en TASKS.md
+            </span>
+            <div className="p-2 rounded bg-[var(--surface-container)] font-mono text-[11px] text-[var(--on-surface)] border border-[var(--outline)] leading-relaxed">
+              ## Sección<br />
+              - [ ] Tarea pendiente<br />
+              &nbsp;&nbsp;id: auth-1<br />
               &nbsp;&nbsp;priority: P0<br />
-              &nbsp;&nbsp;blockedBy: otra-tarea
+              &nbsp;&nbsp;blockedBy: db-setup
             </div>
           </div>
 
-          {/* Section 2: Vistas Duales */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            <div className="rounded-md bg-[var(--surface)] border border-[var(--outline)] p-3 flex flex-col gap-1">
-              <span className="font-semibold text-[var(--on-surface)] flex items-center gap-1.5 text-xs">
-                <span className="material-symbols-outlined text-[15px] text-emerald-400">grid_view</span>
-                <span>Vista Canvas (Espacial)</span>
-              </span>
-              <p className="text-[var(--on-surface-variant)] leading-relaxed text-[11px]">
-                Arrastra y organiza tarjetas libremente en un lienzo infinito. Conecta dependencias visuales y utiliza <em>Auto organizar (DAG)</em> para ordenar el flujo jerárquico.
-              </p>
-            </div>
-
-            <div className="rounded-md bg-[var(--surface)] border border-[var(--outline)] p-3 flex flex-col gap-1">
-              <span className="font-semibold text-[var(--on-surface)] flex items-center gap-1.5 text-xs">
-                <span className="material-symbols-outlined text-[15px] text-purple-400">view_kanban</span>
-                <span>Vista Kanban (Columnas)</span>
-              </span>
-              <p className="text-[var(--on-surface-variant)] leading-relaxed text-[11px]">
-                Gestiona el ciclo de vida por estados (<em>Backlog, Todo, In Progress, Review, Done</em>) o por secciones temáticas con arrastrar y soltar fluido.
-              </p>
-            </div>
-          </div>
-
-          {/* Section 3: Tabla de Atajos de Teclado */}
-          <div className="rounded-md bg-[var(--surface)] border border-[var(--outline)] p-3 flex flex-col gap-2">
-            <h3 className="font-semibold text-xs text-[var(--on-surface)] flex items-center gap-2">
-              <span className="material-symbols-outlined text-[16px] text-amber-400">keyboard</span>
-              <span>Atajos de Teclado Esenciales</span>
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 mt-0.5">
+          {/* Section 2: Atajos de Teclado */}
+          <div className="rounded bg-[var(--surface)] border border-[var(--outline)] p-2.5 flex flex-col gap-1.5">
+            <span className="font-semibold text-xs text-[var(--on-surface)]">
+              Atajos de teclado
+            </span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
               {shortcuts.map((s) => (
                 <div
                   key={s.key}
@@ -133,27 +97,13 @@ export const QuickGuideModal: React.FC<QuickGuideModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="px-5 py-2.5 bg-[var(--surface)] border-t border-[var(--outline)] flex items-center justify-between">
-          {onOpenSampleProject ? (
-            <button
-              type="button"
-              onClick={() => {
-                onOpenSampleProject();
-                onClose();
-              }}
-              className="btn-m3-secondary px-3 py-1 text-xs cursor-pointer"
-            >
-              <span className="material-symbols-outlined text-[15px]">refresh</span>
-              <span>Cargar ejemplo inicial</span>
-            </button>
-          ) : <div />}
-
+        <div className="px-4 py-2.5 bg-[var(--surface)] border-t border-[var(--outline)] flex items-center justify-end">
           <button
             type="button"
             onClick={onClose}
-            className="btn-m3-primary px-4 py-1 text-xs cursor-pointer shadow-sm"
+            className="btn-m3-primary px-4 py-1 text-xs cursor-pointer"
           >
-            Entendido
+            Cerrar
           </button>
         </div>
       </div>

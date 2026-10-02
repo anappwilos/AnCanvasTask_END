@@ -2710,16 +2710,15 @@ export default function App() {
         {/* Center Section: View Switcher (Canvas / Kanban / Studio) & Quick Search bar */}
         <div className="hidden md:flex items-center gap-2 flex-1 max-w-sm lg:max-w-md mx-2 justify-center min-w-0">
           {/* View Switcher Segmented Control (Canvas / Kanban / Studio) */}
-          <div className="flex items-center bg-[var(--surface)] p-0.5 rounded-full border border-[var(--outline)] shadow-xs shrink-0">
+          <div className="flex items-center bg-[var(--surface)] p-0.5 rounded-md border border-[var(--outline)] shrink-0">
             <button
               type="button"
               onClick={() => setActiveView('canvas')}
-              className={`px-2.5 py-1 rounded-full text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer ${
+              className={`px-2.5 py-1 rounded text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer ${
                 activeView === 'canvas'
-                  ? 'bg-[var(--primary)] text-[var(--on-primary)] shadow-xs'
+                  ? 'bg-[var(--primary)] text-[var(--on-primary)]'
                   : 'text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]'
               }`}
-              title="Vista espacial en Canvas interactivo"
             >
               <span className="material-symbols-outlined text-[16px]">grid_view</span>
               <span className="hidden xl:inline">Canvas</span>
@@ -2728,70 +2727,29 @@ export default function App() {
             <button
               type="button"
               onClick={() => setActiveView('kanban')}
-              className={`px-2.5 py-1 rounded-full text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer ${
+              className={`px-2.5 py-1 rounded text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer ${
                 activeView === 'kanban'
-                  ? 'bg-[var(--primary)] text-[var(--on-primary)] shadow-xs'
+                  ? 'bg-[var(--primary)] text-[var(--on-primary)]'
                   : 'text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]'
               }`}
-              title="Vista de Tablero Kanban por columnas"
             >
               <span className="material-symbols-outlined text-[16px]">view_kanban</span>
               <span className="hidden xl:inline">Kanban</span>
             </button>
 
-            <div className="flex items-center gap-0.5">
-              <button
-                type="button"
-                onClick={() => setActiveView('studio')}
-                className={`px-2.5 py-1 rounded-full text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer ${
-                  activeView === 'studio'
-                    ? 'bg-[var(--primary)] text-[var(--on-primary)] shadow-xs'
-                    : 'text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]'
-                }`}
-                title="Sanity Studio: Pestaña nativa para explorar y editar documentos de contenido"
-              >
-                <span className="material-symbols-outlined text-[16px] text-rose-400">cloud_sync</span>
-                <span className="hidden xl:inline">Studio</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setIsNativeStudioModalOpen(true)}
-                className="p-1 rounded-full text-[var(--on-surface-variant)] hover:text-rose-400 hover:bg-[var(--surface-container-high)] transition cursor-pointer"
-                title="Abrir Sanity Studio Nativo en ventana flotante / modal (Shift+S)"
-              >
-                <span className="material-symbols-outlined text-[14px]">open_in_new</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Sanity Live Bidirectional Sync Status Badge & Action */}
-          <button
-            type="button"
-            onClick={() => setIsSyncOverrideModalOpen(true)}
-            className={`hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border transition cursor-pointer ${
-              isLiveSyncActive
-                ? 'bg-emerald-950/70 border-emerald-800 text-emerald-300 hover:bg-emerald-900/60'
-                : 'bg-[var(--surface-container)] border-[var(--outline)] text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]'
-            }`}
-            title={
-              isLiveSyncActive
-                ? `Sincronía bidireccional Sanity activa en vivo. Última actualización: ${lastLiveSyncAt || 'Conectado'}. Clic para comparar diferencias y sincronizar.`
-                : 'Configurar sincronización bidireccional con Sanity'
-            }
-          >
-            <span
-              className={`w-2 h-2 rounded-full ${
-                isLiveSyncActive ? 'bg-emerald-400 animate-pulse' : 'bg-neutral-500'
+            <button
+              type="button"
+              onClick={() => setActiveView('studio')}
+              className={`px-2.5 py-1 rounded text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer ${
+                activeView === 'studio'
+                  ? 'bg-[var(--primary)] text-[var(--on-primary)]'
+                  : 'text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]'
               }`}
-            />
-            <span className="hidden 2xl:inline">
-              {isLiveSyncActive ? 'Sincronía Bidireccional' : 'Sanity Desconectado'}
-            </span>
-            <span className="material-symbols-outlined text-[14px] text-[var(--on-surface-variant)]">
-              sync_alt
-            </span>
-          </button>
+            >
+              <span className="material-symbols-outlined text-[16px]">cloud_sync</span>
+              <span className="hidden xl:inline">Studio</span>
+            </button>
+          </div>
 
           <div className="relative w-full hidden lg:block max-w-[180px] xl:max-w-[220px]">
             <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[16px] text-[var(--on-surface-variant)] pointer-events-none">
@@ -2801,8 +2759,8 @@ export default function App() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Buscar (#ID, título)..."
-              className="w-full bg-[var(--surface)] text-[var(--on-surface)] placeholder:text-[var(--on-surface-variant)] border border-[var(--outline)] rounded-full pl-8 pr-10 py-1 text-xs font-sans focus:outline-none focus:border-[var(--primary)] transition-all"
+              placeholder="Buscar..."
+              className="w-full bg-[var(--surface)] text-[var(--on-surface)] placeholder:text-[var(--on-surface-variant)] border border-[var(--outline)] rounded pl-8 pr-10 py-1 text-xs font-sans focus:outline-none focus:border-[var(--primary)] transition-all"
             />
             {searchQuery ? (
               <button
@@ -2826,110 +2784,83 @@ export default function App() {
           </div>
         </div>
 
-        {/* Right Section: Global Actions (Primary CTA, Auto Layout, Save, View .md, Help, Theme) */}
+        {/* Right Section: Global Actions (Split View, Problems, Help, Settings) */}
         <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
-          {/* Offline indicator badge */}
           {!isOnline && (
-            <span
-              className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-950/80 border border-amber-700/60 text-amber-300 text-[10px] font-sans"
-              title="Sin conexión a internet. Los cambios se guardarán localmente."
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+            <span className="flex items-center gap-1 px-2 py-0.5 rounded bg-amber-950/80 border border-amber-700/60 text-amber-300 text-[10px] font-sans">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
               <span className="hidden sm:inline">Offline</span>
             </span>
           )}
-
-
-
-          {/* Normalización Segura de Markdown Button */}
-          <button
-            type="button"
-            onClick={() => setIsSafeNormalizerOpen(true)}
-            className="hidden sm:flex px-2 sm:px-2.5 py-1 text-xs font-medium rounded-full border items-center gap-1 transition-colors cursor-pointer bg-sky-950/60 text-sky-300 border-sky-800/80 hover:bg-sky-900/80 shadow-xs"
-            title="Normalización segura de Markdown (Diff Git, remark/unified y prevención de pérdida)"
-          >
-            <span className="material-symbols-outlined text-[15px] text-sky-400">verified</span>
-            <span className="hidden xl:inline">Normalizar .md</span>
-          </button>
 
           {/* Split View Toggle */}
           <button
             type="button"
             onClick={handleToggleSplitView}
-            className={`hidden sm:flex px-2 sm:px-2.5 py-1 text-xs font-medium rounded-full border items-center gap-1 transition-colors cursor-pointer ${
+            className={`hidden sm:flex px-2 sm:px-2.5 py-1 text-xs font-medium rounded border items-center gap-1 transition-colors cursor-pointer ${
               isSplitViewOpen
-                ? 'bg-sky-950/80 text-sky-300 border-sky-700 shadow-xs'
+                ? 'bg-[var(--surface-container-highest)] text-[var(--on-surface)] border-[var(--outline)]'
                 : 'bg-[var(--surface)] text-[var(--on-surface-variant)] border-[var(--outline)] hover:text-[var(--on-surface)]'
             }`}
-            title={
-              isSplitViewOpen
-                ? 'Ocultar visor / editor Markdown en tiempo real'
-                : 'Abrir visor / editor Markdown en tiempo real bidireccional'
-            }
+            title="Alternar editor Markdown en panel dividido"
           >
-            <span className="material-symbols-outlined text-[16px] text-sky-400">
+            <span className="material-symbols-outlined text-[16px]">
               {isSplitViewOpen ? 'vertical_split' : 'splitscreen'}
             </span>
             <span className="hidden xl:inline">
-              {isSplitViewOpen ? 'Visor .md activo' : 'Visor .md'}
+              {isSplitViewOpen ? 'Cerrar .md' : 'Ver .md'}
             </span>
           </button>
-
-
 
           {/* Mobile Quick Search Button */}
           <button
             type="button"
             onClick={() => setIsCommandPaletteOpen(true)}
             className="btn-m3-icon w-8 h-8 sm:hidden shrink-0 cursor-pointer"
-            title="Buscar tarea o abrir comandos"
+            title="Buscar tarea"
             aria-label="Buscar"
           >
             <span className="material-symbols-outlined text-[18px]">search</span>
           </button>
-
-
 
           {/* Validation Issues Alert Chip (if any) */}
           {validationReport.issues.length > 0 && (
             <button
               type="button"
               onClick={() => setIsProblemsModalOpen(true)}
-              className={`px-2.5 py-1 text-xs font-mono font-semibold rounded-full border flex items-center gap-1.5 cursor-pointer ${
+              className={`px-2 py-0.5 text-xs font-mono font-semibold rounded border flex items-center gap-1 cursor-pointer ${
                 validationReport.hasErrors
-                  ? 'bg-rose-950/80 text-rose-300 border-rose-800 animate-pulse'
+                  ? 'bg-rose-950/80 text-rose-300 border-rose-800'
                   : 'bg-amber-950/80 text-amber-300 border-amber-800'
               }`}
-              title="Ver problemas detectados en el Markdown (P)"
+              title="Ver incidencias detectadas (P)"
             >
               <span>⚠</span>
               <span>{validationReport.issues.length}</span>
             </button>
           )}
 
-          {/* Quick Guide & Shortcuts Button */}
+          {/* Quick Guide Button */}
           <button
             type="button"
             onClick={() => setIsQuickGuideOpen(true)}
             className="btn-m3-icon shrink-0 cursor-pointer hidden sm:inline-flex"
-            title="Guía rápida y atajos de teclado (?)"
-            aria-label="Abrir guía de uso y atajos"
+            title="Atajos de teclado y ayuda (?)"
+            aria-label="Atajos de teclado y ayuda"
           >
             <span className="material-symbols-outlined text-[18px]">help</span>
           </button>
 
-          {/* Settings Button (DESIGN.md Section 4 & Fase 7) */}
+          {/* Settings Button */}
           <button
             type="button"
             onClick={() => setIsSettingsOpen(true)}
             className="btn-m3-icon shrink-0 cursor-pointer hidden sm:inline-flex"
-            title="Configuración y preferencias (⌘,)"
-            aria-label="Abrir configuración"
+            title="Configuración (⌘,)"
+            aria-label="Configuración"
           >
             <span className="material-symbols-outlined text-[18px]">settings</span>
           </button>
-
-
 
           {/* Mobile Menu Trigger */}
           <button
@@ -3192,23 +3123,14 @@ export default function App() {
               </div>
             </div>
 
-            {/* Sidebar Footer: Tools & Persistence */}
-            <div className="flex flex-col gap-1.5 pt-3 border-t border-[var(--outline)]">
-              <button
-                type="button"
-                onClick={() => setIsImportExportOpen(true)}
-                className="btn-m3-text w-full py-1.5 text-xs justify-start px-2 cursor-pointer text-emerald-400"
-              >
-                <span className="material-symbols-outlined text-[18px]">sync_alt</span>
-                <span>Importar / Exportar</span>
-              </button>
-
+            {/* Sidebar Footer: Essential settings & theme */}
+            <div className="flex flex-col gap-1 pt-2.5 border-t border-[var(--outline)]">
               <button
                 type="button"
                 onClick={() => setIsSettingsOpen(true)}
-                className="btn-m3-text w-full py-1.5 text-xs justify-start px-2 cursor-pointer text-[var(--on-surface)]"
+                className="btn-m3-text w-full py-1 text-xs justify-start px-2 cursor-pointer text-[var(--on-surface)]"
               >
-                <span className="material-symbols-outlined text-[18px] text-[var(--primary)]">settings</span>
+                <span className="material-symbols-outlined text-[16px] text-[var(--primary)]">settings</span>
                 <span>Configuración</span>
               </button>
 
@@ -3220,66 +3142,12 @@ export default function App() {
                     theme: effectiveTheme === 'dark' ? 'light' : 'dark',
                   })
                 }
-                className="btn-m3-text w-full py-1.5 text-xs justify-start px-2 cursor-pointer text-[var(--on-surface)]"
+                className="btn-m3-text w-full py-1 text-xs justify-start px-2 cursor-pointer text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]"
               >
-                <span className="material-symbols-outlined text-[18px] text-[var(--primary)]">
+                <span className="material-symbols-outlined text-[16px]">
                   {effectiveTheme === 'dark' ? 'light_mode' : 'dark_mode'}
                 </span>
-                <span>Cambiar a tema {effectiveTheme === 'dark' ? 'claro' : 'oscuro'}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={handleToggleSplitView}
-                className={`btn-m3-text w-full py-1.5 text-xs justify-start px-2 cursor-pointer ${
-                  isSplitViewOpen ? 'text-sky-400 font-semibold bg-[var(--surface-container-high)]' : ''
-                }`}
-              >
-                <span className="material-symbols-outlined text-[18px] text-sky-400">
-                  {isSplitViewOpen ? 'vertical_split' : 'splitscreen'}
-                </span>
-                <span>{isSplitViewOpen ? 'Ocultar Visor .md' : 'Visor .md en tiempo real'}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setActiveView('studio')}
-                className="btn-m3-text w-full py-1.5 text-xs justify-start px-2 cursor-pointer text-rose-400"
-              >
-                <span className="material-symbols-outlined text-[18px]">cloud_sync</span>
-                <span>Abrir Sanity Studio</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setIsNativeStudioModalOpen(true)}
-                className="btn-m3-text w-full py-1.5 text-xs justify-start px-2 cursor-pointer text-rose-300"
-                title="Abrir interfaz nativa completa de Sanity Studio en ventana flotante"
-              >
-                <span className="material-symbols-outlined text-[18px]">dataset</span>
-                <span>Studio Embebido (Modal)</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setIsSanityModalOpen(true)}
-                className="btn-m3-text w-full py-1.5 text-xs justify-start px-2 cursor-pointer"
-              >
-                <span
-                  className={`w-2 h-2 rounded-full mr-1 ${
-                    syncStatus === 'synced' ? 'bg-emerald-400' : 'bg-cyan-400'
-                  }`}
-                />
-                <span>Persistencia Visual</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={handleResetLayout}
-                className="btn-m3-text w-full py-1.5 text-xs justify-start px-2 text-[var(--on-surface-variant)] hover:text-rose-400 cursor-pointer"
-              >
-                <span className="material-symbols-outlined text-[18px]">restart_alt</span>
-                <span>Reiniciar canvas</span>
+                <span>Tema {effectiveTheme === 'dark' ? 'claro' : 'oscuro'}</span>
               </button>
             </div>
           </aside>

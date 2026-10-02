@@ -434,7 +434,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
 
   return (
     <div className="flex-1 h-full flex flex-col overflow-hidden bg-[var(--surface)] text-xs select-none">
-      {/* Top App Bar: SDK & Native Studio Mode Switcher */}
+      {/* Top App Bar: Studio Mode Switcher */}
       <div className="px-3.5 py-2 border-b border-[var(--outline)] bg-[var(--surface-container)] flex items-center justify-between gap-3 shrink-0">
         <div className="flex items-center gap-1.5 flex-wrap">
           <button
@@ -442,13 +442,12 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
             onClick={() => setStudioMode('native')}
             className={`px-3 py-1 rounded text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer ${
               studioMode === 'native'
-                ? 'bg-rose-700 text-white font-semibold shadow-xs'
+                ? 'bg-[var(--primary)] text-[var(--on-primary)] font-semibold'
                 : 'text-[var(--on-surface-variant)] hover:bg-[var(--surface-container-high)] hover:text-[var(--on-surface)]'
             }`}
-            title="Interfaz nativa de Sanity Studio con formularios enriquecidos y validación de esquemas"
           >
-            <div className="w-3.5 h-3.5 rounded bg-rose-500 text-white font-bold flex items-center justify-center text-[9px]">S</div>
-            <span>Studio Nativo Embebido</span>
+            <span className="material-symbols-outlined text-[15px]">dashboard</span>
+            <span>Studio Embebido</span>
           </button>
 
           <button
@@ -456,13 +455,12 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
             onClick={() => setStudioMode('sdk')}
             className={`px-3 py-1 rounded text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer ${
               studioMode === 'sdk'
-                ? 'bg-emerald-800 text-white font-semibold shadow-xs'
+                ? 'bg-[var(--primary)] text-[var(--on-primary)] font-semibold'
                 : 'text-[var(--on-surface-variant)] hover:bg-[var(--surface-container-high)] hover:text-[var(--on-surface)]'
             }`}
-            title="Explorador reactivo con hooks useDocuments, useQuery y useEditDocument"
           >
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span>Sanity App SDK (@sanity/sdk-react)</span>
+            <span className="material-symbols-outlined text-[15px]">code</span>
+            <span>Explorador SDK</span>
           </button>
 
           <button
@@ -470,13 +468,12 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
             onClick={() => setStudioMode('desk')}
             className={`px-3 py-1 rounded text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer ${
               studioMode === 'desk'
-                ? 'bg-[var(--primary)] text-[var(--on-primary)] font-semibold shadow-xs'
+                ? 'bg-[var(--primary)] text-[var(--on-primary)] font-semibold'
                 : 'text-[var(--on-surface-variant)] hover:bg-[var(--surface-container-high)] hover:text-[var(--on-surface)]'
             }`}
-            title="Desk Tool clásico y ligero de 3 paneles"
           >
             <span className="material-symbols-outlined text-[15px]">table_rows</span>
-            <span>Desk Tool Clásico (@sanity/client)</span>
+            <span>Desk Tool</span>
           </button>
         </div>
 
@@ -489,7 +486,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
             onClick={onOpenSanityConfig}
             className="px-2 py-0.5 text-[11px] text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] border border-[var(--outline)] hover:border-[var(--on-surface-variant)] transition cursor-pointer"
           >
-            Ajustes
+            Configuración
           </button>
         </div>
       </div>
@@ -553,36 +550,6 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
 
         {/* Structure Hierarchy Tree */}
         <div className="flex-1 p-2 overflow-y-auto flex flex-col gap-1">
-          <button
-            type="button"
-            onClick={() => setStudioMode('native')}
-            className="w-full px-2.5 py-2 mb-1 rounded text-xs font-medium flex items-center justify-between text-left transition-colors cursor-pointer bg-rose-950/70 border border-rose-800/80 text-rose-200 hover:bg-rose-900/70"
-            title="Abrir la interfaz nativa completa de Sanity Studio con formularios enriquecidos"
-          >
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="w-4 h-4 rounded bg-rose-600 flex items-center justify-center text-white font-bold text-[9px] shrink-0">S</div>
-              <span className="truncate font-semibold">Studio Nativo (Embed)</span>
-            </div>
-            <span className="px-1.5 py-0.2 rounded text-[9px] font-mono bg-rose-900 text-rose-200 uppercase">
-              v6.17
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setStudioMode('sdk')}
-            className="w-full px-2.5 py-2 mb-1.5 rounded text-xs font-medium flex items-center justify-between text-left transition-colors cursor-pointer bg-emerald-950/60 border border-emerald-800/80 text-emerald-300 hover:bg-emerald-900/60"
-            title="Ir al explorador reactivo de Sanity App SDK (@sanity/sdk-react)"
-          >
-            <div className="flex items-center gap-2 min-w-0">
-              <span className="material-symbols-outlined text-[17px] text-emerald-400">bolt</span>
-              <span className="truncate font-semibold">Sanity App SDK</span>
-            </div>
-            <span className="px-1.5 py-0.2 rounded text-[9px] font-mono bg-emerald-900 text-emerald-200 uppercase">
-              Live
-            </span>
-          </button>
-
           <span className="px-2 py-1 text-[10px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
             Tipos de Contenido
           </span>
