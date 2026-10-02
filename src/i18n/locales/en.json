@@ -1,0 +1,152 @@
+{
+  "common": {
+    "appName": "Tasks Canvas",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "close": "Close",
+    "edit": "Edit",
+    "ready": "Done",
+    "search": "Search...",
+    "offline": "Offline",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "warning": "Warning",
+    "info": "Information",
+    "apply": "Apply",
+    "reset": "Reset",
+    "confirm": "Confirm",
+    "language": "Language"
+  },
+  "nav": {
+    "toggleSidebar": "Toggle sidebar",
+    "canvas": "Canvas",
+    "kanban": "Kanban",
+    "studio": "Studio",
+    "splitViewOpen": "View .md",
+    "splitViewClose": "Close .md",
+    "splitViewTooltip": "Toggle Markdown split editor",
+    "quickGuideTooltip": "Keyboard shortcuts and help (?)",
+    "settingsTooltip": "Settings (⌘,)",
+    "commandPaletteTooltip": "Open command palette (⌘K)",
+    "problemsTooltip": "View detected issues",
+    "searchPlaceholder": "Search task or command..."
+  },
+  "workspace": {
+    "title": "Workspaces",
+    "selectWorkspace": "Select workspace",
+    "manageWorkspaces": "Manage",
+    "newWorkspace": "New Workspace",
+    "branches": "Branches",
+    "newBranch": "New branch",
+    "active": "Active",
+    "open": "Open",
+    "syncGitHub": "Sync with GitHub",
+    "linkedTo": "Linked to",
+    "noWorkspaces": "No additional workspaces",
+    "current": "Current workspace",
+    "branchLabel": "Current branch",
+    "createWorkspace": "Create workspace",
+    "deleteWorkspace": "Delete workspace"
+  },
+  "explorer": {
+    "files": "Task Documents",
+    "searchPlaceholder": "Filter files...",
+    "newFile": "New .md file",
+    "newFolder": "New folder",
+    "emptyFolder": "Empty folder",
+    "rename": "Rename",
+    "duplicate": "Duplicate",
+    "deleteConfirm": "Delete this document?",
+    "syncOverride": "Force sync",
+    "refresh": "Refresh list",
+    "tasksCount": "{{count}} tasks"
+  },
+  "canvas": {
+    "addTask": "New Task",
+    "autoLayout": "Auto-layout",
+    "fitView": "Fit view",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "resetZoom": "Reset zoom",
+    "selectedTasks": "{{count}} tasks selected",
+    "bulkStatus": "Change bulk status",
+    "bulkDelete": "Delete selected",
+    "grid": "Grid",
+    "snap": "Snap to grid"
+  },
+  "kanban": {
+    "groupBy": "Group by:",
+    "statusGroup": "By Status",
+    "sectionGroup": "By Section",
+    "addTaskToColumn": "Add task to {{column}}",
+    "noTasks": "No tasks in this column"
+  },
+  "task": {
+    "status": {
+      "backlog": "Backlog",
+      "todo": "To Do",
+      "in_progress": "In Progress",
+      "in_review": "In Review",
+      "done": "Done",
+      "cancelled": "Cancelled"
+    },
+    "priority": {
+      "urgent": "Urgent",
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    },
+    "details": "Task details",
+    "title": "Title",
+    "description": "Description",
+    "checklist": "Subtasks / Checklist",
+    "tags": "Tags",
+    "dependencies": "Dependencies",
+    "blockedBy": "Blocked by",
+    "blocks": "Blocks"
+  },
+  "settings": {
+    "title": "Settings & Preferences",
+    "subtitle": "Customize interface, workspace behavior and persistence",
+    "sections": {
+      "general": "General",
+      "appearance": "Appearance",
+      "language": "Language",
+      "workspace": "Workspace",
+      "canvas": "Canvas",
+      "kanban": "Kanban",
+      "files": "Files",
+      "accessibility": "Accessibility",
+      "advanced": "Advanced"
+    },
+    "languageLabel": "Interface language",
+    "languageDesc": "Select the language for text and controls",
+    "themeLabel": "Color theme",
+    "themes": {
+      "dark": "Dark",
+      "light": "Light",
+      "system": "Follow System"
+    },
+    "densityLabel": "Interface density",
+    "densities": {
+      "compact": "Compact",
+      "normal": "Normal",
+      "comfortable": "Comfortable"
+    },
+    "defaultView": "Default view on start",
+    "defaultViewDesc": "Select startup view mode",
+    "confirmDelete": "Confirm delete with dependents",
+    "confirmDeleteDesc": "Warn with explicit dialog if deleted task blocks other tasks",
+    "showGrid": "Show background grid",
+    "showGridDesc": "Visual dot guides on the infinite canvas",
+    "snapToGrid": "Snap to grid",
+    "snapToGridDesc": "Automatically align cards to grid axes",
+    "resetDefaults": "Reset preferences",
+    "resetDefaultsDesc": "Visual and behavior settings will be reset to defaults.",
+    "resetCanvas": "Reset canvas layout",
+    "resetCanvasDesc": "Restores spatial card layout",
+    "dangerZone": "Danger zone"
+  }
+}

@@ -1,5 +1,6 @@
 export type ThemeMode = 'dark' | 'light' | 'system';
 export type DensityMode = 'compact' | 'normal' | 'comfortable';
+export type LanguageMode = 'es' | 'en' | 'fr' | 'pt';
 
 export interface RecentFileInfo {
   name: string;
@@ -11,6 +12,7 @@ export interface RecentFileInfo {
 export interface AppUserSettings {
   theme: ThemeMode;
   density: DensityMode;
+  language: LanguageMode;
   defaultView: 'canvas' | 'kanban';
   confirmDeleteWithDependents: boolean;
   canvasShowGrid: boolean;
@@ -28,6 +30,7 @@ export interface AppUserSettings {
 export const DEFAULT_USER_SETTINGS: AppUserSettings = {
   theme: 'dark',
   density: 'normal',
+  language: 'es',
   defaultView: 'canvas',
   confirmDeleteWithDependents: true,
   canvasShowGrid: true,

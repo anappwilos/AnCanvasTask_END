@@ -55,6 +55,8 @@ import { NewFolderModal } from './components/NewFolderModal';
 import { RenameFolderModal } from './components/RenameFolderModal';
 import { MarkdownSplitEditor } from './components/MarkdownSplitEditor';
 import { SafeMarkdownNormalizerModal } from './components/SafeMarkdownNormalizerModal';
+import { LanguageSelector } from './components/LanguageSelector';
+import { useTranslation } from 'react-i18next';
 import {
   loadWorkspaceStore,
   saveWorkspaceStore,
@@ -116,12 +118,20 @@ interface DeleteWarningInfo {
 }
 
 export default function App() {
+  const { t, i18n } = useTranslation();
   const [editor, setEditor] = useState<Editor | null>(null);
 
   // User Settings & Preferences State (DESIGN.md Section 4 & Fase 7)
   const [userSettings, setUserSettings] = useState<AppUserSettings>(() => loadUserSettings());
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const [isImportExportOpen, setIsImportExportOpen] = useState<boolean>(false);
+
+  // Sync language with userSettings
+  useEffect(() => {
+    if (userSettings.language && i18n.language !== userSettings.language) {
+      i18n.changeLanguage(userSettings.language);
+    }
+  }, [userSettings.language, i18n]);
 
   // Compute effective theme based on userSettings (including system preference)
   const effectiveTheme = useMemo<'dark' | 'light'>(() => {
@@ -2753,7 +2763,7 @@ export default function App() {
               }`}
             >
               <span className="material-symbols-outlined text-[16px]">grid_view</span>
-              <span className="hidden xl:inline">Canvas</span>
+              <span className="hidden xl:inline">{t('nav.canvas')}</span>
             </button>
 
             <button
@@ -2766,7 +2776,7 @@ export default function App() {
               }`}
             >
               <span className="material-symbols-outlined text-[16px]">view_kanban</span>
-              <span className="hidden xl:inline">Kanban</span>
+              <span className="hidden xl:inline">{t('nav.kanban')}</span>
             </button>
 
             <button
@@ -2779,7 +2789,7 @@ export default function App() {
               }`}
             >
               <span className="material-symbols-outlined text-[16px]">cloud_sync</span>
-              <span className="hidden xl:inline">Studio</span>
+              <span className="hidden xl:inline">{t('nav.studio')}</span>
             </button>
           </div>
 
@@ -2791,7 +2801,7 @@ export default function App() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Buscar..."
+              placeholder={t('common.search')}
               className="w-full bg-[var(--surface)] text-[var(--on-surface)] placeholder:text-[var(--on-surface-variant)] border border-[var(--outline)] rounded pl-8 pr-10 py-1 text-xs font-sans focus:outline-none focus:border-[var(--primary)] transition-all"
             />
             {searchQuery ? (
@@ -2808,7 +2818,7 @@ export default function App() {
                 type="button"
                 onClick={() => setIsCommandPaletteOpen(true)}
                 className="absolute right-1.5 top-1/2 -translate-y-1/2 px-1 py-0.2 rounded bg-[var(--surface-container)] border border-[var(--outline)] text-[9px] font-mono text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] cursor-pointer"
-                title="Abrir paleta de comandos (⌘K)"
+                title={t('nav.commandPaletteTooltip')}
               >
                 ⌘K
               </button>
@@ -2816,12 +2826,12 @@ export default function App() {
           </div>
         </div>
 
-        {/* Right Section: Global Actions (Split View, Problems, Help, Settings) */}
+        {/* Right Section: Global Actions (Split View, Problems, Help, Settings, Language) */}
         <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
           {!isOnline && (
             <span className="flex items-center gap-1 px-2 py-0.5 rounded bg-amber-950/80 border border-amber-700/60 text-amber-300 text-[10px] font-sans">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-              <span className="hidden sm:inline">Offline</span>
+              <span className="hidden sm:inline">{t('common.offline')}</span>
             </span>
           )}
 
@@ -2834,13 +2844,13 @@ export default function App() {
                 ? 'bg-[var(--surface-container-highest)] text-[var(--on-surface)] border-[var(--outline)]'
                 : 'bg-[var(--surface)] text-[var(--on-surface-variant)] border-[var(--outline)] hover:text-[var(--on-surface)]'
             }`}
-            title="Alternar editor Markdown en panel dividido"
+            title={t('nav.splitViewTooltip')}
           >
             <span className="material-symbols-outlined text-[16px]">
               {isSplitViewOpen ? 'vertical_split' : 'splitscreen'}
             </span>
             <span className="hidden xl:inline">
-              {isSplitViewOpen ? 'Cerrar .md' : 'Ver .md'}
+              {isSplitViewOpen ? t('nav.splitViewClose') : t('nav.splitViewOpen')}
             </span>
           </button>
 
@@ -2849,8 +2859,8 @@ export default function App() {
             type="button"
             onClick={() => setIsCommandPaletteOpen(true)}
             className="btn-m3-icon w-8 h-8 sm:hidden shrink-0 cursor-pointer"
-            title="Buscar tarea"
-            aria-label="Buscar"
+            title={t('common.search')}
+            aria-label={t('common.search')}
           >
             <span className="material-symbols-outlined text-[18px]">search</span>
           </button>
@@ -2865,7 +2875,7 @@ export default function App() {
                   ? 'bg-rose-950/80 text-rose-300 border-rose-800'
                   : 'bg-amber-950/80 text-amber-300 border-amber-800'
               }`}
-              title="Ver incidencias detectadas (P)"
+              title={t('nav.problemsTooltip')}
             >
               <span>⚠</span>
               <span>{validationReport.issues.length}</span>
@@ -2877,8 +2887,8 @@ export default function App() {
             type="button"
             onClick={() => setIsQuickGuideOpen(true)}
             className="btn-m3-icon shrink-0 cursor-pointer hidden sm:inline-flex"
-            title="Atajos de teclado y ayuda (?)"
-            aria-label="Atajos de teclado y ayuda"
+            title={t('nav.quickGuideTooltip')}
+            aria-label={t('nav.quickGuideTooltip')}
           >
             <span className="material-symbols-outlined text-[18px]">help</span>
           </button>
@@ -2888,11 +2898,14 @@ export default function App() {
             type="button"
             onClick={() => setIsSettingsOpen(true)}
             className="btn-m3-icon shrink-0 cursor-pointer hidden sm:inline-flex"
-            title="Configuración (⌘,)"
-            aria-label="Configuración"
+            title={t('nav.settingsTooltip')}
+            aria-label={t('nav.settingsTooltip')}
           >
             <span className="material-symbols-outlined text-[18px]">settings</span>
           </button>
+
+          {/* Language Selector */}
+          <LanguageSelector className="hidden sm:inline-block shrink-0" />
 
           {/* Mobile Menu Trigger */}
           <button
@@ -3876,6 +3889,15 @@ export default function App() {
                 </div>
                 <span className="text-[10px] text-[var(--on-surface-variant)]">Cambiar</span>
               </button>
+
+              {/* Language Selection */}
+              <div className="w-full min-h-[44px] px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between text-[var(--on-surface)]">
+                <div className="flex items-center gap-2.5">
+                  <span className="material-symbols-outlined text-[18px] text-[var(--primary)]">language</span>
+                  <span>{t('common.language')}</span>
+                </div>
+                <LanguageSelector />
+              </div>
 
               {/* Settings */}
               <button

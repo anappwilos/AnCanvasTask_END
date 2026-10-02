@@ -1,0 +1,152 @@
+{
+  "common": {
+    "appName": "Tasks Canvas",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "close": "Fermer",
+    "edit": "Modifier",
+    "ready": "Terminé",
+    "search": "Rechercher...",
+    "offline": "Hors ligne",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "warning": "Avertissement",
+    "info": "Information",
+    "apply": "Appliquer",
+    "reset": "Réinitialiser",
+    "confirm": "Confirmer",
+    "language": "Langue"
+  },
+  "nav": {
+    "toggleSidebar": "Basculer le panneau latéral",
+    "canvas": "Canvas",
+    "kanban": "Kanban",
+    "studio": "Studio",
+    "splitViewOpen": "Voir .md",
+    "splitViewClose": "Fermer .md",
+    "splitViewTooltip": "Basculer l'éditeur Markdown divisé",
+    "quickGuideTooltip": "Raccourcis clavier et aide (?)",
+    "settingsTooltip": "Paramètres (⌘,)",
+    "commandPaletteTooltip": "Ouvrir la palette de commandes (⌘K)",
+    "problemsTooltip": "Voir les problèmes détectés",
+    "searchPlaceholder": "Rechercher une tâche..."
+  },
+  "workspace": {
+    "title": "Espaces de travail",
+    "selectWorkspace": "Sélectionner l'espace",
+    "manageWorkspaces": "Gérer",
+    "newWorkspace": "Nouvel espace",
+    "branches": "Branches",
+    "newBranch": "Nouvelle branche",
+    "active": "Actif",
+    "open": "Ouvrir",
+    "syncGitHub": "Synchroniser avec GitHub",
+    "linkedTo": "Lié à",
+    "noWorkspaces": "Aucun espace supplémentaire",
+    "current": "Espace actuel",
+    "branchLabel": "Branche actuelle",
+    "createWorkspace": "Créer un espace",
+    "deleteWorkspace": "Supprimer l'espace"
+  },
+  "explorer": {
+    "files": "Documents de tâches",
+    "searchPlaceholder": "Filtrer les fichiers...",
+    "newFile": "Nouveau fichier .md",
+    "newFolder": "Nouveau dossier",
+    "emptyFolder": "Dossier vide",
+    "rename": "Renommer",
+    "duplicate": "Dupliquer",
+    "deleteConfirm": "Supprimer ce document ?",
+    "syncOverride": "Forcer la synchronisation",
+    "refresh": "Actualiser la liste",
+    "tasksCount": "{{count}} tâches"
+  },
+  "canvas": {
+    "addTask": "Nouvelle tâche",
+    "autoLayout": "Agencer auto",
+    "fitView": "Ajuster la vue",
+    "zoomIn": "Zoomer",
+    "zoomOut": "Dézoomer",
+    "resetZoom": "Réinitialiser zoom",
+    "selectedTasks": "{{count}} tâches sélectionnées",
+    "bulkStatus": "Changer état groupé",
+    "bulkDelete": "Supprimer la sélection",
+    "grid": "Grille",
+    "snap": "Alignement sur la grille"
+  },
+  "kanban": {
+    "groupBy": "Grouper par :",
+    "statusGroup": "Par Statut",
+    "sectionGroup": "Par Section",
+    "addTaskToColumn": "Ajouter tâche à {{column}}",
+    "noTasks": "Aucune tâche dans cette colonne"
+  },
+  "task": {
+    "status": {
+      "backlog": "Backlog",
+      "todo": "À faire",
+      "in_progress": "En cours",
+      "in_review": "En révision",
+      "done": "Terminé",
+      "cancelled": "Annulé"
+    },
+    "priority": {
+      "urgent": "Urgent",
+      "high": "Haute",
+      "medium": "Moyenne",
+      "low": "Basse"
+    },
+    "details": "Détails de la tâche",
+    "title": "Titre",
+    "description": "Description",
+    "checklist": "Sous-tâches / Liste",
+    "tags": "Étiquettes",
+    "dependencies": "Dépendances",
+    "blockedBy": "Bloquée par",
+    "blocks": "Bloque"
+  },
+  "settings": {
+    "title": "Paramètres & Préférences",
+    "subtitle": "Personnalisez l'interface, le comportement et la persistance",
+    "sections": {
+      "general": "Général",
+      "appearance": "Apparence",
+      "language": "Langue",
+      "workspace": "Espace de travail",
+      "canvas": "Canvas",
+      "kanban": "Kanban",
+      "files": "Fichiers",
+      "accessibility": "Accessibilité",
+      "advanced": "Avancé"
+    },
+    "languageLabel": "Langue de l'interface",
+    "languageDesc": "Sélectionnez la langue des textes et contrôles",
+    "themeLabel": "Thème de couleur",
+    "themes": {
+      "dark": "Sombre",
+      "light": "Clair",
+      "system": "Système"
+    },
+    "densityLabel": "Densité de l'interface",
+    "densities": {
+      "compact": "Compacte",
+      "normal": "Normale",
+      "comfortable": "Confortable"
+    },
+    "defaultView": "Vue initiale au démarrage",
+    "defaultViewDesc": "Mode d'affichage au lancement",
+    "confirmDelete": "Confirmer la suppression avec dépendances",
+    "confirmDeleteDesc": "Avertir si la tâche supprimée bloque d'autres tâches",
+    "showGrid": "Afficher la grille",
+    "showGridDesc": "Points guides sur le canevas",
+    "snapToGrid": "Alignement magnétique",
+    "snapToGridDesc": "Aligner automatiquement sur la grille",
+    "resetDefaults": "Réinitialiser les préférences",
+    "resetDefaultsDesc": "Restaure les paramètres par défaut.",
+    "resetCanvas": "Réinitialiser la disposition",
+    "resetCanvasDesc": "Restaure l'emplacement des cartes",
+    "dangerZone": "Zone dangereuse"
+  }
+}

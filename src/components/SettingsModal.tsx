@@ -1,4 +1,6 @@
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { SUPPORTED_LANGUAGES, SupportedLanguageCode } from '../i18n';
 import {
   AppUserSettings,
   clearRecentFilesHistory,
@@ -36,6 +38,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onResetCanvasLayout,
   onShowToast,
 }) => {
+  const { t, i18n } = useTranslation();
   const [activeSection, setActiveSection] = useState<SettingsSection>('general');
   const [searchFilter, setSearchFilter] = useState('');
   const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
@@ -199,6 +202,31 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   <p className="text-[var(--on-surface-variant)] mt-0.5">
                     Comportamiento inicial y confirmaciones de seguridad
                   </p>
+                </div>
+
+                {/* Interface Language */}
+                <div className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between gap-4">
+                  <div className="flex flex-col gap-0.5">
+                    <span className="font-medium text-[var(--on-surface)]">{t('settings.languageLabel')}</span>
+                    <span className="text-[var(--on-surface-variant)] text-[11px]">{t('settings.languageDesc')}</span>
+                  </div>
+                  <select
+                    value={(i18n.resolvedLanguage || i18n.language || settings.language || 'es').slice(0, 2)}
+                    onChange={(e) => {
+                      const newLang = e.target.value as SupportedLanguageCode;
+                      i18n.changeLanguage(newLang);
+                      handleUpdate('language', newLang);
+                      const langLabel = SUPPORTED_LANGUAGES.find((l) => l.code === newLang)?.label || newLang;
+                      onShowToast(`${t('common.language')}: ${langLabel}`, 'success');
+                    }}
+                    className="bg-[var(--surface-container)] text-[var(--on-surface)] border border-[var(--outline)] rounded px-2.5 py-1 text-xs focus:outline-none focus:border-[var(--primary)] cursor-pointer"
+                  >
+                    {SUPPORTED_LANGUAGES.map((l) => (
+                      <option key={l.code} value={l.code}>
+                        {l.flag} {l.label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 {/* Default View */}

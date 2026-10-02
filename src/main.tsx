@@ -2,6 +2,7 @@ import React, { Component, ErrorInfo, ReactNode, StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
+import './i18n';
 
 // Ensure browser compatibility polyfills for libraries expecting Node/global conventions
 if (typeof window !== 'undefined') {
