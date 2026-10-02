@@ -65,12 +65,24 @@ function TaskCardComponent({
   }, [title]);
 
   useEffect(() => {
+    let isMounted = true;
     const checkSelection = () => {
-      setIsSelected(editor.getSelectedShapeIds().includes(shape.id));
+      queueMicrotask(() => {
+        if (!isMounted) return;
+        try {
+          const selected = editor.getSelectedShapeIds().includes(shape.id);
+          setIsSelected((prev) => (prev !== selected ? selected : prev));
+        } catch {
+          // ignore
+        }
+      });
     };
     checkSelection();
     const unsub = editor.store.listen(checkSelection);
-    return () => unsub();
+    return () => {
+      isMounted = false;
+      unsub();
+    };
   }, [editor, shape.id]);
 
   const toggleCompleted = (e: React.MouseEvent | React.PointerEvent) => {

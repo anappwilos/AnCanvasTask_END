@@ -23,7 +23,7 @@ export const ToastContainer: React.FC<ToastContainerProps> = ({ toasts, onDismis
 
   return (
     <div
-      className="fixed bottom-16 sm:bottom-6 right-3 sm:right-6 z-50 flex flex-col gap-2 max-w-[95vw] sm:max-w-md pointer-events-none"
+      className="fixed bottom-16 sm:bottom-6 right-3 sm:right-6 z-[100] flex flex-col gap-2 max-w-[95vw] sm:max-w-md pointer-events-none"
       aria-live="polite"
       aria-atomic="true"
     >

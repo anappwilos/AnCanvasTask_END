@@ -224,9 +224,9 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
   return (
     <div className="flex flex-col gap-1.5 select-none">
       {/* 1. Integrated Workspace & Branch Bar */}
-      <div className="flex items-center gap-1 pb-2 border-b border-[var(--outline)]">
+      <div className="relative flex items-center gap-1 pb-2 border-b border-[var(--outline)]">
         {/* Workspace Dropdown */}
-        <div className="relative flex-1 min-w-0" ref={wsDropdownRef}>
+        <div className="flex-1 min-w-0" ref={wsDropdownRef}>
           <button
             type="button"
             onClick={() => {
@@ -246,76 +246,10 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
               arrow_drop_down
             </span>
           </button>
-
-          {/* Workspace Dropdown Menu */}
-          {isWorkspaceMenuOpen && (
-            <div className="absolute left-0 top-full mt-1 w-64 bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-xl py-1 z-50 animate-fade-in select-none">
-              <div className="px-3 py-1.5 border-b border-[var(--outline)] flex items-center justify-between">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--on-surface-variant)]">
-                  Workspaces ({allWorkspaces.length})
-                </span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsWorkspaceMenuOpen(false);
-                    onOpenWorkspaceManager();
-                  }}
-                  className="text-[10px] text-[var(--primary)] hover:underline cursor-pointer font-medium"
-                >
-                  Administrar
-                </button>
-              </div>
-
-              <div className="max-h-48 overflow-y-auto py-1">
-                {allWorkspaces.map((ws) => {
-                  const isCurrent = ws.id === workspace?.id;
-                  return (
-                    <button
-                      key={ws.id}
-                      type="button"
-                      onClick={() => {
-                        onSelectWorkspace(ws.id);
-                        setIsWorkspaceMenuOpen(false);
-                      }}
-                      className={`w-full px-3 py-1.5 text-left flex items-center justify-between gap-2 text-xs transition-colors cursor-pointer ${
-                        isCurrent
-                          ? 'bg-[var(--primary-container)]/30 text-[var(--primary)] font-medium'
-                          : 'text-[var(--on-surface)] hover:bg-[var(--surface-container-high)]'
-                      }`}
-                    >
-                      <div className="flex flex-col min-w-0">
-                        <span className="font-semibold truncate">{ws.name}</span>
-                        <span className="text-[10px] font-mono text-[var(--on-surface-variant)] truncate">
-                          {ws.githubRepo?.fullName || 'GitHub'}
-                        </span>
-                      </div>
-                      {isCurrent && (
-                        <span className="w-1.5 h-1.5 rounded-full bg-[var(--primary)] shrink-0" />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-
-              <div className="pt-1 border-t border-[var(--outline)] px-2 py-1">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsWorkspaceMenuOpen(false);
-                    onOpenWorkspaceManager();
-                  }}
-                  className="btn-m3-secondary w-full py-1 text-xs justify-center cursor-pointer"
-                >
-                  <span className="material-symbols-outlined text-[14px]">add</span>
-                  <span>+ Nuevo Workspace</span>
-                </button>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Branch Dropdown */}
-        <div className="relative flex-1 min-w-0" ref={branchDropdownRef}>
+        <div className="flex-1 min-w-0" ref={branchDropdownRef}>
           <button
             type="button"
             onClick={() => {
@@ -335,75 +269,141 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
               arrow_drop_down
             </span>
           </button>
-
-          {/* Branch Dropdown Menu */}
-          {isBranchMenuOpen && (
-            <div className="absolute right-0 top-full mt-1 w-60 bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-xl py-1 z-50 animate-fade-in select-none">
-              <div className="px-3 py-1.5 border-b border-[var(--outline)] flex items-center justify-between">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--on-surface-variant)]">
-                  Ramas ({safeBranches.length})
-                </span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsBranchMenuOpen(false);
-                    onOpenGitHubSync();
-                  }}
-                  className="text-[10px] text-sky-400 hover:underline cursor-pointer font-medium flex items-center gap-0.5"
-                >
-                  <span className="material-symbols-outlined text-[12px]">sync</span>
-                  <span>Git Status</span>
-                </button>
-              </div>
-
-              <div className="max-h-48 overflow-y-auto py-1">
-                {safeBranches.map((b) => {
-                  const isCurrent = b.name === branch?.name;
-                  const docCount = b.taskDocuments?.length || 0;
-                  return (
-                    <button
-                      key={b.name}
-                      type="button"
-                      onClick={() => {
-                        onSelectBranch(b.name);
-                        setIsBranchMenuOpen(false);
-                      }}
-                      className={`w-full px-3 py-1.5 text-left flex items-center justify-between gap-2 text-xs transition-colors cursor-pointer ${
-                        isCurrent
-                          ? 'bg-[var(--primary-container)]/30 text-[var(--primary)] font-medium'
-                          : 'text-[var(--on-surface)] hover:bg-[var(--surface-container-high)]'
-                      }`}
-                    >
-                      <div className="flex items-center gap-1.5 min-w-0 truncate font-mono">
-                        <span className="material-symbols-outlined text-[13px] text-sky-400 shrink-0">
-                          fork_right
-                        </span>
-                        <span className="truncate">{b.name}</span>
-                      </div>
-                      <span className="text-[10px] font-mono text-[var(--on-surface-variant)] shrink-0">
-                        {docCount} doc{docCount !== 1 ? 's' : ''}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              <div className="pt-1 border-t border-[var(--outline)] px-2 py-1 flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsBranchMenuOpen(false);
-                    onOpenCreateBranch();
-                  }}
-                  className="btn-m3-secondary flex-1 py-1 text-xs justify-center cursor-pointer"
-                >
-                  <span className="material-symbols-outlined text-[13px]">add</span>
-                  <span>+ Nueva Rama</span>
-                </button>
-              </div>
-            </div>
-          )}
         </div>
+
+        {/* Workspace Dropdown Menu (Full Width of Header to Prevent Any Text Clipping) */}
+        {isWorkspaceMenuOpen && (
+          <div className="absolute left-0 right-0 top-full mt-1.5 bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-2xl py-1 z-50 animate-fade-in select-none">
+            <div className="px-3 py-1.5 border-b border-[var(--outline)] flex items-center justify-between">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--on-surface-variant)]">
+                Workspaces ({allWorkspaces.length})
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsWorkspaceMenuOpen(false);
+                  onOpenWorkspaceManager();
+                }}
+                className="text-[10px] text-[var(--primary)] hover:underline cursor-pointer font-medium"
+              >
+                Administrar
+              </button>
+            </div>
+
+            <div className="max-h-52 overflow-y-auto py-1">
+              {allWorkspaces.map((ws) => {
+                const isCurrent = ws.id === workspace?.id;
+                return (
+                  <button
+                    key={ws.id}
+                    type="button"
+                    onClick={() => {
+                      onSelectWorkspace(ws.id);
+                      setIsWorkspaceMenuOpen(false);
+                    }}
+                    className={`w-full px-3 py-1.5 text-left flex items-center justify-between gap-2 text-xs transition-colors cursor-pointer ${
+                      isCurrent
+                        ? 'bg-[var(--primary-container)]/30 text-[var(--primary)] font-medium'
+                        : 'text-[var(--on-surface)] hover:bg-[var(--surface-container-high)]'
+                    }`}
+                  >
+                    <div className="flex flex-col min-w-0">
+                      <span className="font-semibold truncate">{ws.name}</span>
+                      <span className="text-[10px] font-mono text-[var(--on-surface-variant)] truncate">
+                        {ws.githubRepo?.fullName || 'GitHub'}
+                      </span>
+                    </div>
+                    {isCurrent && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-[var(--primary)] shrink-0" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="pt-1 border-t border-[var(--outline)] px-2 py-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsWorkspaceMenuOpen(false);
+                  onOpenWorkspaceManager();
+                }}
+                className="btn-m3-secondary w-full py-1 text-xs justify-center cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[14px]">add</span>
+                <span>+ Nuevo Workspace</span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Branch Dropdown Menu (Full Width of Header to Prevent Any Text Clipping) */}
+        {isBranchMenuOpen && (
+          <div className="absolute left-0 right-0 top-full mt-1.5 bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-2xl py-1 z-50 animate-fade-in select-none">
+            <div className="px-3 py-1.5 border-b border-[var(--outline)] flex items-center justify-between">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--on-surface-variant)]">
+                Ramas ({safeBranches.length})
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsBranchMenuOpen(false);
+                  onOpenGitHubSync();
+                }}
+                className="text-[10px] text-sky-400 hover:underline cursor-pointer font-medium flex items-center gap-0.5"
+              >
+                <span className="material-symbols-outlined text-[12px]">sync</span>
+                <span>Git Status</span>
+              </button>
+            </div>
+
+            <div className="max-h-52 overflow-y-auto py-1">
+              {safeBranches.map((b) => {
+                const isCurrent = b.name === branch?.name;
+                const docCount = b.taskDocuments?.length || 0;
+                return (
+                  <button
+                    key={b.name}
+                    type="button"
+                    onClick={() => {
+                      onSelectBranch(b.name);
+                      setIsBranchMenuOpen(false);
+                    }}
+                    className={`w-full px-3 py-1.5 text-left flex items-center justify-between gap-2 text-xs transition-colors cursor-pointer ${
+                      isCurrent
+                        ? 'bg-[var(--primary-container)]/30 text-[var(--primary)] font-medium'
+                        : 'text-[var(--on-surface)] hover:bg-[var(--surface-container-high)]'
+                    }`}
+                  >
+                    <div className="flex items-center gap-1.5 min-w-0 truncate font-mono">
+                      <span className="material-symbols-outlined text-[13px] text-sky-400 shrink-0">
+                        fork_right
+                      </span>
+                      <span className="truncate">{b.name}</span>
+                    </div>
+                    <span className="text-[10px] font-mono text-[var(--on-surface-variant)] shrink-0">
+                      {docCount} doc{docCount !== 1 ? 's' : ''}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="pt-1 border-t border-[var(--outline)] px-2 py-1 flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsBranchMenuOpen(false);
+                  onOpenCreateBranch();
+                }}
+                className="btn-m3-secondary flex-1 py-1 text-xs justify-center cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[13px]">add</span>
+                <span>+ Nueva Rama</span>
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* 2. Files & Folders Header with Title and Quick Add Buttons */}

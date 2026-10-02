@@ -62,6 +62,7 @@ import {
   getActiveBranch,
   getActiveDocument,
   getInitialDefaultWorkspaces,
+  logWorkspaceTrace,
   WorkspaceStoreState,
   Workspace,
   BranchConfig,
@@ -357,6 +358,11 @@ export default function App() {
   const activeBranch = useMemo(() => getActiveBranch(activeWorkspace), [activeWorkspace]);
   const activeDocument = useMemo(() => getActiveDocument(activeBranch), [activeBranch]);
 
+  // Compound key to track exact active document across workspaces & branches
+  const currentDocKey = `${activeWorkspace.id}::${activeBranch.name}::${activeDocument.id}`;
+  const activeDocKeyRef = useRef<string>(currentDocKey);
+  const isSwitchingDocRef = useRef<boolean>(false);
+
   // Markdown and sync
   const [currentFileName, setCurrentFileName] = useState<string>(() => activeDocument.path || 'TASKS.md');
   const [markdownInput, setMarkdownInput] = useState<string>(() => activeDocument.content || SAMPLE_MARKDOWN);
@@ -486,8 +492,9 @@ export default function App() {
     [editor, triggerDebouncedVisualSave]
   );
 
-  // Keep workspaceStore synced whenever markdownInput changes
+  // Keep workspaceStore synced whenever markdownInput changes (guarding against doc switches)
   useEffect(() => {
+    if (isSwitchingDocRef.current) return;
     setWorkspaceStore((prevStore) => {
       let hasChanges = false;
       const nextWs = prevStore.workspaces.map((ws) => {
@@ -516,25 +523,36 @@ export default function App() {
     });
   }, [markdownInput]);
 
-  // Handle switching active document in workspace/branch
-  const activeDocIdRef = useRef(activeDocument.id);
+  // Reactive and reliable document switching across workspaces, branches and files
   useEffect(() => {
-    if (activeDocIdRef.current !== activeDocument.id) {
-      activeDocIdRef.current = activeDocument.id;
+    if (activeDocKeyRef.current !== currentDocKey) {
+      isSwitchingDocRef.current = true;
+      activeDocKeyRef.current = currentDocKey;
+      logWorkspaceTrace(`Cargando documento activo: ${currentDocKey}`, {
+        workspace: activeWorkspace.name,
+        branch: activeBranch.name,
+        path: activeDocument.path,
+      });
+
       setCurrentFileName(activeDocument.path);
       setMarkdownInput(activeDocument.content);
       setLastSavedMarkdown(activeDocument.lastSavedContent);
 
       if (editor) {
-        const { taskCount, groupCount } = loadTasksFromMarkdown(
+        loadTasksFromMarkdown(
           editor,
           activeDocument.content,
           activeDocument.visualState
         );
         triggerDebouncedVisualSave(editor);
       }
+
+      const timer = setTimeout(() => {
+        isSwitchingDocRef.current = false;
+      }, 60);
+      return () => clearTimeout(timer);
     }
-  }, [activeDocument]);
+  }, [currentDocKey, activeDocument, activeWorkspace.name, activeBranch.name, editor, triggerDebouncedVisualSave]);
 
   // Existing folders in the active branch for autocomplete
   const existingFoldersInBranch = useMemo(() => {
@@ -550,28 +568,21 @@ export default function App() {
   // Workspace actions
   const handleSelectWorkspace = useCallback(
     (workspaceId: string) => {
+      logWorkspaceTrace(`Seleccionando workspace: ${workspaceId}`);
+      let selectedName = workspaceId;
       setWorkspaceStore((prev) => {
-        const targetWs = prev.workspaces.find((w) => w.id === workspaceId) || prev.workspaces[0];
-        const targetBranch = getActiveBranch(targetWs);
-        const targetDoc = getActiveDocument(targetBranch);
-
-        setCurrentFileName(targetDoc.path);
-        setMarkdownInput(targetDoc.content);
-        setLastSavedMarkdown(targetDoc.lastSavedContent);
-
-        if (editor) {
-          loadTasksFromMarkdown(editor, targetDoc.content, targetDoc.visualState);
-          triggerDebouncedVisualSave(editor);
+        const targetWs = prev.workspaces.find((w) => w.id === workspaceId);
+        if (targetWs) {
+          selectedName = targetWs.name;
         }
-
+        if (prev.activeWorkspaceId === workspaceId) return prev;
         const nextStore = { ...prev, activeWorkspaceId: workspaceId };
         saveWorkspaceStore(nextStore);
         return nextStore;
       });
-      const ws = workspaceStore.workspaces.find((w) => w.id === workspaceId);
-      pushToast(`Workspace "${ws?.name || workspaceId}" cargado`, 'success');
+      pushToast(`Workspace "${selectedName}" cargado`, 'success');
     },
-    [editor, pushToast, triggerDebouncedVisualSave, workspaceStore.workspaces]
+    [pushToast]
   );
 
   const handleCreateWorkspace = useCallback(
@@ -850,32 +861,22 @@ export default function App() {
   // Branch actions
   const handleSelectBranch = useCallback(
     (branchName: string) => {
+      logWorkspaceTrace(`Cambiando a rama: ${branchName}`);
       setWorkspaceStore((prev) => {
+        const currentWs = prev.workspaces.find((w) => w.id === prev.activeWorkspaceId);
+        if (currentWs && currentWs.activeBranchName === branchName) return prev;
+
         const nextWsList = prev.workspaces.map((ws) => {
           if (ws.id !== prev.activeWorkspaceId) return ws;
           return { ...ws, activeBranchName: branchName, updatedAt: new Date().toISOString() };
         });
         const nextStore = { ...prev, workspaces: nextWsList };
         saveWorkspaceStore(nextStore);
-
-        const currentWs = getActiveWorkspace(nextStore);
-        const currentBr = getActiveBranch(currentWs);
-        const currentDc = getActiveDocument(currentBr);
-
-        setCurrentFileName(currentDc.path);
-        setMarkdownInput(currentDc.content);
-        setLastSavedMarkdown(currentDc.lastSavedContent);
-
-        if (editor) {
-          loadTasksFromMarkdown(editor, currentDc.content, currentDc.visualState);
-          triggerDebouncedVisualSave(editor);
-        }
-
         return nextStore;
       });
       pushToast(`Rama "${branchName}" activada`, 'info');
     },
-    [editor, pushToast, triggerDebouncedVisualSave]
+    [pushToast]
   );
 
   const handleCreateBranch = useCallback(
@@ -916,21 +917,11 @@ export default function App() {
 
         const nextStore = { ...prev, workspaces: nextWsList };
         saveWorkspaceStore(nextStore);
-
-        const activeDc = clonedDocs[0];
-        setCurrentFileName(activeDc.path);
-        setMarkdownInput(activeDc.content);
-        setLastSavedMarkdown(activeDc.lastSavedContent);
-
-        if (editor) {
-          loadTasksFromMarkdown(editor, activeDc.content, activeDc.visualState);
-          triggerDebouncedVisualSave(editor);
-        }
-
         return nextStore;
       });
+      pushToast(`Rama "${branchName}" creada y activada`, 'success');
     },
-    [editor, triggerDebouncedVisualSave]
+    [pushToast]
   );
 
   // Task Document actions
@@ -941,30 +932,17 @@ export default function App() {
           if (ws.id !== prev.activeWorkspaceId) return ws;
           const nextBranches = ws.branches.map((b) => {
             if (b.name !== ws.activeBranchName) return b;
+            if (b.activeDocumentId === docId) return b;
             return { ...b, activeDocumentId: docId };
           });
           return { ...ws, branches: nextBranches };
         });
         const nextStore = { ...prev, workspaces: nextWsList };
         saveWorkspaceStore(nextStore);
-
-        const activeWs = getActiveWorkspace(nextStore);
-        const activeBr = getActiveBranch(activeWs);
-        const targetDoc = activeBr.taskDocuments.find((d) => d.id === docId) || activeBr.taskDocuments[0];
-
-        setCurrentFileName(targetDoc.path);
-        setMarkdownInput(targetDoc.content);
-        setLastSavedMarkdown(targetDoc.lastSavedContent);
-
-        if (editor) {
-          loadTasksFromMarkdown(editor, targetDoc.content, targetDoc.visualState);
-          triggerDebouncedVisualSave(editor);
-        }
-
         return nextStore;
       });
     },
-    [editor, triggerDebouncedVisualSave]
+    []
   );
 
   const handleCreateTaskDocument = useCallback(
@@ -1261,32 +1239,48 @@ export default function App() {
   useEffect(() => {
     if (!editor) return;
 
+    let isMounted = true;
     const updateSelectionAndZoom = () => {
-      try {
-        const zoom = Math.round(editor.getZoomLevel() * 100);
-        setCanvasZoom(zoom);
-      } catch {
-        // ignore
-      }
+      queueMicrotask(() => {
+        if (!isMounted || !editor) return;
+        try {
+          const zoom = Math.round(editor.getZoomLevel() * 100);
+          setCanvasZoom((prev) => (prev !== zoom ? zoom : prev));
+        } catch {
+          // ignore
+        }
 
-      const selected = editor.getSelectedShapes();
-      const taskShapes = selected.filter((s) => (s as any).type === 'task');
-      const taskIds = taskShapes
-        .map((s) => ((s as any).props?.taskId || (s as any).props?.temporaryId || s.id) as string)
-        .filter(Boolean);
+        try {
+          const selected = editor.getSelectedShapes();
+          const taskShapes = selected.filter((s) => (s as any).type === 'task');
+          const taskIds = taskShapes
+            .map((s) => ((s as any).props?.taskId || (s as any).props?.temporaryId || s.id) as string)
+            .filter(Boolean);
 
-      setSelectedTaskIdsOnCanvas(taskIds);
+          setSelectedTaskIdsOnCanvas((prev) => {
+            if (prev.length === taskIds.length && prev.every((id, i) => id === taskIds[i])) {
+              return prev;
+            }
+            return taskIds;
+          });
 
-      if (taskShapes.length === 1) {
-        setSelectedTaskShapeId(taskShapes[0].id);
-      } else if (taskShapes.length === 0 && activeView === 'canvas') {
-        setSelectedTaskShapeId(null);
-      }
+          if (taskShapes.length === 1) {
+            setSelectedTaskShapeId((prev) => (prev !== taskShapes[0].id ? taskShapes[0].id : prev));
+          } else if (taskShapes.length === 0 && activeView === 'canvas') {
+            setSelectedTaskShapeId((prev) => (prev !== null ? null : prev));
+          }
+        } catch {
+          // ignore
+        }
+      });
     };
 
     updateSelectionAndZoom();
     const unsub = editor.store.listen(updateSelectionAndZoom);
-    return () => unsub();
+    return () => {
+      isMounted = false;
+      unsub();
+    };
   }, [editor, activeView]);
 
   // Sync theme with editor user preferences
@@ -1318,73 +1312,77 @@ export default function App() {
       initVisualState();
 
       // Set up store listener to sync task content edits, moves between groups, and visual persistence
+      let isMounted = true;
       const unsubscribe = editorInstance.store.listen((entry) => {
-        let hasVisualChange = false;
-        const changes = entry.changes as any;
+        queueMicrotask(() => {
+          if (!isMounted) return;
+          let hasVisualChange = false;
+          const changes = entry.changes as any;
 
-        if (changes.updated) {
-          for (const id of Object.keys(changes.updated)) {
-            const [from, to] = changes.updated[id] || [];
-            if (to?.typeName === 'shape' || from?.typeName === 'shape') {
-              hasVisualChange = true;
+          if (changes.updated) {
+            for (const id of Object.keys(changes.updated)) {
+              const [from, to] = changes.updated[id] || [];
+              if (to?.typeName === 'shape' || from?.typeName === 'shape') {
+                hasVisualChange = true;
 
-              // 1. Detect task attribute changes (title, completed, priority)
-              if (to?.type === 'task' && from?.type === 'task') {
-                const toProps = to.props || {};
-                const fromProps = from.props || {};
-                const isTitleChanged = toProps.title !== fromProps.title;
-                const isCompletedChanged = toProps.completed !== fromProps.completed;
-                const isPriorityChanged = toProps.priority !== fromProps.priority;
+                // 1. Detect task attribute changes (title, completed, priority)
+                if (to?.type === 'task' && from?.type === 'task') {
+                  const toProps = to.props || {};
+                  const fromProps = from.props || {};
+                  const isTitleChanged = toProps.title !== fromProps.title;
+                  const isCompletedChanged = toProps.completed !== fromProps.completed;
+                  const isPriorityChanged = toProps.priority !== fromProps.priority;
 
-                if (isTitleChanged || isCompletedChanged || isPriorityChanged) {
-                  const taskId = toProps.taskId || fromProps.taskId;
-                  if (taskId) {
-                    setMarkdownInput((currentMd) =>
-                      updateTaskInMarkdown(currentMd, taskId, {
-                        title: toProps.title,
-                        completed: toProps.completed,
-                        priority: toProps.priority,
-                      })
-                    );
+                  if (isTitleChanged || isCompletedChanged || isPriorityChanged) {
+                    const taskId = toProps.taskId || fromProps.taskId;
+                    if (taskId) {
+                      setMarkdownInput((currentMd) =>
+                        updateTaskInMarkdown(currentMd, taskId, {
+                          title: toProps.title,
+                          completed: toProps.completed,
+                          priority: toProps.priority,
+                        })
+                      );
+                    }
                   }
-                }
 
-                // 2. Detect moving task into another group bounding box
-                const isPositionChanged = to.x !== from.x || to.y !== from.y;
-                if (isPositionChanged) {
-                  const taskId = toProps.taskId || fromProps.taskId;
-                  if (taskId) {
-                    const taskCenterX = to.x + (toProps.w || 320) / 2;
-                    const taskCenterY = to.y + 40;
+                  // 2. Detect moving task into another group bounding box
+                  const isPositionChanged = to.x !== from.x || to.y !== from.y;
+                  if (isPositionChanged) {
+                    const taskId = toProps.taskId || fromProps.taskId;
+                    if (taskId) {
+                      const taskCenterX = to.x + (toProps.w || 320) / 2;
+                      const taskCenterY = to.y + 40;
 
-                    // Find all task-group shapes on canvas
-                    const groupShapes = editorInstance
-                      .getCurrentPageShapes()
-                      .filter((s) => (s as any).type === 'task-group');
+                      // Find all task-group shapes on canvas
+                      const groupShapes = editorInstance
+                        .getCurrentPageShapes()
+                        .filter((s) => (s as any).type === 'task-group');
 
-                    for (const gShape of groupShapes) {
-                      const g = gShape as any;
-                      const gW = g.props?.w || 360;
-                      const gH = g.props?.h || 240;
+                      for (const gShape of groupShapes) {
+                        const g = gShape as any;
+                        const gW = g.props?.w || 360;
+                        const gH = g.props?.h || 240;
 
-                      if (
-                        taskCenterX >= g.x &&
-                        taskCenterX <= g.x + gW &&
-                        taskCenterY >= g.y &&
-                        taskCenterY <= g.y + gH
-                      ) {
-                        const targetGroupTitle = g.props?.title;
-                        if (targetGroupTitle) {
-                          setMarkdownInput((curr) => {
-                            const updated = moveTaskToGroupInMarkdown(
-                              curr,
-                              taskId,
-                              targetGroupTitle
-                            );
-                            return updated;
-                          });
+                        if (
+                          taskCenterX >= g.x &&
+                          taskCenterX <= g.x + gW &&
+                          taskCenterY >= g.y &&
+                          taskCenterY <= g.y + gH
+                        ) {
+                          const targetGroupTitle = g.props?.title;
+                          if (targetGroupTitle) {
+                            setMarkdownInput((curr) => {
+                              const updated = moveTaskToGroupInMarkdown(
+                                curr,
+                                taskId,
+                                targetGroupTitle
+                              );
+                              return updated;
+                            });
+                          }
+                          break;
                         }
-                        break;
                       }
                     }
                   }
@@ -1392,32 +1390,33 @@ export default function App() {
               }
             }
           }
-        }
 
-        if (!hasVisualChange && changes.added) {
-          for (const id of Object.keys(changes.added)) {
-            if (changes.added[id]?.typeName === 'shape') {
-              hasVisualChange = true;
-              break;
+          if (!hasVisualChange && changes.added) {
+            for (const id of Object.keys(changes.added)) {
+              if (changes.added[id]?.typeName === 'shape') {
+                hasVisualChange = true;
+                break;
+              }
             }
           }
-        }
 
-        if (!hasVisualChange && changes.removed) {
-          for (const id of Object.keys(changes.removed)) {
-            if (changes.removed[id]?.typeName === 'shape') {
-              hasVisualChange = true;
-              break;
+          if (!hasVisualChange && changes.removed) {
+            for (const id of Object.keys(changes.removed)) {
+              if (changes.removed[id]?.typeName === 'shape') {
+                hasVisualChange = true;
+                break;
+              }
             }
           }
-        }
 
-        if (hasVisualChange) {
-          triggerDebouncedVisualSave(editorInstance);
-        }
+          if (hasVisualChange) {
+            triggerDebouncedVisualSave(editorInstance);
+          }
+        });
       });
 
       return () => {
+        isMounted = false;
         unsubscribe();
       };
     },
@@ -2904,7 +2903,7 @@ export default function App() {
 
             <div className="flex flex-col gap-3 overflow-y-auto">
               {/* Task MD Documents Explorer (1 to N Task MD files in Root, Frontend, Backend, etc.) */}
-              <div className="rounded-lg bg-[var(--surface)] border border-[var(--outline)] shadow-2xs overflow-hidden">
+              <div className="rounded-lg bg-[var(--surface)] border border-[var(--outline)] shadow-2xs">
                 <TaskDocumentExplorer
                   workspace={activeWorkspace}
                   allWorkspaces={workspaceStore.workspaces}
@@ -3915,7 +3914,7 @@ export default function App() {
       {/* Modal: Panel de Problemas */}
       {isProblemsModalOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70"
+          className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70"
           onClick={() => setIsProblemsModalOpen(false)}
         >
           <div
@@ -4004,7 +4003,7 @@ export default function App() {
       {/* Modal: Confirmación Auto Organizar */}
       {isAutoLayoutConfirmOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70"
+          className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70"
           onClick={() => setIsAutoLayoutConfirmOpen(false)}
         >
           <div
@@ -4062,7 +4061,7 @@ export default function App() {
       {/* Modal: Nueva Tarea */}
       {isNewTaskModalOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70"
+          className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70"
           onClick={() => setIsNewTaskModalOpen(false)}
         >
           <div
@@ -4185,7 +4184,7 @@ export default function App() {
       {/* Modal: Advertencia / Confirmación de Eliminación */}
       {deleteWarningState && (
         <div
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70"
+          className="fixed inset-0 z-[80] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70"
           onClick={() => setDeleteWarningState(null)}
         >
           <div
