@@ -2905,7 +2905,7 @@ export default function App() {
           </button>
 
           {/* Language Selector */}
-          <LanguageSelector className="hidden sm:inline-block shrink-0" />
+          <LanguageSelector className="hidden sm:inline-block shrink-0" onLanguageChange={(lang) => handleUpdateSettings({ ...userSettings, language: lang })} />
 
           {/* Mobile Menu Trigger */}
           <button
@@ -3896,7 +3896,7 @@ export default function App() {
                   <span className="material-symbols-outlined text-[18px] text-[var(--primary)]">language</span>
                   <span>{t('common.language')}</span>
                 </div>
-                <LanguageSelector />
+                <LanguageSelector onLanguageChange={(lang) => handleUpdateSettings({ ...userSettings, language: lang })} />
               </div>
 
               {/* Settings */}
