@@ -3,6 +3,7 @@ import {
   Workspace,
   parseGitHubRepoInput,
   TaskDocument,
+  logWorkspaceTrace,
 } from '../services/workspaceService';
 
 interface WorkspaceManagerModalProps {
@@ -104,6 +105,7 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
     };
 
     onCreateWorkspace(newWorkspace);
+    logWorkspaceTrace(`Workspace creado exitosamente: "${name.trim()}" (${wsId})`, newWorkspace);
     onShowToast(`Workspace "${name.trim()}" creado y vinculado a GitHub`, 'success');
     setName('');
     setRepoInput('');
@@ -112,14 +114,18 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
   };
 
   const handleConfirmDelete = (wsId: string) => {
+    logWorkspaceTrace(`Eliminando workspace: ${wsId}`);
     onDeleteWorkspace(wsId);
     setConfirmDeleteId(null);
   };
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 animate-fade-in"
-      onClick={onClose}
+      className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 animate-fade-in"
+      onClick={() => {
+        logWorkspaceTrace('Cerrando WorkspaceManagerModal por clic en fondo');
+        onClose();
+      }}
     >
       <div
         className="w-full sm:max-w-2xl bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-lg sm:rounded-lg shadow-xl flex flex-col overflow-hidden max-h-[90vh] pb-safe sm:pb-0"
@@ -349,6 +355,7 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
                           <button
                             type="button"
                             onClick={() => {
+                              logWorkspaceTrace(`Clic en Abrir Workspace desde Modal: "${ws.name}" (${ws.id})`);
                               onSelectWorkspace(ws.id);
                               onClose();
                             }}

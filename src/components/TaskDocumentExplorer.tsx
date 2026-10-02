@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useRef, useEffect } from 'react';
-import { TaskDocument, BranchConfig, Workspace } from '../services/workspaceService';
+import { TaskDocument, BranchConfig, Workspace, logWorkspaceTrace } from '../services/workspaceService';
 import { scanTaskBlocks } from '../utils/markdownSync';
 
 interface TaskDocumentExplorerProps {
@@ -51,20 +51,34 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
 
   const wsDropdownRef = useRef<HTMLDivElement>(null);
   const branchDropdownRef = useRef<HTMLDivElement>(null);
+  const wsMenuRef = useRef<HTMLDivElement>(null);
+  const branchMenuRef = useRef<HTMLDivElement>(null);
 
-  // Close menus on outside click
+  // Close menus on outside click safely (guarding against unmounting during mousedown)
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (wsDropdownRef.current && !wsDropdownRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      const isInsideWs =
+        (wsDropdownRef.current && wsDropdownRef.current.contains(target)) ||
+        (wsMenuRef.current && wsMenuRef.current.contains(target));
+
+      if (!isInsideWs && isWorkspaceMenuOpen) {
+        logWorkspaceTrace('Cerrando menú desplegable de Workspaces por clic exterior');
         setIsWorkspaceMenuOpen(false);
       }
-      if (branchDropdownRef.current && !branchDropdownRef.current.contains(e.target as Node)) {
+
+      const isInsideBranch =
+        (branchDropdownRef.current && branchDropdownRef.current.contains(target)) ||
+        (branchMenuRef.current && branchMenuRef.current.contains(target));
+
+      if (!isInsideBranch && isBranchMenuOpen) {
+        logWorkspaceTrace('Cerrando menú desplegable de Ramas por clic exterior');
         setIsBranchMenuOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, [isWorkspaceMenuOpen, isBranchMenuOpen]);
 
   // Collapsed folders state (all open by default)
   const [collapsedFolders, setCollapsedFolders] = useState<Record<string, boolean>>({});
@@ -230,6 +244,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
           <button
             type="button"
             onClick={() => {
+              logWorkspaceTrace(`Alternando menú desplegable de Workspaces (actualmente ${isWorkspaceMenuOpen ? 'abierto' : 'cerrado'})`);
               setIsWorkspaceMenuOpen((prev) => !prev);
               setIsBranchMenuOpen(false);
             }}
@@ -253,6 +268,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
           <button
             type="button"
             onClick={() => {
+              logWorkspaceTrace(`Alternando menú desplegable de Ramas (actualmente ${isBranchMenuOpen ? 'abierto' : 'cerrado'})`);
               setIsBranchMenuOpen((prev) => !prev);
               setIsWorkspaceMenuOpen(false);
             }}
@@ -273,14 +289,16 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
 
         {/* Workspace Dropdown Menu (Full Width of Header to Prevent Any Text Clipping) */}
         {isWorkspaceMenuOpen && (
-          <div className="absolute left-0 right-0 top-full mt-1.5 bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-2xl py-1 z-50 animate-fade-in select-none">
+          <div ref={wsMenuRef} className="absolute left-0 right-0 top-full mt-1.5 bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-2xl py-1 z-50 animate-fade-in select-none">
             <div className="px-3 py-1.5 border-b border-[var(--outline)] flex items-center justify-between">
               <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--on-surface-variant)]">
                 Workspaces ({allWorkspaces.length})
               </span>
               <button
                 type="button"
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
+                  logWorkspaceTrace('Clic en botón Administrar desde Explorador -> ejecutando onOpenWorkspaceManager()');
                   setIsWorkspaceMenuOpen(false);
                   onOpenWorkspaceManager();
                 }}
@@ -297,7 +315,13 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
                   <button
                     key={ws.id}
                     type="button"
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      logWorkspaceTrace(`Clic para seleccionar Workspace: "${ws.name}" (${ws.id})`, {
+                        id: ws.id,
+                        name: ws.name,
+                        esActual: isCurrent,
+                      });
                       onSelectWorkspace(ws.id);
                       setIsWorkspaceMenuOpen(false);
                     }}
@@ -324,7 +348,9 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
             <div className="pt-1 border-t border-[var(--outline)] px-2 py-1">
               <button
                 type="button"
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
+                  logWorkspaceTrace('Clic en + Nuevo Workspace desde Explorador -> ejecutando onOpenWorkspaceManager()');
                   setIsWorkspaceMenuOpen(false);
                   onOpenWorkspaceManager();
                 }}
@@ -339,14 +365,16 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
 
         {/* Branch Dropdown Menu (Full Width of Header to Prevent Any Text Clipping) */}
         {isBranchMenuOpen && (
-          <div className="absolute left-0 right-0 top-full mt-1.5 bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-2xl py-1 z-50 animate-fade-in select-none">
+          <div ref={branchMenuRef} className="absolute left-0 right-0 top-full mt-1.5 bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-2xl py-1 z-50 animate-fade-in select-none">
             <div className="px-3 py-1.5 border-b border-[var(--outline)] flex items-center justify-between">
               <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--on-surface-variant)]">
                 Ramas ({safeBranches.length})
               </span>
               <button
                 type="button"
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
+                  logWorkspaceTrace('Clic en Git Status desde Explorador -> abriendo GitHubSyncModal');
                   setIsBranchMenuOpen(false);
                   onOpenGitHubSync();
                 }}
@@ -365,7 +393,12 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
                   <button
                     key={b.name}
                     type="button"
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      logWorkspaceTrace(`Clic para seleccionar Rama: "${b.name}"`, {
+                        name: b.name,
+                        esActual: isCurrent,
+                      });
                       onSelectBranch(b.name);
                       setIsBranchMenuOpen(false);
                     }}
@@ -392,7 +425,9 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
             <div className="pt-1 border-t border-[var(--outline)] px-2 py-1 flex items-center gap-1">
               <button
                 type="button"
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
+                  logWorkspaceTrace('Clic en + Nueva Rama desde Explorador -> abriendo NewBranchModal');
                   setIsBranchMenuOpen(false);
                   onOpenCreateBranch();
                 }}

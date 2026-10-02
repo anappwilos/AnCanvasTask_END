@@ -568,14 +568,32 @@ export default function App() {
   // Workspace actions
   const handleSelectWorkspace = useCallback(
     (workspaceId: string) => {
-      logWorkspaceTrace(`Seleccionando workspace: ${workspaceId}`);
+      logWorkspaceTrace(`[handleSelectWorkspace] Petición de cambio a workspace: "${workspaceId}"`);
       let selectedName = workspaceId;
       setWorkspaceStore((prev) => {
         const targetWs = prev.workspaces.find((w) => w.id === workspaceId);
         if (targetWs) {
           selectedName = targetWs.name;
+        } else {
+          console.warn(
+            `[AnTask Workspace Engine] ⚠️ Workspace con ID "${workspaceId}" no encontrado en el store. Workspaces existentes:`,
+            prev.workspaces.map((w) => ({ id: w.id, name: w.name }))
+          );
+          return prev;
         }
-        if (prev.activeWorkspaceId === workspaceId) return prev;
+        if (prev.activeWorkspaceId === workspaceId) {
+          logWorkspaceTrace(
+            `[handleSelectWorkspace] El workspace "${targetWs.name}" (${workspaceId}) ya es el activo actualmente. No se requiere cambio.`
+          );
+          return prev;
+        }
+        logWorkspaceTrace(
+          `[handleSelectWorkspace] Cambiando workspace activo de "${prev.activeWorkspaceId}" a "${workspaceId}" ("${targetWs.name}")`,
+          {
+            targetWs,
+            ramasDisponibles: targetWs.branches?.map((b) => b.name) || [],
+          }
+        );
         const nextStore = { ...prev, activeWorkspaceId: workspaceId };
         saveWorkspaceStore(nextStore);
         return nextStore;
@@ -2677,7 +2695,7 @@ export default function App() {
 
       {/* Top App Bar (DESIGN.md Section 3: Lightweight, global actions, clean M3 surface) */}
       <header className="h-14 bg-[var(--surface-container)] border-b border-[var(--outline)] px-3 sm:px-4 flex items-center justify-between z-20 select-none flex-shrink-0 gap-2 sm:gap-4 transition-colors">
-        {/* Left Section: Sidebar Toggle, Brand & Active File Breadcrumb */}
+        {/* Left Section: Sidebar Toggle, Brand & Workspace / Branch Picker */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <button
             type="button"
@@ -2691,13 +2709,30 @@ export default function App() {
             </span>
           </button>
 
-          <div className="flex items-center gap-2 min-w-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
             <div className="flex items-center gap-1.5 font-semibold text-xs text-[var(--on-surface)] shrink-0">
               <span className="material-symbols-outlined text-[18px] text-[var(--primary)]">splitscreen_left</span>
               <span className="hidden sm:inline">Tasks Canvas</span>
             </div>
             <span className="text-[var(--outline)] hidden sm:inline">/</span>
-            <span className="text-xs text-[var(--on-surface-variant)] truncate max-w-[140px] sm:max-w-[200px] flex items-center gap-1" title={`${activeWorkspace.name} · ${activeBranch.name} · ${activeDocument.name}`}>
+
+            {/* Quick Workspace & Branch Switcher in Top Bar */}
+            <WorkspaceSelector
+              workspace={activeWorkspace}
+              allWorkspaces={workspaceStore.workspaces}
+              activeBranch={activeBranch}
+              onSelectWorkspace={handleSelectWorkspace}
+              onSelectBranch={handleSelectBranch}
+              onOpenWorkspaceManager={() => {
+                logWorkspaceTrace('Abriendo WorkspaceManagerModal desde Barra Superior (isWorkspaceManagerOpen -> true)');
+                setIsWorkspaceManagerOpen(true);
+              }}
+              onOpenCreateBranch={() => setIsNewBranchModalOpen(true)}
+              onOpenGitHubSync={() => setIsGitHubSyncOpen(true)}
+            />
+
+            <span className="text-[var(--outline)] hidden lg:inline">/</span>
+            <span className="text-xs text-[var(--on-surface-variant)] truncate max-w-[100px] sm:max-w-[140px] hidden lg:flex items-center gap-1" title={`${activeWorkspace.name} · ${activeBranch.name} · ${activeDocument.name}`}>
               <span className="material-symbols-outlined text-[14px]">description</span>
               <span className="truncate font-mono">{activeDocument.name}</span>
             </span>
@@ -2911,7 +2946,10 @@ export default function App() {
                   activeDocumentId={activeDocument.id}
                   onSelectWorkspace={handleSelectWorkspace}
                   onSelectBranch={handleSelectBranch}
-                  onOpenWorkspaceManager={() => setIsWorkspaceManagerOpen(true)}
+                  onOpenWorkspaceManager={() => {
+                    logWorkspaceTrace('Abriendo WorkspaceManagerModal desde Explorador (isWorkspaceManagerOpen -> true)');
+                    setIsWorkspaceManagerOpen(true);
+                  }}
                   onOpenCreateBranch={() => setIsNewBranchModalOpen(true)}
                   onOpenGitHubSync={() => setIsGitHubSyncOpen(true)}
                   onSelectDocument={handleSelectDocument}

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Workspace, BranchConfig } from '../services/workspaceService';
+import { Workspace, BranchConfig, logWorkspaceTrace } from '../services/workspaceService';
 
 interface WorkspaceSelectorProps {
   workspace: Workspace;
@@ -53,7 +53,7 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
             setIsBranchMenuOpen(false);
           }}
           className="flex items-center gap-1.5 px-2 py-1 rounded bg-[var(--surface)] hover:bg-[var(--surface-container-high)] border border-[var(--outline)] text-xs font-sans text-[var(--on-surface)] transition-colors cursor-pointer"
-          title={`Workspace: ${workspace.name} (GitHub: ${workspace.githubRepo.fullName})`}
+          title={`Workspace: ${workspace?.name || 'Principal'} (GitHub: ${workspace?.githubRepo?.fullName || 'GitHub'})`}
         >
           {/* GitHub Icon */}
           <svg className="w-3.5 h-3.5 fill-current shrink-0 opacity-80" viewBox="0 0 24 24">
@@ -61,7 +61,7 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
           </svg>
 
           <span className="font-semibold truncate max-w-[80px] sm:max-w-[120px]">
-            {workspace.name}
+            {workspace?.name || 'Principal'}
           </span>
 
           <span className="material-symbols-outlined text-[14px] text-[var(--on-surface-variant)] shrink-0">
@@ -78,7 +78,9 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
               </span>
               <button
                 type="button"
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
+                  logWorkspaceTrace('Clic en botón Administrar desde Barra Superior -> abriendo WorkspaceManagerModal');
                   setIsWorkspaceMenuOpen(false);
                   onOpenWorkspaceManager();
                 }}
@@ -99,7 +101,13 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
                   <button
                     key={ws.id}
                     type="button"
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      logWorkspaceTrace(`Clic para seleccionar Workspace desde Barra Superior: "${ws.name}" (${ws.id})`, {
+                        id: ws.id,
+                        name: ws.name,
+                        esActual: isCurrent,
+                      });
                       onSelectWorkspace(ws.id);
                       setIsWorkspaceMenuOpen(false);
                     }}
@@ -133,7 +141,9 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
             <div className="pt-1 border-t border-[var(--outline)] px-2 py-1">
               <button
                 type="button"
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
+                  logWorkspaceTrace('Clic en + Nuevo Workspace desde Barra Superior -> abriendo WorkspaceManagerModal');
                   setIsWorkspaceMenuOpen(false);
                   onOpenWorkspaceManager();
                 }}
@@ -156,13 +166,13 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
             setIsWorkspaceMenuOpen(false);
           }}
           className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded bg-[var(--surface)] hover:bg-[var(--surface-container-high)] border border-[var(--outline)] text-xs font-mono text-[var(--on-surface)] transition-colors cursor-pointer"
-          title={`Rama actual: ${activeBranch.name}`}
+          title={`Rama actual: ${activeBranch?.name || 'main'}`}
         >
           <span className="material-symbols-outlined text-[14px] text-sky-400 shrink-0">
             fork_right
           </span>
           <span className="font-medium truncate max-w-[80px] sm:max-w-[120px]">
-            {activeBranch.name}
+            {activeBranch?.name || 'main'}
           </span>
           <span className="material-symbols-outlined text-[14px] text-[var(--on-surface-variant)] shrink-0">
             arrow_drop_down
@@ -174,7 +184,7 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
           <div className="absolute left-0 top-full mt-1 w-64 sm:w-72 max-w-[calc(100vw-1.5rem)] bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-xl py-1 z-50 animate-fade-in select-none">
             <div className="px-3 py-1.5 border-b border-[var(--outline)] flex items-center justify-between">
               <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--on-surface-variant)]">
-                Ramas de Git ({workspace.branches.length})
+                Ramas de Git ({(workspace?.branches || []).length})
               </span>
               <button
                 type="button"
