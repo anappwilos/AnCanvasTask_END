@@ -321,11 +321,11 @@ export default function App() {
   useEffect(() => {
     const handleOnline = () => {
       setIsOnline(true);
-      pushToast('Conexión reestablecida', 'success');
+      pushToast(t('toast.connectionRestored'), 'success');
     };
     const handleOffline = () => {
       setIsOnline(false);
-      pushToast('Sin conexión a internet. Los cambios se guardarán localmente.', 'warning');
+      pushToast(t('toast.offlineWarning'), 'warning');
     };
 
     window.addEventListener('online', handleOnline);
@@ -669,12 +669,12 @@ export default function App() {
           };
           nextWorkspaces = [cleanWs];
           nextActiveId = cleanWs.id;
-          pushToast('Workspace eliminado. Se ha inicializado un nuevo workspace limpio.', 'info');
+          pushToast(t('toast.workspaceDeletedNewInit'), 'info');
         } else {
           if (prev.activeWorkspaceId === wsId) {
             nextActiveId = nextWorkspaces[0].id;
           }
-          pushToast('Workspace eliminado', 'info');
+          pushToast(t('toast.workspaceDeleted'), 'info');
         }
 
         const nextStore: WorkspaceStoreState = {
@@ -810,7 +810,7 @@ export default function App() {
   const handleSyncAllWorkspacesToSanity = useCallback(async () => {
     const config = getSanityConfig();
     if (!config.projectId || !config.dataset || !config.token) {
-      pushToast('Configura el API Token de Sanity para sincronizar workspaces', 'warning');
+      pushToast(t('toast.sanityConfigSyncWorkspace'), 'warning');
       setIsSanityModalOpen(true);
       return;
     }
@@ -827,7 +827,7 @@ export default function App() {
   const handleImportWorkspacesFromSanity = useCallback(async () => {
     const config = getSanityConfig();
     if (!config.projectId || !config.dataset) {
-      pushToast('Configura Sanity (Project ID y Dataset) para importar workspaces', 'warning');
+      pushToast(t('toast.sanityConfigImportWorkspace'), 'warning');
       setIsSanityModalOpen(true);
       return;
     }
@@ -835,7 +835,7 @@ export default function App() {
     try {
       const remoteWorkspaces = await loadWorkspacesFromSanity(config);
       if (remoteWorkspaces.length === 0) {
-        pushToast('No se encontraron documentos _type: "workspace" en Sanity', 'info');
+        pushToast(t('toast.noWorkspacesInSanity'), 'info');
         return;
       }
 
@@ -862,7 +862,7 @@ export default function App() {
 
       pushToast(`${remoteWorkspaces.length} workspace(s) importado(s) desde Sanity`, 'success');
     } catch (err) {
-      pushToast('Error al importar workspaces desde Sanity', 'error');
+      pushToast(t('toast.errorImportingWorkspaces'), 'error');
     }
   }, [pushToast]);
 
@@ -871,7 +871,7 @@ export default function App() {
     async (ws: Workspace) => {
       const config = getSanityConfig();
       if (!config.projectId || !config.dataset || !config.token) {
-        pushToast('Configura el API Token de Sanity para guardar el workspace', 'warning');
+        pushToast(t('toast.sanityConfigSaveWorkspace'), 'warning');
         setIsSanityModalOpen(true);
         return;
       }
@@ -902,7 +902,7 @@ export default function App() {
         saveWorkspaceStore(nextStore);
         return nextStore;
       });
-      pushToast(`Rama "${branchName}" activada`, 'info');
+      pushToast(t('toast.branchActivated', { branchName }), 'info');
     },
     [pushToast]
   );
@@ -947,7 +947,7 @@ export default function App() {
         saveWorkspaceStore(nextStore);
         return nextStore;
       });
-      pushToast(`Rama "${branchName}" creada y activada`, 'success');
+      pushToast(t('toast.branchCreatedActivated', { branchName }), 'success');
     },
     [pushToast]
   );
@@ -1084,7 +1084,7 @@ export default function App() {
           triggerDebouncedVisualSave(editor);
         }
 
-        pushToast(`Documento duplicado como "${copyPath}"`, 'success');
+        pushToast(t('toast.documentDuplicated', { copyPath }), 'success');
         return nextStore;
       });
     },
@@ -1098,7 +1098,7 @@ export default function App() {
         const activeBr = getActiveBranch(activeWs);
 
         if (activeBr.taskDocuments.length <= 1) {
-          pushToast('No puedes eliminar el único archivo Task MD de la rama', 'warning');
+          pushToast(t('toast.cannotDeleteLastTaskMd'), 'warning');
           return prev;
         }
 
@@ -1131,7 +1131,7 @@ export default function App() {
           triggerDebouncedVisualSave(editor);
         }
 
-        pushToast(`Archivo "${docPath}" eliminado`, 'info');
+        pushToast(t('toast.fileDeleted', { docPath }), 'info');
         return nextStore;
       });
     },
@@ -1490,7 +1490,7 @@ export default function App() {
       }
       seedMockTasks(editor, null);
       triggerDebouncedVisualSave(editor);
-      showToast('Canvas reiniciado al estado inicial');
+      showToast(t('toast.canvasResetToInitial'));
     }
   }, [editor, triggerDebouncedVisualSave]);
 
@@ -1536,7 +1536,7 @@ export default function App() {
         file.type.includes('text/plain');
 
       if (!isMd) {
-        showToast('Por favor selecciona o arrastra un archivo Markdown válido (.md)');
+        showToast(t('toast.selectValidMarkdown'));
         return;
       }
 
@@ -1558,15 +1558,15 @@ export default function App() {
 
           if (taskCount > 0 || groupCount > 0) {
             triggerDebouncedVisualSave(editor);
-            pushToast(`"${file.name}" cargado (${taskCount} tareas en ${groupCount} secciones)`, 'success');
+            pushToast(t('toast.fileLoadedWithTasks', { fileName: file.name, taskCount, groupCount }), 'success');
           } else {
-            pushToast(`"${file.name}" cargado, pero no contiene tareas válidas (- [ ] ...)`, 'warning');
+            pushToast(t('toast.fileLoadedNoValidTasks', { fileName: file.name }), 'warning');
           }
         } else {
-          pushToast(`"${file.name}" cargado en memoria`, 'info');
+          pushToast(t('toast.fileLoadedInMemory', { fileName: file.name }), 'info');
         }
       } catch (err) {
-        pushToast(`Error al leer "${file.name}"`, 'error');
+        pushToast(t('toast.errorReadingFile', { fileName: file.name }), 'error');
       }
     },
     [editor, triggerDebouncedVisualSave, pushToast]
@@ -1623,9 +1623,9 @@ export default function App() {
         URL.revokeObjectURL(url);
 
         setLastSavedMarkdown(markdownInput);
-        pushToast(`Archivo "${fileName}" descargado con éxito`, 'success');
+        pushToast(t('toast.fileDownloaded', { fileName }), 'success');
       } catch (err) {
-        pushToast('Error al exportar archivo', 'error');
+        pushToast(t('toast.errorExportingFile'), 'error');
       }
     },
     [markdownInput, pushToast]
@@ -1658,9 +1658,9 @@ export default function App() {
       URL.revokeObjectURL(url);
 
       setLastSavedMarkdown(markdownInput);
-      pushToast(`Archivo "${currentFileName || 'TASKS.md'}" guardado`, 'success');
+      pushToast(t('toast.fileSaved', { fileName: currentFileName || 'TASKS.md' }), 'success');
     } catch (err) {
-      pushToast('Error al exportar archivo', 'error');
+      pushToast(t('toast.errorExportingFile'), 'error');
     }
   }, [markdownInput, currentFileName, pushToast]);
 
@@ -1712,10 +1712,10 @@ export default function App() {
     if (taskCount > 0 || groupCount > 0) {
       setIsImportExportOpen(false);
       setLastSavedMarkdown(markdownInput);
-      showToast(`${taskCount} tareas aplicadas al canvas`);
+      showToast(t('toast.tasksAppliedToCanvas', { taskCount }));
       triggerDebouncedVisualSave(editor);
     } else {
-      showToast('No se detectaron tareas válidas');
+      showToast(t('toast.noValidTasksDetected'));
     }
   }, [editor, markdownInput, triggerDebouncedVisualSave]);
 
@@ -1738,9 +1738,9 @@ export default function App() {
       editor.select(taskShape.id);
       setSelectedTaskShapeId(taskShape.id);
       editor.zoomToSelection({ animation: { duration: 300 } });
-      showToast(`Enfocado: "${(taskShape.props as any)?.title || targetTaskId}"`);
+      showToast(t('toast.focusedTask', { title: (taskShape.props as any)?.title || targetTaskId }));
     } else {
-      showToast(`No se encontró la tarjeta #${targetTaskId} en el canvas`);
+      showToast(t('toast.taskNotFoundInCanvas', { taskId: targetTaskId }));
     }
   };
 
@@ -1757,7 +1757,7 @@ export default function App() {
     if (groupShape) {
       editor.select(groupShape.id);
       editor.zoomToSelection({ animation: { duration: 300 } });
-      showToast(`Sección: "${sectionTitle}"`);
+      showToast(t('toast.focusedSection', { sectionTitle }));
     }
   };
 
@@ -1854,7 +1854,7 @@ export default function App() {
     setNewTaskTitle('');
     setNewTaskPriority('P1');
     setIsNewTaskModalOpen(false);
-    showToast(`Tarea #${taskId} creada en "${groupTitle}"`);
+    showToast(t('toast.taskCreatedInSection', { taskId, groupTitle }));
   };
 
   // Load Sample Project Helper
@@ -1879,7 +1879,7 @@ export default function App() {
     }
     setTimeout(() => {
       setIsLoadingDocument(false);
-      pushToast('Proyecto de ejemplo cargado', 'success');
+      pushToast(t('toast.sampleProjectLoaded'), 'success');
     }, 150);
   }, [editor, triggerDebouncedVisualSave, pushToast]);
 
@@ -1911,7 +1911,7 @@ export default function App() {
     setDeleteWarningState(null);
     triggerDebouncedVisualSave(editor);
 
-    pushToast(`Tarea #${taskId} eliminada`, 'info', {
+    pushToast(t('toast.taskDeleted', { taskId }), 'info', {
       label: 'Deshacer',
       onClick: async () => {
         setMarkdownInput(priorMarkdown);
@@ -1920,7 +1920,7 @@ export default function App() {
           loadTasksFromMarkdown(editor, priorMarkdown, visual);
           triggerDebouncedVisualSave(editor);
         }
-        pushToast(`Tarea "${title}" restaurada`, 'success');
+        pushToast(t('toast.taskRestored', { title }), 'success');
       },
     });
   };
@@ -1936,12 +1936,12 @@ export default function App() {
         const { taskCount, groupCount } = applyAutoLayout(editor, markdownInput);
         if (taskCount > 0 || groupCount > 0) {
           triggerDebouncedVisualSave(editor);
-          pushToast(`Canvas organizado (${taskCount} tareas en ${groupCount} secciones)`, 'success');
+          pushToast(t('toast.canvasOrganized', { taskCount, groupCount }), 'success');
         } else {
-          pushToast('No hay tareas para organizar', 'info');
+          pushToast(t('toast.noTasksToOrganize'), 'info');
         }
       } catch (err) {
-        pushToast('Error al organizar el canvas', 'error');
+        pushToast(t('toast.errorOrganizingCanvas'), 'error');
       } finally {
         setIsAutoOrganizing(false);
       }
@@ -1956,7 +1956,7 @@ export default function App() {
           const remoteState = await loadCanvasVisualState();
           if (remoteState) {
             seedMockTasks(editor, remoteState);
-            pushToast('Estado visual cargado desde Sanity', 'success');
+            pushToast(t('toast.visualStateLoadedFromSanity'), 'success');
           } else {
             triggerDebouncedVisualSave(editor);
           }
@@ -1980,7 +1980,7 @@ export default function App() {
           });
           syncAllTasksToSanity(tasksToSync, newConfig).then((res) => {
             if (res.ok) {
-              pushToast(`Sincronización activa: ${res.syncedCount} tareas registradas en Sanity`, 'success');
+              pushToast(t('toast.activeSyncTasksRegistered', { count: res.syncedCount }), 'success');
             }
           });
         } else {
@@ -1996,7 +1996,7 @@ export default function App() {
   const handleSyncAllTasksToSanity = useCallback(async () => {
     const config = getSanityConfig();
     if (!config.projectId || !config.dataset || !config.token) {
-      pushToast('Configura el API Token de Sanity para guardar en producción', 'warning');
+      pushToast(t('toast.sanityConfigSaveProd'), 'warning');
       setIsSanityModalOpen(true);
       return;
     }
@@ -2122,7 +2122,7 @@ export default function App() {
             });
             setMarkdownInput(updated);
             setSyncStatus('synced');
-            pushToast(`Sanity: Tarea #${targetId} sincronizada en vivo`, 'info');
+            pushToast(t('toast.sanityTaskLiveSynced', { targetId }), 'info');
             setTimeout(() => {
               isRemoteMutationInProgressRef.current = false;
             }, 1800);
@@ -2160,7 +2160,7 @@ export default function App() {
         subtasks: taskDoc.subtasks,
       });
       setMarkdownInput(updatedMarkdown);
-      pushToast(`Tarea #${taskDoc.taskId || taskId} importada de Sanity al lienzo`, 'success');
+      pushToast(t('toast.taskImportedFromSanity', { taskId: taskDoc.taskId || taskId }), 'success');
     },
     [markdownInput, pushToast]
   );
@@ -2270,7 +2270,7 @@ export default function App() {
           }
         }
       }
-      showToast(`${taskIds.length} tareas actualizadas`);
+      showToast(t('toast.tasksUpdated', { count: taskIds.length }));
     },
     [editor]
   );
@@ -2306,7 +2306,7 @@ export default function App() {
         triggerDebouncedVisualSave(editor);
       }
 
-      pushToast(`${taskIds.length} tareas eliminadas`, 'info', {
+      pushToast(t('toast.tasksDeletedBulk', { count: taskIds.length }), 'info', {
         label: 'Deshacer',
         onClick: async () => {
           setMarkdownInput(priorMarkdown);
@@ -2315,7 +2315,7 @@ export default function App() {
             loadTasksFromMarkdown(editor, priorMarkdown, visual);
             triggerDebouncedVisualSave(editor);
           }
-          pushToast(`${taskIds.length} tareas restauradas`, 'success');
+          pushToast(t('toast.tasksRestoredBulk', { count: taskIds.length }), 'success');
         },
       });
     },
