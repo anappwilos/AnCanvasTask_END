@@ -47,6 +47,17 @@ export interface SanityConnectionTestResult {
 const LOCAL_STORAGE_KEY_VISUAL_STATE = 'antaskcanvas_visual_state_v1';
 const LOCAL_STORAGE_KEY_SANITY_CONFIG = 'antaskcanvas_sanity_config';
 
+// Identifiable Trace Logger for Sanity Integration
+export const logSanityTrace = (action: string, details?: any) => {
+  const timestamp = new Date().toISOString().substring(11, 19);
+  console.log(`%c[AnTask Sanity Bridge ${timestamp}]%c ${action}`, 'color: #10b981; font-weight: bold;', 'color: inherit;', details || '');
+};
+
+export const logSanityWarn = (action: string, details?: any) => {
+  const timestamp = new Date().toISOString().substring(11, 19);
+  console.warn(`[AnTask Sanity Bridge ${timestamp}] ⚠️ ${action}`, details || '');
+};
+
 const DEFAULT_SANITY_CONFIG: SanityConfig = {
   projectId: import.meta.env.VITE_SANITY_PROJECT_ID || 'or19faat',
   dataset: import.meta.env.VITE_SANITY_DATASET || 'production',
@@ -922,41 +933,71 @@ export async function loadWorkspacesFromSanity(
 
     const query = `*[_type == "workspace" || _id match "workspace*"] | order(_updatedAt desc)`;
     const results = await client.fetch<SanityWorkspaceDocument[]>(query);
-    if (!Array.isArray(results)) return [];
+    if (!Array.isArray(results)) {
+      logSanityTrace('Consulta de workspaces ejecutada, 0 documentos encontrados');
+      return [];
+    }
 
-    return results.map((doc: any) => ({
-      id: doc.workspaceId || doc._id?.replace(/^workspace-/, '') || doc._id,
-      name: doc.name || doc.title || 'Workspace',
-      githubRepo: {
-        owner: doc.githubRepo?.owner || 'owner',
-        repo: doc.githubRepo?.repo || 'repo',
-        fullName: doc.githubRepo?.fullName || `${doc.githubRepo?.owner || 'owner'}/${doc.githubRepo?.repo || 'repo'}`,
-        url: doc.githubRepo?.url || `https://github.com/${doc.githubRepo?.fullName || 'repo'}`,
-        defaultBranch: doc.githubRepo?.defaultBranch || 'main',
-        isPrivate: Boolean(doc.githubRepo?.isPrivate),
-        description: doc.githubRepo?.description || '',
-      },
-      activeBranchName: doc.activeBranchName || 'main',
-      branches: (doc.branches || []).map((b: any) => ({
-        name: b.name || 'main',
-        isProtected: Boolean(b.isProtected),
-        activeDocumentId: b.activeDocumentId || b.taskDocuments?.[0]?.id || 'doc_root',
-        lastCommit: b.lastCommit,
-        taskDocuments: (b.taskDocuments || []).map((d: any) => ({
-          id: d.id || `doc_${Date.now()}`,
-          name: d.name || 'TASKS.md',
-          folder: d.folder || '',
-          path: d.path || (d.folder ? `${d.folder}/${d.name}` : d.name || 'TASKS.md'),
-          content: d.content || '',
-          lastSavedContent: d.lastSavedContent || d.content || '',
-          updatedAt: d.updatedAt || doc._updatedAt || new Date().toISOString(),
-        })),
-      })),
-      createdAt: doc.createdAt || doc._createdAt || new Date().toISOString(),
-      updatedAt: doc.updatedAt || doc._updatedAt || new Date().toISOString(),
-    }));
+    logSanityTrace(`Cargados ${results.length} workspace(s) desde Sanity (${config.dataset})`);
+
+    return results.map((doc: any) => {
+      const rawBranches = Array.isArray(doc.branches) && doc.branches.length > 0
+        ? doc.branches
+        : [{ name: 'main', isProtected: true, taskDocuments: [] }];
+
+      const branches = rawBranches.map((b: any) => {
+        const rawDocs = Array.isArray(b.taskDocuments) ? b.taskDocuments : [];
+        const taskDocuments = rawDocs.length > 0
+          ? rawDocs.map((d: any) => ({
+              id: d.id || `doc_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+              name: d.name || 'TASKS.md',
+              folder: d.folder || '',
+              path: d.path || (d.folder ? `${d.folder}/${d.name || 'TASKS.md'}` : d.name || 'TASKS.md'),
+              content: typeof d.content === 'string' ? d.content : '',
+              lastSavedContent: typeof d.lastSavedContent === 'string' ? d.lastSavedContent : (d.content || ''),
+              updatedAt: d.updatedAt || doc._updatedAt || new Date().toISOString(),
+            }))
+          : [
+              {
+                id: `doc_${b.name || 'main'}_root`,
+                name: 'TASKS.md',
+                folder: '',
+                path: 'TASKS.md',
+                content: '# Tareas\n\n## General\n- [ ] Tarea inicial\n  id: task_init\n  priority: P1\n',
+                lastSavedContent: '# Tareas\n\n## General\n- [ ] Tarea inicial\n  id: task_init\n  priority: P1\n',
+                updatedAt: new Date().toISOString(),
+              },
+            ];
+
+        return {
+          name: b.name || 'main',
+          isProtected: Boolean(b.isProtected),
+          activeDocumentId: b.activeDocumentId || taskDocuments[0].id,
+          lastCommit: b.lastCommit,
+          taskDocuments,
+        };
+      });
+
+      return {
+        id: doc.workspaceId || doc._id?.replace(/^workspace-/, '') || doc._id,
+        name: doc.name || doc.title || 'Workspace',
+        githubRepo: {
+          owner: doc.githubRepo?.owner || 'usuario',
+          repo: doc.githubRepo?.repo || 'proyecto',
+          fullName: doc.githubRepo?.fullName || `${doc.githubRepo?.owner || 'usuario'}/${doc.githubRepo?.repo || 'proyecto'}`,
+          url: doc.githubRepo?.url || `https://github.com/${doc.githubRepo?.fullName || 'proyecto'}`,
+          defaultBranch: doc.githubRepo?.defaultBranch || 'main',
+          isPrivate: Boolean(doc.githubRepo?.isPrivate),
+          description: doc.githubRepo?.description || '',
+        },
+        activeBranchName: doc.activeBranchName || branches[0]?.name || 'main',
+        branches,
+        createdAt: doc.createdAt || doc._createdAt || new Date().toISOString(),
+        updatedAt: doc.updatedAt || doc._updatedAt || new Date().toISOString(),
+      };
+    });
   } catch (err) {
-    console.warn('Error loading workspaces from Sanity:', err);
+    logSanityWarn('Error al cargar workspaces desde Sanity:', err);
     return [];
   }
 }

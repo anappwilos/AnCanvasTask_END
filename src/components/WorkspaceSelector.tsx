@@ -89,10 +89,10 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
             </div>
 
             <div className="max-h-56 overflow-y-auto py-1">
-              {allWorkspaces.map((ws) => {
-                const isCurrent = ws.id === workspace.id;
-                const totalDocs = ws.branches.reduce(
-                  (acc, b) => acc + b.taskDocuments.length,
+              {(allWorkspaces || []).map((ws) => {
+                const isCurrent = ws.id === workspace?.id;
+                const totalDocs = (ws.branches || []).reduce(
+                  (acc, b) => acc + (b.taskDocuments?.length || 0),
                   0
                 );
                 return (
@@ -117,12 +117,12 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
                         )}
                       </div>
                       <span className="text-[11px] font-mono text-[var(--on-surface-variant)] truncate">
-                        {ws.githubRepo.fullName}
+                        {ws.githubRepo?.fullName || 'GitHub'}
                       </span>
                     </div>
 
                     <div className="flex flex-col items-end shrink-0 text-[10px] font-mono text-[var(--on-surface-variant)]">
-                      <span>{ws.branches.length} rama{ws.branches.length > 1 ? 's' : ''}</span>
+                      <span>{(ws.branches || []).length} rama{(ws.branches || []).length !== 1 ? 's' : ''}</span>
                       <span>{totalDocs} Task MD</span>
                     </div>
                   </button>
@@ -190,8 +190,9 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
             </div>
 
             <div className="max-h-56 overflow-y-auto py-1">
-              {workspace.branches.map((b) => {
-                const isCurrent = b.name === activeBranch.name;
+              {(workspace?.branches || []).map((b) => {
+                const isCurrent = b.name === activeBranch?.name;
+                const docCount = b.taskDocuments?.length || 0;
                 return (
                   <button
                     key={b.name}
@@ -226,7 +227,7 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
                     </div>
 
                     <span className="text-[10px] font-mono text-[var(--on-surface-variant)] shrink-0 pt-0.5">
-                      {b.taskDocuments.length} doc{b.taskDocuments.length > 1 ? 's' : ''}
+                      {docCount} doc{docCount !== 1 ? 's' : ''}
                     </span>
                   </button>
                 );

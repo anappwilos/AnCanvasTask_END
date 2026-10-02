@@ -147,18 +147,19 @@ export async function analyzeSyncDifferences(
 
     if (!remoteWs) {
       // Exists only locally
-      const totalDocs = localWs.branches.reduce((acc, b) => acc + b.taskDocuments.length, 0);
+      const localBranches = localWs.branches || [];
+      const totalDocs = localBranches.reduce((acc, b) => acc + (b.taskDocuments?.length || 0), 0);
       items.push({
         id: `ws_${localWs.id}`,
         entityType: 'workspace',
         title: `Workspace: ${localWs.name}`,
-        subtitle: `${localWs.githubRepo.fullName} (${localWs.branches.length} ramas, ${totalDocs} archivos)`,
+        subtitle: `${localWs.githubRepo?.fullName || 'GitHub'} (${localBranches.length} ramas, ${totalDocs} archivos)`,
         diffType: 'only_local',
         localTimestamp: localWs.updatedAt,
         localData: localWs,
         summaryChanges: [
           'Workspace no existe en Sanity Cloud',
-          `Contiene ${localWs.branches.length} rama(s) y ${totalDocs} documento(s) Markdown`,
+          `Contiene ${localBranches.length} rama(s) y ${totalDocs} documento(s) Markdown`,
         ],
         resolutionStrategy: 'keep_local',
       });
@@ -180,8 +181,8 @@ export async function analyzeSyncDifferences(
       if (localWs.activeBranchName !== remoteWs.activeBranchName) {
         changes.push(`Rama activa diferente: Remoto="${remoteWs.activeBranchName}", Local="${localWs.activeBranchName}"`);
       }
-      if (localWs.githubRepo.fullName !== remoteWs.githubRepo?.fullName) {
-        changes.push(`Repositorio modificado: "${remoteWs.githubRepo?.fullName}" vs "${localWs.githubRepo.fullName}"`);
+      if (localWs.githubRepo?.fullName !== remoteWs.githubRepo?.fullName) {
+        changes.push(`Repositorio modificado: "${remoteWs.githubRepo?.fullName}" vs "${localWs.githubRepo?.fullName}"`);
       }
 
       // Check branches & documents differences
@@ -192,7 +193,7 @@ export async function analyzeSyncDifferences(
         changes.push(`Cantidad de ramas diferente: Local (${localBranches.length}) vs Remoto (${remoteBranches.length})`);
       }
 
-      const totalLocalDocs = localBranches.reduce((acc, b) => acc + b.taskDocuments.length, 0);
+      const totalLocalDocs = localBranches.reduce((acc, b) => acc + (b.taskDocuments?.length || 0), 0);
       const totalRemoteDocs = remoteBranches.reduce((acc: number, b: any) => acc + (b.taskDocuments?.length || 0), 0);
       if (totalLocalDocs !== totalRemoteDocs) {
         changes.push(`Total de archivos MD: Local (${totalLocalDocs}) vs Remoto (${totalRemoteDocs})`);
@@ -208,14 +209,14 @@ export async function analyzeSyncDifferences(
           continue;
         }
 
-        for (const lDoc of lb.taskDocuments) {
+        for (const lDoc of (lb.taskDocuments || [])) {
           const rDoc = rb.taskDocuments?.find((d: any) => d.id === lDoc.id || d.path === lDoc.path);
           if (!rDoc) {
             changes.push(`Documento local "${lDoc.path}" (${lb.name}) pendiente de subir`);
             contentDiffers = true;
-          } else if (lDoc.content.trim() !== (rDoc.content || '').trim()) {
+          } else if ((lDoc.content || '').trim() !== (rDoc.content || '').trim()) {
             contentDiffers = true;
-            const lGroups = parseTasksMarkdown(lDoc.content);
+            const lGroups = parseTasksMarkdown(lDoc.content || '');
             const rGroups = parseTasksMarkdown(rDoc.content || '');
             const lTasks = lGroups.reduce((acc: number, g: ParsedGroup) => acc + g.tasks.length, 0);
             const rTasks = rGroups.reduce((acc: number, g: ParsedGroup) => acc + g.tasks.length, 0);
@@ -240,7 +241,7 @@ export async function analyzeSyncDifferences(
         id: `ws_${localWs.id}`,
         entityType: 'workspace',
         title: `Workspace: ${localWs.name}`,
-        subtitle: `${localWs.githubRepo.fullName} (${localWs.branches.length} ramas)`,
+        subtitle: `${localWs.githubRepo?.fullName || 'GitHub'} (${localBranches.length} ramas)`,
         diffType,
         localTimestamp: localWs.updatedAt,
         remoteTimestamp: remoteWs.updatedAt,
@@ -282,11 +283,11 @@ export async function analyzeSyncDifferences(
   }
 
   // 3. Compare Individual Tasks in Active Document vs Sanity Task Documents
-  const activeWs = workspaceStore.workspaces.find((w) => w.id === workspaceStore.activeWorkspaceId) || workspaceStore.workspaces[0];
+  const activeWs = workspaceStore.workspaces?.find((w) => w.id === workspaceStore.activeWorkspaceId) || workspaceStore.workspaces?.[0];
   if (activeWs) {
-    const activeBranch = activeWs.branches.find((b) => b.name === activeWs.activeBranchName) || activeWs.branches[0];
+    const activeBranch = activeWs.branches?.find((b) => b.name === activeWs.activeBranchName) || activeWs.branches?.[0];
     if (activeBranch) {
-      const activeDoc = activeBranch.taskDocuments.find((d) => d.id === activeBranch.activeDocumentId) || activeBranch.taskDocuments[0];
+      const activeDoc = activeBranch.taskDocuments?.find((d) => d.id === activeBranch.activeDocumentId) || activeBranch.taskDocuments?.[0];
       if (activeDoc) {
         const parsedGroups = parseTasksMarkdown(activeDoc.content);
         const allLocalTasks = parsedGroups.flatMap((g: ParsedGroup) => g.tasks.map((t) => ({ ...t, groupTitle: g.title })));

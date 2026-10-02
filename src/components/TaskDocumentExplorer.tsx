@@ -24,7 +24,7 @@ interface TaskDocumentExplorerProps {
 
 export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
   workspace,
-  allWorkspaces,
+  allWorkspaces = [],
   activeBranch,
   activeDocumentId,
   onSelectWorkspace,
@@ -42,6 +42,8 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
   onExportDocument,
 }) => {
   const branch = activeBranch;
+  const safeTaskDocuments = branch?.taskDocuments || [];
+  const safeBranches = workspace?.branches || [];
 
   // Dropdown menus for Workspace and Branch
   const [isWorkspaceMenuOpen, setIsWorkspaceMenuOpen] = useState(false);
@@ -74,7 +76,8 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
     const rootDocs: TaskDocument[] = [];
     const folderMap: Record<string, TaskDocument[]> = {};
 
-    branch.taskDocuments.forEach((doc) => {
+    safeTaskDocuments.forEach((doc) => {
+      if (!doc) return;
       const isRoot = !doc.folder || doc.folder === 'root' || doc.folder === '/' || doc.folder === '.';
       if (isRoot) {
         rootDocs.push(doc);
@@ -91,10 +94,10 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
       rootDocuments: rootDocs,
       folderGroups: sortedFolderKeys.map((key) => ({
         folder: key,
-        documents: folderMap[key],
+        documents: folderMap[key] || [],
       })),
     };
-  }, [branch.taskDocuments]);
+  }, [safeTaskDocuments]);
 
   const toggleFolder = (folder: string) => {
     setCollapsedFolders((prev) => ({
@@ -104,8 +107,9 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
   };
 
   const renderDocumentRow = (doc: TaskDocument, isInFolder: boolean = false) => {
+    if (!doc) return null;
     const isActive = doc.id === activeDocumentId;
-    const { taskBlocks } = scanTaskBlocks(doc.content);
+    const { taskBlocks } = scanTaskBlocks(doc.content || '');
     const totalTasks = taskBlocks.length;
     const completedTasks = taskBlocks.filter(
       (b) => b.rawTaskLine.includes('[x]') || b.rawTaskLine.includes('[X]')
@@ -196,7 +200,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
                   <span>Descargar .md</span>
                 </button>
 
-                {branch.taskDocuments.length > 1 && (
+                {safeTaskDocuments.length > 1 && (
                   <button
                     type="button"
                     onClick={() => {
@@ -230,13 +234,13 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
               setIsBranchMenuOpen(false);
             }}
             className="w-full flex items-center justify-between gap-1 px-2 py-1 rounded bg-[var(--surface-container)] hover:bg-[var(--surface-container-high)] border border-[var(--outline)] text-xs text-[var(--on-surface)] transition-colors cursor-pointer"
-            title={`Workspace: ${workspace.name}`}
+            title={`Workspace: ${workspace?.name || 'Principal'}`}
           >
             <div className="flex items-center gap-1.5 min-w-0 truncate">
               <svg className="w-3.5 h-3.5 fill-current shrink-0 opacity-80" viewBox="0 0 24 24">
                 <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
               </svg>
-              <span className="font-semibold truncate">{workspace.name}</span>
+              <span className="font-semibold truncate">{workspace?.name || 'Principal'}</span>
             </div>
             <span className="material-symbols-outlined text-[14px] text-[var(--on-surface-variant)] shrink-0">
               arrow_drop_down
@@ -264,7 +268,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
 
               <div className="max-h-48 overflow-y-auto py-1">
                 {allWorkspaces.map((ws) => {
-                  const isCurrent = ws.id === workspace.id;
+                  const isCurrent = ws.id === workspace?.id;
                   return (
                     <button
                       key={ws.id}
@@ -282,7 +286,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
                       <div className="flex flex-col min-w-0">
                         <span className="font-semibold truncate">{ws.name}</span>
                         <span className="text-[10px] font-mono text-[var(--on-surface-variant)] truncate">
-                          {ws.githubRepo.fullName}
+                          {ws.githubRepo?.fullName || 'GitHub'}
                         </span>
                       </div>
                       {isCurrent && (
@@ -319,13 +323,13 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
               setIsWorkspaceMenuOpen(false);
             }}
             className="w-full flex items-center justify-between gap-1 px-2 py-1 rounded bg-[var(--surface-container)] hover:bg-[var(--surface-container-high)] border border-[var(--outline)] text-xs font-mono text-[var(--on-surface)] transition-colors cursor-pointer"
-            title={`Rama actual: ${activeBranch.name}`}
+            title={`Rama actual: ${branch?.name || 'main'}`}
           >
             <div className="flex items-center gap-1 min-w-0 truncate">
               <span className="material-symbols-outlined text-[13px] text-sky-400 shrink-0">
                 fork_right
               </span>
-              <span className="font-medium truncate">{activeBranch.name}</span>
+              <span className="font-medium truncate">{branch?.name || 'main'}</span>
             </div>
             <span className="material-symbols-outlined text-[14px] text-[var(--on-surface-variant)] shrink-0">
               arrow_drop_down
@@ -337,7 +341,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
             <div className="absolute right-0 top-full mt-1 w-60 bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-xl py-1 z-50 animate-fade-in select-none">
               <div className="px-3 py-1.5 border-b border-[var(--outline)] flex items-center justify-between">
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--on-surface-variant)]">
-                  Ramas ({workspace.branches.length})
+                  Ramas ({safeBranches.length})
                 </span>
                 <button
                   type="button"
@@ -353,8 +357,9 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
               </div>
 
               <div className="max-h-48 overflow-y-auto py-1">
-                {workspace.branches.map((b) => {
-                  const isCurrent = b.name === activeBranch.name;
+                {safeBranches.map((b) => {
+                  const isCurrent = b.name === branch?.name;
+                  const docCount = b.taskDocuments?.length || 0;
                   return (
                     <button
                       key={b.name}
@@ -376,7 +381,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
                         <span className="truncate">{b.name}</span>
                       </div>
                       <span className="text-[10px] font-mono text-[var(--on-surface-variant)] shrink-0">
-                        {b.taskDocuments.length} doc{b.taskDocuments.length > 1 ? 's' : ''}
+                        {docCount} doc{docCount !== 1 ? 's' : ''}
                       </span>
                     </button>
                   );
@@ -408,7 +413,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
             folder_special
           </span>
           <span className="text-[11px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
-            TASK MD ({branch.taskDocuments.length})
+            TASK MD ({safeTaskDocuments.length})
           </span>
         </div>
 

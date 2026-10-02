@@ -258,10 +258,10 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
                 </div>
               </div>
 
-              {workspaces.map((ws) => {
+              {(workspaces || []).map((ws) => {
                 const isActive = ws.id === activeWorkspaceId;
-                const totalDocs = ws.branches.reduce(
-                  (acc, b) => acc + b.taskDocuments.length,
+                const totalDocs = (ws.branches || []).reduce(
+                  (acc, b) => acc + (b.taskDocuments?.length || 0),
                   0
                 );
                 const isConfirmingThis = confirmDeleteId === ws.id;

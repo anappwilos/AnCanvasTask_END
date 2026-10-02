@@ -539,13 +539,13 @@ export default function App() {
   // Existing folders in the active branch for autocomplete
   const existingFoldersInBranch = useMemo(() => {
     const folders = new Set<string>();
-    activeBranch.taskDocuments.forEach((doc) => {
-      if (doc.folder && doc.folder !== 'root' && doc.folder !== '/') {
+    (activeBranch?.taskDocuments || []).forEach((doc) => {
+      if (doc && doc.folder && doc.folder !== 'root' && doc.folder !== '/') {
         folders.add(doc.folder);
       }
     });
     return Array.from(folders);
-  }, [activeBranch.taskDocuments]);
+  }, [activeBranch]);
 
   // Workspace actions
   const handleSelectWorkspace = useCallback(
