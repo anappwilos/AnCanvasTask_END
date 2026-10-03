@@ -1,5 +1,7 @@
 import React, { useMemo, useState, useRef, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useLingui } from '@lingui/react';
+import { msg } from '@lingui/core/macro';
+import { Trans } from '@lingui/react/macro';
 import { TaskDocument, BranchConfig, Workspace, logWorkspaceTrace } from '../services/workspaceService';
 import { scanTaskBlocks } from '../utils/markdownSync';
 
@@ -42,7 +44,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
   onDeleteDocument,
   onExportDocument,
 }) => {
-  const { t } = useTranslation();
+  const { i18n } = useLingui();
   const branch = activeBranch;
   const safeTaskDocuments = branch?.taskDocuments || [];
   const safeBranches = workspace?.branches || [];
@@ -150,7 +152,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
           {hasUnsaved && (
             <span
               className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0"
-              title="Cambios sin guardar"
+              title={i18n._(msg`Cambios sin guardar`)}
             />
           )}
         </div>
@@ -169,7 +171,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
                 setActiveMenuDocId(activeMenuDocId === doc.id ? null : doc.id);
               }}
               className="btn-m3-icon w-5 h-5 opacity-0 group-hover:opacity-100 hover:text-[var(--on-surface)] cursor-pointer"
-              title="Opciones de archivo"
+              title={i18n._(msg`Opciones de archivo`)}
             >
               <span className="material-symbols-outlined text-[13px]">more_vert</span>
             </button>
@@ -189,7 +191,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
                   className="w-full px-2.5 py-1 text-left text-xs text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] flex items-center gap-1.5 cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-[14px]">edit</span>
-                  <span>Renombrar / Mover</span>
+                  <span>{i18n._(msg`Renombrar / Mover`)}</span>
                 </button>
 
                 <button
@@ -201,7 +203,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
                   className="w-full px-2.5 py-1 text-left text-xs text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] flex items-center gap-1.5 cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-[14px]">content_copy</span>
-                  <span>Duplicar</span>
+                  <span>{i18n._(msg`Duplicar`)}</span>
                 </button>
 
                 <button
@@ -213,7 +215,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
                   className="w-full px-2.5 py-1 text-left text-xs text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] flex items-center gap-1.5 cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-[14px]">download</span>
-                  <span>Descargar .md</span>
+                  <span>{i18n._(msg`Descargar .md`)}</span>
                 </button>
 
                 {safeTaskDocuments.length > 1 && (
@@ -226,7 +228,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
                     className="w-full px-2.5 py-1 text-left text-xs text-[var(--error)] hover:bg-rose-950/30 flex items-center gap-1.5 border-t border-[var(--outline)] cursor-pointer"
                   >
                     <span className="material-symbols-outlined text-[14px]">delete</span>
-                    <span>Eliminar</span>
+                    <span>{i18n._(msg`Eliminar`)}</span>
                   </button>
                 )}
               </div>
@@ -294,7 +296,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
           <div id="div-taskdocumentexplorer-10" ref={wsMenuRef} className="absolute left-0 right-0 top-full mt-1.5 bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-2xl py-1 z-50 animate-fade-in select-none">
             <div id="div-taskdocumentexplorer-11" className="px-3 py-1.5 border-b border-[var(--outline)] flex items-center justify-between">
               <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--on-surface-variant)]">
-                {t('workspace.title')} ({allWorkspaces.length})
+                {i18n._(msg`Workspaces`)} ({allWorkspaces.length})
               </span>
               <button
                 type="button"
@@ -306,7 +308,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
                 }}
                 className="text-[10px] text-[var(--primary)] hover:underline cursor-pointer font-medium"
               >
-                {t('workspace.manageWorkspaces')}
+                {i18n._(msg`Administrar`)}
               </button>
             </div>
 
@@ -359,7 +361,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
                 className="btn-m3-secondary w-full py-1 text-xs justify-center cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[14px]">add</span>
-                <span>+ {t('workspace.newWorkspace')}</span>
+                <span>+ {i18n._(msg`Nuevo Workspace`)}</span>
               </button>
             </div>
           </div>
@@ -370,7 +372,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
           <div id="div-taskdocumentexplorer-15" ref={branchMenuRef} className="absolute left-0 right-0 top-full mt-1.5 bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-2xl py-1 z-50 animate-fade-in select-none">
             <div id="div-taskdocumentexplorer-16" className="px-3 py-1.5 border-b border-[var(--outline)] flex items-center justify-between">
               <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--on-surface-variant)]">
-                {t('workspace.branches')} ({safeBranches.length})
+                {i18n._(msg`Ramas`)} ({safeBranches.length})
               </span>
               <button
                 type="button"
@@ -383,7 +385,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
                 className="text-[10px] text-sky-400 hover:underline cursor-pointer font-medium flex items-center gap-0.5"
               >
                 <span className="material-symbols-outlined text-[12px]">sync</span>
-                <span>Git Status</span>
+                <span>{i18n._(msg`Estado de Git`)}</span>
               </button>
             </div>
 
@@ -417,7 +419,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
                       <span className="truncate">{b.name}</span>
                     </div>
                     <span className="text-[10px] font-mono text-[var(--on-surface-variant)] shrink-0">
-                      {docCount} doc{docCount !== 1 ? 's' : ''}
+                      {docCount} {i18n._(msg`doc`)}{docCount !== 1 ? 's' : ''}
                     </span>
                   </button>
                 );
@@ -436,7 +438,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
                 className="btn-m3-secondary flex-1 py-1 text-xs justify-center cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[13px]">add</span>
-                <span>+ {t('workspace.newBranch')}</span>
+                <span>+ {i18n._(msg`Nueva rama`)}</span>
               </button>
             </div>
           </div>
@@ -450,7 +452,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
             folder_special
           </span>
           <span className="text-[11px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
-            {t('explorer.files')} ({safeTaskDocuments.length})
+            {i18n._(msg`Documentos de Tareas`)} ({safeTaskDocuments.length})
           </span>
         </div>
 
@@ -459,20 +461,20 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
             type="button"
             onClick={onOpenNewFolderModal}
             className="text-[11px] text-amber-400 hover:underline cursor-pointer flex items-center gap-0.5 font-medium"
-            title="Crear una nueva carpeta"
+            title={i18n._(msg`Crear una nueva carpeta`)}
           >
             <span className="material-symbols-outlined text-[13px]">create_new_folder</span>
-            <span>+ {t('explorer.newFolder')}</span>
+            <span>+ {i18n._(msg`Nueva carpeta`)}</span>
           </button>
 
           <button
             type="button"
             onClick={() => onOpenNewDocumentModal('')}
             className="text-[11px] text-[var(--primary)] hover:underline cursor-pointer flex items-center gap-0.5 font-medium"
-            title="Crear un nuevo archivo Task MD"
+            title={i18n._(msg`Crear un nuevo archivo Task MD`)}
           >
             <span className="material-symbols-outlined text-[13px]">note_add</span>
-            <span>+ {t('explorer.newFile')}</span>
+            <span>+ {i18n._(msg`Nuevo archivo .md`)}</span>
           </button>
         </div>
       </div>
@@ -517,7 +519,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
                       onOpenNewDocumentModal(folder);
                     }}
                     className="btn-m3-icon w-5 h-5 text-[var(--on-surface-variant)] hover:text-[var(--primary)] cursor-pointer"
-                    title={`Añadir Task MD dentro de "${folderLabel}"`}
+                    title={i18n._(msg`Añadir Task MD dentro de "${folderLabel}"`)}
                   >
                     <span className="material-symbols-outlined text-[13px]">add</span>
                   </button>
@@ -530,7 +532,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
                         setActiveMenuFolder(activeMenuFolder === folder ? null : folder);
                       }}
                       className="btn-m3-icon w-5 h-5 text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] cursor-pointer"
-                      title="Opciones de carpeta"
+                      title={i18n._(msg`Opciones de carpeta`)}
                     >
                       <span className="material-symbols-outlined text-[13px]">more_horiz</span>
                     </button>
@@ -549,7 +551,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
                           className="w-full px-2.5 py-1 text-left text-xs text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] flex items-center gap-1.5 cursor-pointer"
                         >
                           <span className="material-symbols-outlined text-[14px]">drive_file_rename_outline</span>
-                          <span>Renombrar carpeta</span>
+                          <span>{i18n._(msg`Renombrar carpeta`)}</span>
                         </button>
                       </div>
                     )}

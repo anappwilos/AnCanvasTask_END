@@ -1,3 +1,5 @@
+import { useLingui } from '@lingui/react';
+import { msg } from '@lingui/core/macro';
 import React, { useEffect, useState } from 'react';
 
 export type ToastType = 'success' | 'info' | 'warning' | 'error';
@@ -35,6 +37,7 @@ export const ToastContainer: React.FC<ToastContainerProps> = ({ toasts, onDismis
 };
 
 const ToastCard: React.FC<{ toast: ToastItem; onDismiss: () => void }> = ({ toast, onDismiss }) => {
+  const { _ } = useLingui();
   const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
@@ -122,7 +125,7 @@ const ToastCard: React.FC<{ toast: ToastItem; onDismiss: () => void }> = ({ toas
           type="button"
           onClick={handleManualDismiss}
           className="p-0.5 rounded text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--surface-container-highest)] cursor-pointer transition-colors"
-          aria-label="Cerrar notificación"
+          aria-label={_(msg`Cerrar notificación`)}
         >
           <span className="material-symbols-outlined text-[15px]">close</span>
         </button>

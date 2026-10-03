@@ -1,3 +1,6 @@
+import { useLingui } from '@lingui/react';
+import { msg } from '@lingui/core/macro';
+import { formatTaskCount, formatSectionCount } from '../i18n';
 import React, { useState, useMemo } from 'react';
 import { parseTasksMarkdown, ParsedGroup } from '../shapes/TaskShapeUtil';
 import { validateMarkdownDocument } from '../utils/markdownSync';
@@ -21,6 +24,7 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
   onImportMarkdown,
   onExportMarkdown,
 }) => {
+  const { _ } = useLingui();
   const [activeTab, setActiveTab] = useState<TabType>('export');
 
   // Export State
@@ -188,7 +192,7 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
                 }`}
               >
                 <span className="material-symbols-outlined text-[15px]">file_download</span>
-                <span>Exportar</span>
+                <span>{_(msg`Exportar`)}</span>
               </button>
 
               <button
@@ -201,11 +205,11 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
                 }`}
               >
                 <span className="material-symbols-outlined text-[15px]">file_upload</span>
-                <span>Importar</span>
+                <span>{_(msg`Importar`)}</span>
               </button>
             </div>
             <span id="import-export-title" className="text-xs text-[var(--on-surface-variant)] hidden sm:inline">
-              Gestión de archivos TASKS.md
+              {_(msg`Gestión de archivos TASKS.md`)}
             </span>
           </div>
 
@@ -213,7 +217,7 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
             type="button"
             onClick={onClose}
             className="btn-m3-icon w-7 h-7 cursor-pointer"
-            aria-label="Cerrar modal"
+            aria-label={_(msg`Cerrar modal`)}
           >
             <span className="material-symbols-outlined text-[16px]">close</span>
           </button>
@@ -227,20 +231,20 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
               <div id="div-importexportmodal-7" className="p-3 rounded-md bg-[var(--surface)] border border-[var(--outline)] flex flex-col gap-1.5">
                 <span className="font-semibold text-[var(--on-surface)] flex items-center gap-1.5 text-xs">
                   <span className="material-symbols-outlined text-[16px] text-emerald-400">save</span>
-                  <span>Exportar proyecto actual</span>
+                  <span>{_(msg`Exportar proyecto actual`)}</span>
                 </span>
                 <p className="text-[var(--on-surface-variant)] leading-relaxed text-[11px]">
-                  Descarga tus tareas manteniendo las dependencias <code className="font-mono text-[var(--primary)]">blockedBy</code>, secciones y prioridades.
+                  {_(msg`Descarga tus tareas manteniendo las dependencias blockedBy, secciones y prioridades.`)}
                 </p>
                 <div id="div-importexportmodal-8" className="flex items-center gap-3 pt-0.5 text-[11px] font-mono text-[var(--on-surface-variant)]">
-                  <span>• {currentStats.tasks} tareas</span>
-                  <span>• {currentStats.groups} secciones</span>
+                  <span>• {formatTaskCount(currentStats.tasks)}</span>
+                  <span>• {formatSectionCount(currentStats.groups)}</span>
                 </div>
               </div>
 
               {/* Format selection */}
               <div id="div-importexportmodal-9" className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-[var(--on-surface)]">Formato de exportación</label>
+                <label className="text-xs font-semibold text-[var(--on-surface)]">{_(msg`Formato de exportación`)}</label>
                 <div id="div-importexportmodal-10" className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
@@ -252,10 +256,10 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
                     }`}
                   >
                     <div id="div-importexportmodal-11" className="flex items-center justify-between">
-                      <span className="font-semibold text-xs text-[var(--on-surface)]">Markdown (.md)</span>
+                      <span className="font-semibold text-xs text-[var(--on-surface)]">{_(msg`Markdown (.md)`)}</span>
                       <span className="material-symbols-outlined text-[15px] text-sky-400">description</span>
                     </div>
-                    <span className="text-[11px] opacity-80">Formato nativo TASKS.md estándar</span>
+                    <span className="text-[11px] opacity-80">{_(msg`Formato nativo TASKS.md estándar`)}</span>
                   </button>
 
                   <button
@@ -268,17 +272,17 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
                     }`}
                   >
                     <div id="div-importexportmodal-12" className="flex items-center justify-between">
-                      <span className="font-semibold text-xs text-[var(--on-surface)]">JSON Estructurado (.json)</span>
+                      <span className="font-semibold text-xs text-[var(--on-surface)]">{_(msg`JSON Estructurado (.json)`)}</span>
                       <span className="material-symbols-outlined text-[15px] text-purple-400">data_object</span>
                     </div>
-                    <span className="text-[11px] opacity-80">Grafo completo y metadatos estructurados</span>
+                    <span className="text-[11px] opacity-80">{_(msg`Grafo completo y metadatos estructurados`)}</span>
                   </button>
                 </div>
               </div>
 
               {/* File name */}
               <div id="div-importexportmodal-13" className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-[var(--on-surface)]">Nombre del archivo</label>
+                <label className="text-xs font-semibold text-[var(--on-surface)]">{_(msg`Nombre del archivo`)}</label>
                 <input
                   type="text"
                   value={exportFileName}
@@ -291,14 +295,14 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
               {/* Quick Preview Box */}
               <div id="div-importexportmodal-14" className="flex flex-col gap-1.5">
                 <div id="div-importexportmodal-15" className="flex items-center justify-between">
-                  <label className="text-xs font-semibold text-[var(--on-surface)]">Previsualización de contenido</label>
+                  <label className="text-xs font-semibold text-[var(--on-surface)]">{_(msg`Previsualización de contenido`)}</label>
                   <button
                     type="button"
                     onClick={handleCopyExportText}
                     className="text-[11px] text-[var(--primary)] hover:underline flex items-center gap-1 cursor-pointer"
                   >
                     <span className="material-symbols-outlined text-[13px]">content_copy</span>
-                    <span>{copiedExport ? '¡Copiado!' : 'Copiar texto'}</span>
+                    <span>{copiedExport ? _(msg`¡Copiado!`) : _(msg`Copiar texto`)}</span>
                   </button>
                 </div>
                 <pre className="p-2.5 rounded bg-[var(--surface)] border border-[var(--outline)] max-h-36 overflow-auto text-[11px] font-mono leading-relaxed select-text whitespace-pre-wrap">
@@ -322,10 +326,10 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
               <div id="div-importexportmodal-17" className="p-3 rounded-md bg-[var(--surface)] border border-[var(--outline)] flex flex-col gap-1.5">
                 <span className="font-semibold text-[var(--on-surface)] flex items-center gap-1.5 text-xs">
                   <span className="material-symbols-outlined text-[16px] text-sky-400">upload_file</span>
-                  <span>Importar o cargar TASKS.md</span>
+                  <span>{_(msg`Importar o cargar TASKS.md`)}</span>
                 </span>
                 <p className="text-[var(--on-surface-variant)] leading-relaxed text-[11px]">
-                  Carga un archivo local o pega el texto directamente. Se parsearán automáticamente las secciones, identificadores y dependencias.
+                  {_(msg`Carga un archivo local o pega el texto directamente. Se parsearán automáticamente las secciones, identificadores y dependencias.`)}
                 </p>
               </div>
 
@@ -333,7 +337,7 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
               <div id="div-importexportmodal-18" className="flex items-center gap-2">
                 <label className="btn-m3-secondary flex-1 py-1.5 text-xs cursor-pointer text-center justify-center">
                   <span className="material-symbols-outlined text-[15px]">folder_open</span>
-                  <span>Seleccionar archivo (.md, .json)</span>
+                  <span>{_(msg`Seleccionar archivo (.md, .json)`)}</span>
                   <input
                     type="file"
                     accept=".md,.markdown,.json,.txt"
@@ -345,7 +349,7 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
 
               {/* Text Area */}
               <div id="div-importexportmodal-19" className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-[var(--on-surface)]">Contenido Markdown</label>
+                <label className="text-xs font-semibold text-[var(--on-surface)]">{_(msg`Contenido Markdown`)}</label>
                 <textarea
                   value={importInputText}
                   onChange={(e) => {
@@ -353,14 +357,14 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
                     setImportSourceType('paste');
                   }}
                   rows={6}
-                  placeholder="Pega aquí el contenido de tu archivo TASKS.md..."
+                  placeholder={_(msg`Pega aquí el contenido de tu archivo TASKS.md...`)}
                   className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded p-2.5 text-xs font-mono text-[var(--on-surface)] focus:outline-none resize-none leading-relaxed"
                 />
               </div>
 
               {/* Import Mode: Replace vs Merge */}
               <div id="div-importexportmodal-20" className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-[var(--on-surface)]">Estrategia de importación</label>
+                <label className="text-xs font-semibold text-[var(--on-surface)]">{_(msg`Estrategia de importación`)}</label>
                 <div id="div-importexportmodal-21" className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
@@ -371,8 +375,8 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
                         : 'bg-[var(--surface)] border-[var(--outline)] text-[var(--on-surface-variant)] hover:bg-[var(--surface-container-high)]'
                     }`}
                   >
-                    <span className="font-semibold text-xs text-[var(--on-surface)]">Reemplazar actual</span>
-                    <span className="text-[11px] opacity-80">Sustituye todo el contenido del canvas y Kanban</span>
+                    <span className="font-semibold text-xs text-[var(--on-surface)]">{_(msg`Reemplazar actual`)}</span>
+                    <span className="text-[11px] opacity-80">{_(msg`Sustituye todo el contenido del canvas y Kanban`)}</span>
                   </button>
 
                   <button
@@ -384,8 +388,8 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
                         : 'bg-[var(--surface)] border-[var(--outline)] text-[var(--on-surface-variant)] hover:bg-[var(--surface-container-high)]'
                     }`}
                   >
-                    <span className="font-semibold text-xs text-[var(--on-surface)]">Combinar / Añadir</span>
-                    <span className="text-[11px] opacity-80">Agrega las nuevas secciones conservando las existentes</span>
+                    <span className="font-semibold text-xs text-[var(--on-surface)]">{_(msg`Combinar / Añadir`)}</span>
+                    <span className="text-[11px] opacity-80">{_(msg`Agrega las nuevas secciones conservando las existentes`)}</span>
                   </button>
                 </div>
               </div>
@@ -395,12 +399,12 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
                 <div id="div-importexportmodal-22" className="p-2.5 rounded bg-[var(--surface)] border border-[var(--outline)] flex flex-col gap-1">
                   <span className="font-semibold text-xs text-[var(--on-surface)] flex items-center gap-1.5">
                     <span className="material-symbols-outlined text-[15px] text-emerald-400">check_circle</span>
-                    <span>Análisis previo: {importPreview.taskCount} tareas detectadas en {importPreview.groupCount} secciones</span>
+                    <span>{_(msg`Análisis previo:`)} {formatTaskCount(importPreview.taskCount)} {_(msg`en`)} {formatSectionCount(importPreview.groupCount)}</span>
                   </span>
                   {importPreview.validation.issues.length > 0 && (
                     <div id="div-importexportmodal-23" className="text-[11px] text-amber-400 flex items-center gap-1">
                       <span>⚠</span>
-                      <span>Se detectaron {importPreview.validation.issues.length} avisos de sintaxis en el archivo importado.</span>
+                      <span>{_(msg`Se detectaron ${importPreview.validation.issues.length} avisos de sintaxis en el archivo importado.`)}</span>
                     </div>
                   )}
                 </div>
@@ -416,7 +420,7 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
             onClick={onClose}
             className="btn-m3-text px-3.5 py-1 text-xs cursor-pointer"
           >
-            Cancelar
+            {_(msg`Cancelar`)}
           </button>
 
           {activeTab === 'export' ? (
@@ -426,7 +430,7 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
               className="btn-m3-primary px-4 py-1 text-xs cursor-pointer shadow-sm flex items-center gap-1.5"
             >
               <span className="material-symbols-outlined text-[15px]">download</span>
-              <span>Descargar {exportFormat.toUpperCase()}</span>
+              <span>{_(msg`Descargar`)} {exportFormat.toUpperCase()}</span>
             </button>
           ) : (
             <button
@@ -436,7 +440,7 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
               className="btn-m3-primary px-4 py-1 text-xs cursor-pointer shadow-sm flex items-center gap-1.5"
             >
               <span className="material-symbols-outlined text-[15px]">check</span>
-              <span>{importMode === 'replace' ? 'Reemplazar y aplicar' : 'Combinar al proyecto'}</span>
+              <span>{importMode === 'replace' ? _(msg`Reemplazar y aplicar`) : _(msg`Combinar al proyecto`)}</span>
             </button>
           )}
         </div>

@@ -3,6 +3,8 @@ import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror';
 import { markdown } from '@codemirror/lang-markdown';
 import { oneDark } from '@codemirror/theme-one-dark';
 import { EditorView } from '@codemirror/view';
+import { useLingui } from '@lingui/react';
+import { msg, plural } from '@lingui/core/macro';
 import {
   MarkdownIssue,
   MarkdownValidationReport,
@@ -35,6 +37,7 @@ export function MarkdownSplitEditor({
   onChangeSplitRatio,
   onOpenNormalizer,
 }: MarkdownSplitEditorProps) {
+  const { i18n } = useLingui();
   const editorRef = useRef<ReactCodeMirrorRef>(null);
   const [copied, setCopied] = useState(false);
   const [showIssuesPanel, setShowIssuesPanel] = useState(false);
@@ -125,12 +128,12 @@ export function MarkdownSplitEditor({
     try {
       await navigator.clipboard.writeText(value);
       setCopied(true);
-      onShowToast('Markdown copiado al portapapeles', 'success');
+      onShowToast(i18n._(msg`Markdown copiado al portapapeles`), 'success');
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      onShowToast('Error al copiar al portapapeles', 'error');
+      onShowToast(i18n._(msg`Error al copiar al portapapeles`), 'error');
     }
-  }, [value, onShowToast]);
+  }, [value, onShowToast, i18n]);
 
   // Open safe normalization dialog
   const handleOpenNormalizer = useCallback(() => {
@@ -141,58 +144,61 @@ export function MarkdownSplitEditor({
     }
   }, [onOpenNormalizer]);
 
-  // CodeMirror extensions
+  // Track cursor position
+  const cursorTrackerPlugin = useMemo(() => {
+    return EditorView.updateListener.of((update) => {
+      if (update.selectionSet || update.docChanged) {
+        const pos = update.state.selection.main.head;
+        const line = update.state.doc.lineAt(pos);
+        setCursorPos({
+          line: line.number,
+          col: pos - line.from + 1,
+        });
+      }
+    });
+  }, []);
+
   const extensions = useMemo(() => {
-    const exts = [
+    return [
       markdown(),
+      cursorTrackerPlugin,
       EditorView.lineWrapping,
-      EditorView.updateListener.of((update) => {
-        if (update.selectionSet) {
-          const main = update.state.selection.main;
-          const line = update.state.doc.lineAt(main.head);
-          setCursorPos({
-            line: line.number,
-            col: main.head - line.from + 1,
-          });
-        }
-      }),
     ];
-
-    if (theme === 'dark') {
-      exts.push(oneDark);
-    }
-
-    return exts;
-  }, [theme]);
+  }, [cursorTrackerPlugin]);
 
   return (
-    <aside className="h-full flex flex-col bg-[var(--surface-container)] border-l border-[var(--outline)] select-none overflow-hidden relative font-sans text-[var(--on-surface)] transition-all">
-      {/* Top Header */}
-      <div id="div-markdownspliteditor-1" className="h-11 px-3 bg-[var(--surface-container-high)] border-b border-[var(--outline)] flex items-center justify-between shrink-0 gap-2">
+    <aside
+      aria-label={i18n._(msg`Editor Markdown en panel dividido`)}
+      className="flex flex-col h-full bg-[var(--surface-container)] border-r border-[var(--outline)] overflow-hidden shrink-0 shadow-sm"
+      style={{ width: '100%' }}
+    >
+      {/* Top Header Bar */}
+      <div id="div-markdownspliteditor-1" className="h-10 px-3 border-b border-[var(--outline)] bg-[var(--surface)] flex items-center justify-between gap-2 select-none shrink-0">
+        {/* Left: File Title & State Indicator */}
         <div id="div-markdownspliteditor-2" className="flex items-center gap-2 min-w-0">
           <span className="material-symbols-outlined text-[16px] text-sky-400 shrink-0">
-            code_blocks
+            description
           </span>
-          <div id="div-markdownspliteditor-3" className="flex items-center gap-1.5 truncate">
-            <span className="text-xs font-semibold text-[var(--on-surface)] font-mono truncate">
-              {fileName || 'TASKS.md'}
+          <div id="div-markdownspliteditor-3" className="flex items-center gap-1.5 min-w-0">
+            <span className="text-xs font-semibold text-[var(--on-surface)] truncate font-mono">
+              {fileName}
             </span>
-            <span className="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-950/60 text-emerald-300 border border-emerald-800/60">
-              <span
-                className={`w-1.5 h-1.5 rounded-full ${
-                  isTyping ? 'bg-amber-400 animate-ping' : 'bg-emerald-400'
-                }`}
-              />
-              <span>{isTyping ? 'Sincronizando...' : 'Bidireccional en vivo'}</span>
-            </span>
+            <span
+              className={`w-2 h-2 rounded-full shrink-0 transition-all ${
+                isTyping
+                  ? 'bg-amber-400 animate-pulse'
+                  : 'bg-emerald-400'
+              }`}
+              title={isTyping ? i18n._(msg`Escribiendo cambios...`) : i18n._(msg`Sincronizado con Canvas`)}
+            />
           </div>
         </div>
 
-        {/* Header Right Actions */}
-        <div id="div-markdownspliteditor-4" className="flex items-center gap-1 shrink-0">
-          {/* Preset Split Width Buttons */}
+        {/* Right: Quick actions & controls */}
+        <div id="div-markdownspliteditor-4" className="flex items-center gap-1.5 shrink-0">
+          {/* Preset Ratio Selector (35% / 50% / 65%) */}
           {onChangeSplitRatio && (
-            <div id="div-markdownspliteditor-5" className="hidden lg:flex items-center gap-0.5 bg-[var(--surface)] p-0.5 rounded border border-[var(--outline)] mr-1">
+            <div id="div-markdownspliteditor-5" className="hidden sm:flex items-center bg-[var(--surface-container)] p-0.5 rounded border border-[var(--outline)] text-[10px]">
               <button
                 type="button"
                 onClick={() => onChangeSplitRatio(35)}
@@ -201,7 +207,7 @@ export function MarkdownSplitEditor({
                     ? 'bg-[var(--primary)] text-[var(--on-primary)] font-bold'
                     : 'text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]'
                 }`}
-                title="Dividir 35% Editor / 65% Canvas o Kanban"
+                title={i18n._(msg`Dividir 35% Editor / 65% Canvas o Kanban`)}
               >
                 35%
               </button>
@@ -213,7 +219,7 @@ export function MarkdownSplitEditor({
                     ? 'bg-[var(--primary)] text-[var(--on-primary)] font-bold'
                     : 'text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]'
                 }`}
-                title="Dividir 50% / 50%"
+                title={i18n._(msg`Dividir 50% / 50%`)}
               >
                 50%
               </button>
@@ -225,7 +231,7 @@ export function MarkdownSplitEditor({
                     ? 'bg-[var(--primary)] text-[var(--on-primary)] font-bold'
                     : 'text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]'
                 }`}
-                title="Dividir 65% Editor / 35% Canvas o Kanban"
+                title={i18n._(msg`Dividir 65% Editor / 35% Canvas o Kanban`)}
               >
                 65%
               </button>
@@ -237,11 +243,11 @@ export function MarkdownSplitEditor({
             type="button"
             onClick={handleOpenNormalizer}
             className="px-2 py-0.5 rounded text-[11px] font-semibold bg-sky-950/60 text-sky-300 border border-sky-800/80 hover:bg-sky-900/80 cursor-pointer transition-colors flex items-center gap-1 shadow-xs"
-            title="Normalización segura de Markdown (Diff Git, AST y prevención de pérdidas)"
-            aria-label="Normalización segura"
+            title={i18n._(msg`Normalización segura de Markdown (Diff Git, AST y prevención de pérdidas)`)}
+            aria-label={i18n._(msg`Normalización segura`)}
           >
             <span className="material-symbols-outlined text-[14px] text-sky-400">verified</span>
-            <span className="hidden sm:inline">Normalizar</span>
+            <span className="hidden sm:inline">{i18n._(msg`Normalizar`)}</span>
           </button>
 
           {/* Copy Markdown */}
@@ -249,8 +255,8 @@ export function MarkdownSplitEditor({
             type="button"
             onClick={handleCopy}
             className="btn-m3-icon w-7 h-7 text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] cursor-pointer"
-            title={copied ? 'Copiado' : 'Copiar todo el Markdown'}
-            aria-label="Copy Markdown"
+            title={copied ? i18n._(msg`¡Copiado!`) : i18n._(msg`Copiar todo el Markdown`)}
+            aria-label={i18n._(msg`Copiar Markdown`)}
           >
             <span className="material-symbols-outlined text-[15px]">
               {copied ? 'check' : 'content_copy'}
@@ -262,8 +268,8 @@ export function MarkdownSplitEditor({
             type="button"
             onClick={onExport}
             className="btn-m3-icon w-7 h-7 text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] cursor-pointer"
-            title="Descargar archivo .md"
-            aria-label="Export Markdown"
+            title={i18n._(msg`Descargar archivo .md`)}
+            aria-label={i18n._(msg`Descargar archivo .md`)}
           >
             <span className="material-symbols-outlined text-[15px]">download</span>
           </button>
@@ -275,8 +281,8 @@ export function MarkdownSplitEditor({
             type="button"
             onClick={onClose}
             className="btn-m3-icon w-7 h-7 text-[var(--on-surface-variant)] hover:text-rose-400 cursor-pointer"
-            title="Cerrar visor en tiempo real"
-            aria-label="Close Markdown Editor"
+            title={i18n._(msg`Cerrar visor en tiempo real`)}
+            aria-label={i18n._(msg`Cerrar visor en tiempo real`)}
           >
             <span className="material-symbols-outlined text-[16px]">close</span>
           </button>
@@ -290,20 +296,20 @@ export function MarkdownSplitEditor({
             type="button"
             onClick={() => insertText('\n- [ ] Nueva tarea\n  - Priority: P1\n')}
             className="px-2 py-1 rounded bg-[var(--surface-container)] hover:bg-[var(--surface-container-highest)] border border-[var(--outline)] text-[11px] font-mono text-[var(--on-surface)] flex items-center gap-1 cursor-pointer transition-colors"
-            title="Insertar nueva tarea pendiente (- [ ])"
+            title={i18n._(msg`Insertar nueva tarea pendiente (- [ ])`)}
           >
             <span className="text-sky-400 font-bold">+</span>
-            <span>- [ ] Tarea</span>
+            <span>- [ ] {i18n._(msg`Tarea`)}</span>
           </button>
 
           <button
             type="button"
             onClick={() => insertText('\n## Nueva Sección\n\n- [ ] Tarea inicial\n  - Priority: P1\n')}
             className="px-2 py-1 rounded bg-[var(--surface-container)] hover:bg-[var(--surface-container-highest)] border border-[var(--outline)] text-[11px] font-mono text-[var(--on-surface)] flex items-center gap-1 cursor-pointer transition-colors"
-            title="Insertar nueva sección (## Sección)"
+            title={i18n._(msg`Insertar nueva sección (## Sección)`)}
           >
             <span className="text-purple-400 font-bold">##</span>
-            <span>Sección</span>
+            <span>{i18n._(msg`Sección`)}</span>
           </button>
 
           <div id="div-markdownspliteditor-9" className="w-px h-3.5 bg-[var(--outline)] mx-1" />
@@ -314,7 +320,7 @@ export function MarkdownSplitEditor({
               type="button"
               onClick={() => insertText('  - Priority: P0\n')}
               className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-rose-950/60 text-rose-300 border border-rose-800/80 hover:bg-rose-900/80 cursor-pointer"
-              title="Insertar Priority: P0 (Crítica)"
+              title={i18n._(msg`Insertar Priority: P0 (Crítica)`)}
             >
               P0
             </button>
@@ -322,7 +328,7 @@ export function MarkdownSplitEditor({
               type="button"
               onClick={() => insertText('  - Priority: P1\n')}
               className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-950/60 text-amber-300 border border-amber-800/80 hover:bg-amber-900/80 cursor-pointer"
-              title="Insertar Priority: P1 (Alta)"
+              title={i18n._(msg`Insertar Priority: P1 (Alta)`)}
             >
               P1
             </button>
@@ -330,7 +336,7 @@ export function MarkdownSplitEditor({
               type="button"
               onClick={() => insertText('  - Priority: P2\n')}
               className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-blue-950/60 text-blue-300 border border-blue-800/80 hover:bg-blue-900/80 cursor-pointer"
-              title="Insertar Priority: P2 (Media)"
+              title={i18n._(msg`Insertar Priority: P2 (Media)`)}
             >
               P2
             </button>
@@ -342,7 +348,7 @@ export function MarkdownSplitEditor({
             type="button"
             onClick={() => insertText('  - Blocked by: id-tarea\n')}
             className="px-2 py-1 rounded bg-[var(--surface-container)] hover:bg-[var(--surface-container-highest)] border border-[var(--outline)] text-[11px] font-mono text-amber-300 flex items-center gap-1 cursor-pointer transition-colors"
-            title="Insertar dependencia (Blocked by: id)"
+            title={i18n._(msg`Insertar dependencia (Blocked by: id)`)}
           >
             <span className="material-symbols-outlined text-[13px]">lock</span>
             <span>Blocked by</span>
@@ -352,7 +358,7 @@ export function MarkdownSplitEditor({
             type="button"
             onClick={() => insertText('  - Tags: frontend, auth\n')}
             className="px-2 py-1 rounded bg-[var(--surface-container)] hover:bg-[var(--surface-container-highest)] border border-[var(--outline)] text-[11px] font-mono text-sky-300 flex items-center gap-1 cursor-pointer transition-colors"
-            title="Insertar etiquetas (Tags: ...)"
+            title={i18n._(msg`Insertar etiquetas (Tags: ...)`)}
           >
             <span className="material-symbols-outlined text-[13px]">label</span>
             <span>Tags</span>
@@ -369,10 +375,10 @@ export function MarkdownSplitEditor({
                 ? 'bg-rose-950/80 text-rose-300 border-rose-700 animate-pulse'
                 : 'bg-amber-950/80 text-amber-300 border-amber-700'
             }`}
-            title="Ver/Ocultar problemas detectados en el Markdown"
+            title={i18n._(msg`Ver/Ocultar problemas detectados en el Markdown`)}
           >
             <span>⚠</span>
-            <span>{validationReport.issues.length} {validationReport.issues.length === 1 ? 'problema' : 'problemas'}</span>
+            <span>{plural(validationReport.issues.length, { one: '# problema', other: '# problemas' })}</span>
           </button>
         )}
       </div>
@@ -382,14 +388,14 @@ export function MarkdownSplitEditor({
         <div id="div-markdownspliteditor-12" className="bg-[var(--surface-container-high)] border-b border-[var(--outline)] p-2 max-h-36 overflow-y-auto flex flex-col gap-1.5 select-none shrink-0 animate-slide-down">
           <div id="div-markdownspliteditor-13" className="flex items-center justify-between px-1">
             <span className="text-[11px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
-              Diagnósticos de sincronización
+              {i18n._(msg`Diagnósticos de sincronización`)}
             </span>
             <button
               type="button"
               onClick={() => setShowIssuesPanel(false)}
               className="text-[10px] text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] cursor-pointer"
             >
-              Cerrar
+              {i18n._(msg`Cerrar`)}
             </button>
           </div>
           {validationReport.issues.map((issue: MarkdownIssue) => (
@@ -401,7 +407,7 @@ export function MarkdownSplitEditor({
                 }
               }}
               className="p-1.5 rounded bg-[var(--surface)] hover:bg-[var(--surface-container-highest)] border border-[var(--outline)] flex items-center justify-between gap-2 text-xs font-mono cursor-pointer transition-colors"
-              title="Clic para saltar a esta línea en el editor"
+              title={i18n._(msg`Clic para saltar a esta línea en el editor`)}
             >
               <div id="div-markdownspliteditor-14" className="flex items-center gap-1.5 truncate">
                 <span
@@ -472,12 +478,12 @@ export function MarkdownSplitEditor({
       <div id="div-markdownspliteditor-16" className="h-7 px-3 bg-[var(--surface-container-high)] border-t border-[var(--outline)] flex items-center justify-between text-[11px] font-mono text-[var(--on-surface-variant)] select-none shrink-0">
         <div id="div-markdownspliteditor-17" className="flex items-center gap-3">
           <span>
-            Tareas: <strong className="text-[var(--on-surface)]">{stats.totalTasks}</strong> (
-            <span className="text-emerald-400">{stats.completedTasks} done</span> /{' '}
-            <span className="text-amber-400">{stats.pendingTasks} todo</span>)
+            {i18n._(msg`Tareas`)}: <strong className="text-[var(--on-surface)]">{stats.totalTasks}</strong> (
+            <span className="text-emerald-400">{stats.completedTasks} {i18n._(msg`completadas`)}</span> /{' '}
+            <span className="text-amber-400">{stats.pendingTasks} {i18n._(msg`pendientes`)}</span>)
           </span>
           <span className="hidden sm:inline">
-            Secciones: <strong className="text-[var(--on-surface)]">{stats.sections}</strong>
+            {i18n._(msg`Secciones`)}: <strong className="text-[var(--on-surface)]">{stats.sections}</strong>
           </span>
           {stats.criticalCount > 0 && (
             <span className="text-rose-400 font-bold hidden md:inline">

@@ -56,7 +56,10 @@ import { RenameFolderModal } from './components/RenameFolderModal';
 import { MarkdownSplitEditor } from './components/MarkdownSplitEditor';
 import { SafeMarkdownNormalizerModal } from './components/SafeMarkdownNormalizerModal';
 import { LanguageSelector } from './components/LanguageSelector';
-import { useTranslation } from 'react-i18next';
+import { useLingui } from '@lingui/react';
+import { msg } from '@lingui/core/macro';
+import { Trans } from '@lingui/react/macro';
+import { dynamicActivate, formatTime, formatTaskCount, formatSectionCount, formatWorkspaceCount } from './i18n';
 import {
   loadWorkspaceStore,
   saveWorkspaceStore,
@@ -118,7 +121,7 @@ interface DeleteWarningInfo {
 }
 
 export default function App() {
-  const { t, i18n } = useTranslation();
+  const { i18n } = useLingui();
   const [editor, setEditor] = useState<Editor | null>(null);
 
   // User Settings & Preferences State (DESIGN.md Section 4 & Fase 7)
@@ -128,8 +131,8 @@ export default function App() {
 
   // Sync language with userSettings
   useEffect(() => {
-    if (userSettings.language && i18n.language !== userSettings.language) {
-      i18n.changeLanguage(userSettings.language);
+    if (userSettings.language && i18n.locale !== userSettings.language) {
+      dynamicActivate(userSettings.language as any);
     }
   }, [userSettings.language, i18n]);
 
@@ -321,11 +324,11 @@ export default function App() {
   useEffect(() => {
     const handleOnline = () => {
       setIsOnline(true);
-      pushToast(t('toast.connectionRestored'), 'success');
+      pushToast(i18n._(msg`Conexión reestablecida`), 'success');
     };
     const handleOffline = () => {
       setIsOnline(false);
-      pushToast(t('toast.offlineWarning'), 'warning');
+      pushToast(i18n._(msg`Sin conexión a internet. Los cambios se guardarán localmente.`), 'warning');
     };
 
     window.addEventListener('online', handleOnline);
@@ -608,7 +611,7 @@ export default function App() {
         saveWorkspaceStore(nextStore);
         return nextStore;
       });
-      pushToast(`Workspace "${selectedName}" cargado`, 'success');
+      pushToast(i18n._(msg`Workspace "${selectedName}" cargado`), 'success');
     },
     [pushToast]
   );
@@ -669,12 +672,12 @@ export default function App() {
           };
           nextWorkspaces = [cleanWs];
           nextActiveId = cleanWs.id;
-          pushToast(t('toast.workspaceDeletedNewInit'), 'info');
+          pushToast(i18n._(msg`Workspace eliminado. Se ha inicializado un nuevo workspace limpio.`), 'info');
         } else {
           if (prev.activeWorkspaceId === wsId) {
             nextActiveId = nextWorkspaces[0].id;
           }
-          pushToast(t('toast.workspaceDeleted'), 'info');
+          pushToast(i18n._(msg`Workspace eliminado`), 'info');
         }
 
         const nextStore: WorkspaceStoreState = {
@@ -801,7 +804,7 @@ export default function App() {
       });
 
       setActiveView('canvas');
-      pushToast(`Workspace "${targetWorkspace.name}" cargado desde Sanity`, 'success');
+      pushToast(i18n._(msg`Workspace "${targetWorkspace.name}" cargado desde Sanity`), 'success');
     },
     [editor, pushToast, triggerDebouncedVisualSave]
   );
@@ -810,7 +813,7 @@ export default function App() {
   const handleSyncAllWorkspacesToSanity = useCallback(async () => {
     const config = getSanityConfig();
     if (!config.projectId || !config.dataset || !config.token) {
-      pushToast(t('toast.sanityConfigSyncWorkspace'), 'warning');
+      pushToast(i18n._(msg`Configura el API Token de Sanity para sincronizar workspaces`), 'warning');
       setIsSanityModalOpen(true);
       return;
     }
@@ -827,7 +830,7 @@ export default function App() {
   const handleImportWorkspacesFromSanity = useCallback(async () => {
     const config = getSanityConfig();
     if (!config.projectId || !config.dataset) {
-      pushToast(t('toast.sanityConfigImportWorkspace'), 'warning');
+      pushToast(i18n._(msg`Configura Sanity (Project ID y Dataset) para importar workspaces`), 'warning');
       setIsSanityModalOpen(true);
       return;
     }
@@ -835,7 +838,7 @@ export default function App() {
     try {
       const remoteWorkspaces = await loadWorkspacesFromSanity(config);
       if (remoteWorkspaces.length === 0) {
-        pushToast(t('toast.noWorkspacesInSanity'), 'info');
+        pushToast(i18n._(msg`No se encontraron documentos _type: "workspace" en Sanity`), 'info');
         return;
       }
 
@@ -860,9 +863,9 @@ export default function App() {
         return nextStore;
       });
 
-      pushToast(`${remoteWorkspaces.length} workspace(s) importado(s) desde Sanity`, 'success');
+      pushToast(formatWorkspaceCount(remoteWorkspaces.length) + ' ' + i18n._(msg`importados desde Sanity`), 'success');
     } catch (err) {
-      pushToast(t('toast.errorImportingWorkspaces'), 'error');
+      pushToast(i18n._(msg`Error al importar workspaces desde Sanity`), 'error');
     }
   }, [pushToast]);
 
@@ -871,7 +874,7 @@ export default function App() {
     async (ws: Workspace) => {
       const config = getSanityConfig();
       if (!config.projectId || !config.dataset || !config.token) {
-        pushToast(t('toast.sanityConfigSaveWorkspace'), 'warning');
+        pushToast(i18n._(msg`Configura el API Token de Sanity para guardar el workspace`), 'warning');
         setIsSanityModalOpen(true);
         return;
       }
@@ -902,7 +905,7 @@ export default function App() {
         saveWorkspaceStore(nextStore);
         return nextStore;
       });
-      pushToast(t('toast.branchActivated', { branchName }), 'info');
+      pushToast(i18n._(msg`Rama "\$\${branchName}" activada`), 'info');
     },
     [pushToast]
   );
@@ -947,7 +950,7 @@ export default function App() {
         saveWorkspaceStore(nextStore);
         return nextStore;
       });
-      pushToast(t('toast.branchCreatedActivated', { branchName }), 'success');
+      pushToast(i18n._(msg`Rama "\$\${branchName}" creada y activada`), 'success');
     },
     [pushToast]
   );
@@ -1084,7 +1087,7 @@ export default function App() {
           triggerDebouncedVisualSave(editor);
         }
 
-        pushToast(t('toast.documentDuplicated', { copyPath }), 'success');
+        pushToast(i18n._(msg`Documento duplicado como "\$\${copyPath}"`), 'success');
         return nextStore;
       });
     },
@@ -1098,7 +1101,7 @@ export default function App() {
         const activeBr = getActiveBranch(activeWs);
 
         if (activeBr.taskDocuments.length <= 1) {
-          pushToast(t('toast.cannotDeleteLastTaskMd'), 'warning');
+          pushToast(i18n._(msg`No puedes eliminar el único archivo Task MD de la rama`), 'warning');
           return prev;
         }
 
@@ -1131,7 +1134,7 @@ export default function App() {
           triggerDebouncedVisualSave(editor);
         }
 
-        pushToast(t('toast.fileDeleted', { docPath }), 'info');
+        pushToast(i18n._(msg`Archivo "\$\${docPath}" eliminado`), 'info');
         return nextStore;
       });
     },
@@ -1490,7 +1493,7 @@ export default function App() {
       }
       seedMockTasks(editor, null);
       triggerDebouncedVisualSave(editor);
-      showToast(t('toast.canvasResetToInitial'));
+      showToast(i18n._(msg`Canvas reiniciado al estado inicial`));
     }
   }, [editor, triggerDebouncedVisualSave]);
 
@@ -1536,7 +1539,7 @@ export default function App() {
         file.type.includes('text/plain');
 
       if (!isMd) {
-        showToast(t('toast.selectValidMarkdown'));
+        showToast(i18n._(msg`Por favor selecciona o arrastra un archivo Markdown válido (.md)`));
         return;
       }
 
@@ -1558,15 +1561,15 @@ export default function App() {
 
           if (taskCount > 0 || groupCount > 0) {
             triggerDebouncedVisualSave(editor);
-            pushToast(t('toast.fileLoadedWithTasks', { fileName: file.name, taskCount, groupCount }), 'success');
+            pushToast(i18n._(msg`"\$\${fileName}" cargado (\$\${taskCount} tareas en \$\${groupCount} secciones)`), 'success');
           } else {
-            pushToast(t('toast.fileLoadedNoValidTasks', { fileName: file.name }), 'warning');
+            pushToast(i18n._(msg`"\$\${fileName}" cargado, pero no contiene tareas válidas (- [ ] ...)`), 'warning');
           }
         } else {
-          pushToast(t('toast.fileLoadedInMemory', { fileName: file.name }), 'info');
+          pushToast(i18n._(msg`"\$\${fileName}" cargado en memoria`), 'info');
         }
       } catch (err) {
-        pushToast(t('toast.errorReadingFile', { fileName: file.name }), 'error');
+        pushToast(i18n._(msg`Error al leer "\$\${fileName}"`), 'error');
       }
     },
     [editor, triggerDebouncedVisualSave, pushToast]
@@ -1623,9 +1626,9 @@ export default function App() {
         URL.revokeObjectURL(url);
 
         setLastSavedMarkdown(markdownInput);
-        pushToast(t('toast.fileDownloaded', { fileName }), 'success');
+        pushToast(i18n._(msg`Archivo "\$\${fileName}" descargado con éxito`), 'success');
       } catch (err) {
-        pushToast(t('toast.errorExportingFile'), 'error');
+        pushToast(i18n._(msg`Error al exportar archivo`), 'error');
       }
     },
     [markdownInput, pushToast]
@@ -1658,9 +1661,9 @@ export default function App() {
       URL.revokeObjectURL(url);
 
       setLastSavedMarkdown(markdownInput);
-      pushToast(t('toast.fileSaved', { fileName: currentFileName || 'TASKS.md' }), 'success');
+      pushToast(i18n._(msg`Archivo "\$\${fileName}" guardado`), 'success');
     } catch (err) {
-      pushToast(t('toast.errorExportingFile'), 'error');
+      pushToast(i18n._(msg`Error al exportar archivo`), 'error');
     }
   }, [markdownInput, currentFileName, pushToast]);
 
@@ -1712,10 +1715,10 @@ export default function App() {
     if (taskCount > 0 || groupCount > 0) {
       setIsImportExportOpen(false);
       setLastSavedMarkdown(markdownInput);
-      showToast(t('toast.tasksAppliedToCanvas', { taskCount }));
+      showToast(i18n._(msg`\$\${taskCount} tareas aplicadas al canvas`));
       triggerDebouncedVisualSave(editor);
     } else {
-      showToast(t('toast.noValidTasksDetected'));
+      showToast(i18n._(msg`No se detectaron tareas válidas`));
     }
   }, [editor, markdownInput, triggerDebouncedVisualSave]);
 
@@ -1738,9 +1741,9 @@ export default function App() {
       editor.select(taskShape.id);
       setSelectedTaskShapeId(taskShape.id);
       editor.zoomToSelection({ animation: { duration: 300 } });
-      showToast(t('toast.focusedTask', { title: (taskShape.props as any)?.title || targetTaskId }));
+      showToast(i18n._(msg`Enfocado: "\$\${title}"`));
     } else {
-      showToast(t('toast.taskNotFoundInCanvas', { taskId: targetTaskId }));
+      showToast(i18n._(msg`No se encontró la tarjeta #\$\${taskId} en el canvas`));
     }
   };
 
@@ -1757,7 +1760,7 @@ export default function App() {
     if (groupShape) {
       editor.select(groupShape.id);
       editor.zoomToSelection({ animation: { duration: 300 } });
-      showToast(t('toast.focusedSection', { sectionTitle }));
+      showToast(i18n._(msg`Sección: "\$\${sectionTitle}"`));
     }
   };
 
@@ -1854,7 +1857,7 @@ export default function App() {
     setNewTaskTitle('');
     setNewTaskPriority('P1');
     setIsNewTaskModalOpen(false);
-    showToast(t('toast.taskCreatedInSection', { taskId, groupTitle }));
+    showToast(i18n._(msg`Tarea #\$\${taskId} creada en "\$\${groupTitle}"`));
   };
 
   // Load Sample Project Helper
@@ -1879,7 +1882,7 @@ export default function App() {
     }
     setTimeout(() => {
       setIsLoadingDocument(false);
-      pushToast(t('toast.sampleProjectLoaded'), 'success');
+      pushToast(i18n._(msg`Proyecto de ejemplo cargado`), 'success');
     }, 150);
   }, [editor, triggerDebouncedVisualSave, pushToast]);
 
@@ -1911,7 +1914,7 @@ export default function App() {
     setDeleteWarningState(null);
     triggerDebouncedVisualSave(editor);
 
-    pushToast(t('toast.taskDeleted', { taskId }), 'info', {
+    pushToast(i18n._(msg`Tarea #\$\${taskId} eliminada`), 'info', {
       label: 'Deshacer',
       onClick: async () => {
         setMarkdownInput(priorMarkdown);
@@ -1920,7 +1923,7 @@ export default function App() {
           loadTasksFromMarkdown(editor, priorMarkdown, visual);
           triggerDebouncedVisualSave(editor);
         }
-        pushToast(t('toast.taskRestored', { title }), 'success');
+        pushToast(i18n._(msg`Tarea "\$\${title}" restaurada`), 'success');
       },
     });
   };
@@ -1936,12 +1939,12 @@ export default function App() {
         const { taskCount, groupCount } = applyAutoLayout(editor, markdownInput);
         if (taskCount > 0 || groupCount > 0) {
           triggerDebouncedVisualSave(editor);
-          pushToast(t('toast.canvasOrganized', { taskCount, groupCount }), 'success');
+          pushToast(i18n._(msg`Canvas organizado (\$\${taskCount} tareas en \$\${groupCount} secciones)`), 'success');
         } else {
-          pushToast(t('toast.noTasksToOrganize'), 'info');
+          pushToast(i18n._(msg`No hay tareas para organizar`), 'info');
         }
       } catch (err) {
-        pushToast(t('toast.errorOrganizingCanvas'), 'error');
+        pushToast(i18n._(msg`Error al organizar el canvas`), 'error');
       } finally {
         setIsAutoOrganizing(false);
       }
@@ -1956,7 +1959,7 @@ export default function App() {
           const remoteState = await loadCanvasVisualState();
           if (remoteState) {
             seedMockTasks(editor, remoteState);
-            pushToast(t('toast.visualStateLoadedFromSanity'), 'success');
+            pushToast(i18n._(msg`Estado visual cargado desde Sanity`), 'success');
           } else {
             triggerDebouncedVisualSave(editor);
           }
@@ -1980,7 +1983,7 @@ export default function App() {
           });
           syncAllTasksToSanity(tasksToSync, newConfig).then((res) => {
             if (res.ok) {
-              pushToast(t('toast.activeSyncTasksRegistered', { count: res.syncedCount }), 'success');
+              pushToast(i18n._(msg`Sincronización activa: \$\${count} tareas registradas en Sanity`), 'success');
             }
           });
         } else {
@@ -1996,7 +1999,7 @@ export default function App() {
   const handleSyncAllTasksToSanity = useCallback(async () => {
     const config = getSanityConfig();
     if (!config.projectId || !config.dataset || !config.token) {
-      pushToast(t('toast.sanityConfigSaveProd'), 'warning');
+      pushToast(i18n._(msg`Configura el API Token de Sanity para guardar en producción`), 'warning');
       setIsSanityModalOpen(true);
       return;
     }
@@ -2085,7 +2088,7 @@ export default function App() {
     setIsLiveSyncActive(true);
 
     const unsubscribe = subscribeToSanityLiveChanges((event: SanityLiveChangeEvent) => {
-      setLastLiveSyncAt(new Date().toLocaleTimeString());
+      setLastLiveSyncAt(formatTime(new Date()));
 
       if (event.type === 'task' && event.document) {
         const taskDoc = event.document;
@@ -2122,7 +2125,7 @@ export default function App() {
             });
             setMarkdownInput(updated);
             setSyncStatus('synced');
-            pushToast(t('toast.sanityTaskLiveSynced', { targetId }), 'info');
+            pushToast(i18n._(msg`Sanity: Tarea #\$\${targetId} sincronizada en vivo`), 'info');
             setTimeout(() => {
               isRemoteMutationInProgressRef.current = false;
             }, 1800);
@@ -2160,7 +2163,7 @@ export default function App() {
         subtasks: taskDoc.subtasks,
       });
       setMarkdownInput(updatedMarkdown);
-      pushToast(t('toast.taskImportedFromSanity', { taskId: taskDoc.taskId || taskId }), 'success');
+      pushToast(i18n._(msg`Tarea #\$\${taskId} importada de Sanity al lienzo`), 'success');
     },
     [markdownInput, pushToast]
   );
@@ -2270,7 +2273,7 @@ export default function App() {
           }
         }
       }
-      showToast(t('toast.tasksUpdated', { count: taskIds.length }));
+      showToast(i18n._(msg`\$\${count} tareas actualizadas`));
     },
     [editor]
   );
@@ -2306,7 +2309,7 @@ export default function App() {
         triggerDebouncedVisualSave(editor);
       }
 
-      pushToast(t('toast.tasksDeletedBulk', { count: taskIds.length }), 'info', {
+      pushToast(i18n._(msg`\$\${count} tareas eliminadas`), 'info', {
         label: 'Deshacer',
         onClick: async () => {
           setMarkdownInput(priorMarkdown);
@@ -2315,7 +2318,7 @@ export default function App() {
             loadTasksFromMarkdown(editor, priorMarkdown, visual);
             triggerDebouncedVisualSave(editor);
           }
-          pushToast(t('toast.tasksRestoredBulk', { count: taskIds.length }), 'success');
+          pushToast(i18n._(msg`\$\${count} tareas restauradas`), 'success');
         },
       });
     },
@@ -2711,8 +2714,8 @@ export default function App() {
             type="button"
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             className="btn-m3-icon shrink-0 cursor-pointer"
-            title={isSidebarOpen ? 'Ocultar panel lateral' : 'Mostrar panel lateral'}
-            aria-label="Toggle Sidebar"
+            title={isSidebarOpen ? i18n._(msg`Ocultar panel lateral`) : i18n._(msg`Mostrar panel lateral`)}
+            aria-label={i18n._(msg`Alternar panel lateral`)}
           >
             <span className="material-symbols-outlined text-[20px]">
               {isSidebarOpen ? 'menu_open' : 'menu'}
@@ -2763,7 +2766,7 @@ export default function App() {
               }`}
             >
               <span className="material-symbols-outlined text-[16px]">grid_view</span>
-              <span className="hidden xl:inline">{t('nav.canvas')}</span>
+              <span className="hidden xl:inline">{i18n._(msg`Canvas`)}</span>
             </button>
 
             <button
@@ -2776,7 +2779,7 @@ export default function App() {
               }`}
             >
               <span className="material-symbols-outlined text-[16px]">view_kanban</span>
-              <span className="hidden xl:inline">{t('nav.kanban')}</span>
+              <span className="hidden xl:inline">{i18n._(msg`Kanban`)}</span>
             </button>
 
             <button
@@ -2789,7 +2792,7 @@ export default function App() {
               }`}
             >
               <span className="material-symbols-outlined text-[16px]">cloud_sync</span>
-              <span className="hidden xl:inline">{t('nav.studio')}</span>
+              <span className="hidden xl:inline">{i18n._(msg`Studio`)}</span>
             </button>
           </div>
 
@@ -2801,7 +2804,7 @@ export default function App() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={t('common.search')}
+              placeholder={i18n._(msg`Buscar...`)}
               className="w-full bg-[var(--surface)] text-[var(--on-surface)] placeholder:text-[var(--on-surface-variant)] border border-[var(--outline)] rounded pl-8 pr-10 py-1 text-xs font-sans focus:outline-none focus:border-[var(--primary)] transition-all"
             />
             {searchQuery ? (
@@ -2809,7 +2812,7 @@ export default function App() {
                 type="button"
                 onClick={() => setSearchQuery('')}
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] cursor-pointer"
-                title="Limpiar búsqueda"
+                title={i18n._(msg`Limpiar búsqueda`)}
               >
                 <span className="material-symbols-outlined text-[14px]">close</span>
               </button>
@@ -2818,7 +2821,7 @@ export default function App() {
                 type="button"
                 onClick={() => setIsCommandPaletteOpen(true)}
                 className="absolute right-1.5 top-1/2 -translate-y-1/2 px-1 py-0.2 rounded bg-[var(--surface-container)] border border-[var(--outline)] text-[9px] font-mono text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] cursor-pointer"
-                title={t('nav.commandPaletteTooltip')}
+                title={i18n._(msg`Abrir paleta de comandos (⌘K)`)}
               >
                 ⌘K
               </button>
@@ -2831,7 +2834,7 @@ export default function App() {
           {!isOnline && (
             <span className="flex items-center gap-1 px-2 py-0.5 rounded bg-amber-950/80 border border-amber-700/60 text-amber-300 text-[10px] font-sans">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-              <span className="hidden sm:inline">{t('common.offline')}</span>
+              <span className="hidden sm:inline">{i18n._(msg`Desconectado`)}</span>
             </span>
           )}
 
@@ -2844,13 +2847,13 @@ export default function App() {
                 ? 'bg-[var(--surface-container-highest)] text-[var(--on-surface)] border-[var(--outline)]'
                 : 'bg-[var(--surface)] text-[var(--on-surface-variant)] border-[var(--outline)] hover:text-[var(--on-surface)]'
             }`}
-            title={t('nav.splitViewTooltip')}
+            title={i18n._(msg`Alternar editor Markdown en panel dividido`)}
           >
             <span className="material-symbols-outlined text-[16px]">
               {isSplitViewOpen ? 'vertical_split' : 'splitscreen'}
             </span>
             <span className="hidden xl:inline">
-              {isSplitViewOpen ? t('nav.splitViewClose') : t('nav.splitViewOpen')}
+              {isSplitViewOpen ? i18n._(msg`Cerrar .md`) : i18n._(msg`Ver .md`)}
             </span>
           </button>
 
@@ -2859,8 +2862,8 @@ export default function App() {
             type="button"
             onClick={() => setIsCommandPaletteOpen(true)}
             className="btn-m3-icon w-8 h-8 sm:hidden shrink-0 cursor-pointer"
-            title={t('common.search')}
-            aria-label={t('common.search')}
+            title={i18n._(msg`Buscar...`)}
+            aria-label={i18n._(msg`Buscar...`)}
           >
             <span className="material-symbols-outlined text-[18px]">search</span>
           </button>
@@ -2875,7 +2878,7 @@ export default function App() {
                   ? 'bg-rose-950/80 text-rose-300 border-rose-800'
                   : 'bg-amber-950/80 text-amber-300 border-amber-800'
               }`}
-              title={t('nav.problemsTooltip')}
+              title={i18n._(msg`Ver incidencias detectadas`)}
             >
               <span>⚠</span>
               <span>{validationReport.issues.length}</span>
@@ -2887,8 +2890,8 @@ export default function App() {
             type="button"
             onClick={() => setIsQuickGuideOpen(true)}
             className="btn-m3-icon shrink-0 cursor-pointer hidden sm:inline-flex"
-            title={t('nav.quickGuideTooltip')}
-            aria-label={t('nav.quickGuideTooltip')}
+            title={i18n._(msg`Atajos de teclado y ayuda (?)`)}
+            aria-label={i18n._(msg`Atajos de teclado y ayuda (?)`)}
           >
             <span className="material-symbols-outlined text-[18px]">help</span>
           </button>
@@ -2898,8 +2901,8 @@ export default function App() {
             type="button"
             onClick={() => setIsSettingsOpen(true)}
             className="btn-m3-icon shrink-0 cursor-pointer hidden sm:inline-flex"
-            title={t('nav.settingsTooltip')}
-            aria-label={t('nav.settingsTooltip')}
+            title={i18n._(msg`Configuración (⌘,)`)}
+            aria-label={i18n._(msg`Configuración (⌘,)`)}
           >
             <span className="material-symbols-outlined text-[18px]">settings</span>
           </button>
@@ -2912,7 +2915,7 @@ export default function App() {
             type="button"
             onClick={() => setIsMobileMenuOpen(true)}
             className="btn-m3-icon sm:hidden shrink-0 cursor-pointer"
-            aria-label="Abrir menú"
+            aria-label={i18n._(msg`Abrir menú`)}
           >
             <span className="material-symbols-outlined text-[20px]">more_vert</span>
           </button>
@@ -2937,13 +2940,13 @@ export default function App() {
             <div id="div-app-9" className="flex items-center justify-between lg:hidden pb-2 border-b border-[var(--outline)] mb-1">
               <div id="div-app-10" className="flex items-center gap-1.5">
                 <span className="material-symbols-outlined text-sky-400 text-[18px]">folder_open</span>
-                <span className="font-semibold text-xs text-[var(--on-surface)]">{t('explorer.files')}</span>
+                <span className="font-semibold text-xs text-[var(--on-surface)]">{i18n._(msg`Documentos de Tareas`)}</span>
               </div>
               <button
                 type="button"
                 onClick={() => setIsSidebarOpen(false)}
                 className="btn-m3-icon w-7 h-7 cursor-pointer"
-                aria-label="Cerrar explorador"
+                aria-label={i18n._(msg`Cerrar explorador`)}
               >
                 <span className="material-symbols-outlined text-[16px]">close</span>
               </button>
@@ -3000,16 +3003,16 @@ export default function App() {
                   type="button"
                   onClick={handleOpenFilePicker}
                   className="btn-m3-secondary flex-1 py-1.5 text-xs cursor-pointer"
-                  title="Abrir TASKS.md desde el equipo"
+                  title={i18n._(msg`Abrir TASKS.md desde el equipo`)}
                 >
                   <span className="material-symbols-outlined text-[16px]">folder_open</span>
-                  <span>{t('nav.importMd')}</span>
+                  <span>{i18n._(msg`Importar .md`)}</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setIsImportExportOpen(true)}
                   className="btn-m3-secondary px-2.5 py-1.5 text-xs cursor-pointer"
-                  title="Importar o Exportar TASKS.md / JSON"
+                  title={i18n._(msg`Importar o Exportar TASKS.md / JSON`)}
                 >
                   <span className="material-symbols-outlined text-[16px]">sync_alt</span>
                 </button>
@@ -3018,7 +3021,7 @@ export default function App() {
               {/* Quick Filters */}
               <div id="div-app-14" className="flex flex-col gap-1">
                 <span className="text-[11px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider px-2">
-                  Filtros & Estados
+                  {i18n._(msg`Filtros & Estados`)}
                 </span>
 
                 <button
@@ -3035,7 +3038,7 @@ export default function App() {
                 >
                   <div id="div-app-15" className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-[16px] text-sky-400">inbox</span>
-                    <span>{t('task.status.allTasks')}</span>
+                    <span>{i18n._(msg`Todas las tareas`)}</span>
                   </div>
                   <span className="text-[11px] font-mono px-1.5 py-0.2 rounded-full bg-[var(--surface)] text-[var(--on-surface-variant)]">
                     {parsedStats.taskCount}
@@ -3056,7 +3059,7 @@ export default function App() {
                 >
                   <div id="div-app-16" className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-[16px] text-amber-400">pending</span>
-                    <span>{t('task.status.todo')}</span>
+                    <span>{i18n._(msg`Por Hacer`)}</span>
                   </div>
                   <span className="text-[11px] font-mono px-1.5 py-0.2 rounded-full bg-[var(--surface)] text-[var(--on-surface-variant)]">
                     {parsedStats.taskCount - parsedStats.completedCount}
@@ -3077,7 +3080,7 @@ export default function App() {
                 >
                   <div id="div-app-17" className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-[16px] text-emerald-400">check_circle</span>
-                    <span>{t('task.status.done')}</span>
+                    <span>{i18n._(msg`Completada`)}</span>
                   </div>
                   <span className="text-[11px] font-mono px-1.5 py-0.2 rounded-full bg-[var(--surface)] text-[var(--on-surface-variant)]">
                     {parsedStats.completedCount}
@@ -3098,7 +3101,7 @@ export default function App() {
                 >
                   <div id="div-app-18" className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-[16px] text-rose-400">priority_high</span>
-                    <span>{t('task.priority.critical')}</span>
+                    <span>{i18n._(msg`Críticas (P0)`)}</span>
                   </div>
                   <span className="text-[11px] font-mono px-1.5 py-0.2 rounded-full bg-[var(--surface)] text-[var(--on-surface-variant)]">
                     {parsedStats.criticalCount}
@@ -3119,7 +3122,7 @@ export default function App() {
                 >
                   <div id="div-app-19" className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-[16px] text-amber-500">lock</span>
-                    <span>{t('task.status.blocked')}</span>
+                    <span>{i18n._(msg`Bloqueadas`)}</span>
                   </div>
                   <span className="text-[11px] font-mono px-1.5 py-0.2 rounded-full bg-[var(--surface)] text-[var(--on-surface-variant)]">
                     {parsedStats.blockedCount}
@@ -3131,7 +3134,7 @@ export default function App() {
               <div id="div-app-20" className="flex flex-col gap-1">
                 <div id="div-app-21" className="flex items-center justify-between px-2">
                   <span className="text-[11px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
-                    Secciones ({parsedGroups.length})
+                    {i18n._(msg`Secciones`)} ({parsedGroups.length})
                   </span>
                   {taskFilters.section !== 'all' && (
                     <button
@@ -3139,7 +3142,7 @@ export default function App() {
                       onClick={() => setTaskFilters((prev) => ({ ...prev, section: 'all' }))}
                       className="text-[10px] text-[var(--primary)] hover:underline cursor-pointer"
                     >
-                      Ver todas
+                      {i18n._(msg`Ver todas`)}
                     </button>
                   )}
                 </div>
@@ -3186,7 +3189,7 @@ export default function App() {
                 className="btn-m3-text w-full py-1 text-xs justify-start px-2 cursor-pointer text-[var(--on-surface)]"
               >
                 <span className="material-symbols-outlined text-[16px] text-[var(--primary)]">settings</span>
-                <span>{t('settings.title')}</span>
+                <span>{i18n._(msg`Configuración & Preferencias`)}</span>
               </button>
 
               <button
@@ -3202,7 +3205,7 @@ export default function App() {
                 <span className="material-symbols-outlined text-[16px]">
                   {effectiveTheme === 'dark' ? 'light_mode' : 'dark_mode'}
                 </span>
-                <span>{t('settings.themeLabel')}</span>
+                <span>{i18n._(msg`Tema de color`)}</span>
               </button>
             </div>
           </aside>
@@ -3282,8 +3285,8 @@ export default function App() {
                       type="button"
                       onClick={handleZoomOut}
                       className="btn-m3-icon w-7 h-7 cursor-pointer"
-                      title="Alejar zoom (Zoom Out)"
-                      aria-label="Zoom out"
+                      title={i18n._(msg`Alejar zoom (Zoom Out)`)}
+                      aria-label={i18n._(msg`Alejar zoom`)}
                     >
                       <span className="material-symbols-outlined text-[16px]">remove</span>
                     </button>
@@ -3292,7 +3295,7 @@ export default function App() {
                       type="button"
                       onClick={handleResetZoom}
                       className="px-2 py-0.5 text-xs font-mono font-medium text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] rounded-full transition-colors cursor-pointer"
-                      title="Clic para restablecer zoom al 100%"
+                      title={i18n._(msg`Clic para restablecer zoom al 100%`)}
                     >
                       {canvasZoom}%
                     </button>
@@ -3301,8 +3304,8 @@ export default function App() {
                       type="button"
                       onClick={handleZoomIn}
                       className="btn-m3-icon w-7 h-7 cursor-pointer"
-                      title="Acercar zoom (Zoom In)"
-                      aria-label="Zoom in"
+                      title={i18n._(msg`Acercar zoom (Zoom In)`)}
+                      aria-label={i18n._(msg`Acercar zoom`)}
                     >
                       <span className="material-symbols-outlined text-[16px]">add</span>
                     </button>
@@ -3313,8 +3316,8 @@ export default function App() {
                       type="button"
                       onClick={handleZoomToFit}
                       className="btn-m3-icon w-7 h-7 cursor-pointer"
-                      title="Ajustar zoom al contenido (Zoom to Fit)"
-                      aria-label="Zoom to fit"
+                      title={i18n._(msg`Ajustar zoom al contenido (Zoom to Fit)`)}
+                      aria-label={i18n._(msg`Ajustar zoom`)}
                     >
                       <span className="material-symbols-outlined text-[16px]">fit_screen</span>
                     </button>
@@ -3323,8 +3326,8 @@ export default function App() {
                       type="button"
                       onClick={() => setIsAutoLayoutConfirmOpen(true)}
                       className="btn-m3-icon w-7 h-7 cursor-pointer text-sky-400"
-                      title="Auto organizar canvas jerárquicamente (DAG)"
-                      aria-label="Auto organizar"
+                      title={i18n._(msg`Auto organizar canvas jerárquicamente (DAG)`)}
+                      aria-label={i18n._(msg`Auto organizar`)}
                     >
                       <span className="material-symbols-outlined text-[16px]">account_tree</span>
                     </button>
@@ -3338,10 +3341,10 @@ export default function App() {
                           <span className="material-symbols-outlined text-[22px]">grid_view</span>
                         </div>
                         <h3 className="text-sm font-semibold text-[var(--on-surface)] font-sans mb-1">
-                          Lienzo vacío
+                          {i18n._(msg`Lienzo vacío`)}
                         </h3>
                         <p className="text-xs text-[var(--on-surface-variant)] mb-4 leading-relaxed">
-                          No hay tareas en este archivo TASKS.md. Comienza añadiendo una tarea o carga un proyecto de ejemplo.
+                          {i18n._(msg`No hay tareas en este archivo TASKS.md. Comienza añadiendo una tarea o carga un proyecto de ejemplo.`)}
                         </p>
                         <div id="div-app-29" className="flex items-center gap-2 flex-wrap justify-center">
                           <button
@@ -3355,15 +3358,15 @@ export default function App() {
                             className="btn-m3-primary px-3.5 py-1.5 text-xs cursor-pointer shadow-sm"
                           >
                             <span className="material-symbols-outlined text-[15px]">add</span>
-                            <span>{t('canvas.createFirstTask')}</span>
+                            <span>{i18n._(msg`Crear primera tarea`)}</span>
                           </button>
                           <button
                             type="button"
                             onClick={handleLoadSampleProject}
-                            className="btn-m3-secondary px-3 py-1.5 text-xs cursor-pointer"
+                            className="btn-m3-secondary px-3.5 py-1.5 text-xs cursor-pointer"
                           >
                             <span className="material-symbols-outlined text-[15px]">refresh</span>
-                            <span>{t('canvas.loadSample')}</span>
+                            <span>{i18n._(msg`Cargar ejemplo`)}</span>
                           </button>
                         </div>
                       </div>
@@ -3376,7 +3379,7 @@ export default function App() {
                       <div id="div-app-31" className="flex items-center gap-1.5 pr-2 border-r border-[var(--outline)] shrink-0">
                         <span className="w-2 h-2 rounded bg-[var(--primary)]" />
                         <span className="text-xs font-mono font-medium text-[var(--on-surface)]">
-                          {selectedTaskIdsOnCanvas.length} seleccionadas
+                          {selectedTaskIdsOnCanvas.length} {i18n._(msg`seleccionadas`)}
                         </span>
                       </div>
 
@@ -3389,10 +3392,10 @@ export default function App() {
                           })
                         }
                         className="btn-m3-secondary px-2 py-1 text-xs text-emerald-400 border-emerald-800/60 bg-emerald-950/30 cursor-pointer shrink-0"
-                        title="Marcar seleccionadas como completadas"
+                        title={i18n._(msg`Marcar seleccionadas como completadas`)}
                       >
                         <span className="material-symbols-outlined text-[15px]">check_circle</span>
-                        <span className="hidden sm:inline">{t('common.complete')}</span>
+                        <span className="hidden sm:inline">{i18n._(msg`Completar`)}</span>
                       </button>
 
                       <button
@@ -3404,10 +3407,10 @@ export default function App() {
                           })
                         }
                         className="btn-m3-secondary px-2 py-1 text-xs text-amber-400 border-amber-800/60 bg-amber-950/30 cursor-pointer shrink-0"
-                        title="Marcar seleccionadas como pendientes"
+                        title={i18n._(msg`Marcar seleccionadas como pendientes`)}
                       >
                         <span className="material-symbols-outlined text-[15px]">pending</span>
-                        <span className="hidden sm:inline">{t('common.pending')}</span>
+                        <span className="hidden sm:inline">{i18n._(msg`Pendiente`)}</span>
                       </button>
 
                       {/* Quick Priorities */}
@@ -3420,7 +3423,7 @@ export default function App() {
                               handleBatchUpdateTasksFromKanban(selectedTaskIdsOnCanvas, { priority: p })
                             }
                             className="px-1.5 py-0.5 text-[10px] font-mono font-medium rounded border border-[var(--outline)] text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer"
-                            title={`Establecer prioridad ${p}`}
+                            title={i18n._(msg`Establecer prioridad ${p}`)}
                           >
                             {p}
                           </button>
@@ -3433,10 +3436,10 @@ export default function App() {
                           handleBatchDeleteTasksFromKanban(selectedTaskIdsOnCanvas);
                         }}
                         className="btn-m3-secondary px-2 py-1 text-xs text-[var(--error)] border-rose-800/60 bg-rose-950/30 cursor-pointer shrink-0"
-                        title="Eliminar tareas seleccionadas"
+                        title={i18n._(msg`Eliminar tareas seleccionadas`)}
                       >
                         <span className="material-symbols-outlined text-[15px]">delete</span>
-                        <span className="hidden sm:inline">{t('common.delete')}</span>
+                        <span className="hidden sm:inline">{i18n._(msg`Eliminar`)}</span>
                       </button>
 
                       <button
@@ -3449,7 +3452,7 @@ export default function App() {
                           setSelectedTaskShapeId(null);
                         }}
                         className="btn-m3-icon w-6 h-6 shrink-0 cursor-pointer"
-                        title="Deseleccionar"
+                        title={i18n._(msg`Deseleccionar`)}
                       >
                         <span className="material-symbols-outlined text-[14px]">close</span>
                       </button>
@@ -3514,10 +3517,10 @@ export default function App() {
                     <span className="material-symbols-outlined text-[32px]">upload_file</span>
                   </div>
                   <h3 className="text-base font-semibold text-white font-sans mb-1">
-                    Suelta tu archivo TASKS.md aquí
+                    {i18n._(msg`Suelta tu archivo TASKS.md aquí`)}
                   </h3>
                   <p className="text-xs text-slate-400 font-sans">
-                    Se parseará automáticamente manteniendo coordenadas y jerarquía
+                    {i18n._(msg`Se parseará automáticamente manteniendo coordenadas y jerarquía`)}
                   </p>
                 </div>
               )}
@@ -3529,7 +3532,7 @@ export default function App() {
                 onPointerDown={handleSplitterPointerDown}
                 onDoubleClick={() => handleSetSplitRatio(50)}
                 className="h-2 w-full md:h-full md:w-2 bg-[var(--outline)] hover:bg-[var(--primary)] cursor-row-resize md:cursor-col-resize transition-colors shrink-0 relative flex items-center justify-center group select-none z-20"
-                title="Arrastra para ajustar el visor en tiempo real (Doble clic para 50%)"
+                title={i18n._(msg`Arrastra para ajustar el visor en tiempo real (Doble clic para 50%)`)}
               >
                 <div id="div-app-35" className="w-8 h-1 md:w-1 md:h-8 rounded-full bg-[var(--on-surface-variant)] group-hover:bg-[var(--on-primary)] transition-colors" />
               </div>
@@ -3571,8 +3574,8 @@ export default function App() {
               setIsNewTaskModalOpen(true);
             }}
             className="absolute bottom-16 sm:bottom-6 right-6 z-30 w-12 h-12 rounded-full bg-[var(--primary)] text-[var(--on-primary)] shadow-2xl flex items-center justify-center cursor-pointer hover:scale-105 active:scale-95 transition-transform select-none"
-            title="Crear nueva tarea (N)"
-            aria-label="Crear nueva tarea"
+            title={i18n._(msg`Crear nueva tarea (N)`)}
+            aria-label={i18n._(msg`Crear nueva tarea`)}
           >
             <span className="material-symbols-outlined text-[26px]">add</span>
           </button>
@@ -3632,7 +3635,7 @@ export default function App() {
 
       {/* Mobile Bottom Navigation Bar (Docked, reliable, no button superposition) */}
       <nav
-        aria-label="Acciones rápidas móviles"
+        aria-label={i18n._(msg`Acciones rápidas móviles`)}
         className="sm:hidden h-14 bg-[var(--surface-container)]/98 border-t border-[var(--outline)] shrink-0 z-30 grid grid-cols-5 gap-1 px-1.5 py-1 pb-[calc(0.25rem+env(safe-area-inset-bottom,0px))] backdrop-blur-md select-none"
       >
         <button
@@ -3650,7 +3653,7 @@ export default function App() {
           className="btn-m3-primary py-1 px-1 rounded-lg flex flex-col items-center justify-center text-[10px] cursor-pointer shadow-xs overflow-hidden"
         >
           <span className="material-symbols-outlined text-[18px]">add</span>
-          <span className="font-semibold truncate w-full text-center leading-none mt-0.5">{activeView === 'studio' ? t('nav.create') : t('canvas.addTask')}</span>
+          <span className="font-semibold truncate w-full text-center leading-none mt-0.5">{activeView === 'studio' ? i18n._(msg`Crear`) : i18n._(msg`Nueva Tarea`)}</span>
         </button>
 
         <button
@@ -3677,30 +3680,30 @@ export default function App() {
             type="button"
             onClick={() => setIsAutoLayoutConfirmOpen(true)}
             className="flex flex-col items-center justify-center py-1 px-0.5 rounded-lg text-[10px] text-sky-400 hover:text-sky-300 transition-colors cursor-pointer overflow-hidden"
-            title="Auto organizar tareas"
+            title={i18n._(msg`Auto organizar tareas`)}
           >
             <span className="material-symbols-outlined text-[18px]">account_tree</span>
-            <span className="truncate w-full text-center leading-none mt-0.5">{t('canvas.autoLayout')}</span>
+            <span className="truncate w-full text-center leading-none mt-0.5">{i18n._(msg`Auto-ordenar`)}</span>
           </button>
         ) : activeView === 'kanban' ? (
           <button
             type="button"
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             className="flex flex-col items-center justify-center py-1 px-0.5 rounded-lg text-[10px] text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] transition-colors cursor-pointer overflow-hidden"
-            title="Filtros y documentos"
+            title={i18n._(msg`Filtros y documentos`)}
           >
             <span className="material-symbols-outlined text-[18px]">filter_list</span>
-            <span className="truncate w-full text-center leading-none mt-0.5">{t('nav.filters')}</span>
+            <span className="truncate w-full text-center leading-none mt-0.5">{i18n._(msg`Filtros`)}</span>
           </button>
         ) : (
           <button
             type="button"
             onClick={() => setIsSyncOverrideModalOpen(true)}
             className="flex flex-col items-center justify-center py-1 px-0.5 rounded-lg text-[10px] text-amber-400 hover:text-amber-300 transition-colors cursor-pointer overflow-hidden"
-            title="Sincronizar con Sanity"
+            title={i18n._(msg`Sincronizar con Sanity`)}
           >
             <span className="material-symbols-outlined text-[18px]">sync_problem</span>
-            <span className="truncate w-full text-center leading-none mt-0.5">{t('nav.sync')}</span>
+            <span className="truncate w-full text-center leading-none mt-0.5">{i18n._(msg`Sincronizar`)}</span>
           </button>
         )}
 
@@ -3716,7 +3719,7 @@ export default function App() {
           <span className="material-symbols-outlined text-[18px]">
             {isSplitViewOpen ? 'vertical_split' : 'splitscreen'}
           </span>
-          <span className="truncate w-full text-center leading-none mt-0.5">{isSplitViewOpen ? t('nav.splitViewClose') : t('nav.splitViewOpen')}</span>
+          <span className="truncate w-full text-center leading-none mt-0.5">{isSplitViewOpen ? i18n._(msg`Cerrar .md`) : i18n._(msg`Ver .md`)}</span>
         </button>
 
         <button
@@ -3728,7 +3731,7 @@ export default function App() {
             <span className="absolute top-1 right-2 w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
           )}
           <span className="material-symbols-outlined text-[18px]">menu</span>
-          <span className="truncate w-full text-center leading-none mt-0.5">{t('nav.menu')}</span>
+          <span className="truncate w-full text-center leading-none mt-0.5">{i18n._(msg`Menú`)}</span>
         </button>
       </nav>
 
@@ -3743,17 +3746,17 @@ export default function App() {
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
-            aria-label="Opciones y herramientas"
+            aria-label={i18n._(msg`Opciones y herramientas`)}
           >
             <div id="div-app-36" className="w-12 h-1 bg-[var(--outline)] rounded-full mx-auto" />
 
             <div id="div-app-37" className="flex items-center justify-between border-b border-[var(--outline)] pb-2.5">
               <div>
                 <h2 className="text-sm font-semibold text-[var(--on-surface)] font-sans">
-                  Menú de Opciones
+                  {i18n._(msg`Menú de Opciones`)}
                 </h2>
                 <p className="text-xs text-[var(--on-surface-variant)] font-mono">
-                  {currentFileName} · {parsedStats.taskCount} tareas
+                  {currentFileName} · {parsedStats.taskCount} {i18n._(msg`tareas`)}
                 </p>
               </div>
               <button
@@ -3777,7 +3780,7 @@ export default function App() {
               >
                 <div id="div-app-39" className="flex items-center gap-2.5">
                   <span className="material-symbols-outlined text-[18px] text-emerald-400">workspaces</span>
-                  <span>{t('workspace.title')}</span>
+                  <span>{i18n._(msg`Workspaces`)}</span>
                 </div>
                 <span className="text-[10px] font-mono text-[var(--on-surface-variant)]">{activeWorkspace.name} ➔</span>
               </button>
@@ -3793,7 +3796,7 @@ export default function App() {
               >
                 <div id="div-app-40" className="flex items-center gap-2.5">
                   <span className="material-symbols-outlined text-[18px] text-sky-400">fork_right</span>
-                  <span>{t('workspace.branches')}</span>
+                  <span>{i18n._(msg`Ramas`)}</span>
                 </div>
                 <span className="text-[10px] font-mono text-[var(--on-surface-variant)]">{activeBranch.name} ➔</span>
               </button>
@@ -3809,7 +3812,7 @@ export default function App() {
               >
                 <div id="div-app-41" className="flex items-center gap-2.5">
                   <span className="material-symbols-outlined text-[18px] text-amber-400">sync_problem</span>
-                  <span>{t('workspace.syncSanity')}</span>
+                  <span>{i18n._(msg`Sincronizar con Sanity`)}</span>
                 </div>
                 <span>➔</span>
               </button>
@@ -3825,7 +3828,7 @@ export default function App() {
               >
                 <div id="div-app-42" className="flex items-center gap-2.5">
                   <span className="material-symbols-outlined text-[18px] text-[var(--primary)]">folder_open</span>
-                  <span>{t('workspace.openTasksMd')}</span>
+                  <span>{i18n._(msg`Abrir TASKS.md`)}</span>
                 </div>
                 <span>➔</span>
               </button>
@@ -3845,11 +3848,11 @@ export default function App() {
               >
                 <div id="div-app-43" className="flex items-center gap-2.5">
                   <span className="material-symbols-outlined text-[18px] text-emerald-400">save</span>
-                  <span>Guardar {currentFileName}</span>
+                  <span>{i18n._(msg`Guardar`)} {currentFileName}</span>
                 </div>
                 {hasUnsavedChanges && (
                   <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px]">
-                    Modificado
+                    {i18n._(msg`Modificado`)}
                   </span>
                 )}
               </button>
@@ -3865,7 +3868,7 @@ export default function App() {
               >
                 <div id="div-app-44" className="flex items-center gap-2.5">
                   <span className="material-symbols-outlined text-[18px] text-[var(--primary)]">sync_alt</span>
-                  <span>{t('workspace.importExport')}</span>
+                  <span>{i18n._(msg`Importar / Exportar (.md, JSON)`)}</span>
                 </div>
                 <span>➔</span>
               </button>
@@ -3885,16 +3888,16 @@ export default function App() {
                   <span className="material-symbols-outlined text-[18px]">
                     {effectiveTheme === 'dark' ? 'light_mode' : 'dark_mode'}
                   </span>
-                  <span>Tema: {effectiveTheme === 'dark' ? 'Oscuro' : 'Claro'}</span>
+                  <span>{i18n._(msg`Tema:`)} {effectiveTheme === 'dark' ? i18n._(msg`Oscuro`) : i18n._(msg`Claro`)}</span>
                 </div>
-                <span className="text-[10px] text-[var(--on-surface-variant)]">{t('common.change')}</span>
+                <span className="text-[10px] text-[var(--on-surface-variant)]">{i18n._(msg`Cambiar`)}</span>
               </button>
 
               {/* Language Selection */}
               <div id="div-app-46" className="w-full min-h-[44px] px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between text-[var(--on-surface)]">
                 <div id="div-app-47" className="flex items-center gap-2.5">
                   <span className="material-symbols-outlined text-[18px] text-[var(--primary)]">language</span>
-                  <span>{t('common.language')}</span>
+                  <span>{i18n._(msg`Idioma`)}</span>
                 </div>
                 <LanguageSelector onLanguageChange={(lang) => handleUpdateSettings({ ...userSettings, language: lang })} />
               </div>
@@ -3910,7 +3913,7 @@ export default function App() {
               >
                 <div id="div-app-48" className="flex items-center gap-2.5">
                   <span className="material-symbols-outlined text-[18px] text-[var(--primary)]">settings</span>
-                  <span>{t('settings.title')}</span>
+                  <span>{i18n._(msg`Configuración & Preferencias`)}</span>
                 </div>
                 <span>➔</span>
               </button>
@@ -3926,7 +3929,7 @@ export default function App() {
               >
                 <div id="div-app-49" className="flex items-center gap-2.5">
                   <span className="material-symbols-outlined text-[18px] text-rose-400">cloud_sync</span>
-                  <span>{t('settings.sanityCloudSettings')}</span>
+                  <span>{i18n._(msg`Ajustes de Sanity Cloud`)}</span>
                 </div>
                 <span className="text-[10px] font-mono text-emerald-400">or19faat</span>
               </button>
@@ -3942,7 +3945,7 @@ export default function App() {
               >
                 <div id="div-app-50" className="flex items-center gap-2.5">
                   <span className="material-symbols-outlined text-[18px] text-sky-400">help</span>
-                  <span>{t('nav.quickGuideTooltip')}</span>
+                  <span>{i18n._(msg`Atajos de teclado y ayuda (?)`)}</span>
                 </div>
                 <span>➔</span>
               </button>
@@ -3959,7 +3962,7 @@ export default function App() {
                 >
                   <div id="div-app-51" className="flex items-center gap-2.5">
                     <span>⚠</span>
-                    <span>{t('nav.problemsTooltip')}</span>
+                    <span>{i18n._(msg`Ver incidencias detectadas`)}</span>
                   </div>
                   <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-900/60 text-amber-200">
                     {validationReport.issues.length}
@@ -3989,10 +3992,10 @@ export default function App() {
             <div id="div-app-53" className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
               <div>
                 <h2 id="problems-modal-title" className="text-sm font-semibold text-[var(--on-surface)] font-sans flex items-center gap-2">
-                  <span>{t('nav.problemsTooltip')}</span>
+                  <span>{i18n._(msg`Ver incidencias detectadas`)}</span>
                 </h2>
                 <p className="text-xs text-[var(--on-surface-variant)] mt-0.5 font-sans">
-                  El editor previene la corrupción manteniendo una única fuente de verdad.
+                  {i18n._(msg`El editor previene la corrupción manteniendo una única fuente de verdad.`)}
                 </p>
               </div>
               <button
@@ -4005,9 +4008,9 @@ export default function App() {
             </div>
 
             <div id="div-app-54" className="px-4 py-2 bg-[var(--surface)] border-b border-[var(--outline)] flex items-center gap-4 text-xs font-mono overflow-x-auto">
-              <span>Total: <strong className="text-[var(--on-surface)]">{validationReport.issues.length}</strong></span>
-              <span className="text-rose-400">{t('common.errors')}: <strong>{validationReport.errorCount}</strong></span>
-              <span className="text-amber-400">{t('common.warnings')}: <strong>{validationReport.warningCount}</strong></span>
+              <span>{i18n._(msg`Total:`)} <strong className="text-[var(--on-surface)]">{validationReport.issues.length}</strong></span>
+              <span className="text-rose-400">{i18n._(msg`Errores`)}: <strong>{validationReport.errorCount}</strong></span>
+              <span className="text-amber-400">{i18n._(msg`Avisos`)}: <strong>{validationReport.warningCount}</strong></span>
             </div>
 
             <div id="div-app-55" className="p-4 overflow-auto max-h-[50vh] flex flex-col gap-2">
@@ -4016,7 +4019,7 @@ export default function App() {
                   <div id="div-app-57" className="w-8 h-8 rounded bg-emerald-950/80 border border-emerald-700 flex items-center justify-center text-emerald-400 text-base">
                     ✓
                   </div>
-                  <p className="text-xs text-[var(--on-surface-variant)]">{t('common.noIssues')}</p>
+                  <p className="text-xs text-[var(--on-surface-variant)]">{i18n._(msg`Documento válido sin incidencias.`)}</p>
                 </div>
               ) : (
                 validationReport.issues.map((issue) => (
@@ -4039,7 +4042,7 @@ export default function App() {
                         onClick={() => handleFocusTaskOnCanvas(issue.taskId, issue.taskTitle)}
                         className="btn-m3-secondary px-2.5 py-1 text-[11px] cursor-pointer"
                       >
-                        Localizar
+                        {i18n._(msg`Localizar`)}
                       </button>
                     )}
                   </div>
@@ -4053,7 +4056,7 @@ export default function App() {
                 onClick={() => setIsProblemsModalOpen(false)}
                 className="btn-m3-secondary px-3.5 py-1 text-xs cursor-pointer"
               >
-                Cerrar
+                {i18n._(msg`Cerrar`)}
               </button>
             </div>
           </div>
@@ -4078,7 +4081,7 @@ export default function App() {
             <div id="div-app-62" className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
               <h2 id="autolayout-modal-title" className="text-sm font-semibold text-[var(--on-surface)] font-sans flex items-center gap-2">
                 <span className="material-symbols-outlined text-[16px] text-sky-400">account_tree</span>
-                <span>{t('canvas.autoLayout')}</span>
+                <span>{i18n._(msg`Auto-ordenar`)}</span>
               </h2>
               <button
                 type="button"
@@ -4091,10 +4094,10 @@ export default function App() {
 
             <div id="div-app-63" className="p-4 flex flex-col gap-2.5 text-xs text-[var(--on-surface-variant)] leading-relaxed">
               <p>
-                Esta acción organizará todas las tarjetas y secciones en un grafo jerárquico según sus dependencias <code className="text-[var(--primary)] font-mono">blockedBy</code>.
+                {i18n._(msg`Esta acción organizará todas las tarjetas y secciones en un grafo jerárquico según sus dependencias`)} <code className="text-[var(--primary)] font-mono">blockedBy</code>.
               </p>
               <div id="div-app-64" className="p-2.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] font-mono">
-                • {parsedStats.taskCount} tareas en {parsedStats.groupCount} secciones
+                • {parsedStats.taskCount} {i18n._(msg`tareas en`)} {parsedStats.groupCount} {i18n._(msg`secciones`)}
               </div>
             </div>
 
@@ -4104,14 +4107,14 @@ export default function App() {
                 onClick={() => setIsAutoLayoutConfirmOpen(false)}
                 className="btn-m3-text px-3 py-1 text-xs cursor-pointer"
               >
-                Cancelar
+                {i18n._(msg`Cancelar`)}
               </button>
               <button
                 type="button"
                 onClick={handleExecuteAutoLayout}
                 className="btn-m3-primary px-3.5 py-1 text-xs cursor-pointer shadow-sm"
               >
-                Auto organizar
+                {i18n._(msg`Auto organizar`)}
               </button>
             </div>
           </div>
@@ -4136,7 +4139,7 @@ export default function App() {
             <div id="div-app-67" className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
               <h2 id="new-task-modal-title" className="text-sm font-semibold text-[var(--on-surface)] font-sans flex items-center gap-2">
                 <span className="material-symbols-outlined text-[16px] text-sky-400">add_task</span>
-                <span>{t('canvas.addTask')}</span>
+                <span>{i18n._(msg`Nueva Tarea`)}</span>
               </h2>
               <button
                 type="button"
@@ -4149,20 +4152,20 @@ export default function App() {
 
             <form onSubmit={handleCreateTask} className="p-4 flex flex-col gap-3.5">
               <div id="div-app-68" className="flex flex-col gap-1">
-                <label className="text-xs font-medium text-[var(--on-surface)]">{t('task.title')}</label>
+                <label className="text-xs font-medium text-[var(--on-surface)]">{i18n._(msg`Título`)}</label>
                 <input
                   type="text"
                   autoFocus
                   value={newTaskTitle}
                   onChange={(e) => setNewTaskTitle(e.target.value)}
-                  placeholder="ej. Crear recuperación de contraseña"
+                  placeholder={i18n._(msg`ej. Crear recuperación de contraseña`)}
                   className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-2.5 py-1.5 text-xs font-sans text-[var(--on-surface)] focus:outline-none"
                 />
               </div>
 
               {/* Priority Selection */}
               <div id="div-app-69" className="flex flex-col gap-1">
-                <label className="text-xs font-medium text-[var(--on-surface)]">{t('task.priority.label')}</label>
+                <label className="text-xs font-medium text-[var(--on-surface)]">{i18n._(msg`Prioridad`)}</label>
                 <div id="div-app-70" className="grid grid-cols-4 gap-2">
                   {(['P0', 'P1', 'P2', 'P3'] as TaskPriority[]).map((p) => {
                     const isSelected = newTaskPriority === p;
@@ -4187,13 +4190,13 @@ export default function App() {
               {/* Section / Group */}
               <div id="div-app-71" className="flex flex-col gap-1">
                 <div id="div-app-72" className="flex items-center justify-between">
-                  <label className="text-xs font-medium text-[var(--on-surface)]">{t('task.section')}</label>
+                  <label className="text-xs font-medium text-[var(--on-surface)]">{i18n._(msg`Sección`)}</label>
                   <button
                     type="button"
                     onClick={() => setIsCustomGroup(!isCustomGroup)}
                     className="text-[11px] text-[var(--primary)] hover:underline cursor-pointer"
                   >
-                    {isCustomGroup ? 'Elegir existente' : '+ Nueva sección'}
+                    {isCustomGroup ? i18n._(msg`Elegir existente`) : i18n._(msg`+ Nueva sección`)}
                   </button>
                 </div>
 
@@ -4202,7 +4205,7 @@ export default function App() {
                     type="text"
                     value={customGroupInput}
                     onChange={(e) => setCustomGroupInput(e.target.value)}
-                    placeholder="ej. Notificaciones"
+                    placeholder={i18n._(msg`ej. Notificaciones`)}
                     className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-2.5 py-1.5 text-xs font-sans text-[var(--on-surface)] focus:outline-none"
                   />
                 ) : (
@@ -4226,14 +4229,14 @@ export default function App() {
                   onClick={() => setIsNewTaskModalOpen(false)}
                   className="btn-m3-text px-3 py-1 text-xs cursor-pointer"
                 >
-                  Cancelar
+                  {i18n._(msg`Cancelar`)}
                 </button>
                 <button
                   type="submit"
                   disabled={!newTaskTitle.trim()}
                   className="btn-m3-primary px-4 py-1 text-xs cursor-pointer shadow-sm"
                 >
-                  Crear Tarea
+                  {i18n._(msg`Crear Tarea`)}
                 </button>
               </div>
             </form>
@@ -4259,7 +4262,7 @@ export default function App() {
             <div id="div-app-75" className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
               <h2 id="delete-warning-title" className="text-sm font-semibold text-rose-400 font-sans flex items-center gap-2">
                 <span className="material-symbols-outlined text-[16px]">warning</span>
-                <span>{t('common.confirmDelete')}</span>
+                <span>{i18n._(msg`Confirmar Eliminación`)}</span>
               </h2>
               <button
                 type="button"
@@ -4272,16 +4275,16 @@ export default function App() {
 
             <div id="div-app-76" className="p-4 flex flex-col gap-2.5 text-xs text-[var(--on-surface-variant)] leading-relaxed">
               <p>
-                ¿Estás seguro de que deseas eliminar la tarea <strong className="text-[var(--on-surface)]">"{deleteWarningState.title}"</strong> (#{deleteWarningState.taskId})?
+                {i18n._(msg`¿Estás seguro de que deseas eliminar la tarea "${deleteWarningState.title}" (#${deleteWarningState.taskId})?`)}
               </p>
 
               {deleteWarningState.dependents.length > 0 && (
                 <div id="div-app-77" className="p-2.5 rounded bg-rose-950/40 border border-rose-800/80 text-rose-200">
-                  <span className="font-semibold block mb-1">{t('common.dependentTasksAffected')}:</span>
+                  <span className="font-semibold block mb-1">{i18n._(msg`Tareas dependientes que quedarán afectadas`)}:</span>
                   <ul className="list-disc pl-4 space-y-0.5">
                     {deleteWarningState.dependents.map((dep) => (
                       <li key={dep.taskId}>
-                        #{dep.taskId} ({dep.title}) en <em>{dep.groupTitle}</em>
+                        #{dep.taskId} ({dep.title}) {i18n._(msg`en`)} <em>{dep.groupTitle}</em>
                       </li>
                     ))}
                   </ul>
@@ -4295,14 +4298,14 @@ export default function App() {
                 onClick={() => setDeleteWarningState(null)}
                 className="btn-m3-text px-3 py-1 text-xs cursor-pointer"
               >
-                Cancelar
+                {i18n._(msg`Cancelar`)}
               </button>
               <button
                 type="button"
                 onClick={handleConfirmDeleteTask}
                 className="btn-m3-primary bg-rose-600 hover:bg-rose-500 text-white px-4 py-1 text-xs cursor-pointer shadow-sm"
               >
-                Eliminar
+                {i18n._(msg`Eliminar`)}
               </button>
             </div>
           </div>
@@ -4327,10 +4330,10 @@ export default function App() {
             <div id="div-app-80" className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
               <div>
                 <h2 id="view-markdown-title" className="text-sm font-semibold text-[var(--on-surface)] font-sans">
-                  TASKS.md — Sincronizado en Vivo
+                  {i18n._(msg`TASKS.md — Sincronizado en Vivo`)}
                 </h2>
                 <p className="text-xs text-[var(--on-surface-variant)] mt-0.5">
-                  {parsedStats.taskCount} tareas · {parsedStats.groupCount} secciones
+                  {formatTaskCount(parsedStats.taskCount)} · {formatSectionCount(parsedStats.groupCount)}
                 </p>
               </div>
               <button
@@ -4357,7 +4360,7 @@ export default function App() {
                 className="btn-m3-secondary px-3 py-1 text-xs cursor-pointer flex items-center gap-1.5"
               >
                 <span className="material-symbols-outlined text-[15px]">content_copy</span>
-                <span>{copiedMarkdown ? t('common.copied') : t('common.copyMarkdown')}</span>
+                <span>{copiedMarkdown ? i18n._(msg`¡Copiado!`) : i18n._(msg`Copiar Markdown`)}</span>
               </button>
 
               <button
@@ -4365,7 +4368,7 @@ export default function App() {
                 onClick={() => setIsViewMarkdownOpen(false)}
                 className="btn-m3-text px-3 py-1 text-xs cursor-pointer"
               >
-                Cerrar
+                {i18n._(msg`Cerrar`)}
               </button>
             </div>
           </div>

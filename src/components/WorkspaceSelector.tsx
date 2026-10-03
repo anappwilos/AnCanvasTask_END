@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useLingui } from '@lingui/react';
+import { msg } from '@lingui/core/macro';
+import { Trans } from '@lingui/react/macro';
 import { Workspace, BranchConfig, logWorkspaceTrace } from '../services/workspaceService';
 
 interface WorkspaceSelectorProps {
@@ -23,7 +25,7 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
   onOpenCreateBranch,
   onOpenGitHubSync,
 }) => {
-  const { t } = useTranslation();
+  const { i18n } = useLingui();
   const [isWorkspaceMenuOpen, setIsWorkspaceMenuOpen] = useState(false);
   const [isBranchMenuOpen, setIsBranchMenuOpen] = useState(false);
 
@@ -76,7 +78,7 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
           <div id="div-workspaceselector-3" className="absolute left-0 top-full mt-1 w-64 sm:w-72 max-w-[calc(100vw-1.5rem)] bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-xl py-1 z-50 animate-fade-in select-none">
             <div id="div-workspaceselector-4" className="px-3 py-1.5 border-b border-[var(--outline)] flex items-center justify-between">
               <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--on-surface-variant)]">
-                {t('workspace.title')}
+                {i18n._(msg`Workspaces`)}
               </span>
               <button
                 type="button"
@@ -88,7 +90,7 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
                 }}
                 className="text-[10px] text-[var(--primary)] hover:underline cursor-pointer font-medium"
               >
-                {t('workspace.manageWorkspaces')}
+                {i18n._(msg`Administrar`)}
               </button>
             </div>
 
@@ -132,8 +134,8 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
                     </div>
 
                     <div id="div-workspaceselector-8" className="flex flex-col items-end shrink-0 text-[10px] font-mono text-[var(--on-surface-variant)]">
-                      <span>{(ws.branches || []).length} {t('workspace.branches').toLowerCase()}</span>
-                      <span>{totalDocs} {t('workspace.taskMd', 'Task MD')}</span>
+                      <span>{(ws.branches || []).length} {i18n._(msg`Ramas`).toLowerCase()}</span>
+                      <span>{totalDocs} {i18n._(msg`Task MD`)}</span>
                     </div>
                   </button>
                 );
@@ -152,7 +154,7 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
                 className="btn-m3-secondary w-full py-1 text-xs justify-center cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[14px]">add</span>
-                <span>+ {t('workspace.newWorkspace')}</span>
+                <span>+ {i18n._(msg`Nuevo Workspace`)}</span>
               </button>
             </div>
           </div>
@@ -168,7 +170,7 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
             setIsWorkspaceMenuOpen(false);
           }}
           className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded bg-[var(--surface)] hover:bg-[var(--surface-container-high)] border border-[var(--outline)] text-xs font-mono text-[var(--on-surface)] transition-colors cursor-pointer"
-          title={`${t('workspace.branchLabel')}: ${activeBranch?.name || 'main'}`}
+          title={`${i18n._(msg`Rama actual`)}: ${activeBranch?.name || 'main'}`}
         >
           <span className="material-symbols-outlined text-[14px] text-sky-400 shrink-0">
             fork_right
@@ -186,7 +188,7 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
           <div id="div-workspaceselector-11" className="absolute left-0 top-full mt-1 w-64 sm:w-72 max-w-[calc(100vw-1.5rem)] bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-xl py-1 z-50 animate-fade-in select-none">
             <div id="div-workspaceselector-12" className="px-3 py-1.5 border-b border-[var(--outline)] flex items-center justify-between">
               <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--on-surface-variant)]">
-                {t('workspace.branches')} ({(workspace?.branches || []).length})
+                {i18n._(msg`Ramas`)} ({(workspace?.branches || []).length})
               </span>
               <button
                 type="button"
@@ -197,7 +199,7 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
                 className="text-[10px] text-sky-400 hover:underline cursor-pointer font-medium flex items-center gap-0.5"
               >
                 <span className="material-symbols-outlined text-[12px]">sync</span>
-                <span>{t('workspace.syncGitHub')}</span>
+                <span>{i18n._(msg`Sincronizar con GitHub`)}</span>
               </button>
             </div>
 
@@ -256,7 +258,7 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
                 className="btn-m3-secondary flex-1 py-1 text-xs justify-center cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[14px]">add</span>
-                <span>+ {t('workspace.newBranch')}</span>
+                <span>+ {i18n._(msg`Nueva rama`)}</span>
               </button>
 
               <button
@@ -266,7 +268,7 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
                   onOpenGitHubSync();
                 }}
                 className="btn-m3-secondary px-2.5 py-1 text-xs cursor-pointer text-sky-400"
-                title={t('workspace.syncGitHub')}
+                title={i18n._(msg`Sincronizar con GitHub`)}
               >
                 <span className="material-symbols-outlined text-[14px]">commit</span>
               </button>
