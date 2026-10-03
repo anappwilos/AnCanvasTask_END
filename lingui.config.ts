@@ -2,7 +2,7 @@ import type { LinguiConfig } from '@lingui/conf';
 import { formatter } from '@lingui/format-json';
 
 const config: LinguiConfig = {
-  locales: ['es', 'en'],
+  locales: ['es', 'en', 'zh', 'hi', 'fr', 'ar', 'bn', 'pt', 'ru', 'ur'],
   sourceLocale: 'es',
   fallbackLocales: {
     default: 'es'

@@ -11,9 +11,27 @@ export interface LanguageOption {
 export const SUPPORTED_LANGUAGES: LanguageOption[] = [
   { code: 'es', label: 'Español' },
   { code: 'en', label: 'English' },
+  { code: 'zh', label: '中文' },
+  { code: 'hi', label: 'हिन्दी' },
+  { code: 'fr', label: 'Français' },
+  { code: 'ar', label: 'العربية' },
+  { code: 'bn', label: 'বাংলা' },
+  { code: 'pt', label: 'Português' },
+  { code: 'ru', label: 'Русский' },
+  { code: 'ur', label: 'اردو' },
 ];
 
-export type SupportedLanguageCode = 'es' | 'en' | 'fr' | 'de' | 'pt' | 'it';
+export type SupportedLanguageCode =
+  | 'es'
+  | 'en'
+  | 'zh'
+  | 'hi'
+  | 'fr'
+  | 'ar'
+  | 'bn'
+  | 'pt'
+  | 'ru'
+  | 'ur';
 
 export const defaultLocale: SupportedLanguageCode = 'es';
 
@@ -28,6 +46,7 @@ export async function dynamicActivate(locale: string) {
     localStorage.setItem('antask_language', locale);
     if (typeof document !== 'undefined') {
       document.documentElement.lang = locale;
+      document.documentElement.dir = locale === 'ar' || locale === 'ur' ? 'rtl' : 'ltr';
     }
   } catch (error) {
     console.error(`Error loading locale ${locale}:`, error);
