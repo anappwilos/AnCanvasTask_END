@@ -136,6 +136,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
 
     return (
       <div
+        id={`div-doc-item-${doc.id}`}
         key={doc.id}
         className={`group relative flex items-center justify-between px-2 py-1.5 rounded-md text-xs transition-colors cursor-pointer ${
           isActive
@@ -165,6 +166,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
 
           <div id="div-taskdocumentexplorer-3" className="relative">
             <button
+              id={`btn-doc-menu-${doc.id}`}
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
@@ -179,10 +181,12 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
             {/* Dropdown Options */}
             {activeMenuDocId === doc.id && (
               <div
+                id={`div-doc-dropdown-${doc.id}`}
                 className="absolute right-0 top-full mt-1 w-44 bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-xl py-1 z-50 animate-fade-in"
                 onClick={(e) => e.stopPropagation()}
               >
                 <button
+                  id={`btn-doc-rename-${doc.id}`}
                   type="button"
                   onClick={() => {
                     setActiveMenuDocId(null);
@@ -195,6 +199,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
                 </button>
 
                 <button
+                  id={`btn-doc-duplicate-${doc.id}`}
                   type="button"
                   onClick={() => {
                     setActiveMenuDocId(null);
@@ -207,6 +212,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
                 </button>
 
                 <button
+                  id={`btn-doc-export-${doc.id}`}
                   type="button"
                   onClick={() => {
                     setActiveMenuDocId(null);
@@ -220,6 +226,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
 
                 {safeTaskDocuments.length > 1 && (
                   <button
+                    id={`btn-doc-delete-${doc.id}`}
                     type="button"
                     onClick={() => {
                       setActiveMenuDocId(null);
@@ -246,6 +253,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
         {/* Workspace Dropdown */}
         <div id="div-taskdocumentexplorer-6" className="flex-1 min-w-0" ref={wsDropdownRef}>
           <button
+            id="btn-explorer-workspace-dropdown"
             type="button"
             onClick={() => {
               logWorkspaceTrace(`Alternando menú desplegable de Workspaces (actualmente ${isWorkspaceMenuOpen ? 'abierto' : 'cerrado'})`);
@@ -270,6 +278,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
         {/* Branch Dropdown */}
         <div id="div-taskdocumentexplorer-8" className="flex-1 min-w-0" ref={branchDropdownRef}>
           <button
+            id="btn-explorer-branch-dropdown"
             type="button"
             onClick={() => {
               logWorkspaceTrace(`Alternando menú desplegable de Ramas (actualmente ${isBranchMenuOpen ? 'abierto' : 'cerrado'})`);
@@ -299,6 +308,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
                 {i18n._(msg`Workspaces`)} ({allWorkspaces.length})
               </span>
               <button
+                id="btn-explorer-manage-workspaces"
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
@@ -317,6 +327,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
                 const isCurrent = ws.id === workspace?.id;
                 return (
                   <button
+                    id={`btn-explorer-select-ws-${ws.id}`}
                     key={ws.id}
                     type="button"
                     onClick={(e) => {
@@ -351,6 +362,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
 
             <div id="div-taskdocumentexplorer-14" className="pt-1 border-t border-[var(--outline)] px-2 py-1">
               <button
+                id="btn-explorer-new-workspace"
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
@@ -375,6 +387,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
                 {i18n._(msg`Ramas`)} ({safeBranches.length})
               </span>
               <button
+                id="btn-explorer-git-status"
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
@@ -395,6 +408,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
                 const docCount = b.taskDocuments?.length || 0;
                 return (
                   <button
+                    id={`btn-explorer-select-branch-${b.name}`}
                     key={b.name}
                     type="button"
                     onClick={(e) => {
@@ -428,6 +442,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
 
             <div id="div-taskdocumentexplorer-19" className="pt-1 border-t border-[var(--outline)] px-2 py-1 flex items-center gap-1">
               <button
+                id="btn-explorer-new-branch"
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
@@ -458,6 +473,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
 
         <div id="div-taskdocumentexplorer-22" className="flex items-center gap-1.5">
           <button
+            id="btn-explorer-new-folder"
             type="button"
             onClick={onOpenNewFolderModal}
             className="text-[11px] text-amber-400 hover:underline cursor-pointer flex items-center gap-0.5 font-medium"
@@ -468,6 +484,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
           </button>
 
           <button
+            id="btn-explorer-new-doc"
             type="button"
             onClick={() => onOpenNewDocumentModal('')}
             className="text-[11px] text-[var(--primary)] hover:underline cursor-pointer flex items-center gap-0.5 font-medium"
@@ -498,6 +515,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
               {/* Folder Heading */}
               <div id="div-taskdocumentexplorer-26" className="flex items-center justify-between px-2 py-1 rounded hover:bg-[var(--surface-container-high)] text-xs text-[var(--on-surface-variant)] group cursor-pointer">
                 <button
+                  id={`btn-explorer-toggle-folder-${folder}`}
                   type="button"
                   onClick={() => toggleFolder(folder)}
                   className="flex items-center gap-1.5 flex-1 min-w-0 text-left font-mono font-medium text-[11px] cursor-pointer"
@@ -513,6 +531,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
 
                 <div id="div-taskdocumentexplorer-27" className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
+                    id={`btn-explorer-add-doc-to-folder-${folder}`}
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
@@ -526,6 +545,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
 
                   <div id="div-taskdocumentexplorer-28" className="relative">
                     <button
+                      id={`btn-explorer-folder-menu-${folder}`}
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
@@ -539,10 +559,12 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
 
                     {activeMenuFolder === folder && (
                       <div
+                        id={`div-explorer-folder-dropdown-${folder}`}
                         className="absolute right-0 top-full mt-1 w-44 bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-xl py-1 z-50 animate-fade-in"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <button
+                          id={`btn-explorer-rename-folder-${folder}`}
                           type="button"
                           onClick={() => {
                             setActiveMenuFolder(null);

@@ -60,10 +60,12 @@ export const RenameDocumentModal: React.FC<RenameDocumentModalProps> = ({
 
   return (
     <div
+      id="modal-rename-doc-overlay"
       className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 animate-fade-in"
       onClick={onClose}
     >
       <div
+        id="modal-rename-doc-dialog"
         className="w-full sm:max-w-md bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-lg sm:rounded-lg shadow-xl flex flex-col overflow-hidden pb-safe sm:pb-0"
         role="dialog"
         aria-modal="true"
@@ -113,9 +115,11 @@ export const RenameDocumentModal: React.FC<RenameDocumentModalProps> = ({
             <div id="div-renamedocumentmodal-5" className="flex items-center gap-1.5 flex-wrap mt-1">
               {quickFolderChips.slice(0, 6).map((chip) => {
                 const isSelected = folderInput.trim().replace(/^\/+|\/+$/g, '') === chip.value;
+                const chipKey = chip.value.replace(/[^a-zA-Z0-9]/g, '-') || 'root';
                 return (
                   <button
                     key={chip.label}
+                    id={`btn-rename-chip-${chipKey}`}
                     type="button"
                     onClick={() => setFolderInput(chip.value)}
                     className={`px-2 py-0.5 rounded text-[10px] font-mono transition-colors cursor-pointer border ${
@@ -138,6 +142,7 @@ export const RenameDocumentModal: React.FC<RenameDocumentModalProps> = ({
 
           <div id="div-renamedocumentmodal-7" className="pt-2.5 flex items-center justify-end gap-2 border-t border-[var(--outline)]">
             <button
+              id="btn-cancel-rename-doc"
               type="button"
               onClick={onClose}
               className="btn-m3-text px-3 py-1 text-xs cursor-pointer"
@@ -145,6 +150,7 @@ export const RenameDocumentModal: React.FC<RenameDocumentModalProps> = ({
               {_(msg`Cancelar`)}
             </button>
             <button
+              id="btn-submit-rename-doc"
               type="submit"
               disabled={!name.trim()}
               className="btn-m3-primary px-4 py-1 text-xs cursor-pointer shadow-sm"

@@ -200,6 +200,7 @@ export function MarkdownSplitEditor({
           {onChangeSplitRatio && (
             <div id="div-markdownspliteditor-5" className="hidden sm:flex items-center bg-[var(--surface-container)] p-0.5 rounded border border-[var(--outline)] text-[10px]">
               <button
+                id="btn-split-ratio-35"
                 type="button"
                 onClick={() => onChangeSplitRatio(35)}
                 className={`px-1.5 py-0.5 rounded text-[10px] font-mono cursor-pointer transition-colors ${
@@ -212,6 +213,7 @@ export function MarkdownSplitEditor({
                 35%
               </button>
               <button
+                id="btn-split-ratio-50"
                 type="button"
                 onClick={() => onChangeSplitRatio(50)}
                 className={`px-1.5 py-0.5 rounded text-[10px] font-mono cursor-pointer transition-colors ${
@@ -224,6 +226,7 @@ export function MarkdownSplitEditor({
                 50%
               </button>
               <button
+                id="btn-split-ratio-65"
                 type="button"
                 onClick={() => onChangeSplitRatio(65)}
                 className={`px-1.5 py-0.5 rounded text-[10px] font-mono cursor-pointer transition-colors ${
@@ -240,6 +243,7 @@ export function MarkdownSplitEditor({
 
           {/* Normalización Segura button */}
           <button
+            id="btn-markdown-normalizer"
             type="button"
             onClick={handleOpenNormalizer}
             className="px-2 py-0.5 rounded text-[11px] font-semibold bg-sky-950/60 text-sky-300 border border-sky-800/80 hover:bg-sky-900/80 cursor-pointer transition-colors flex items-center gap-1 shadow-xs"
@@ -252,6 +256,7 @@ export function MarkdownSplitEditor({
 
           {/* Copy Markdown */}
           <button
+            id="btn-markdown-copy"
             type="button"
             onClick={handleCopy}
             className="btn-m3-icon w-7 h-7 text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] cursor-pointer"
@@ -265,6 +270,7 @@ export function MarkdownSplitEditor({
 
           {/* Download file */}
           <button
+            id="btn-markdown-export"
             type="button"
             onClick={onExport}
             className="btn-m3-icon w-7 h-7 text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] cursor-pointer"
@@ -278,6 +284,7 @@ export function MarkdownSplitEditor({
 
           {/* Close split view */}
           <button
+            id="btn-markdown-close-split"
             type="button"
             onClick={onClose}
             className="btn-m3-icon w-7 h-7 text-[var(--on-surface-variant)] hover:text-rose-400 cursor-pointer"
@@ -293,6 +300,7 @@ export function MarkdownSplitEditor({
       <div id="div-markdownspliteditor-7" className="px-2.5 py-1.5 bg-[var(--surface)] border-b border-[var(--outline)] flex items-center justify-between gap-1 overflow-x-auto select-none shrink-0">
         <div id="div-markdownspliteditor-8" className="flex items-center gap-1 shrink-0">
           <button
+            id="btn-markdown-insert-task"
             type="button"
             onClick={() => insertText('\n- [ ] Nueva tarea\n  - Priority: P1\n')}
             className="px-2 py-1 rounded bg-[var(--surface-container)] hover:bg-[var(--surface-container-highest)] border border-[var(--outline)] text-[11px] font-mono text-[var(--on-surface)] flex items-center gap-1 cursor-pointer transition-colors"
@@ -303,6 +311,7 @@ export function MarkdownSplitEditor({
           </button>
 
           <button
+            id="btn-markdown-insert-section"
             type="button"
             onClick={() => insertText('\n## Nueva Sección\n\n- [ ] Tarea inicial\n  - Priority: P1\n')}
             className="px-2 py-1 rounded bg-[var(--surface-container)] hover:bg-[var(--surface-container-highest)] border border-[var(--outline)] text-[11px] font-mono text-[var(--on-surface)] flex items-center gap-1 cursor-pointer transition-colors"
@@ -317,6 +326,7 @@ export function MarkdownSplitEditor({
           {/* Quick Priorities */}
           <div id="div-markdownspliteditor-10" className="flex items-center gap-0.5">
             <button
+              id="btn-markdown-insert-p0"
               type="button"
               onClick={() => insertText('  - Priority: P0\n')}
               className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-rose-950/60 text-rose-300 border border-rose-800/80 hover:bg-rose-900/80 cursor-pointer"
@@ -325,6 +335,7 @@ export function MarkdownSplitEditor({
               P0
             </button>
             <button
+              id="btn-markdown-insert-p1"
               type="button"
               onClick={() => insertText('  - Priority: P1\n')}
               className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-950/60 text-amber-300 border border-amber-800/80 hover:bg-amber-900/80 cursor-pointer"
@@ -333,6 +344,7 @@ export function MarkdownSplitEditor({
               P1
             </button>
             <button
+              id="btn-markdown-insert-p2"
               type="button"
               onClick={() => insertText('  - Priority: P2\n')}
               className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-blue-950/60 text-blue-300 border border-blue-800/80 hover:bg-blue-900/80 cursor-pointer"
@@ -345,6 +357,7 @@ export function MarkdownSplitEditor({
           <div id="div-markdownspliteditor-11" className="w-px h-3.5 bg-[var(--outline)] mx-1" />
 
           <button
+            id="btn-markdown-insert-blocked-by"
             type="button"
             onClick={() => insertText('  - Blocked by: id-tarea\n')}
             className="px-2 py-1 rounded bg-[var(--surface-container)] hover:bg-[var(--surface-container-highest)] border border-[var(--outline)] text-[11px] font-mono text-amber-300 flex items-center gap-1 cursor-pointer transition-colors"
@@ -355,6 +368,7 @@ export function MarkdownSplitEditor({
           </button>
 
           <button
+            id="btn-markdown-insert-tags"
             type="button"
             onClick={() => insertText('  - Tags: frontend, auth\n')}
             className="px-2 py-1 rounded bg-[var(--surface-container)] hover:bg-[var(--surface-container-highest)] border border-[var(--outline)] text-[11px] font-mono text-sky-300 flex items-center gap-1 cursor-pointer transition-colors"
@@ -368,6 +382,7 @@ export function MarkdownSplitEditor({
         {/* Problems Indicator Toggle */}
         {validationReport.issues.length > 0 && (
           <button
+            id="btn-markdown-toggle-issues"
             type="button"
             onClick={() => setShowIssuesPanel((prev) => !prev)}
             className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold border flex items-center gap-1 cursor-pointer shrink-0 transition-colors ${
@@ -391,6 +406,7 @@ export function MarkdownSplitEditor({
               {i18n._(msg`Diagnósticos de sincronización`)}
             </span>
             <button
+              id="btn-markdown-close-issues"
               type="button"
               onClick={() => setShowIssuesPanel(false)}
               className="text-[10px] text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] cursor-pointer"
@@ -400,6 +416,7 @@ export function MarkdownSplitEditor({
           </div>
           {validationReport.issues.map((issue: MarkdownIssue) => (
             <div
+              id={`div-markdown-issue-${issue.id}`}
               key={issue.id}
               onClick={() => {
                 if (issue.lineIndex !== undefined) {

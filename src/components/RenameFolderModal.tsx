@@ -48,10 +48,12 @@ export const RenameFolderModal: React.FC<RenameFolderModalProps> = ({
 
   return (
     <div
+      id="modal-rename-folder-overlay"
       className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 animate-fade-in"
       onClick={onClose}
     >
       <div
+        id="modal-rename-folder-dialog"
         className="w-full sm:max-w-md bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-lg sm:rounded-lg shadow-xl flex flex-col overflow-hidden pb-safe sm:pb-0"
         role="dialog"
         aria-modal="true"
@@ -92,6 +94,7 @@ export const RenameFolderModal: React.FC<RenameFolderModalProps> = ({
 
           <div id="div-renamefoldermodal-5" className="pt-2.5 flex items-center justify-end gap-2 border-t border-[var(--outline)]">
             <button
+              id="btn-cancel-rename-folder"
               type="button"
               onClick={onClose}
               className="btn-m3-text px-3 py-1 text-xs cursor-pointer"
@@ -99,6 +102,7 @@ export const RenameFolderModal: React.FC<RenameFolderModalProps> = ({
               {_(msg`Cancelar`)}
             </button>
             <button
+              id="btn-submit-rename-folder"
               type="submit"
               disabled={!newFolderInput.trim()}
               className="btn-m3-primary px-4 py-1 text-xs cursor-pointer shadow-sm"

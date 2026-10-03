@@ -421,6 +421,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
           Para explorar y editar tus esquemas <code className="font-mono text-sky-300">_type: "task"</code> y el estado visual del canvas, configura tu Project ID y Dataset de Sanity.
         </p>
         <button
+          id="btn-sanity-studio-configure-unconnected"
           type="button"
           onClick={onOpenSanityConfig}
           className="btn-m3-primary px-4 py-2 text-xs flex items-center gap-1.5 cursor-pointer shadow-sm"
@@ -438,6 +439,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
       <div id="div-sanitystudio-4" className="px-3.5 py-2 border-b border-[var(--outline)] bg-[var(--surface-container)] flex items-center justify-between gap-3 shrink-0">
         <div id="div-sanitystudio-5" className="flex items-center gap-1.5 flex-wrap">
           <button
+            id="btn-sanity-studio-mode-native"
             type="button"
             onClick={() => setStudioMode('native')}
             className={`px-3 py-1 rounded text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer ${
@@ -451,6 +453,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
           </button>
 
           <button
+            id="btn-sanity-studio-mode-sdk"
             type="button"
             onClick={() => setStudioMode('sdk')}
             className={`px-3 py-1 rounded text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer ${
@@ -464,6 +467,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
           </button>
 
           <button
+            id="btn-sanity-studio-mode-desk"
             type="button"
             onClick={() => setStudioMode('desk')}
             className={`px-3 py-1 rounded text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer ${
@@ -482,6 +486,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
             {config.projectId} · {config.dataset}
           </span>
           <button
+            id="btn-sanity-studio-open-config-header"
             type="button"
             onClick={onOpenSanityConfig}
             className="px-2 py-0.5 text-[11px] text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] border border-[var(--outline)] hover:border-[var(--on-surface-variant)] transition cursor-pointer"
@@ -537,6 +542,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
           </div>
 
           <button
+            id="btn-sanity-studio-refresh-documents"
             type="button"
             onClick={loadDocuments}
             className="btn-m3-icon w-6 h-6 cursor-pointer shrink-0"
@@ -556,6 +562,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
 
           {/* Workspace Document Type */}
           <button
+            id="btn-sanity-studio-nav-workspace"
             type="button"
             onClick={() => {
               setActiveDocType('workspace');
@@ -578,6 +585,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
 
           {/* Task Document Type */}
           <button
+            id="btn-sanity-studio-nav-task"
             type="button"
             onClick={() => {
               setActiveDocType('task');
@@ -600,6 +608,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
 
           {/* Canvas Visual State Document Type */}
           <button
+            id="btn-sanity-studio-nav-canvas"
             type="button"
             onClick={() => {
               setActiveDocType('canvasVisualState');
@@ -622,6 +631,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
 
           {/* All Documents */}
           <button
+            id="btn-sanity-studio-nav-all"
             type="button"
             onClick={() => {
               setActiveDocType('all');
@@ -647,6 +657,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
         <div id="div-sanitystudio-20" className="p-2.5 border-t border-[var(--outline)] bg-[var(--surface)] flex flex-col gap-1.5">
           {onOpenSyncDiffModal && (
             <button
+              id="btn-sanity-studio-sync-diff"
               type="button"
               onClick={onOpenSyncDiffModal}
               className="btn-m3-primary w-full py-1.5 text-xs justify-start px-2.5 cursor-pointer shadow-xs flex items-center gap-1.5"
@@ -658,6 +669,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
           )}
 
           <button
+            id="btn-sanity-studio-connection-settings"
             type="button"
             onClick={onOpenSanityConfig}
             className="btn-m3-secondary w-full py-1.5 text-xs justify-start px-2.5 cursor-pointer flex items-center gap-1.5"
@@ -680,6 +692,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
         <div id="div-sanitystudio-21" className="px-3.5 py-2.5 border-b border-[var(--outline)] flex items-center justify-between bg-[var(--surface-container)] gap-2">
           <div id="div-sanitystudio-22" className="flex items-center gap-2 min-w-0">
             <button
+              id="btn-sanity-studio-back-to-structure"
               type="button"
               onClick={() => setMobilePane('structure')}
               className="sm:hidden btn-m3-icon w-6 h-6 cursor-pointer"
@@ -704,6 +717,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
 
           {activeDocType === 'workspace' ? (
             <button
+              id="btn-sanity-studio-open-create-workspace"
               type="button"
               onClick={handleOpenCreateWorkspaceModal}
               className="btn-m3-primary px-2.5 py-1 text-[11px] flex items-center gap-1 cursor-pointer shrink-0 shadow-xs"
@@ -714,6 +728,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
             </button>
           ) : (
             <button
+              id="btn-sanity-studio-open-create-task"
               type="button"
               onClick={() => handleOpenCreateTaskModal()}
               className="btn-m3-primary px-2.5 py-1 text-[11px] flex items-center gap-1 cursor-pointer shrink-0 shadow-xs"
@@ -740,6 +755,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
             />
             {searchQuery && (
               <button
+                id="btn-sanity-studio-clear-search"
                 type="button"
                 onClick={() => setSearchQuery('')}
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] cursor-pointer"
@@ -777,6 +793,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
                 ].map((f) => (
                   <button
                     key={f.id}
+                    id={`btn-sanity-studio-status-filter-${f.id}`}
                     type="button"
                     onClick={() => setStatusFilter(f.id)}
                     className={`px-2 py-0.5 rounded text-[10px] whitespace-nowrap transition-colors cursor-pointer ${
@@ -806,6 +823,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
               <span>No hay documentos que coincidan con el filtro.</span>
               {activeDocType === 'workspace' ? (
                 <button
+                  id="btn-sanity-studio-empty-create-workspace"
                   type="button"
                   onClick={handleOpenCreateWorkspaceModal}
                   className="btn-m3-secondary px-3 py-1 text-xs text-emerald-400 cursor-pointer mt-1"
@@ -814,6 +832,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
                 </button>
               ) : (
                 <button
+                  id="btn-sanity-studio-empty-create-task"
                   type="button"
                   onClick={() => handleOpenCreateTaskModal()}
                   className="btn-m3-secondary px-3 py-1 text-xs text-sky-400 cursor-pointer mt-1"
@@ -838,6 +857,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
               return (
                 <div
                   key={doc._id}
+                  id={`div-sanity-studio-doc-${doc._id}`}
                   onClick={() => {
                     setSelectedDocId(doc._id);
                     setMobilePane('inspector');
@@ -874,6 +894,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
 
                     {isWorkspace && onActivateWorkspace && (
                       <button
+                        id={`btn-sanity-studio-activate-ws-${doc._id}`}
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
@@ -939,6 +960,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
             <div id="div-sanitystudio-39" className="px-4 py-2.5 border-b border-[var(--outline)] bg-[var(--surface-container)] flex items-center justify-between gap-3 shrink-0">
               <div id="div-sanitystudio-40" className="flex items-center gap-2 min-w-0">
                 <button
+                  id="btn-sanity-studio-back-to-list"
                   type="button"
                   onClick={() => setMobilePane('list')}
                   className="sm:hidden btn-m3-icon w-6 h-6 cursor-pointer"
@@ -964,6 +986,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
               <div id="div-sanitystudio-43" className="flex items-center gap-1.5 shrink-0">
                 <div id="div-sanitystudio-44" className="flex items-center bg-[var(--surface)] p-0.5 rounded border border-[var(--outline)]">
                   <button
+                    id="btn-sanity-studio-inspector-mode-form"
                     type="button"
                     onClick={() => setInspectorMode('form')}
                     className={`px-2 py-0.5 rounded text-[11px] font-medium cursor-pointer ${
@@ -973,6 +996,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
                     Formulario
                   </button>
                   <button
+                    id="btn-sanity-studio-inspector-mode-json"
                     type="button"
                     onClick={() => setInspectorMode('json')}
                     className={`px-2 py-0.5 rounded text-[11px] font-medium cursor-pointer ${
@@ -984,6 +1008,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
                 </div>
 
                 <button
+                  id="btn-sanity-studio-open-confirm-delete"
                   type="button"
                   onClick={() => setIsConfirmDeleteOpen(true)}
                   disabled={isDeleting}
@@ -994,6 +1019,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
                 </button>
 
                 <button
+                  id="btn-sanity-studio-save-document"
                   type="button"
                   onClick={handleSaveDocument}
                   disabled={isSaving || !isDirty}
@@ -1021,6 +1047,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
                   <div id="div-sanitystudio-47" className="flex items-center justify-between text-xs text-[var(--on-surface-variant)]">
                     <span>Documento RAW almacenado en Sanity ({config.dataset}):</span>
                     <button
+                      id="btn-sanity-studio-copy-json"
                       type="button"
                       onClick={() => {
                         navigator.clipboard.writeText(JSON.stringify(formState, null, 2));
@@ -1062,6 +1089,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
 
                     {onActivateWorkspace && (
                       <button
+                        id="btn-sanity-studio-load-ws-app"
                         type="button"
                         onClick={() => onActivateWorkspace(formState)}
                         className="btn-m3-primary bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-1.5 text-xs flex items-center gap-1.5 cursor-pointer shadow-sm shrink-0"
@@ -1211,6 +1239,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
                         return (
                           <div
                             key={branch.name || bIdx}
+                            id={`div-sanity-studio-branch-${bIdx}`}
                             className={`p-3 rounded border flex flex-col gap-2 transition-colors ${
                               isCurrentActive
                                 ? 'bg-[var(--surface)] border-[var(--primary)]/60'
@@ -1253,6 +1282,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
                               {(branch.taskDocuments || []).map((doc: any, dIdx: number) => (
                                 <div
                                   key={doc.id || dIdx}
+                                  id={`div-sanity-studio-branch-doc-${dIdx}`}
                                   className="p-2 rounded bg-[var(--surface-container-high)]/60 border border-[var(--outline)] flex items-start justify-between gap-2 text-xs"
                                 >
                                   <div id="div-sanitystudio-75" className="flex flex-col min-w-0 flex-1">
@@ -1304,6 +1334,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
                           </div>
 
                           <button
+                            id="btn-sanity-studio-create-task-in-ws"
                             type="button"
                             onClick={() => handleOpenCreateTaskModal(wsId)}
                             className="btn-m3-primary px-2.5 py-1 text-[11px] flex items-center gap-1 cursor-pointer"
@@ -1322,6 +1353,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
                             {linkedTasks.map((t) => (
                               <div
                                 key={t._id}
+                                id={`div-sanity-studio-linked-task-${t._id}`}
                                 onClick={() => {
                                   setSelectedDocId(t._id);
                                   setActiveDocType('task');
@@ -1426,6 +1458,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
                         {['P0', 'P1', 'P2', 'P3'].map((p) => (
                           <button
                             key={p}
+                            id={`btn-sanity-studio-priority-${p}`}
                             type="button"
                             onClick={() => handleFormFieldChange('priority', p)}
                             className={`py-1 rounded font-mono text-xs border text-center cursor-pointer ${
@@ -1484,6 +1517,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
                         >
                           <span>#{tag}</span>
                           <button
+                            id={`btn-sanity-studio-remove-tag-${tag}`}
                             type="button"
                             onClick={() => handleRemoveTag(tag)}
                             className="hover:text-white cursor-pointer"
@@ -1507,6 +1541,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
                           className="w-20 bg-[var(--surface-container)] border border-[var(--outline)] rounded px-2 py-0.5 text-[10px] font-mono text-[var(--on-surface)] focus:outline-none"
                         />
                         <button
+                          id="btn-sanity-studio-add-tag"
                           type="button"
                           onClick={handleAddTag}
                           className="px-1.5 py-0.5 text-[10px] rounded bg-[var(--surface-container)] border border-[var(--outline)] cursor-pointer"
@@ -1536,6 +1571,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
                               </span>
                             </label>
                             <button
+                              id={`btn-sanity-studio-remove-subtask-${idx}`}
                               type="button"
                               onClick={() => handleRemoveSubtask(idx)}
                               className="text-rose-400 hover:text-rose-300 text-xs cursor-pointer"
@@ -1560,6 +1596,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
                           className="flex-1 bg-[var(--surface)] border border-[var(--outline)] rounded px-2.5 py-1 text-xs text-[var(--on-surface)] focus:outline-none"
                         />
                         <button
+                          id="btn-sanity-studio-add-subtask"
                           type="button"
                           onClick={handleAddSubtask}
                           className="btn-m3-secondary px-2.5 py-1 text-xs cursor-pointer"
@@ -1592,6 +1629,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
                         </span>
                       </div>
                       <button
+                        id="btn-sanity-studio-import-to-markdown"
                         type="button"
                         onClick={() => onImportTaskToMarkdown(formState)}
                         className="btn-m3-secondary px-3 py-1.5 text-xs flex items-center gap-1 cursor-pointer text-emerald-400 border-emerald-800/60"
@@ -1624,10 +1662,12 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
       {/* Modal: Crear Workspace Estructurado en Sanity */}
       {isCreateWsOpen && (
         <div
+          id="modal-sanity-studio-create-ws-overlay"
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 animate-fade-in"
           onClick={() => setIsCreateWsOpen(false)}
         >
           <div
+            id="modal-sanity-studio-create-ws-dialog"
             className="w-full max-w-md bg-[var(--surface-container)] border border-[var(--outline)] rounded-lg shadow-xl flex flex-col overflow-hidden"
             role="dialog"
             aria-modal="true"
@@ -1641,6 +1681,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
                 </h3>
               </div>
               <button
+                id="btn-sanity-studio-create-ws-close-header"
                 type="button"
                 onClick={() => setIsCreateWsOpen(false)}
                 className="btn-m3-icon w-6 h-6 cursor-pointer"
@@ -1694,6 +1735,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
 
               <div id="div-sanitystudio-112" className="pt-2 flex items-center justify-end gap-2 border-t border-[var(--outline)]">
                 <button
+                  id="btn-sanity-studio-create-ws-cancel"
                   type="button"
                   onClick={() => setIsCreateWsOpen(false)}
                   className="btn-m3-text px-3 py-1 text-xs cursor-pointer"
@@ -1701,6 +1743,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
                   Cancelar
                 </button>
                 <button
+                  id="btn-sanity-studio-create-ws-submit"
                   type="submit"
                   disabled={!newWsName.trim() || !newWsRepo.trim()}
                   className="btn-m3-primary bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-1.5 text-xs cursor-pointer shadow-sm disabled:opacity-50"
@@ -1716,10 +1759,12 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
       {/* Modal: Crear Tarea en Sanity */}
       {isCreateTaskOpen && (
         <div
+          id="modal-sanity-studio-create-task-overlay"
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 animate-fade-in"
           onClick={() => setIsCreateTaskOpen(false)}
         >
           <div
+            id="modal-sanity-studio-create-task-dialog"
             className="w-full max-w-sm bg-[var(--surface-container)] border border-[var(--outline)] rounded-lg shadow-xl flex flex-col overflow-hidden"
             role="dialog"
             aria-modal="true"
@@ -1733,6 +1778,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
                 </h3>
               </div>
               <button
+                id="btn-sanity-studio-create-task-close-header"
                 type="button"
                 onClick={() => setIsCreateTaskOpen(false)}
                 className="btn-m3-icon w-6 h-6 cursor-pointer"
@@ -1781,6 +1827,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
                   {(['P0', 'P1', 'P2', 'P3'] as const).map((p) => (
                     <button
                       key={p}
+                      id={`btn-sanity-studio-new-task-priority-${p}`}
                       type="button"
                       onClick={() => setNewTaskPriorityInput(p)}
                       className={`py-1 rounded font-mono text-xs border text-center cursor-pointer ${
@@ -1797,6 +1844,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
 
               <div id="div-sanitystudio-119" className="pt-2 flex items-center justify-end gap-2 border-t border-[var(--outline)]">
                 <button
+                  id="btn-sanity-studio-create-task-cancel"
                   type="button"
                   onClick={() => setIsCreateTaskOpen(false)}
                   className="btn-m3-text px-3 py-1 text-xs cursor-pointer"
@@ -1804,6 +1852,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
                   Cancelar
                 </button>
                 <button
+                  id="btn-sanity-studio-create-task-submit"
                   type="submit"
                   disabled={!newTaskTitleInput.trim()}
                   className="btn-m3-primary px-3.5 py-1.5 text-xs cursor-pointer shadow-sm disabled:opacity-50"
@@ -1819,10 +1868,12 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
       {/* Modal: Confirmación de Eliminación Seguro */}
       {isConfirmDeleteOpen && (
         <div
+          id="modal-sanity-studio-confirm-delete-overlay"
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 animate-fade-in"
           onClick={() => setIsConfirmDeleteOpen(false)}
         >
           <div
+            id="modal-sanity-studio-confirm-delete-dialog"
             className="w-full max-w-sm bg-[var(--surface-container)] border border-[var(--outline)] rounded-lg shadow-xl flex flex-col overflow-hidden"
             role="dialog"
             aria-modal="true"
@@ -1834,6 +1885,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
                 <h3 className="text-xs font-semibold">Eliminar de Sanity</h3>
               </div>
               <button
+                id="btn-sanity-studio-confirm-delete-close-header"
                 type="button"
                 onClick={() => setIsConfirmDeleteOpen(false)}
                 className="btn-m3-icon w-6 h-6 cursor-pointer"
@@ -1851,6 +1903,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
 
             <div id="div-sanitystudio-123" className="px-4 py-2.5 bg-[var(--surface)] border-t border-[var(--outline)] flex items-center justify-end gap-2">
               <button
+                id="btn-sanity-studio-confirm-delete-cancel"
                 type="button"
                 onClick={() => setIsConfirmDeleteOpen(false)}
                 className="btn-m3-text px-3 py-1 text-xs cursor-pointer"
@@ -1858,6 +1911,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
                 Cancelar
               </button>
               <button
+                id="btn-sanity-studio-confirm-delete-confirm"
                 type="button"
                 onClick={handleConfirmDelete}
                 className="px-3 py-1 rounded bg-rose-600 hover:bg-rose-500 text-white text-xs font-medium cursor-pointer shadow-sm"

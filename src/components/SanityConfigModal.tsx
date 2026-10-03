@@ -149,7 +149,7 @@ export const SanityConfigModal: React.FC<SanityConfigModalProps> = ({
       });
       setWriteTestResult(res);
       if (res.ok) {
-        onShowToast(i18n._(msg`Tarea de prueba escrita con éxito en ${res.dataset}`), 'success');
+        onShowToast(i18n._(msg`Tarea de prueba escrita con éxito en ${res.dataset || dataset.trim()}`), 'success');
         handleFetchRemoteDocs();
       } else {
         onShowToast(res.message, 'error');
@@ -355,6 +355,7 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
 
   return (
     <div
+      id="modal-sanity-config-overlay"
       className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-xs"
       onClick={onClose}
       role="dialog"
@@ -362,6 +363,7 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
       aria-labelledby="sanity-config-dialog-title"
     >
       <div
+        id="modal-sanity-config-dialog"
         className="w-full sm:max-w-xl bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-lg sm:rounded-lg shadow-xl flex flex-col overflow-hidden animate-slide-up sm:animate-none max-h-[92vh] sm:max-h-[85vh] pb-safe sm:pb-0"
         onClick={(e) => e.stopPropagation()}
       >
@@ -373,7 +375,7 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
             <div id="div-sanityconfigmodal-4" className="w-7 h-7 rounded bg-sky-950/80 border border-sky-600/50 flex items-center justify-center text-sky-400">
               <span className="material-symbols-outlined text-[17px]">cloud_sync</span>
             </div>
-            <div>
+            <div id="div-sanityconfigmodal-header-titles">
               <h2 id="sanity-config-dialog-title" className="text-sm font-semibold text-[var(--on-surface)]">
                 {i18n._(msg`Integración & Persistencia Sanity`)}
               </h2>
@@ -384,6 +386,7 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
           </div>
 
           <button
+            id="btn-sanity-config-close-header"
             type="button"
             onClick={onClose}
             className="btn-m3-icon w-7 h-7 cursor-pointer"
@@ -404,6 +407,7 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
             return (
               <button
                 key={tab.id}
+                id={`btn-sanity-config-tab-${tab.id}`}
                 type="button"
                 onClick={() => {
                   setActiveTab(tab.id);
@@ -432,7 +436,7 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
               {/* Concept Banner */}
               <div id="div-sanityconfigmodal-7" className="p-2.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] text-[var(--on-surface-variant)] leading-relaxed flex items-start gap-2">
                 <span className="material-symbols-outlined text-[15px] text-sky-400 shrink-0 mt-0.5">info</span>
-                <div>
+                <div id="div-sanityconfigmodal-concept-text">
                   <strong className="text-[var(--on-surface)] font-medium">{i18n._(msg`Single Source of Truth:`)} </strong>
                   {i18n._(msg`Tu archivo`)} <code className="font-mono text-sky-300">TASKS.md</code> {i18n._(msg`define el contenido y dependencias. Sanity almacena la posición espacial`)} <code className="font-mono text-slate-300">(x, y, w, h)</code> {i18n._(msg`y documentos de tareas.`)}
                 </div>
@@ -466,6 +470,7 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
                     <span>{i18n._(msg`Dataset`)} <span className="text-rose-400">*</span></span>
                     <div id="div-sanityconfigmodal-10" className="flex items-center gap-1">
                       <button
+                        id="btn-sanity-dataset-production"
                         type="button"
                         onClick={() => {
                           setDataset('production');
@@ -477,6 +482,7 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
                       </button>
                       <span className="text-[10px] text-[var(--on-surface-variant)]">·</span>
                       <button
+                        id="btn-sanity-dataset-staging"
                         type="button"
                         onClick={() => {
                           setDataset('staging');
@@ -507,6 +513,7 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
                   <label htmlFor="sanity-token" className="font-medium text-[var(--on-surface)] flex items-center justify-between">
                     <span>{i18n._(msg`API Token`)} <span className="text-[10px] text-[var(--on-surface-variant)] font-normal">{i18n._(msg`(Requerido para escribir en producción)`)}</span></span>
                     <button
+                      id="btn-sanity-toggle-show-token"
                       type="button"
                       onClick={() => setShowToken(!showToken)}
                       className="text-[10px] text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] cursor-pointer flex items-center gap-0.5"
@@ -537,6 +544,7 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
                 <div id="div-sanityconfigmodal-13" className="flex items-center justify-between gap-2">
                   <span className="font-medium text-[var(--on-surface)] text-xs">{i18n._(msg`Comprobación de conectividad`)}</span>
                   <button
+                    id="btn-sanity-test-connection"
                     type="button"
                     onClick={handleTestConnection}
                     disabled={isTesting || !projectId.trim() || !dataset.trim()}
@@ -559,6 +567,7 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
                 {/* Test Result Display */}
                 {testResult && (
                   <div
+                    id="div-sanity-test-result"
                     className={`p-3 rounded border flex flex-col gap-1.5 transition-all text-xs ${
                       testResult.ok
                         ? testResult.mode === 'authenticated'
@@ -592,6 +601,7 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
                       <div id="div-sanityconfigmodal-16" className="mt-1 pt-2 border-t border-rose-900/40 flex items-center justify-between gap-2 text-[11px]">
                         <span className="text-slate-300 truncate">{i18n._(msg`Origen CORS de la app:`)}</span>
                         <button
+                          id="btn-sanity-copy-origin"
                           type="button"
                           onClick={handleCopyOrigin}
                           className="px-2 py-0.5 rounded bg-black/40 border border-[var(--outline)] hover:border-sky-500 text-sky-300 font-mono text-[10px] flex items-center gap-1 cursor-pointer shrink-0"
@@ -629,6 +639,7 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
 
                 <div id="div-sanityconfigmodal-21" className="flex items-center gap-2 pt-1">
                   <button
+                    id="btn-sanity-execute-write-test"
                     type="button"
                     onClick={handleExecuteWriteTest}
                     disabled={isWritingTest || !projectId.trim() || !dataset.trim() || !token.trim()}
@@ -648,6 +659,7 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
                   </button>
 
                   <button
+                    id="btn-sanity-fetch-remote-docs"
                     type="button"
                     onClick={handleFetchRemoteDocs}
                     disabled={isLoadingDocs || !projectId.trim() || !dataset.trim()}
@@ -676,8 +688,9 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
                   <p className="text-[11px] text-[var(--on-surface-variant)] leading-relaxed">
                     {i18n._(msg`Todas las tareas que crees, edites, marques como completadas o muevas en el canvas/kanban se sincronizan automáticamente en tu dataset`)} <strong className="text-sky-300 font-mono">"{dataset}"</strong> {i18n._(msg`de Sanity con`)} <code className="font-mono text-sky-200">_type: 'task'</code>.
                   </p>
-                  <div>
+                  <div id="div-sanityconfigmodal-sync-all-action">
                     <button
+                      id="btn-sanity-sync-all-now"
                       type="button"
                       onClick={async () => {
                         if (!token.trim()) {
@@ -715,6 +728,7 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
               {/* Write Test Result Card */}
               {writeTestResult && (
                 <div
+                  id="div-sanity-write-test-result"
                   className={`p-3 rounded border flex flex-col gap-2 transition-all text-xs ${
                     writeTestResult.ok
                       ? 'bg-emerald-950/30 border-emerald-800/70 text-emerald-300'
@@ -747,6 +761,7 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
                       <div id="div-sanityconfigmodal-28" className="flex items-center justify-between text-[11px] text-[var(--on-surface-variant)]">
                         <span>{i18n._(msg`Payload persistido en Sanity:`)}</span>
                         <button
+                          id="btn-sanity-delete-test-doc"
                           type="button"
                           onClick={() => handleDeleteTestDoc(writeTestResult.document._id)}
                           disabled={isDeletingTestDoc}
@@ -822,6 +837,7 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
                 ].map((s) => (
                   <button
                     key={s.id}
+                    id={`btn-sanity-schema-${s.id}`}
                     type="button"
                     onClick={() => setSelectedSchema(s.id)}
                     className={`px-2.5 py-1 rounded text-xs font-mono transition-colors cursor-pointer ${
@@ -840,6 +856,7 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
                 <div id="div-sanityconfigmodal-40" className="px-3 py-1.5 bg-[var(--surface)] border-b border-[var(--outline)] flex items-center justify-between text-[11px]">
                   <span className="font-mono text-[var(--on-surface-variant)]">{selectedSchema}.ts</span>
                   <button
+                    id="btn-sanity-copy-schema-code"
                     type="button"
                     onClick={() => handleCopySchema(schemaCodeMap[selectedSchema])}
                     className="text-sky-400 hover:underline flex items-center gap-1 cursor-pointer"
@@ -859,9 +876,10 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
 
         {/* Modal Footer */}
         <div id="div-sanityconfigmodal-41" className="px-5 py-3 bg-[var(--surface)] border-t border-[var(--outline)] flex items-center justify-between shrink-0">
-          <div>
+          <div id="div-sanityconfigmodal-footer-left">
             {hasConfig && (
               <button
+                id="btn-sanity-disconnect"
                 type="button"
                 onClick={handleDisconnect}
                 className="btn-m3-text text-rose-400 hover:text-rose-300 px-2 py-1 text-xs cursor-pointer"
@@ -873,6 +891,7 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
 
           <div id="div-sanityconfigmodal-42" className="flex items-center gap-2">
             <button
+              id="btn-sanity-cancel-footer"
               type="button"
               onClick={onClose}
               className="btn-m3-text px-3.5 py-1 text-xs cursor-pointer"
@@ -880,6 +899,7 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
               {i18n._(msg`Cerrar`)}
             </button>
             <button
+              id="btn-sanity-save-footer"
               type="submit"
               form="sanity-config-form"
               className="btn-m3-primary px-4 py-1 text-xs cursor-pointer shadow-sm"

@@ -124,10 +124,12 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
 
   return (
     <div
+      id="modal-workspace-manager-overlay"
       className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in"
       onClick={onClose}
     >
       <div
+        id="modal-workspace-manager-dialog"
         className="w-full sm:max-w-2xl bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-lg sm:rounded-lg shadow-xl flex flex-col overflow-hidden max-h-[90vh] pb-safe sm:pb-0"
         role="dialog"
         aria-modal="true"
@@ -152,6 +154,7 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
         {/* Tab switcher */}
         <div id="div-workspacemanagermodal-3" className="flex border-b border-[var(--outline)] px-4 bg-[var(--surface)]">
           <button
+            id="btn-workspace-tab-list"
             type="button"
             onClick={() => setActiveTab('list')}
             className={`py-2 px-3 text-xs font-medium border-b-2 transition-colors cursor-pointer ${
@@ -163,6 +166,7 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
             {i18n._(msg`Mis Workspaces`)} ({workspaces.length})
           </button>
           <button
+            id="btn-workspace-tab-create"
             type="button"
             onClick={() => setActiveTab('create')}
             className={`py-2 px-3 text-xs font-medium border-b-2 transition-colors cursor-pointer ${
@@ -207,6 +211,7 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
                 <div id="div-workspacemanagermodal-11" className="flex items-center gap-1.5 shrink-0 flex-wrap">
                   {onOpenSyncDiffModal && (
                     <button
+                      id="btn-ws-sync-diff-modal"
                       type="button"
                       disabled={!isSanityConfigured}
                       onClick={onOpenSyncDiffModal}
@@ -220,6 +225,7 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
 
                   {onSyncWorkspacesToSanity && (
                     <button
+                      id="btn-ws-sync-sanity"
                       type="button"
                       disabled={isSyncingSanity || !isSanityConfigured}
                       onClick={async () => {
@@ -242,6 +248,7 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
 
                   {onImportWorkspacesFromSanity && (
                     <button
+                      id="btn-ws-import-sanity"
                       type="button"
                       disabled={isImportingSanity || !isSanityConfigured}
                       onClick={async () => {
@@ -275,6 +282,7 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
                 return (
                   <div
                     key={ws.id}
+                    id={`div-workspace-card-${ws.id}`}
                     className={`p-3 rounded-lg border transition-all ${
                       isActive
                         ? 'bg-[var(--primary-container)]/20 border-[var(--primary)]'
@@ -332,6 +340,7 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
                       <div id="div-workspacemanagermodal-17" className="flex items-center gap-1.5 shrink-0">
                         {onSaveSingleWorkspaceToSanity && isSanityConfigured && (
                           <button
+                            id={`btn-ws-save-sanity-${ws.id}`}
                             type="button"
                             disabled={savingWsId === ws.id}
                             onClick={async () => {
@@ -353,6 +362,7 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
 
                         {!isActive && (
                           <button
+                            id={`btn-ws-open-${ws.id}`}
                             type="button"
                             onClick={() => {
                               logWorkspaceTrace(`Clic en Abrir Workspace desde Modal: "${ws.name}" (${ws.id})`);
@@ -366,6 +376,7 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
                         )}
 
                         <button
+                          id={`btn-ws-delete-trigger-${ws.id}`}
                           type="button"
                           onClick={() => setConfirmDeleteId(isConfirmingThis ? null : ws.id)}
                           className="btn-m3-icon w-7 h-7 text-[var(--on-surface-variant)] hover:text-rose-400 cursor-pointer"
@@ -386,6 +397,7 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
 
                         <div id="div-workspacemanagermodal-20" className="flex items-center gap-1.5 shrink-0">
                           <button
+                            id={`btn-ws-cancel-delete-${ws.id}`}
                             type="button"
                             onClick={() => setConfirmDeleteId(null)}
                             className="px-2 py-0.5 rounded text-xs text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer"
@@ -393,6 +405,7 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
                             {i18n._(msg`Cancelar`)}
                           </button>
                           <button
+                            id={`btn-ws-confirm-delete-${ws.id}`}
                             type="button"
                             onClick={() => handleConfirmDelete(ws.id)}
                             className="px-2.5 py-0.5 rounded bg-rose-600 hover:bg-rose-700 text-white text-xs font-medium cursor-pointer shadow-sm"
@@ -464,6 +477,7 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
 
               <div id="div-workspacemanagermodal-25" className="pt-3 flex items-center justify-end gap-2 border-t border-[var(--outline)]">
                 <button
+                  id="btn-ws-create-cancel"
                   type="button"
                   onClick={() => setActiveTab('list')}
                   className="btn-m3-text px-3 py-1 text-xs cursor-pointer"
@@ -471,6 +485,7 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
                   {i18n._(msg`Cancelar`)}
                 </button>
                 <button
+                  id="btn-ws-create-submit"
                   type="submit"
                   disabled={!name.trim() || !repoInput.trim()}
                   className="btn-m3-primary px-4 py-1.5 text-xs cursor-pointer shadow-sm"
@@ -485,6 +500,7 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
         {/* Footer */}
         <div id="div-workspacemanagermodal-26" className="px-4 py-2.5 bg-[var(--surface)] border-t border-[var(--outline)] flex justify-end">
           <button
+            id="btn-ws-manager-close-footer"
             type="button"
             onClick={onClose}
             className="btn-m3-secondary px-3.5 py-1 text-xs cursor-pointer"

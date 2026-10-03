@@ -242,6 +242,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
       <>
         {/* Mobile Backdrop Overlay */}
         <div
+          id="modal-task-details-batch-backdrop"
           className="fixed inset-0 bg-black/60 backdrop-blur-xs z-30 sm:hidden animate-fade-in"
           onClick={onClose}
           aria-hidden="true"
@@ -262,6 +263,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
               </h2>
             </div>
             <button
+              id="btn-batch-close"
               type="button"
               onClick={onClose}
               className="btn-m3-icon w-7 h-7 cursor-pointer"
@@ -284,6 +286,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
             <div id="div-taskdetailspanel-6" className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
               {statusOptions.map((st) => (
                 <button
+                  id={`btn-batch-status-${st.id}`}
                   key={st.id}
                   type="button"
                   onClick={() => {
@@ -312,6 +315,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
             <div id="div-taskdetailspanel-8" className="grid grid-cols-4 gap-1.5">
               {priorityOptions.map((p) => (
                 <button
+                  id={`btn-batch-priority-${p.id}`}
                   key={p.id}
                   type="button"
                   onClick={() => onBatchUpdateTasks(selectedTaskIds, { priority: p.id })}
@@ -354,6 +358,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
         {/* Footer Actions */}
         <div id="div-taskdetailspanel-10" className="pt-3 border-t border-[var(--outline)] flex items-center justify-between gap-2 mt-4">
           <button
+            id="btn-batch-delete"
             type="button"
             onClick={() => onBatchDeleteTasks(selectedTaskIds)}
             className="btn-m3-secondary flex-1 py-1.5 text-xs text-[var(--error)] border-rose-800/60 bg-rose-950/30 cursor-pointer"
@@ -362,6 +367,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
             <span>{i18n._(msg`Eliminar ${selectedCount} tareas`)}</span>
           </button>
           <button
+            id="btn-batch-deselect"
             type="button"
             onClick={onClose}
             className="btn-m3-text px-3 py-1.5 text-xs cursor-pointer"
@@ -386,6 +392,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
     <>
       {/* Mobile Backdrop Overlay */}
       <div
+        id="modal-task-details-single-backdrop"
         className="fixed inset-0 bg-black/60 backdrop-blur-xs z-30 sm:hidden animate-fade-in"
         onClick={onClose}
         aria-hidden="true"
@@ -401,6 +408,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
         <div id="div-taskdetailspanel-13" className="flex items-center justify-between border-b border-[var(--outline)] pb-2.5">
           <div id="div-taskdetailspanel-14" className="flex items-center gap-1.5">
             <button
+              id="btn-task-copy-id"
               type="button"
               onClick={handleCopyId}
               className="group/id flex items-center gap-1 text-xs font-mono font-medium px-1.5 py-0.5 rounded bg-[var(--surface)] border border-[var(--outline)] hover:border-[var(--primary)] text-[var(--primary)] cursor-pointer transition-colors"
@@ -423,6 +431,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
           <div id="div-taskdetailspanel-15" className="flex items-center gap-0.5">
             {/* Previous Task */}
             <button
+              id="btn-task-prev"
               type="button"
               disabled={!prevTask}
               onClick={() => prevTask && onSelectTask(prevTask.taskId)}
@@ -435,6 +444,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
 
             {/* Next Task */}
             <button
+              id="btn-task-next"
               type="button"
               disabled={!nextTask}
               onClick={() => nextTask && onSelectTask(nextTask.taskId)}
@@ -448,6 +458,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
             {/* Context Menu Trigger ⋮ */}
             <div id="div-taskdetailspanel-16" className="relative">
               <button
+                id="btn-task-menu-trigger"
                 type="button"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 className="btn-m3-icon w-6 h-6 cursor-pointer"
@@ -459,10 +470,12 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
 
               {isMenuOpen && (
                 <div
+                  id="div-task-menu-dropdown"
                   onPointerDown={(e) => e.stopPropagation()}
                   className="absolute right-0 top-7 z-50 bg-[var(--surface-container-high)] border border-[var(--outline)] rounded-md shadow-lg p-1 flex flex-col gap-0.5 min-w-[170px] text-xs font-sans"
                 >
                   <button
+                    id="btn-task-menu-copy-id"
                     type="button"
                     onClick={() => {
                       handleCopyId();
@@ -475,6 +488,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
                   </button>
 
                   <button
+                    id="btn-task-menu-copy-md"
                     type="button"
                     onClick={handleCopyMarkdownSnippet}
                     className="px-2 py-1 rounded text-left text-[var(--on-surface)] hover:bg-[var(--surface-container-highest)] flex items-center gap-2 cursor-pointer"
@@ -485,6 +499,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
 
                   {onFocusOnCanvas && (
                     <button
+                      id="btn-task-menu-focus-canvas"
                       type="button"
                       onClick={() => {
                         setIsMenuOpen(false);
@@ -500,6 +515,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
                   <div id="div-taskdetailspanel-17" className="h-px bg-[var(--outline)] my-0.5" />
 
                   <button
+                    id="btn-task-menu-delete"
                     type="button"
                     onClick={() => {
                       setIsMenuOpen(false);
@@ -516,6 +532,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
 
             {/* Close Button */}
             <button
+              id="btn-task-close"
               type="button"
               onClick={onClose}
               className="btn-m3-icon w-6 h-6 cursor-pointer"
@@ -558,6 +575,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
             />
           ) : (
             <div
+              id="div-task-title-display"
               onDoubleClick={() => setIsEditingTitle(true)}
               onClick={() => setIsEditingTitle(true)}
               title={i18n._(msg`Clic o doble clic para editar`)}
@@ -609,6 +627,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
               const isCurrent = currentStatusId === st.id;
               return (
                 <button
+                  id={`btn-task-status-${st.id}`}
                   key={st.id}
                   type="button"
                   onClick={() => {
@@ -648,6 +667,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
               const isSelected = task.priority === p.id;
               return (
                 <button
+                  id={`btn-task-priority-${p.id}`}
                   key={p.id}
                   type="button"
                   onClick={() => onUpdateTask(task.taskId, { priority: p.id })}
@@ -674,6 +694,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
             </label>
             {!isAddingTag && (
               <button
+                id="btn-task-add-tag-trigger"
                 type="button"
                 onClick={() => setIsAddingTag(true)}
                 className="text-[11px] text-[var(--primary)] hover:underline flex items-center gap-0.5 cursor-pointer"
@@ -692,6 +713,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
                 >
                   <span>#{tag}</span>
                   <button
+                    id={`btn-task-remove-tag-${tag}`}
                     type="button"
                     onClick={() => handleRemoveTag(tag)}
                     className="text-[var(--on-surface-variant)] hover:text-rose-400 cursor-pointer leading-none"
@@ -729,6 +751,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
                 className="flex-1 bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--primary)] rounded px-2 py-0.5 text-xs font-mono focus:outline-none"
               />
               <button
+                id="btn-task-confirm-add-tag"
                 type="button"
                 onClick={() => handleAddTag(newTagInput)}
                 className="btn-m3-primary px-2 py-0.5 text-xs cursor-pointer"
@@ -736,6 +759,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
                 {i18n._(msg`Añadir`)}
               </button>
               <button
+                id="btn-task-cancel-add-tag"
                 type="button"
                 onClick={() => setIsAddingTag(false)}
                 className="btn-m3-icon w-5 h-5 cursor-pointer"
@@ -761,6 +785,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
 
             <div id="div-taskdetailspanel-31" className="w-full h-1 bg-[var(--surface-container-highest)] rounded overflow-hidden">
               <div
+                id="div-task-subtasks-progress-bar"
                 className="h-full bg-[var(--primary)] transition-all duration-200"
                 style={{
                   width: `${(task.subtasks.completed / task.subtasks.total) * 100}%`,
@@ -795,10 +820,12 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
                   );
                   return (
                     <div
+                      id={`div-task-blocker-item-${bId}`}
                       key={bId}
                       className="flex items-center justify-between px-2 py-1 rounded bg-[var(--surface)] border border-[var(--outline)] text-xs"
                     >
                       <button
+                        id={`btn-task-inspect-blocker-${bId}`}
                         type="button"
                         onClick={() => onSelectTask(bId)}
                         className="flex items-center gap-1.5 text-left text-[var(--on-surface)] hover:text-[var(--primary)] truncate flex-1 cursor-pointer"
@@ -813,6 +840,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
                       </button>
 
                       <button
+                        id={`btn-task-remove-blocker-${bId}`}
                         type="button"
                         onClick={() => handleRemoveBlocker(bId)}
                         className="text-[var(--on-surface-variant)] hover:text-rose-400 cursor-pointer p-0.5 ml-1 shrink-0"
@@ -865,10 +893,12 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
               <div id="div-taskdetailspanel-38" className="flex flex-col gap-1">
                 {blockingTasks.map((bTask) => (
                   <div
+                    id={`div-task-blocking-item-${bTask.taskId}`}
                     key={bTask.taskId}
                     className="flex items-center justify-between px-2 py-1 rounded bg-[var(--surface)] border border-[var(--outline)] text-xs"
                   >
                     <button
+                      id={`btn-task-inspect-blocked-${bTask.taskId}`}
                       type="button"
                       onClick={() => onSelectTask(bTask.taskId)}
                       className="flex items-center gap-1.5 text-left text-[var(--on-surface)] hover:text-[var(--primary)] truncate flex-1 cursor-pointer"
@@ -893,6 +923,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
       <div id="div-taskdetailspanel-39" className="pt-3 border-t border-[var(--outline)] flex items-center justify-between gap-2 mt-4">
         {onFocusOnCanvas && (
           <button
+            id="btn-task-footer-focus-canvas"
             type="button"
             onClick={() => onFocusOnCanvas(task.taskId, task.title)}
             className="btn-m3-secondary flex-1 py-1.5 text-xs cursor-pointer"
@@ -903,6 +934,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
         )}
 
         <button
+          id="btn-task-footer-delete"
           type="button"
           onClick={() => onDeleteTask(task.taskId, task.title)}
           className="btn-m3-icon w-8 h-8 text-[var(--error)] hover:bg-rose-950/40 cursor-pointer"

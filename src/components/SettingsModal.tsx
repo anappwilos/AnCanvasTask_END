@@ -86,6 +86,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
   return (
     <div
+      id="modal-settings-overlay"
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70"
       onClick={onClose}
       role="dialog"
@@ -93,6 +94,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       aria-labelledby="settings-dialog-title"
     >
       <div
+        id="modal-settings-dialog"
         className="w-full sm:max-w-3xl bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-lg sm:rounded-lg shadow-xl flex flex-col overflow-hidden animate-slide-up sm:animate-none h-[88vh] sm:h-[640px] max-h-[90vh] pb-safe sm:pb-0"
         onClick={(e) => e.stopPropagation()}
       >
@@ -104,7 +106,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             <div id="div-settingsmodal-4" className="w-7 h-7 rounded bg-[var(--surface-container-high)] border border-[var(--outline)] flex items-center justify-center text-[var(--primary)]">
               <span className="material-symbols-outlined text-[17px]">settings</span>
             </div>
-            <div>
+            <div id="div-settings-title-group">
               <h2 id="settings-dialog-title" className="text-sm font-semibold text-[var(--on-surface)]">{i18n._(msg`Configuración & Preferencias`)}</h2>
               <p className="text-[11px] text-[var(--on-surface-variant)]">{i18n._(msg`Personaliza la interfaz, el comportamiento del espacio de trabajo y persistencia`)}</p>
             </div>
@@ -123,6 +125,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               />
               {searchFilter && (
                 <button
+                  id="btn-settings-search-clear"
                   type="button"
                   onClick={() => setSearchFilter('')}
                   className="text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] cursor-pointer"
@@ -133,6 +136,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </div>
 
             <button
+              id="btn-settings-close-header"
               type="button"
               onClick={onClose}
               className="btn-m3-icon w-7 h-7 cursor-pointer"
@@ -148,6 +152,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {sectionsList.map((sec) => (
             <button
               key={sec.id}
+              id={`btn-settings-tab-mobile-${sec.id}`}
               type="button"
               onClick={() => setActiveSection(sec.id)}
               className={`px-2.5 py-1 rounded text-xs font-medium whitespace-nowrap flex items-center gap-1.5 transition-colors cursor-pointer ${
@@ -171,6 +176,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               return (
                 <button
                   key={sec.id}
+                  id={`btn-settings-tab-desktop-${sec.id}`}
                   type="button"
                   onClick={() => setActiveSection(sec.id)}
                   className={`w-full px-2.5 py-1.5 rounded text-xs font-medium flex items-center gap-2 transition-colors text-left cursor-pointer ${
@@ -195,7 +201,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             {/* GENERAL SECTION */}
             {activeSection === 'general' && (
               <div id="div-settingsmodal-10" className="flex flex-col gap-3">
-                <div>
+                <div id="div-settings-general-header">
                   <h3 className="text-sm font-semibold text-[var(--on-surface)]">{i18n._(msg`General`)}</h3>
                   <p className="text-[var(--on-surface-variant)] mt-0.5">
                     {i18n._(msg`Comportamiento inicial y confirmaciones de seguridad`)}
@@ -264,7 +270,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             {/* APPEARANCE SECTION */}
             {activeSection === 'appearance' && (
               <div id="div-settingsmodal-17" className="flex flex-col gap-4">
-                <div>
+                <div id="div-settings-appearance-header">
                   <h3 className="text-sm font-semibold text-[var(--on-surface)]">{i18n._(msg`Apariencia`)}</h3>
                   <p className="text-[var(--on-surface-variant)] mt-0.5">
                     {i18n._(msg`Tema visual y escala de densidad conforme a DESIGN.md`)}
@@ -284,6 +290,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       return (
                         <button
                           key={t.id}
+                          id={`btn-settings-theme-${t.id}`}
                           type="button"
                           onClick={() => handleUpdate('theme', t.id as any)}
                           className={`p-2.5 rounded border text-left transition-colors cursor-pointer flex flex-col gap-1.5 ${
@@ -313,6 +320,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       return (
                         <button
                           key={d.id}
+                          id={`btn-settings-density-${d.id}`}
                           type="button"
                           onClick={() => handleUpdate('density', d.id as any)}
                           className={`p-2.5 rounded border text-left transition-colors cursor-pointer flex flex-col gap-0.5 ${
@@ -334,7 +342,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             {/* WORKSPACE SECTION */}
             {activeSection === 'workspace' && (
               <div id="div-settingsmodal-22" className="flex flex-col gap-3">
-                <div>
+                <div id="div-settings-workspace-header">
                   <h3 className="text-sm font-semibold text-[var(--on-surface)]">{i18n._(msg`Workspace`)}</h3>
                   <p className="text-[var(--on-surface-variant)] mt-0.5">{i18n._(msg`Organización de paneles laterales y distribución del espacio`)}</p>
                 </div>
@@ -358,7 +366,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             {/* CANVAS SECTION */}
             {activeSection === 'canvas' && (
               <div id="div-settingsmodal-25" className="flex flex-col gap-3">
-                <div>
+                <div id="div-settings-canvas-header">
                   <h3 className="text-sm font-semibold text-[var(--on-surface)]">{i18n._(msg`Canvas`)}</h3>
                   <p className="text-[var(--on-surface-variant)] mt-0.5">{i18n._(msg`Comportamiento visual del lienzo y alineación interactiva`)}</p>
                 </div>
@@ -396,7 +404,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             {/* KANBAN SECTION */}
             {activeSection === 'kanban' && (
               <div id="div-settingsmodal-30" className="flex flex-col gap-3">
-                <div>
+                <div id="div-settings-kanban-header">
                   <h3 className="text-sm font-semibold text-[var(--on-surface)]">{i18n._(msg`Kanban`)}</h3>
                   <p className="text-[var(--on-surface-variant)] mt-0.5">{i18n._(msg`Opciones de visualización de columnas y tarjetas del tablero`)}</p>
                 </div>
@@ -451,7 +459,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             {activeSection === 'files' && (
               <div id="div-settingsmodal-37" className="flex flex-col gap-3">
                 <div id="div-settingsmodal-38" className="flex items-center justify-between">
-                  <div>
+                  <div id="div-settings-files-header">
                     <h3 className="text-sm font-semibold text-[var(--on-surface)]">{i18n._(msg`Archivos Recientes`)}</h3>
                     <p className="text-[var(--on-surface-variant)] mt-0.5">
                       {i18n._(msg`Historial de documentos TASKS.md abiertos recientemente`)}
@@ -459,6 +467,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   </div>
                   {settings.recentFiles && settings.recentFiles.length > 0 && (
                     <button
+                      id="btn-settings-clear-recents"
                       type="button"
                       onClick={handleClearRecents}
                       className="text-[11px] text-[var(--primary)] hover:underline cursor-pointer"
@@ -477,6 +486,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     settings.recentFiles.map((file) => (
                       <div
                         key={file.name}
+                        id={`div-settings-recent-file-${file.name.replace(/[^a-zA-Z0-9]/g, '-')}`}
                         className="p-2.5 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between gap-3"
                       >
                         <div id="div-settingsmodal-41" className="flex items-center gap-2 min-w-0">
@@ -500,6 +510,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     <span className="text-[var(--on-surface-variant)] text-[11px]">{i18n._(msg`Guarda las coordenadas espaciales del canvas`)}</span>
                   </div>
                   <button
+                    id="btn-settings-configure-sanity"
                     type="button"
                     onClick={() => {
                       onClose();
@@ -514,7 +525,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             {/* ACCESSIBILITY SECTION */}
             {activeSection === 'accessibility' && (
               <div id="div-settingsmodal-45" className="flex flex-col gap-3">
-                <div>
+                <div id="div-settings-accessibility-header">
                   <h3 className="text-sm font-semibold text-[var(--on-surface)]">{i18n._(msg`Accesibilidad & Atajos`)}</h3>
                   <p className="text-[var(--on-surface-variant)] mt-0.5">
                     {i18n._(msg`Opciones de contraste, movimiento y mapa de atajos de teclado`)}
@@ -560,8 +571,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       { key: 'Esc', desc: i18n._(msg`Cerrar modal o deseleccionar tarea`) },
                       { key: 'D / Delete', desc: i18n._(msg`Eliminar tarea seleccionada (con confirmación)`) },
                       { key: 'Space + Arrastrar', desc: i18n._(msg`Desplazamiento panorámico (Pan) en Canvas`) },
-                    ].map((item) => (
-                      <div id="div-settingsmodal-52" key={item.key} className="p-2 px-2.5 flex items-center justify-between gap-3 text-xs">
+                    ].map((item, idx) => (
+                      <div id={`div-settings-shortcut-${idx}`} key={item.key} className="p-2 px-2.5 flex items-center justify-between gap-3 text-xs">
                         <span className="text-[var(--on-surface-variant)]">{item.desc}</span>
                         <kbd className="px-1.5 py-0.5 rounded bg-[var(--surface-container)] text-[var(--on-surface)] font-mono text-[10px] border border-[var(--outline)]">
                           {item.key}
@@ -576,7 +587,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             {/* ADVANCED SECTION */}
             {activeSection === 'advanced' && (
               <div id="div-settingsmodal-53" className="flex flex-col gap-3">
-                <div>
+                <div id="div-settings-advanced-header">
                   <h3 className="text-sm font-semibold text-[var(--on-surface)]">{i18n._(msg`Avanzado`)}</h3>
                   <p className="text-[var(--on-surface-variant)] mt-0.5">
                     {i18n._(msg`Acciones de mantenimiento y restablecimiento de configuración`)}
@@ -590,6 +601,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     <span className="text-[var(--on-surface-variant)] text-[11px]">{i18n._(msg`Restaura la distribución espacial de las tarjetas`)}</span>
                   </div>
                   <button
+                    id="btn-settings-reset-canvas-layout"
                     type="button"
                     onClick={() => {
                       onClose();
@@ -613,6 +625,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   </p>
                   <div id="div-settingsmodal-58" className="flex justify-end pt-1">
                     <button
+                      id="btn-settings-open-reset-confirm"
                       type="button"
                       onClick={() => setIsResetConfirmOpen(true)}
                       className="btn-m3-secondary px-3 py-1 text-xs text-rose-300 border-rose-800 hover:bg-rose-950/60 cursor-pointer"
@@ -632,6 +645,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             AnTaskCanvas
           </span>
           <button
+            id="btn-settings-done-footer"
             type="button"
             onClick={onClose}
             className="btn-m3-primary px-4 py-1 text-xs cursor-pointer shadow-sm"
@@ -644,10 +658,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       {/* Confirmation Sub-Modal for Resetting Settings */}
       {isResetConfirmOpen && (
         <div
+          id="modal-settings-reset-confirm-overlay"
           className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/80"
           onClick={() => setIsResetConfirmOpen(false)}
         >
           <div
+            id="modal-settings-reset-confirm-dialog"
             className="w-full max-w-sm bg-[var(--surface-container)] border border-[var(--outline)] rounded-lg shadow-xl p-4 flex flex-col gap-2.5"
             onClick={(e) => e.stopPropagation()}
             role="alertdialog"
@@ -663,6 +679,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </p>
             <div id="div-settingsmodal-60" className="flex items-center justify-end gap-2 pt-2 border-t border-[var(--outline)]">
               <button
+                id="btn-settings-cancel-reset"
                 type="button"
                 onClick={() => setIsResetConfirmOpen(false)}
                 className="btn-m3-text px-3 py-1 text-xs cursor-pointer"
@@ -670,6 +687,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 {i18n._(msg`Cancelar`)}
               </button>
               <button
+                id="btn-settings-execute-reset"
                 type="button"
                 onClick={handleExecuteResetSettings}
                 className="btn-m3-primary bg-rose-600 hover:bg-rose-500 text-white px-3.5 py-1 text-xs cursor-pointer"

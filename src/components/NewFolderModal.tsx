@@ -57,10 +57,12 @@ export const NewFolderModal: React.FC<NewFolderModalProps> = ({
 
   return (
     <div
+      id="modal-new-folder-overlay"
       className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 animate-fade-in"
       onClick={onClose}
     >
       <div
+        id="modal-new-folder-dialog"
         className="w-full sm:max-w-md bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-lg sm:rounded-lg shadow-xl flex flex-col overflow-hidden pb-safe sm:pb-0"
         role="dialog"
         aria-modal="true"
@@ -104,6 +106,7 @@ export const NewFolderModal: React.FC<NewFolderModalProps> = ({
                 .map((sug) => (
                   <button
                     key={sug}
+                    id={`btn-folder-sug-${sug.replace(/[^a-zA-Z0-9]/g, '-')}`}
                     type="button"
                     onClick={() => setFolderName(sug)}
                     className="px-2 py-0.5 rounded bg-[var(--surface)] hover:bg-[var(--surface-container-high)] border border-[var(--outline)] text-[10px] font-mono text-[var(--on-surface)] cursor-pointer transition-colors"
@@ -136,6 +139,7 @@ export const NewFolderModal: React.FC<NewFolderModalProps> = ({
 
           <div id="div-newfoldermodal-7" className="pt-2.5 flex items-center justify-end gap-2 border-t border-[var(--outline)]">
             <button
+              id="btn-cancel-new-folder"
               type="button"
               onClick={onClose}
               className="btn-m3-text px-3 py-1 text-xs cursor-pointer"
@@ -143,6 +147,7 @@ export const NewFolderModal: React.FC<NewFolderModalProps> = ({
               <Trans>Cancelar</Trans>
             </button>
             <button
+              id="btn-submit-new-folder"
               type="submit"
               disabled={!folderName.trim()}
               className="btn-m3-primary px-4 py-1 text-xs cursor-pointer shadow-sm"

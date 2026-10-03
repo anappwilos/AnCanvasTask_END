@@ -55,9 +55,8 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
       const res = await analyzeSyncDifferences(workspaceStore);
       setResult(res);
       if (res.hasPendingChanges) {
-        onShowToast(i18n._(msg`Detección completada: \$\${count} overrides/diferencias encontrados`, {
-          count: res.counts.localOverrides + res.counts.remoteOverrides + res.counts.conflicts
-        }), 'info');
+        const count = res.counts.localOverrides + res.counts.remoteOverrides + res.counts.conflicts;
+        onShowToast(i18n._(msg`Detección completada: ${count} overrides/diferencias encontrados`), 'info');
       } else {
         onShowToast(i18n._(msg`Todo está al día y sincronizado con Sanity`), 'success');
       }
@@ -174,10 +173,12 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
 
   return (
     <div
+      id="modal-sync-override-overlay"
       className="fixed inset-0 z-[65] flex items-center justify-center p-2 sm:p-4 bg-black/75 animate-fade-in"
       onClick={onClose}
     >
       <div
+        id="modal-sync-override-dialog"
         className="w-full max-w-4xl bg-[var(--surface-container)] border border-[var(--outline)] rounded-lg shadow-2xl flex flex-col overflow-hidden max-h-[92vh]"
         role="dialog"
         aria-modal="true"
@@ -190,7 +191,7 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
             <div id="div-syncoverridemodal-3" className="w-7 h-7 rounded bg-rose-600 flex items-center justify-center text-white font-bold text-xs shadow-xs shrink-0">
               S
             </div>
-            <div>
+            <div id="div-sync-modal-header-info">
               <h2 id="sync-modal-title" className="text-sm font-semibold text-[var(--on-surface)] flex items-center gap-2">
                 <span>{i18n._(msg`Sincronización & Detección de Overrides`)}</span>
                 <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[var(--surface-container-high)] text-[var(--on-surface-variant)] border border-[var(--outline)]">
@@ -206,6 +207,7 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
           <div id="div-syncoverridemodal-4" className="flex items-center gap-2">
             {!isSanityConfigured && (
               <button
+                id="btn-sync-configure-credentials"
                 type="button"
                 onClick={onOpenSanityConfig}
                 className="btn-m3-secondary px-2.5 py-1 text-xs cursor-pointer text-amber-300"
@@ -214,6 +216,7 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
               </button>
             )}
             <button
+              id="btn-sync-re-analyze"
               type="button"
               onClick={handleRunAnalysis}
               disabled={isAnalyzing || isProcessing}
@@ -283,6 +286,7 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
             {/* Filter Tabs */}
             <div id="div-syncoverridemodal-14" className="flex items-center gap-1 bg-[var(--surface)] p-0.5 rounded border border-[var(--outline)] text-xs overflow-x-auto max-w-full">
               <button
+                id="btn-sync-filter-all"
                 type="button"
                 onClick={() => setFilterType('all')}
                 className={`px-2 py-0.5 rounded cursor-pointer ${
@@ -294,6 +298,7 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
                 {i18n._(msg`Todos`)} ({result?.items.length || 0})
               </button>
               <button
+                id="btn-sync-filter-pending"
                 type="button"
                 onClick={() => setFilterType('pending')}
                 className={`px-2 py-0.5 rounded cursor-pointer ${
@@ -305,6 +310,7 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
                 {i18n._(msg`Con Diferencias`)} ({(result?.counts.total || 0) - (result?.counts.synced || 0)})
               </button>
               <button
+                id="btn-sync-filter-conflicts"
                 type="button"
                 onClick={() => setFilterType('conflicts')}
                 className={`px-2 py-0.5 rounded cursor-pointer ${
@@ -316,6 +322,7 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
                 {i18n._(msg`Conflictos & Remoto`)} ({(result?.counts.conflicts || 0) + (result?.counts.remoteOverrides || 0)})
               </button>
               <button
+                id="btn-sync-filter-synced"
                 type="button"
                 onClick={() => setFilterType('synced')}
                 className={`px-2 py-0.5 rounded cursor-pointer ${
@@ -331,6 +338,7 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
             {/* Batch execution buttons */}
             <div id="div-syncoverridemodal-15" className="flex items-center gap-2">
               <button
+                id="btn-sync-batch-smart"
                 type="button"
                 disabled={isProcessing || !result?.hasPendingChanges || !isSanityConfigured}
                 onClick={() => handleBatchSyncAction('smart')}
@@ -342,6 +350,7 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
               </button>
 
               <button
+                id="btn-sync-batch-push-all"
                 type="button"
                 disabled={isProcessing || !result?.hasPendingChanges || !isSanityConfigured}
                 onClick={() => handleBatchSyncAction('push_all')}
@@ -353,6 +362,7 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
               </button>
 
               <button
+                id="btn-sync-batch-pull-all"
                 type="button"
                 disabled={isProcessing || !result?.hasPendingChanges || !isSanityConfigured}
                 onClick={() => handleBatchSyncAction('pull_all')}
@@ -388,6 +398,7 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
               return (
                 <div
                   key={item.id}
+                  id={`div-sync-item-${item.id}`}
                   className={`border rounded-lg transition-all overflow-hidden ${
                     item.diffType === 'conflict'
                       ? 'border-rose-800/60 bg-rose-950/10'
@@ -432,6 +443,7 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
                       {item.diffType !== 'synced' && (
                         <>
                           <button
+                            id={`btn-sync-item-keep-local-${item.id}`}
                             type="button"
                             disabled={isResolving || !isSanityConfigured}
                             onClick={() => handleResolveSingle(item, 'keep_local')}
@@ -443,6 +455,7 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
                           </button>
 
                           <button
+                            id={`btn-sync-item-keep-remote-${item.id}`}
                             type="button"
                             disabled={isResolving || !isSanityConfigured || !item.remoteData}
                             onClick={() => handleResolveSingle(item, 'keep_remote')}
@@ -456,6 +469,7 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
                       )}
 
                       <button
+                        id={`btn-sync-item-toggle-expand-${item.id}`}
                         type="button"
                         onClick={() => setExpandedItemId(isExpanded ? null : item.id)}
                         className="btn-m3-icon w-7 h-7 cursor-pointer"
@@ -556,6 +570,7 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
               : i18n._(msg`Todo sincronizado y al día.`)}
           </span>
           <button
+            id="btn-sync-override-close-footer"
             type="button"
             onClick={onClose}
             className="btn-m3-secondary px-3.5 py-1 text-xs cursor-pointer"

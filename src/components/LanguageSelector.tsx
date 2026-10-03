@@ -72,7 +72,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
           role="menu"
           aria-orientation="vertical"
         >
-          <div className="px-2.5 py-1 text-[10px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider border-b border-[var(--outline)] mb-1">
+          <div id="div-language-options-header" className="px-2.5 py-1 text-[10px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider border-b border-[var(--outline)] mb-1">
             {i18n._(msg`Idioma`)}
           </div>
           {SUPPORTED_LANGUAGES.map((lang) => {

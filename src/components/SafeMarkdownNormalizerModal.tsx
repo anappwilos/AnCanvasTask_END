@@ -176,6 +176,7 @@ export function SafeMarkdownNormalizerModal({
 
   return (
     <div
+      id="modal-safe-markdown-normalizer-overlay"
       role="dialog"
       aria-modal="true"
       aria-labelledby="normalizer-title"
@@ -199,6 +200,7 @@ export function SafeMarkdownNormalizerModal({
           <div id="div-safemarkdownnormalizermodal-3" className="flex items-center gap-2">
             {/* Toggle Hidden / Invisible Characters */}
             <button
+              id="btn-normalizer-toggle-invisibles"
               type="button"
               onClick={() => setShowInvisibles((prev) => !prev)}
               className={`px-2 py-0.5 rounded text-[11px] font-mono border cursor-pointer transition-colors flex items-center gap-1 ${
@@ -220,6 +222,7 @@ export function SafeMarkdownNormalizerModal({
             {/* View Mode Toggle */}
             <div id="div-safemarkdownnormalizermodal-4" className="flex items-center bg-[var(--surface)] p-0.5 rounded border border-[var(--outline)] text-[11px]">
               <button
+                id="btn-normalizer-view-side-by-side"
                 type="button"
                 onClick={() => setRenderSideBySide(true)}
                 className={`px-2 py-0.5 rounded cursor-pointer transition-colors ${
@@ -232,6 +235,7 @@ export function SafeMarkdownNormalizerModal({
                 {i18n._(msg`Lado a lado`)}
               </button>
               <button
+                id="btn-normalizer-view-inline"
                 type="button"
                 onClick={() => setRenderSideBySide(false)}
                 className={`px-2 py-0.5 rounded cursor-pointer transition-colors ${
@@ -246,6 +250,7 @@ export function SafeMarkdownNormalizerModal({
             </div>
 
             <button
+              id="btn-normalizer-close-header"
               type="button"
               onClick={onClose}
               className="p-1 rounded text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--surface-container-highest)] cursor-pointer transition-colors"
@@ -262,6 +267,7 @@ export function SafeMarkdownNormalizerModal({
           <div id="div-safemarkdownnormalizermodal-6" className="flex items-center gap-1.5 flex-wrap">
             <span className="text-[11px] text-[var(--on-surface-variant)] mr-1">{i18n._(msg`Acciones`)}:</span>
             <button
+              id="btn-normalizer-preset-safe-only"
               type="button"
               onClick={() => handlePreset('safe_only')}
               className="px-2 py-0.5 rounded text-[11px] font-medium bg-sky-950/40 text-sky-300 border border-sky-800/60 hover:bg-sky-900/60 cursor-pointer transition-colors"
@@ -270,6 +276,7 @@ export function SafeMarkdownNormalizerModal({
               {i18n._(msg`Seguros`)} ({currentStats.safeFormat})
             </button>
             <button
+              id="btn-normalizer-preset-no-deletions"
               type="button"
               onClick={() => handlePreset('no_deletions')}
               className="px-2 py-0.5 rounded text-[11px] font-medium bg-amber-950/40 text-amber-300 border border-amber-800/60 hover:bg-amber-900/60 cursor-pointer transition-colors"
@@ -278,6 +285,7 @@ export function SafeMarkdownNormalizerModal({
               {i18n._(msg`Sin eliminaciones`)}
             </button>
             <button
+              id="btn-normalizer-preset-accept-all"
               type="button"
               onClick={() => handlePreset('accept_all')}
               className="px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-950/40 text-emerald-300 border border-emerald-800/60 hover:bg-emerald-900/60 cursor-pointer transition-colors"
@@ -286,6 +294,7 @@ export function SafeMarkdownNormalizerModal({
               {i18n._(msg`Aceptar todo`)}
             </button>
             <button
+              id="btn-normalizer-preset-reject-all"
               type="button"
               onClick={() => handlePreset('reject_all')}
               className="px-2 py-0.5 rounded text-[11px] font-medium bg-[var(--surface-container)] text-[var(--on-surface-variant)] border border-[var(--outline)] hover:text-[var(--on-surface)] cursor-pointer transition-colors"
@@ -313,6 +322,7 @@ export function SafeMarkdownNormalizerModal({
               </span>
             </div>
             <button
+              id="btn-normalizer-filter-loss-risk-banner"
               type="button"
               onClick={() => setSelectedFilter('loss_risk')}
               className="text-[11px] font-medium underline text-rose-300 hover:text-rose-100 cursor-pointer"
@@ -329,6 +339,7 @@ export function SafeMarkdownNormalizerModal({
             {/* Filter Tabs */}
             <div id="div-safemarkdownnormalizermodal-11" className="p-1.5 border-b border-[var(--outline)] bg-[var(--surface-container-high)] flex flex-wrap gap-1 text-[10px]">
               <button
+                id="btn-normalizer-tab-all"
                 type="button"
                 onClick={() => setSelectedFilter('all')}
                 className={`px-1.5 py-0.5 rounded font-medium cursor-pointer transition-colors ${
@@ -340,6 +351,7 @@ export function SafeMarkdownNormalizerModal({
                 {i18n._(msg`Todos`)} ({currentStats.total})
               </button>
               <button
+                id="btn-normalizer-tab-safe"
                 type="button"
                 onClick={() => setSelectedFilter('formato_seguro')}
                 className={`px-1.5 py-0.5 rounded font-medium cursor-pointer transition-colors ${
@@ -351,6 +363,7 @@ export function SafeMarkdownNormalizerModal({
                 {i18n._(msg`Seguros`)} ({currentStats.safeFormat})
               </button>
               <button
+                id="btn-normalizer-tab-structural"
                 type="button"
                 onClick={() => setSelectedFilter('cambio_estructural')}
                 className={`px-1.5 py-0.5 rounded font-medium cursor-pointer transition-colors ${
@@ -362,6 +375,7 @@ export function SafeMarkdownNormalizerModal({
                 {i18n._(msg`Estructura`)} ({currentStats.structural})
               </button>
               <button
+                id="btn-normalizer-tab-addition"
                 type="button"
                 onClick={() => setSelectedFilter('anadido')}
                 className={`px-1.5 py-0.5 rounded font-medium cursor-pointer transition-colors ${
@@ -373,6 +387,7 @@ export function SafeMarkdownNormalizerModal({
                 + ({currentStats.addition})
               </button>
               <button
+                id="btn-normalizer-tab-deletion"
                 type="button"
                 onClick={() => setSelectedFilter('eliminacion')}
                 className={`px-1.5 py-0.5 rounded font-medium cursor-pointer transition-colors ${
@@ -412,6 +427,7 @@ export function SafeMarkdownNormalizerModal({
                   return (
                     <div
                       key={change.id}
+                      id={`div-normalizer-card-${change.id}`}
                       onClick={() => handleSelectCard(change)}
                       className={`p-2 rounded border transition-colors cursor-pointer text-xs ${
                         isSelected
@@ -435,6 +451,7 @@ export function SafeMarkdownNormalizerModal({
                         </div>
 
                         <button
+                          id={`btn-normalizer-toggle-${change.id}`}
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -545,13 +562,14 @@ export function SafeMarkdownNormalizerModal({
                   onChange={(e) => setHasAcknowledgedRisk(e.target.checked)}
                   className="rounded text-rose-600 focus:ring-rose-500 cursor-pointer"
                 />
-                <span>{i18n._(msg`Confirmar \$\${count} eliminaciones con riesgo`, { count: currentStats.acceptedLossRisk })}</span>
+                <span>{i18n._(msg`Confirmar ${currentStats.acceptedLossRisk} eliminaciones con riesgo`)}</span>
               </label>
             )}
           </div>
 
           <div id="div-safemarkdownnormalizermodal-25" className="flex items-center gap-2">
             <button
+              id="btn-normalizer-copy"
               type="button"
               onClick={handleCopyResult}
               className="px-2.5 py-1 rounded text-xs font-medium bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--outline)] hover:bg-[var(--surface-container-highest)] cursor-pointer transition-colors"
@@ -559,6 +577,7 @@ export function SafeMarkdownNormalizerModal({
               {i18n._(msg`Copiar`)}
             </button>
             <button
+              id="btn-normalizer-cancel"
               type="button"
               onClick={onClose}
               className="px-2.5 py-1 rounded text-xs font-medium text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] cursor-pointer transition-colors"
@@ -566,6 +585,7 @@ export function SafeMarkdownNormalizerModal({
               {i18n._(msg`Cancelar`)}
             </button>
             <button
+              id="btn-normalizer-apply"
               type="button"
               onClick={handleConfirmAndApply}
               disabled={currentStats.acceptedLossRisk > 0 && !hasAcknowledgedRisk}

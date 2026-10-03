@@ -2690,6 +2690,7 @@ export default function App() {
 
   return (
     <div
+      id="div-app-root"
       onDragEnter={handleDragEnter}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -2711,6 +2712,7 @@ export default function App() {
         {/* Left Section: Sidebar Toggle, Brand & Workspace / Branch Picker */}
         <div id="div-app-1" className="flex items-center gap-2 sm:gap-3 min-w-0">
           <button
+            id="btn-toggle-sidebar"
             type="button"
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             className="btn-m3-icon shrink-0 cursor-pointer"
@@ -2757,6 +2759,7 @@ export default function App() {
           {/* View Switcher Segmented Control (Canvas / Kanban / Studio) */}
           <div id="div-app-5" className="flex items-center bg-[var(--surface)] p-0.5 rounded-md border border-[var(--outline)] shrink-0">
             <button
+              id="btn-view-canvas"
               type="button"
               onClick={() => setActiveView('canvas')}
               className={`px-2.5 py-1 rounded text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer ${
@@ -2770,6 +2773,7 @@ export default function App() {
             </button>
 
             <button
+              id="btn-view-kanban"
               type="button"
               onClick={() => setActiveView('kanban')}
               className={`px-2.5 py-1 rounded text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer ${
@@ -2783,6 +2787,7 @@ export default function App() {
             </button>
 
             <button
+              id="btn-view-studio"
               type="button"
               onClick={() => setActiveView('studio')}
               className={`px-2.5 py-1 rounded text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer ${
@@ -2809,6 +2814,7 @@ export default function App() {
             />
             {searchQuery ? (
               <button
+                id="btn-clear-search"
                 type="button"
                 onClick={() => setSearchQuery('')}
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] cursor-pointer"
@@ -2818,6 +2824,7 @@ export default function App() {
               </button>
             ) : (
               <button
+                id="btn-open-command-palette-hint"
                 type="button"
                 onClick={() => setIsCommandPaletteOpen(true)}
                 className="absolute right-1.5 top-1/2 -translate-y-1/2 px-1 py-0.2 rounded bg-[var(--surface-container)] border border-[var(--outline)] text-[9px] font-mono text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] cursor-pointer"
@@ -2840,6 +2847,7 @@ export default function App() {
 
           {/* Split View Toggle */}
           <button
+            id="btn-toggle-split-view-top"
             type="button"
             onClick={handleToggleSplitView}
             className={`hidden sm:flex px-2 sm:px-2.5 py-1 text-xs font-medium rounded border items-center gap-1 transition-colors cursor-pointer ${
@@ -2859,6 +2867,7 @@ export default function App() {
 
           {/* Mobile Quick Search Button */}
           <button
+            id="btn-mobile-open-search"
             type="button"
             onClick={() => setIsCommandPaletteOpen(true)}
             className="btn-m3-icon w-8 h-8 sm:hidden shrink-0 cursor-pointer"
@@ -2871,6 +2880,7 @@ export default function App() {
           {/* Validation Issues Alert Chip (if any) */}
           {validationReport.issues.length > 0 && (
             <button
+              id="btn-validation-issues-chip"
               type="button"
               onClick={() => setIsProblemsModalOpen(true)}
               className={`px-2 py-0.5 text-xs font-mono font-semibold rounded border flex items-center gap-1 cursor-pointer ${
@@ -2887,6 +2897,7 @@ export default function App() {
 
           {/* Quick Guide Button */}
           <button
+            id="btn-quick-guide-top"
             type="button"
             onClick={() => setIsQuickGuideOpen(true)}
             className="btn-m3-icon shrink-0 cursor-pointer hidden sm:inline-flex"
@@ -2898,6 +2909,7 @@ export default function App() {
 
           {/* Settings Button */}
           <button
+            id="btn-settings-top"
             type="button"
             onClick={() => setIsSettingsOpen(true)}
             className="btn-m3-icon shrink-0 cursor-pointer hidden sm:inline-flex"
@@ -2912,6 +2924,7 @@ export default function App() {
 
           {/* Mobile Menu Trigger */}
           <button
+            id="btn-mobile-menu-trigger"
             type="button"
             onClick={() => setIsMobileMenuOpen(true)}
             className="btn-m3-icon sm:hidden shrink-0 cursor-pointer"
@@ -2927,6 +2940,7 @@ export default function App() {
         {/* Mobile Sidebar Overlay Backdrop */}
         {isSidebarOpen && (
           <div
+            id="modal-sidebar-backdrop"
             className="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs lg:hidden animate-fade-in"
             onClick={() => setIsSidebarOpen(false)}
             aria-hidden="true"
@@ -2943,6 +2957,7 @@ export default function App() {
                 <span className="font-semibold text-xs text-[var(--on-surface)]">{i18n._(msg`Documentos de Tareas`)}</span>
               </div>
               <button
+                id="btn-close-sidebar-mobile"
                 type="button"
                 onClick={() => setIsSidebarOpen(false)}
                 className="btn-m3-icon w-7 h-7 cursor-pointer"
@@ -3000,6 +3015,7 @@ export default function App() {
               {/* Quick Actions / New Task & File Button */}
               <div id="div-app-13" className="flex items-center gap-2">
                 <button
+                  id="btn-sidebar-import-file"
                   type="button"
                   onClick={handleOpenFilePicker}
                   className="btn-m3-secondary flex-1 py-1.5 text-xs cursor-pointer"
@@ -3009,6 +3025,7 @@ export default function App() {
                   <span>{i18n._(msg`Importar .md`)}</span>
                 </button>
                 <button
+                  id="btn-sidebar-import-export-modal"
                   type="button"
                   onClick={() => setIsImportExportOpen(true)}
                   className="btn-m3-secondary px-2.5 py-1.5 text-xs cursor-pointer"
@@ -3025,6 +3042,7 @@ export default function App() {
                 </span>
 
                 <button
+                  id="btn-filter-all"
                   type="button"
                   onClick={() => {
                     setActiveFilter('all');
@@ -3046,6 +3064,7 @@ export default function App() {
                 </button>
 
                 <button
+                  id="btn-filter-todo"
                   type="button"
                   onClick={() => {
                     setActiveFilter('todo');
@@ -3067,6 +3086,7 @@ export default function App() {
                 </button>
 
                 <button
+                  id="btn-filter-done"
                   type="button"
                   onClick={() => {
                     setActiveFilter('done');
@@ -3088,6 +3108,7 @@ export default function App() {
                 </button>
 
                 <button
+                  id="btn-filter-critical"
                   type="button"
                   onClick={() => {
                     setActiveFilter('critical');
@@ -3109,6 +3130,7 @@ export default function App() {
                 </button>
 
                 <button
+                  id="btn-filter-blocked"
                   type="button"
                   onClick={() => {
                     setActiveFilter('blocked');
@@ -3138,6 +3160,7 @@ export default function App() {
                   </span>
                   {taskFilters.section !== 'all' && (
                     <button
+                      id="btn-filter-view-all-sections"
                       type="button"
                       onClick={() => setTaskFilters((prev) => ({ ...prev, section: 'all' }))}
                       className="text-[10px] text-[var(--primary)] hover:underline cursor-pointer"
@@ -3153,6 +3176,7 @@ export default function App() {
                     const isSectionActive = taskFilters.section.toLowerCase() === grp.title.toLowerCase();
                     return (
                       <button
+                        id={`btn-filter-section-${grp.title.toLowerCase().replace(/\s+/g, '-')}`}
                         key={grp.title}
                         type="button"
                         onClick={() => {
@@ -3184,6 +3208,7 @@ export default function App() {
             {/* Sidebar Footer: Essential settings & theme */}
             <div id="div-app-23" className="flex flex-col gap-1 pt-2.5 border-t border-[var(--outline)]">
               <button
+                id="btn-sidebar-settings"
                 type="button"
                 onClick={() => setIsSettingsOpen(true)}
                 className="btn-m3-text w-full py-1 text-xs justify-start px-2 cursor-pointer text-[var(--on-surface)]"
@@ -3193,6 +3218,7 @@ export default function App() {
               </button>
 
               <button
+                id="btn-sidebar-theme-toggle"
                 type="button"
                 onClick={() =>
                   handleUpdateSettings({
@@ -3261,6 +3287,7 @@ export default function App() {
           >
             {/* Visual View Pane (Canvas / Kanban / Studio) */}
             <div
+              id="div-visual-view-pane"
               style={{
                 width: isSplitViewOpen ? (isMobileScreen ? '100%' : `${100 - splitRatio}%`) : '100%',
                 height: isSplitViewOpen && isMobileScreen ? '50%' : '100%',
@@ -3282,6 +3309,7 @@ export default function App() {
                   {/* Floating Canvas Navigation Controls (DESIGN.md Section 3 & 14) */}
                   <div id="div-app-24" className="absolute bottom-3 left-3 z-10 flex items-center gap-0.5 sm:gap-1 bg-[var(--surface-container)]/95 backdrop-blur-md border border-[var(--outline)] rounded-full p-1 shadow-md select-none">
                     <button
+                      id="btn-canvas-zoom-out"
                       type="button"
                       onClick={handleZoomOut}
                       className="btn-m3-icon w-7 h-7 cursor-pointer"
@@ -3292,6 +3320,7 @@ export default function App() {
                     </button>
 
                     <button
+                      id="btn-canvas-zoom-reset"
                       type="button"
                       onClick={handleResetZoom}
                       className="px-2 py-0.5 text-xs font-mono font-medium text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] rounded-full transition-colors cursor-pointer"
@@ -3301,6 +3330,7 @@ export default function App() {
                     </button>
 
                     <button
+                      id="btn-canvas-zoom-in"
                       type="button"
                       onClick={handleZoomIn}
                       className="btn-m3-icon w-7 h-7 cursor-pointer"
@@ -3313,6 +3343,7 @@ export default function App() {
                     <div id="div-app-25" className="w-px h-4 bg-[var(--outline)] my-auto mx-0.5" />
 
                     <button
+                      id="btn-canvas-zoom-fit"
                       type="button"
                       onClick={handleZoomToFit}
                       className="btn-m3-icon w-7 h-7 cursor-pointer"
@@ -3323,6 +3354,7 @@ export default function App() {
                     </button>
 
                     <button
+                      id="btn-canvas-autolayout-nav"
                       type="button"
                       onClick={() => setIsAutoLayoutConfirmOpen(true)}
                       className="btn-m3-icon w-7 h-7 cursor-pointer text-sky-400"
@@ -3348,6 +3380,7 @@ export default function App() {
                         </p>
                         <div id="div-app-29" className="flex items-center gap-2 flex-wrap justify-center">
                           <button
+                            id="btn-empty-create-task"
                             type="button"
                             onClick={() => {
                               if (existingSections.length > 0 && !isCustomGroup) {
@@ -3361,6 +3394,7 @@ export default function App() {
                             <span>{i18n._(msg`Crear primera tarea`)}</span>
                           </button>
                           <button
+                            id="btn-empty-load-sample"
                             type="button"
                             onClick={handleLoadSampleProject}
                             className="btn-m3-secondary px-3.5 py-1.5 text-xs cursor-pointer"
@@ -3384,6 +3418,7 @@ export default function App() {
                       </div>
 
                       <button
+                        id="btn-selection-batch-complete"
                         type="button"
                         onClick={() =>
                           handleBatchUpdateTasksFromKanban(selectedTaskIdsOnCanvas, {
@@ -3399,6 +3434,7 @@ export default function App() {
                       </button>
 
                       <button
+                        id="btn-selection-batch-pending"
                         type="button"
                         onClick={() =>
                           handleBatchUpdateTasksFromKanban(selectedTaskIdsOnCanvas, {
@@ -3417,6 +3453,7 @@ export default function App() {
                       <div id="div-app-32" className="flex items-center gap-1 shrink-0 border-l border-r border-[var(--outline)] px-1.5">
                         {(['P0', 'P1', 'P2', 'P3'] as TaskPriority[]).map((p) => (
                           <button
+                            id={`btn-selection-priority-${p}`}
                             key={p}
                             type="button"
                             onClick={() =>
@@ -3431,6 +3468,7 @@ export default function App() {
                       </div>
 
                       <button
+                        id="btn-selection-batch-delete"
                         type="button"
                         onClick={() => {
                           handleBatchDeleteTasksFromKanban(selectedTaskIdsOnCanvas);
@@ -3443,6 +3481,7 @@ export default function App() {
                       </button>
 
                       <button
+                        id="btn-selection-deselect"
                         type="button"
                         onClick={() => {
                           if (editor) {
@@ -3529,6 +3568,7 @@ export default function App() {
             {/* Split Resizer Divider Bar */}
             {isSplitViewOpen && (
               <div
+                id="div-split-resizer-bar"
                 onPointerDown={handleSplitterPointerDown}
                 onDoubleClick={() => handleSetSplitRatio(50)}
                 className="h-2 w-full md:h-full md:w-2 bg-[var(--outline)] hover:bg-[var(--primary)] cursor-row-resize md:cursor-col-resize transition-colors shrink-0 relative flex items-center justify-center group select-none z-20"
@@ -3541,6 +3581,7 @@ export default function App() {
             {/* Real-time Bidirectional Markdown Editor Pane */}
             {isSplitViewOpen && (
               <div
+                id="div-split-editor-pane"
                 style={{
                   width: isMobileScreen ? '100%' : `${splitRatio}%`,
                   height: isMobileScreen ? '50%' : '100%',
@@ -3566,6 +3607,7 @@ export default function App() {
 
           {/* Floating Action Button (FAB) - Bottom Right Corner with plus icon */}
           <button
+            id="btn-fab-new-task"
             type="button"
             onClick={() => {
               if (existingSections.length > 0 && !isCustomGroup) {
@@ -3639,6 +3681,7 @@ export default function App() {
         className="sm:hidden h-14 bg-[var(--surface-container)]/98 border-t border-[var(--outline)] shrink-0 z-30 grid grid-cols-5 gap-1 px-1.5 py-1 pb-[calc(0.25rem+env(safe-area-inset-bottom,0px))] backdrop-blur-md select-none"
       >
         <button
+          id="btn-mobile-nav-create"
           type="button"
           onClick={() => {
             if (activeView === 'studio') {
@@ -3657,6 +3700,7 @@ export default function App() {
         </button>
 
         <button
+          id="btn-mobile-nav-switch-view"
           type="button"
           onClick={() => {
             if (activeView === 'canvas') setActiveView('kanban');
@@ -3677,6 +3721,7 @@ export default function App() {
 
         {activeView === 'canvas' ? (
           <button
+            id="btn-mobile-nav-auto-order"
             type="button"
             onClick={() => setIsAutoLayoutConfirmOpen(true)}
             className="flex flex-col items-center justify-center py-1 px-0.5 rounded-lg text-[10px] text-sky-400 hover:text-sky-300 transition-colors cursor-pointer overflow-hidden"
@@ -3687,6 +3732,7 @@ export default function App() {
           </button>
         ) : activeView === 'kanban' ? (
           <button
+            id="btn-mobile-nav-filters"
             type="button"
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             className="flex flex-col items-center justify-center py-1 px-0.5 rounded-lg text-[10px] text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] transition-colors cursor-pointer overflow-hidden"
@@ -3697,6 +3743,7 @@ export default function App() {
           </button>
         ) : (
           <button
+            id="btn-mobile-nav-sync-sanity"
             type="button"
             onClick={() => setIsSyncOverrideModalOpen(true)}
             className="flex flex-col items-center justify-center py-1 px-0.5 rounded-lg text-[10px] text-amber-400 hover:text-amber-300 transition-colors cursor-pointer overflow-hidden"
@@ -3708,6 +3755,7 @@ export default function App() {
         )}
 
         <button
+          id="btn-mobile-nav-split-view"
           type="button"
           onClick={handleToggleSplitView}
           className={`flex flex-col items-center justify-center py-1 px-0.5 rounded-lg text-[10px] transition-colors cursor-pointer overflow-hidden ${
@@ -3723,6 +3771,7 @@ export default function App() {
         </button>
 
         <button
+          id="btn-mobile-nav-menu"
           type="button"
           onClick={() => setIsMobileMenuOpen(true)}
           className="flex flex-col items-center justify-center py-1 px-0.5 rounded-lg text-[10px] text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] transition-colors cursor-pointer relative overflow-hidden"
@@ -3738,10 +3787,12 @@ export default function App() {
       {/* Mobile Drawer Menu */}
       {isMobileMenuOpen && (
         <div
+          id="modal-mobile-menu-overlay"
           className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 sm:hidden animate-fade-in"
           onClick={() => setIsMobileMenuOpen(false)}
         >
           <div
+            id="modal-mobile-menu-dialog"
             className="w-full bg-[var(--surface-container)] border-t border-[var(--outline)] rounded-t-2xl shadow-2xl p-4 flex flex-col gap-3 animate-slide-up max-h-[88vh] overflow-y-auto pb-safe"
             onClick={(e) => e.stopPropagation()}
             role="dialog"
@@ -3751,7 +3802,7 @@ export default function App() {
             <div id="div-app-36" className="w-12 h-1 bg-[var(--outline)] rounded-full mx-auto" />
 
             <div id="div-app-37" className="flex items-center justify-between border-b border-[var(--outline)] pb-2.5">
-              <div>
+              <div id="div-mobile-menu-header-titles">
                 <h2 className="text-sm font-semibold text-[var(--on-surface)] font-sans">
                   {i18n._(msg`Menú de Opciones`)}
                 </h2>
@@ -3760,6 +3811,7 @@ export default function App() {
                 </p>
               </div>
               <button
+                id="btn-mobile-menu-close"
                 type="button"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="btn-m3-icon w-8 h-8"
@@ -3771,6 +3823,7 @@ export default function App() {
             <div id="div-app-38" className="flex flex-col gap-1.5 text-xs">
               {/* Workspace & Repositories */}
               <button
+                id="btn-mobile-menu-workspaces"
                 type="button"
                 onClick={() => {
                   setIsMobileMenuOpen(false);
@@ -3787,6 +3840,7 @@ export default function App() {
 
               {/* Branches & Git Sync */}
               <button
+                id="btn-mobile-menu-branches"
                 type="button"
                 onClick={() => {
                   setIsMobileMenuOpen(false);
@@ -3803,6 +3857,7 @@ export default function App() {
 
               {/* Sanity Sync & Overrides */}
               <button
+                id="btn-mobile-menu-sanity-sync"
                 type="button"
                 onClick={() => {
                   setIsMobileMenuOpen(false);
@@ -3819,6 +3874,7 @@ export default function App() {
 
               {/* File Open */}
               <button
+                id="btn-mobile-menu-open-file"
                 type="button"
                 onClick={() => {
                   setIsMobileMenuOpen(false);
@@ -3835,6 +3891,7 @@ export default function App() {
 
               {/* Save File */}
               <button
+                id="btn-mobile-menu-save-file"
                 type="button"
                 onClick={() => {
                   setIsMobileMenuOpen(false);
@@ -3859,6 +3916,7 @@ export default function App() {
 
               {/* Import / Export */}
               <button
+                id="btn-mobile-menu-import-export"
                 type="button"
                 onClick={() => {
                   setIsMobileMenuOpen(false);
@@ -3875,6 +3933,7 @@ export default function App() {
 
               {/* Theme Toggle */}
               <button
+                id="btn-mobile-menu-toggle-theme"
                 type="button"
                 onClick={() => {
                   handleUpdateSettings({
@@ -3904,6 +3963,7 @@ export default function App() {
 
               {/* Settings */}
               <button
+                id="btn-mobile-menu-settings"
                 type="button"
                 onClick={() => {
                   setIsMobileMenuOpen(false);
@@ -3920,6 +3980,7 @@ export default function App() {
 
               {/* Sanity Credentials */}
               <button
+                id="btn-mobile-menu-sanity-config"
                 type="button"
                 onClick={() => {
                   setIsMobileMenuOpen(false);
@@ -3936,6 +3997,7 @@ export default function App() {
 
               {/* Quick Guide */}
               <button
+                id="btn-mobile-menu-quick-guide"
                 type="button"
                 onClick={() => {
                   setIsMobileMenuOpen(false);
@@ -3953,6 +4015,7 @@ export default function App() {
               {/* Problems & Validation Panel */}
               {validationReport.issues.length > 0 && (
                 <button
+                  id="btn-mobile-menu-problems"
                   type="button"
                   onClick={() => {
                     setIsMobileMenuOpen(false);
@@ -3977,10 +4040,12 @@ export default function App() {
       {/* Modal: Panel de Problemas */}
       {isProblemsModalOpen && (
         <div
+          id="modal-problems-overlay"
           className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70"
           onClick={() => setIsProblemsModalOpen(false)}
         >
           <div
+            id="modal-problems-dialog"
             className="w-full sm:max-w-2xl bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-lg sm:rounded-lg shadow-xl flex flex-col overflow-hidden animate-slide-up sm:animate-none max-h-[90vh] sm:max-h-[85vh] pb-safe sm:pb-0"
             role="dialog"
             aria-modal="true"
@@ -3990,7 +4055,7 @@ export default function App() {
             <div id="div-app-52" className="w-10 h-1 bg-[var(--outline)] rounded mx-auto my-2 sm:hidden" />
 
             <div id="div-app-53" className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
-              <div>
+              <div id="div-problems-header-titles">
                 <h2 id="problems-modal-title" className="text-sm font-semibold text-[var(--on-surface)] font-sans flex items-center gap-2">
                   <span>{i18n._(msg`Ver incidencias detectadas`)}</span>
                 </h2>
@@ -3999,6 +4064,7 @@ export default function App() {
                 </p>
               </div>
               <button
+                id="btn-problems-close-header"
                 type="button"
                 onClick={() => setIsProblemsModalOpen(false)}
                 className="btn-m3-icon w-7 h-7 cursor-pointer"
@@ -4024,6 +4090,7 @@ export default function App() {
               ) : (
                 validationReport.issues.map((issue) => (
                   <div
+                    id={`div-problems-item-${issue.id}`}
                     key={issue.id}
                     className="p-2.5 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-start justify-between gap-3 text-xs"
                   >
@@ -4038,6 +4105,7 @@ export default function App() {
                     </div>
                     {issue.taskId && (
                       <button
+                        id={`btn-problems-locate-${issue.id}`}
                         type="button"
                         onClick={() => handleFocusTaskOnCanvas(issue.taskId, issue.taskTitle)}
                         className="btn-m3-secondary px-2.5 py-1 text-[11px] cursor-pointer"
@@ -4052,6 +4120,7 @@ export default function App() {
 
             <div id="div-app-60" className="px-4 py-2.5 bg-[var(--surface)] border-t border-[var(--outline)] flex justify-end">
               <button
+                id="btn-problems-close-footer"
                 type="button"
                 onClick={() => setIsProblemsModalOpen(false)}
                 className="btn-m3-secondary px-3.5 py-1 text-xs cursor-pointer"
@@ -4066,10 +4135,12 @@ export default function App() {
       {/* Modal: Confirmación Auto Organizar */}
       {isAutoLayoutConfirmOpen && (
         <div
+          id="modal-autolayout-overlay"
           className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70"
           onClick={() => setIsAutoLayoutConfirmOpen(false)}
         >
           <div
+            id="modal-autolayout-dialog"
             className="w-full sm:max-w-md bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-lg sm:rounded-lg shadow-xl flex flex-col overflow-hidden animate-slide-up sm:animate-none pb-safe sm:pb-0"
             role="dialog"
             aria-modal="true"
@@ -4084,6 +4155,7 @@ export default function App() {
                 <span>{i18n._(msg`Auto-ordenar`)}</span>
               </h2>
               <button
+                id="btn-autolayout-close-header"
                 type="button"
                 onClick={() => setIsAutoLayoutConfirmOpen(false)}
                 className="btn-m3-icon w-7 h-7 cursor-pointer"
@@ -4103,6 +4175,7 @@ export default function App() {
 
             <div id="div-app-65" className="px-4 py-2.5 bg-[var(--surface)] border-t border-[var(--outline)] flex items-center justify-end gap-2">
               <button
+                id="btn-autolayout-cancel"
                 type="button"
                 onClick={() => setIsAutoLayoutConfirmOpen(false)}
                 className="btn-m3-text px-3 py-1 text-xs cursor-pointer"
@@ -4110,6 +4183,7 @@ export default function App() {
                 {i18n._(msg`Cancelar`)}
               </button>
               <button
+                id="btn-autolayout-confirm"
                 type="button"
                 onClick={handleExecuteAutoLayout}
                 className="btn-m3-primary px-3.5 py-1 text-xs cursor-pointer shadow-sm"
@@ -4124,10 +4198,12 @@ export default function App() {
       {/* Modal: Nueva Tarea */}
       {isNewTaskModalOpen && (
         <div
+          id="modal-new-task-overlay"
           className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70"
           onClick={() => setIsNewTaskModalOpen(false)}
         >
           <div
+            id="modal-new-task-dialog"
             className="w-full sm:max-w-md bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-lg sm:rounded-lg shadow-xl flex flex-col overflow-hidden animate-slide-up sm:animate-none pb-safe sm:pb-0"
             role="dialog"
             aria-modal="true"
@@ -4142,6 +4218,7 @@ export default function App() {
                 <span>{i18n._(msg`Nueva Tarea`)}</span>
               </h2>
               <button
+                id="btn-new-task-close-header"
                 type="button"
                 onClick={() => setIsNewTaskModalOpen(false)}
                 className="btn-m3-icon w-7 h-7 cursor-pointer"
@@ -4171,6 +4248,7 @@ export default function App() {
                     const isSelected = newTaskPriority === p;
                     return (
                       <button
+                        id={`btn-new-task-priority-${p}`}
                         key={p}
                         type="button"
                         onClick={() => setNewTaskPriority(p)}
@@ -4192,6 +4270,7 @@ export default function App() {
                 <div id="div-app-72" className="flex items-center justify-between">
                   <label className="text-xs font-medium text-[var(--on-surface)]">{i18n._(msg`Sección`)}</label>
                   <button
+                    id="btn-new-task-toggle-custom-group"
                     type="button"
                     onClick={() => setIsCustomGroup(!isCustomGroup)}
                     className="text-[11px] text-[var(--primary)] hover:underline cursor-pointer"
@@ -4225,6 +4304,7 @@ export default function App() {
 
               <div id="div-app-73" className="pt-2.5 flex items-center justify-end gap-2 border-t border-[var(--outline)]">
                 <button
+                  id="btn-new-task-cancel"
                   type="button"
                   onClick={() => setIsNewTaskModalOpen(false)}
                   className="btn-m3-text px-3 py-1 text-xs cursor-pointer"
@@ -4232,6 +4312,7 @@ export default function App() {
                   {i18n._(msg`Cancelar`)}
                 </button>
                 <button
+                  id="btn-new-task-submit"
                   type="submit"
                   disabled={!newTaskTitle.trim()}
                   className="btn-m3-primary px-4 py-1 text-xs cursor-pointer shadow-sm"
@@ -4247,10 +4328,12 @@ export default function App() {
       {/* Modal: Advertencia / Confirmación de Eliminación */}
       {deleteWarningState && (
         <div
+          id="modal-delete-warning-overlay"
           className="fixed inset-0 z-[80] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70"
           onClick={() => setDeleteWarningState(null)}
         >
           <div
+            id="modal-delete-warning-dialog"
             className="w-full sm:max-w-md bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-lg sm:rounded-lg shadow-xl flex flex-col overflow-hidden animate-slide-up sm:animate-none pb-safe sm:pb-0"
             role="dialog"
             aria-modal="true"
@@ -4265,6 +4348,7 @@ export default function App() {
                 <span>{i18n._(msg`Confirmar Eliminación`)}</span>
               </h2>
               <button
+                id="btn-delete-warning-close-header"
                 type="button"
                 onClick={() => setDeleteWarningState(null)}
                 className="btn-m3-icon w-7 h-7 cursor-pointer"
@@ -4294,6 +4378,7 @@ export default function App() {
 
             <div id="div-app-78" className="px-4 py-2.5 bg-[var(--surface)] border-t border-[var(--outline)] flex items-center justify-end gap-2">
               <button
+                id="btn-delete-warning-cancel"
                 type="button"
                 onClick={() => setDeleteWarningState(null)}
                 className="btn-m3-text px-3 py-1 text-xs cursor-pointer"
@@ -4301,6 +4386,7 @@ export default function App() {
                 {i18n._(msg`Cancelar`)}
               </button>
               <button
+                id="btn-delete-warning-confirm"
                 type="button"
                 onClick={handleConfirmDeleteTask}
                 className="btn-m3-primary bg-rose-600 hover:bg-rose-500 text-white px-4 py-1 text-xs cursor-pointer shadow-sm"
@@ -4315,10 +4401,12 @@ export default function App() {
       {/* Modal: Ver TASKS.md Sincronizado */}
       {isViewMarkdownOpen && (
         <div
+          id="modal-view-markdown-overlay"
           className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70"
           onClick={() => setIsViewMarkdownOpen(false)}
         >
           <div
+            id="modal-view-markdown-dialog"
             className="w-full sm:max-w-2xl bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-lg sm:rounded-lg shadow-xl flex flex-col overflow-hidden animate-slide-up sm:animate-none max-h-[90vh] sm:max-h-[85vh] pb-safe sm:pb-0"
             role="dialog"
             aria-modal="true"
@@ -4328,7 +4416,7 @@ export default function App() {
             <div id="div-app-79" className="w-10 h-1 bg-[var(--outline)] rounded mx-auto my-2 sm:hidden" />
 
             <div id="div-app-80" className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
-              <div>
+              <div id="div-view-markdown-header-titles">
                 <h2 id="view-markdown-title" className="text-sm font-semibold text-[var(--on-surface)] font-sans">
                   {i18n._(msg`TASKS.md — Sincronizado en Vivo`)}
                 </h2>
@@ -4337,6 +4425,7 @@ export default function App() {
                 </p>
               </div>
               <button
+                id="btn-view-markdown-close-header"
                 type="button"
                 onClick={() => setIsViewMarkdownOpen(false)}
                 className="btn-m3-icon w-7 h-7 cursor-pointer"
@@ -4355,6 +4444,7 @@ export default function App() {
 
             <div id="div-app-83" className="px-4 py-2.5 bg-[var(--surface)] border-t border-[var(--outline)] flex items-center justify-between">
               <button
+                id="btn-view-markdown-copy"
                 type="button"
                 onClick={handleCopyMarkdown}
                 className="btn-m3-secondary px-3 py-1 text-xs cursor-pointer flex items-center gap-1.5"
@@ -4364,6 +4454,7 @@ export default function App() {
               </button>
 
               <button
+                id="btn-view-markdown-close-footer"
                 type="button"
                 onClick={() => setIsViewMarkdownOpen(false)}
                 className="btn-m3-text px-3 py-1 text-xs cursor-pointer"

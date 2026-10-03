@@ -282,6 +282,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
 
   return (
     <div
+      id="modal-command-palette-overlay"
       role="dialog"
       aria-modal="true"
       aria-label={i18n._(msg`Paleta de comandos y búsqueda global`)}
@@ -289,6 +290,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       className="fixed inset-0 z-50 bg-black/70 flex items-start justify-center p-3 sm:p-6 pt-16 sm:pt-20"
     >
       <div
+        id="modal-command-palette-dialog"
         onClick={(e) => e.stopPropagation()}
         className="w-full max-w-xl bg-[var(--surface-container)] border border-[var(--outline)] rounded-lg shadow-xl overflow-hidden flex flex-col max-h-[82vh]"
       >
@@ -311,6 +313,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
           />
           {query && (
             <button
+              id="btn-command-palette-clear-query"
               type="button"
               onClick={() => {
                 setQuery('');
@@ -328,6 +331,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
 
         {/* Results List */}
         <div
+          id="div-command-palette-results-list"
           ref={resultsContainerRef}
           className="flex-1 overflow-y-auto p-2 flex flex-col gap-0.5 min-h-[220px]"
         >
@@ -357,6 +361,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
 
                   {res.type === 'action' && (
                     <button
+                      id={`btn-cmd-palette-action-${index}`}
                       data-index={index}
                       type="button"
                       onClick={() => handleExecute(res)}
@@ -393,6 +398,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
 
                   {(res.type === 'task' || res.type === 'recent-task') && (
                     <button
+                      id={`btn-cmd-palette-task-${res.item.taskId || index}`}
                       data-index={index}
                       type="button"
                       onClick={() => handleExecute(res)}
@@ -452,6 +458,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
 
                   {res.type === 'section' && (
                     <button
+                      id={`btn-cmd-palette-section-${index}`}
                       data-index={index}
                       type="button"
                       onClick={() => handleExecute(res)}
@@ -476,6 +483,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
 
                   {res.type === 'tag' && (
                     <button
+                      id={`btn-cmd-palette-tag-${index}`}
                       data-index={index}
                       type="button"
                       onClick={() => handleExecute(res)}

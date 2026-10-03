@@ -46,10 +46,12 @@ export const NewBranchModal: React.FC<NewBranchModalProps> = ({
 
   return (
     <div
+      id="modal-new-branch-overlay"
       className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 animate-fade-in"
       onClick={onClose}
     >
       <div
+        id="modal-new-branch-dialog"
         className="w-full sm:max-w-md bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-lg sm:rounded-lg shadow-xl flex flex-col overflow-hidden pb-safe sm:pb-0"
         role="dialog"
         aria-modal="true"
@@ -107,6 +109,7 @@ export const NewBranchModal: React.FC<NewBranchModalProps> = ({
 
           <div id="div-newbranchmodal-6" className="pt-2.5 flex items-center justify-end gap-2 border-t border-[var(--outline)]">
             <button
+              id="btn-cancel-new-branch"
               type="button"
               onClick={onClose}
               className="btn-m3-text px-3 py-1 text-xs cursor-pointer"
@@ -114,6 +117,7 @@ export const NewBranchModal: React.FC<NewBranchModalProps> = ({
               {_(msg`Cancelar`)}
             </button>
             <button
+              id="btn-submit-new-branch"
               type="submit"
               disabled={!branchName.trim()}
               className="btn-m3-primary px-4 py-1 text-xs cursor-pointer shadow-sm"

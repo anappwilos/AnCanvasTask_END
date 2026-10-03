@@ -68,10 +68,12 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
 
   return (
     <div
+      id="modal-github-sync-overlay"
       className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 animate-fade-in"
       onClick={onClose}
     >
       <div
+        id="modal-github-sync-dialog"
         className="w-full sm:max-w-xl bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-lg sm:rounded-lg shadow-xl flex flex-col overflow-hidden max-h-[90vh] pb-safe sm:pb-0"
         role="dialog"
         aria-modal="true"
@@ -84,7 +86,7 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
             <svg className="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
               <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
             </svg>
-            <div>
+            <div id="div-github-sync-header-info">
               <h2 id="github-sync-title" className="text-sm font-semibold text-[var(--on-surface)] font-sans">
                 {_(msg`GitHub Repository & Git Status`)}
               </h2>
@@ -101,6 +103,7 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
         {/* Tab Navigation */}
         <div id="div-githubsyncmodal-3" className="flex border-b border-[var(--outline)] px-4 bg-[var(--surface)]">
           <button
+            id="btn-github-tab-commit"
             type="button"
             onClick={() => setActiveTab('commit')}
             className={`py-2 px-3 text-xs font-medium border-b-2 transition-colors cursor-pointer ${
@@ -112,6 +115,7 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
             {_(msg`Confirmar Cambios`)} ({modifiedDocs.length})
           </button>
           <button
+            id="btn-github-tab-history"
             type="button"
             onClick={() => setActiveTab('history')}
             className={`py-2 px-3 text-xs font-medium border-b-2 transition-colors cursor-pointer ${
@@ -123,6 +127,7 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
             {_(msg`Historial de Commits`)}
           </button>
           <button
+            id="btn-github-tab-settings"
             type="button"
             onClick={() => setActiveTab('settings')}
             className={`py-2 px-3 text-xs font-medium border-b-2 transition-colors cursor-pointer ${
@@ -150,6 +155,7 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
                     return (
                       <div
                         key={doc.id}
+                        id={`div-github-doc-item-${doc.id}`}
                         className={`px-2.5 py-1.5 rounded border text-xs font-mono flex items-center justify-between ${
                           isMod
                             ? 'bg-amber-950/20 border-amber-700/60 text-amber-200'
@@ -203,6 +209,7 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
 
                 <div id="div-githubsyncmodal-11" className="pt-2 flex items-center justify-end gap-2">
                   <button
+                    id="btn-github-commit-submit"
                     type="submit"
                     disabled={!commitMessage.trim()}
                     className="btn-m3-primary px-4 py-1.5 text-xs cursor-pointer shadow-sm flex items-center gap-1.5"
@@ -260,6 +267,7 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
 
               <div id="div-githubsyncmodal-17" className="pt-2 flex justify-end">
                 <button
+                  id="btn-github-token-submit"
                   type="submit"
                   disabled={isSavingToken}
                   className="btn-m3-primary px-4 py-1.5 text-xs cursor-pointer shadow-sm"
@@ -274,6 +282,7 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
         {/* Footer */}
         <div id="div-githubsyncmodal-18" className="px-4 py-2.5 bg-[var(--surface)] border-t border-[var(--outline)] flex justify-end">
           <button
+            id="btn-github-sync-close-footer"
             type="button"
             onClick={onClose}
             className="btn-m3-secondary px-3.5 py-1 text-xs cursor-pointer"

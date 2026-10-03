@@ -183,6 +183,7 @@ function SdkDocumentInspector({
           </h3>
         </div>
         <button
+          id="btn-sanity-sdk-close-inspector"
           onClick={onClose}
           className="text-xs text-neutral-400 hover:text-neutral-200 px-2 py-1 bg-neutral-800 hover:bg-neutral-700 transition"
         >
@@ -194,6 +195,7 @@ function SdkDocumentInspector({
       <div id="div-sanitysdkexplorer-6" className="flex flex-wrap gap-2">
         {isTask && onImportTaskToMarkdown && (
           <button
+            id="btn-sanity-sdk-import-task"
             onClick={() => onImportTaskToMarkdown(document)}
             className="px-3 py-1.5 text-xs bg-emerald-800 hover:bg-emerald-700 text-white flex items-center gap-1.5 transition"
             title="Importar al archivo TASKS.md activo"
@@ -204,6 +206,7 @@ function SdkDocumentInspector({
         )}
         {isWorkspace && onActivateWorkspace && (
           <button
+            id="btn-sanity-sdk-activate-workspace"
             onClick={() => onActivateWorkspace(document)}
             className="px-3 py-1.5 text-xs bg-sky-800 hover:bg-sky-700 text-white flex items-center gap-1.5 transition"
             title="Activar como Workspace activo de la app"
@@ -217,7 +220,7 @@ function SdkDocumentInspector({
       {/* Quick Edit Form */}
       {isEditing ? (
         <div id="div-sanitysdkexplorer-7" className="space-y-3 p-3 bg-neutral-950 border border-neutral-800">
-          <div>
+          <div id="div-sanity-sdk-edit-title-group">
             <label className="text-[11px] uppercase tracking-wider text-neutral-400 font-mono block mb-1">
               Título / Nombre
             </label>
@@ -229,7 +232,7 @@ function SdkDocumentInspector({
             />
           </div>
           {isTask && (
-            <div>
+            <div id="div-sanity-sdk-edit-status-group">
               <label className="text-[11px] uppercase tracking-wider text-neutral-400 font-mono block mb-1">
                 Estado
               </label>
@@ -247,12 +250,14 @@ function SdkDocumentInspector({
           )}
           <div id="div-sanitysdkexplorer-8" className="flex gap-2 justify-end pt-1">
             <button
+              id="btn-sanity-sdk-cancel-quick-edit"
               onClick={() => setIsEditing(false)}
               className="px-2.5 py-1 text-xs text-neutral-400 hover:text-neutral-200 bg-neutral-800 hover:bg-neutral-700"
             >
               Cancelar
             </button>
             <button
+              id="btn-sanity-sdk-save-quick-edit"
               onClick={handleApplyQuickEdit}
               disabled={isSaving}
               className="px-3 py-1 text-xs bg-emerald-700 hover:bg-emerald-600 text-white font-medium flex items-center gap-1.5"
@@ -271,6 +276,7 @@ function SdkDocumentInspector({
             </span>
           </div>
           <button
+            id="btn-sanity-sdk-open-quick-edit"
             onClick={() => setIsEditing(true)}
             className="px-2.5 py-1 text-xs bg-neutral-800 hover:bg-neutral-700 text-neutral-200 flex items-center gap-1.5 transition"
           >
@@ -281,7 +287,7 @@ function SdkDocumentInspector({
       )}
 
       {/* JSON Payload Inspector */}
-      <div>
+      <div id="div-sanity-sdk-payload-inspector">
         <div id="div-sanitysdkexplorer-11" className="text-[11px] uppercase tracking-wider text-neutral-400 font-mono mb-1.5 flex items-center gap-1.5">
           <Code2 className="w-3.5 h-3.5 text-neutral-500" />
           Estado reactivo en memoria (Content Lake)
@@ -341,6 +347,7 @@ function SdkDocumentsList({
             return (
               <button
                 key={h.documentId}
+                id={`btn-sanity-sdk-handle-${h.documentId}`}
                 onClick={() => onSelectHandle(h)}
                 className={`text-left p-3 border transition flex flex-col justify-between gap-2 cursor-pointer ${
                   isSelected
@@ -368,6 +375,7 @@ function SdkDocumentsList({
       {hasMore && (
         <div id="div-sanitysdkexplorer-18" className="pt-2 text-center">
           <button
+            id="btn-sanity-sdk-load-more"
             onClick={() => loadMore()}
             disabled={isPending}
             className="px-4 py-1.5 text-xs bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-neutral-200 transition"
@@ -405,6 +413,7 @@ function SdkGroqSandbox({ onShowToast }: { onShowToast: (msg: string, type?: any
         {PRESET_QUERIES.map((preset) => (
           <button
             key={preset.label}
+            id={`btn-sanity-sdk-preset-${preset.label.toLowerCase().replace(/[^a-z0-9]/g, '-')}`}
             onClick={() => {
               setInputQuery(preset.query);
               setActiveQuery(preset.query);
@@ -443,6 +452,7 @@ function SdkGroqSandbox({ onShowToast }: { onShowToast: (msg: string, type?: any
             placeholder="Escribe tu consulta GROQ..."
           />
           <button
+            id="btn-sanity-sdk-run-query"
             onClick={() => setActiveQuery(inputQuery)}
             className="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-xs font-medium text-neutral-200 border border-neutral-700 flex items-center gap-1.5 transition"
           >
@@ -453,7 +463,7 @@ function SdkGroqSandbox({ onShowToast }: { onShowToast: (msg: string, type?: any
       </div>
 
       {/* Query output */}
-      <div>
+      <div id="div-sanity-sdk-groq-results">
         <div id="div-sanitysdkexplorer-24" className="text-[11px] font-mono text-neutral-400 mb-1 flex items-center justify-between">
           <span>
             Resultados devueltos:{' '}
@@ -541,7 +551,7 @@ function SdkDocumentCreator({
             className="w-full bg-neutral-950 border border-neutral-800 px-3 py-1.5 text-xs text-neutral-200 focus:outline-none focus:border-neutral-600 font-mono"
           />
         </div>
-        <div>
+        <div id="div-sanity-sdk-creator-priority-group">
           <label className="text-[11px] font-mono uppercase text-neutral-400 block mb-1">
             Prioridad
           </label>
@@ -563,6 +573,7 @@ function SdkDocumentCreator({
           Escribe a la Content Lake con sincronización reactiva
         </span>
         <button
+          id="btn-sanity-sdk-submit-new-task"
           type="submit"
           disabled={isCreating}
           className="px-4 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-medium flex items-center gap-1.5 transition"
@@ -648,6 +659,7 @@ function SdkExplorerInner({
         <div id="div-sanitysdkexplorer-34" className="flex items-center gap-2 flex-wrap">
           {onSwitchToNativeStudio && (
             <button
+              id="btn-sanity-sdk-switch-native-studio"
               onClick={onSwitchToNativeStudio}
               className="px-3 py-1.5 text-xs bg-rose-950 hover:bg-rose-900 text-rose-200 border border-rose-800/80 flex items-center gap-1.5 transition cursor-pointer"
               title="Abrir interfaz nativa de Sanity Studio con formularios enriquecidos"
@@ -658,6 +670,7 @@ function SdkExplorerInner({
           )}
           {onSwitchToDeskTool && (
             <button
+              id="btn-sanity-sdk-switch-desk-tool"
               onClick={onSwitchToDeskTool}
               className="px-3 py-1.5 text-xs bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700 flex items-center gap-1.5 transition cursor-pointer"
               title="Abrir el Desk Tool clásico de 3 paneles"
@@ -667,6 +680,7 @@ function SdkExplorerInner({
             </button>
           )}
           <button
+            id="btn-sanity-sdk-open-config"
             onClick={onOpenSanityConfig}
             className="px-3 py-1.5 text-xs bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700 transition"
           >
@@ -687,6 +701,7 @@ function SdkExplorerInner({
       {/* Navigation Tabs */}
       <div id="div-sanitysdkexplorer-36" className="flex border-b border-neutral-800 gap-1">
         <button
+          id="btn-sanity-sdk-tab-documents"
           onClick={() => setActiveTab('documents')}
           className={`px-4 py-2 text-xs font-medium border-b-2 transition flex items-center gap-1.5 ${
             activeTab === 'documents'
@@ -698,6 +713,7 @@ function SdkExplorerInner({
           Documentos Reactivos (useDocuments)
         </button>
         <button
+          id="btn-sanity-sdk-tab-groq"
           onClick={() => setActiveTab('groq')}
           className={`px-4 py-2 text-xs font-medium border-b-2 transition flex items-center gap-1.5 ${
             activeTab === 'groq'
@@ -709,6 +725,7 @@ function SdkExplorerInner({
           Consultas GROQ Live (useQuery)
         </button>
         <button
+          id="btn-sanity-sdk-tab-events"
           onClick={() => setActiveTab('events')}
           className={`px-4 py-2 text-xs font-medium border-b-2 transition flex items-center gap-1.5 ${
             activeTab === 'events'
@@ -736,6 +753,7 @@ function SdkExplorerInner({
               {['task', 'workspace', 'canvasVisualState', 'all'].map((t) => (
                 <button
                   key={t}
+                  id={`btn-sanity-sdk-filter-type-${t}`}
                   onClick={() => {
                     setSelectedDocType(t);
                     setSelectedHandle(null);
@@ -830,6 +848,7 @@ function SdkExplorerInner({
             </span>
             {eventsLog.length > 0 && (
               <button
+                id="btn-sanity-sdk-clear-events"
                 onClick={() => setEventsLog([])}
                 className="text-[11px] text-neutral-400 hover:text-neutral-200 underline"
               >
@@ -848,6 +867,7 @@ function SdkExplorerInner({
               {eventsLog.map((evt) => (
                 <div
                   key={evt.id}
+                  id={`div-sanity-sdk-event-${evt.id}`}
                   className="p-2.5 bg-neutral-900 border border-neutral-800 flex items-center justify-between gap-2"
                 >
                   <div id="div-sanitysdkexplorer-51" className="flex items-center gap-2">
@@ -909,6 +929,7 @@ export const SanitySdkExplorer: React.FC<SanitySdkExplorerProps> = ({
           </p>
         </div>
         <button
+          id="btn-sanity-sdk-configure-credentials"
           onClick={onOpenSanityConfig}
           className="px-4 py-2 bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-medium transition"
         >
@@ -934,6 +955,7 @@ export const SanitySdkExplorer: React.FC<SanitySdkExplorerProps> = ({
           </div>
           <div id="div-sanitysdkexplorer-58" className="flex gap-2 pt-1">
             <button
+              id="btn-sanity-sdk-error-retry"
               onClick={reset}
               className="px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200"
             >
@@ -941,6 +963,7 @@ export const SanitySdkExplorer: React.FC<SanitySdkExplorerProps> = ({
             </button>
             {onSwitchToDeskTool && (
               <button
+                id="btn-sanity-sdk-error-desk-tool"
                 onClick={onSwitchToDeskTool}
                 className="px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200"
               >
@@ -948,6 +971,7 @@ export const SanitySdkExplorer: React.FC<SanitySdkExplorerProps> = ({
               </button>
             )}
             <button
+              id="btn-sanity-sdk-error-open-config"
               onClick={onOpenSanityConfig}
               className="px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200"
             >

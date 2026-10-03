@@ -25,6 +25,7 @@ export const ToastContainer: React.FC<ToastContainerProps> = ({ toasts, onDismis
 
   return (
     <div
+      id="toast-container"
       className="fixed bottom-16 sm:bottom-6 right-3 sm:right-6 z-[100] flex flex-col gap-2 max-w-[95vw] sm:max-w-md pointer-events-none"
       aria-live="polite"
       aria-atomic="true"
@@ -93,6 +94,7 @@ const ToastCard: React.FC<{ toast: ToastItem; onDismiss: () => void }> = ({ toas
 
   return (
     <div
+      id={`toast-card-${toast.id}`}
       role={toast.type === 'error' ? 'alert' : 'status'}
       className={`pointer-events-auto flex items-center justify-between gap-3 px-3 py-2 rounded-md border ${config.borderClass} ${config.bgClass} shadow-md text-xs font-sans text-[var(--on-surface)] transition-all duration-150 ${
         isClosing ? 'opacity-0 translate-y-1' : 'opacity-100 translate-y-0'
@@ -110,6 +112,7 @@ const ToastCard: React.FC<{ toast: ToastItem; onDismiss: () => void }> = ({ toas
       <div id="div-toastsystem-2" className="flex items-center gap-1.5 shrink-0">
         {toast.action && (
           <button
+            id={`btn-toast-action-${toast.id}`}
             type="button"
             onClick={() => {
               toast.action?.onClick();
@@ -122,6 +125,7 @@ const ToastCard: React.FC<{ toast: ToastItem; onDismiss: () => void }> = ({ toas
         )}
 
         <button
+          id={`btn-toast-dismiss-${toast.id}`}
           type="button"
           onClick={handleManualDismiss}
           className="p-0.5 rounded text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--surface-container-highest)] cursor-pointer transition-colors"

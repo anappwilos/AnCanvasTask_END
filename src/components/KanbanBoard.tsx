@@ -329,6 +329,7 @@ export function KanbanBoard({
 
   return (
     <div
+      id="div-kanban-board-container"
       className="flex-1 w-full h-full flex flex-col overflow-hidden bg-[var(--surface)] select-none relative"
       onClick={() => {
         setActiveMenuTaskId(null);
@@ -342,6 +343,7 @@ export function KanbanBoard({
           </span>
           <div id="div-kanbanboard-3" className="flex items-center bg-[var(--surface)] p-0.5 rounded-md border border-[var(--outline)]">
             <button
+              id="btn-kanban-group-by-status"
               type="button"
               onClick={() => setGroupBy('status')}
               className={`px-2.5 py-0.5 rounded text-xs font-medium transition-colors cursor-pointer ${
@@ -353,6 +355,7 @@ export function KanbanBoard({
               {i18n._(msg`Estados`)}
             </button>
             <button
+              id="btn-kanban-group-by-section"
               type="button"
               onClick={() => setGroupBy('section')}
               className={`px-2.5 py-0.5 rounded text-xs font-medium transition-colors cursor-pointer ${
@@ -392,6 +395,7 @@ export function KanbanBoard({
                 return (
                   <button
                     key={col.id}
+                    id={`btn-kanban-mobile-col-${col.id}`}
                     type="button"
                     onClick={() => {
                       setActiveMobileColumn(col.id);
@@ -424,6 +428,7 @@ export function KanbanBoard({
                 return (
                   <button
                     key={sec}
+                    id={`btn-kanban-mobile-sec-${secId}`}
                     type="button"
                     onClick={() => {
                       setActiveMobileColumn(sec);
@@ -474,6 +479,7 @@ export function KanbanBoard({
           </p>
           <div id="div-kanbanboard-9" className="flex items-center gap-2 flex-wrap justify-center">
             <button
+              id="btn-kanban-create-first-task"
               type="button"
               onClick={() => onOpenNewTaskModalWithGroup?.('General')}
               className="btn-m3-primary px-3.5 py-1.5 text-xs cursor-pointer"
@@ -483,6 +489,7 @@ export function KanbanBoard({
             </button>
             {onOpenSampleProject && (
               <button
+                id="btn-kanban-load-sample"
                 type="button"
                 onClick={onOpenSampleProject}
                 className="btn-m3-secondary px-3.5 py-1.5 text-xs cursor-pointer"
@@ -506,6 +513,7 @@ export function KanbanBoard({
           </p>
           {onResetFilters && (
             <button
+              id="btn-kanban-reset-filters"
               type="button"
               onClick={onResetFilters}
               className="btn-m3-secondary px-3.5 py-1.5 text-xs cursor-pointer text-[var(--primary)] border-[var(--primary)]/40 hover:bg-[var(--primary-container)]/20"
@@ -555,6 +563,7 @@ export function KanbanBoard({
                     </div>
 
                     <button
+                      id={`btn-kanban-add-task-${col.id}`}
                       type="button"
                       onClick={() => onOpenNewTaskModalWithGroup?.(col.label)}
                       className="btn-m3-icon w-6 h-6 cursor-pointer hover:text-[var(--primary)]"
@@ -570,6 +579,7 @@ export function KanbanBoard({
                       <div id="div-kanbanboard-16" className="h-24 flex flex-col items-center justify-center text-center p-2 border border-dashed border-[var(--outline)] rounded text-[var(--on-surface-variant)] gap-1">
                         <span className="text-[11px] font-sans">{i18n._(msg`No hay tareas`)}</span>
                         <button
+                          id={`btn-kanban-empty-add-task-${col.id}`}
                           type="button"
                           onClick={() => onOpenNewTaskModalWithGroup?.(col.label)}
                           className="text-[11px] font-medium text-[var(--primary)] hover:underline cursor-pointer flex items-center gap-0.5"
@@ -588,6 +598,7 @@ export function KanbanBoard({
                         return (
                           <div
                             key={task.taskId}
+                            id={`div-kanban-card-${task.taskId}`}
                             draggable
                             tabIndex={0}
                             role="button"
@@ -615,6 +626,7 @@ export function KanbanBoard({
                               <div id="div-kanbanboard-18" className="flex items-start gap-1.5 flex-1 min-w-0">
                                 {/* Checkbox */}
                                 <button
+                                  id={`btn-kanban-toggle-task-${task.taskId}`}
                                   type="button"
                                   onClick={(e) => {
                                     e.stopPropagation();
@@ -664,6 +676,7 @@ export function KanbanBoard({
                                   />
                                 ) : (
                                   <div
+                                    id={`div-kanban-title-${task.taskId}`}
                                     onDoubleClick={(e) => {
                                       e.stopPropagation();
                                       setEditingTaskId(task.taskId);
@@ -686,6 +699,7 @@ export function KanbanBoard({
 
                                 {/* Priority indicator */}
                                 <button
+                                  id={`btn-kanban-cycle-prio-${task.taskId}`}
                                   type="button"
                                   onClick={(e) => cyclePriority(task.taskId, task.priority, e)}
                                   title={i18n._(msg`Clic para cambiar prioridad`)}
@@ -696,6 +710,7 @@ export function KanbanBoard({
                                 </button>
 
                                 <button
+                                  id={`btn-kanban-menu-trigger-${task.taskId}`}
                                   type="button"
                                   onClick={(e) => {
                                     e.stopPropagation();
@@ -711,10 +726,12 @@ export function KanbanBoard({
                             {/* Contextual Popover Menu */}
                             {activeMenuTaskId === task.taskId && (
                               <div
+                                id={`div-kanban-card-menu-${task.taskId}`}
                                 onClick={(e) => e.stopPropagation()}
                                 className="absolute top-8 right-2 z-30 bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-lg p-1 flex flex-col gap-0.5 min-w-[140px] text-xs font-sans"
                               >
                                 <button
+                                  id={`btn-kanban-menu-edit-${task.taskId}`}
                                   type="button"
                                   onClick={(e) => {
                                     e.stopPropagation();
@@ -729,6 +746,7 @@ export function KanbanBoard({
                                 </button>
 
                                 <button
+                                  id={`btn-kanban-menu-select-${task.taskId}`}
                                   type="button"
                                   onClick={(e) => {
                                     e.stopPropagation();
@@ -744,6 +762,7 @@ export function KanbanBoard({
                                 <div id="div-kanbanboard-19" className="h-px bg-[var(--outline)] my-0.5" />
 
                                 <button
+                                  id={`btn-kanban-menu-delete-${task.taskId}`}
                                   type="button"
                                   onClick={(e) => {
                                     e.stopPropagation();
@@ -843,6 +862,7 @@ export function KanbanBoard({
                     </div>
 
                     <button
+                      id={`btn-kanban-add-task-sec-${secId}`}
                       type="button"
                       onClick={() => onOpenNewTaskModalWithGroup?.(sec)}
                       className="btn-m3-icon w-6 h-6 cursor-pointer hover:text-[var(--primary)]"
@@ -858,6 +878,7 @@ export function KanbanBoard({
                       <div id="div-kanbanboard-26" className="h-24 flex flex-col items-center justify-center text-center p-2 border border-dashed border-[var(--outline)] rounded text-[var(--on-surface-variant)] gap-1">
                         <span className="text-[11px] font-sans">{i18n._(msg`No hay tareas en esta sección`)}</span>
                         <button
+                          id={`btn-kanban-empty-add-sec-${secId}`}
                           type="button"
                           onClick={() => onOpenNewTaskModalWithGroup?.(sec)}
                           className="text-[11px] font-medium text-[var(--primary)] hover:underline cursor-pointer flex items-center gap-0.5"
@@ -876,6 +897,7 @@ export function KanbanBoard({
                         return (
                           <div
                             key={task.taskId}
+                            id={`div-kanban-sec-card-${task.taskId}`}
                             draggable
                             tabIndex={0}
                             role="button"
@@ -901,6 +923,7 @@ export function KanbanBoard({
                             <div id="div-kanbanboard-27" className="flex items-start justify-between gap-1.5">
                               <div id="div-kanbanboard-28" className="flex items-start gap-1.5 flex-1 min-w-0">
                                 <button
+                                  id={`btn-kanban-sec-toggle-${task.taskId}`}
                                   type="button"
                                   onClick={(e) => {
                                     e.stopPropagation();
@@ -944,6 +967,7 @@ export function KanbanBoard({
                               </div>
 
                               <button
+                                id={`btn-kanban-sec-cycle-prio-${task.taskId}`}
                                 type="button"
                                 onClick={(e) => cyclePriority(task.taskId, task.priority, e)}
                                 className={`px-1.5 py-0.5 rounded border border-[var(--outline)] bg-[var(--surface)] text-[11px] font-mono font-medium flex items-center gap-1 cursor-pointer shrink-0 transition-colors hover:border-[var(--on-surface-variant)] ${prio.text}`}
@@ -984,6 +1008,7 @@ export function KanbanBoard({
 
           <div id="div-kanbanboard-32" className="flex items-center gap-1.5">
             <button
+              id="btn-kanban-batch-complete"
               type="button"
               onClick={() => handleBatchSetCompleted(true)}
               className="btn-m3-secondary px-2.5 py-1 text-xs cursor-pointer text-emerald-400"
@@ -994,6 +1019,7 @@ export function KanbanBoard({
             </button>
 
             <button
+              id="btn-kanban-batch-pending"
               type="button"
               onClick={() => handleBatchSetCompleted(false)}
               className="btn-m3-secondary px-2.5 py-1 text-xs cursor-pointer text-amber-400"
@@ -1004,6 +1030,7 @@ export function KanbanBoard({
             </button>
 
             <button
+              id="btn-kanban-batch-p0"
               type="button"
               onClick={() => handleBatchSetPriority('P0')}
               className="btn-m3-secondary px-2.5 py-1 text-xs cursor-pointer text-rose-400"
@@ -1013,6 +1040,7 @@ export function KanbanBoard({
             </button>
 
             <button
+              id="btn-kanban-batch-p1"
               type="button"
               onClick={() => handleBatchSetPriority('P1')}
               className="btn-m3-secondary px-2.5 py-1 text-xs cursor-pointer text-amber-400"
@@ -1022,6 +1050,7 @@ export function KanbanBoard({
             </button>
 
             <button
+              id="btn-kanban-batch-in-progress"
               type="button"
               onClick={() => handleBatchSetStatus('in_progress')}
               className="btn-m3-secondary px-2.5 py-1 text-xs cursor-pointer text-sky-400"
@@ -1032,6 +1061,7 @@ export function KanbanBoard({
             </button>
 
             <button
+              id="btn-kanban-batch-delete"
               type="button"
               onClick={handleBatchDelete}
               className="btn-m3-secondary px-2.5 py-1 text-xs cursor-pointer text-rose-400 border-rose-900/60 hover:bg-rose-950/40"
@@ -1043,6 +1073,7 @@ export function KanbanBoard({
           </div>
 
           <button
+            id="btn-kanban-batch-clear-selection"
             type="button"
             onClick={clearSelection}
             className="btn-m3-icon w-6 h-6 ml-1 cursor-pointer"

@@ -123,6 +123,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
               {/* Filter Popover Button */}
               <div id="div-filterbar-4" className="relative shrink-0" ref={popoverRef}>
                 <button
+                  id="btn-filter-popover-toggle"
                   type="button"
                   aria-expanded={isFilterPopoverOpen}
                   aria-haspopup="true"
@@ -147,6 +148,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                 {/* Filter Popover Content */}
                 {isFilterPopoverOpen && (
                   <div
+                    id="div-filter-popover-content"
                     onPointerDown={(e) => e.stopPropagation()}
                     className="absolute left-0 top-9 z-40 w-72 sm:w-80 max-w-[calc(100vw-2rem)] bg-[var(--surface-container-high)] border border-[var(--outline)] rounded-lg shadow-lg p-3 flex flex-col gap-2.5 text-xs"
                   >
@@ -156,6 +158,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                         <span>{i18n._(msg`Filtros avanzados`)}</span>
                       </span>
                       <button
+                        id="btn-filter-popover-close"
                         type="button"
                         onClick={() => setIsFilterPopoverOpen(false)}
                         className="btn-m3-icon w-6 h-6 cursor-pointer"
@@ -288,6 +291,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                     {/* Footer Buttons */}
                     <div id="div-filterbar-11" className="flex items-center justify-between pt-2 border-t border-[var(--outline)] mt-1">
                       <button
+                        id="btn-filter-reset-popover"
                         type="button"
                         onClick={() => {
                           onResetFilters();
@@ -299,6 +303,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                       </button>
 
                       <button
+                        id="btn-filter-done-popover"
                         type="button"
                         onClick={() => setIsFilterPopoverOpen(false)}
                         className="btn-m3-primary px-3 py-1 text-xs cursor-pointer"
@@ -312,6 +317,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
 
               {/* Quick Command Palette Button (Cmd + K) on desktop */}
               <button
+                id="btn-open-command-palette-filterbar"
                 type="button"
                 onClick={onOpenCommandPalette}
                 className="btn-m3-secondary px-3 py-1.5 text-xs cursor-pointer hidden sm:flex items-center gap-1.5 shrink-0"
@@ -327,6 +333,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
               {/* Auto Organizar Button */}
               {onAutoOrganize && (
                 <button
+                  id="btn-auto-organize-filterbar"
                   type="button"
                   disabled={isAutoOrganizing}
                   onClick={onAutoOrganize}
@@ -362,6 +369,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             />
             {searchQuery && (
               <button
+                id="btn-clear-search-filterbar"
                 type="button"
                 onClick={() => onSearchChange('')}
                 className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] cursor-pointer"
@@ -378,6 +386,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             <div id="div-filterbar-14" className="flex items-center gap-1.5 shrink-0">
               {onOpenSanityModal && (
                 <button
+                  id="btn-sanity-status-filterbar"
                   type="button"
                   onClick={onOpenSanityModal}
                   className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-mono border transition-colors cursor-pointer bg-[var(--surface)] border-[var(--outline)] text-[var(--on-surface)] hover:bg-[var(--surface-container-high)]"
@@ -404,6 +413,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
 
               {onOpenSyncOverrideModal && (
                 <button
+                  id="btn-sync-override-filterbar"
                   type="button"
                   onClick={onOpenSyncOverrideModal}
                   className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--outline)] hover:border-[var(--primary)] hover:bg-[var(--surface-container-high)] transition-colors cursor-pointer shadow-xs"
@@ -420,6 +430,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             <>
               {currentFileName && onRenameDocument && (
                 <div
+                  id="div-current-document-indicator"
                   className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] font-mono truncate shadow-xs cursor-pointer hover:bg-[var(--surface-container-high)] transition-colors"
                   onClick={onRenameDocument}
                   title={i18n._(msg`Documento activo: ${currentFileName} (Clic para renombrar/mover)`)}
@@ -464,6 +475,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             <span className="px-2 py-0.5 rounded bg-[var(--surface)] border border-[var(--primary)]/60 text-[11px] text-[var(--primary)] font-medium flex items-center gap-1">
               <span>{i18n._(msg`Búsqueda: “\$\${query}”`)}</span>
               <button
+                id="btn-chip-remove-query"
                 type="button"
                 onClick={() => onSearchChange('')}
                 className="hover:text-rose-400 cursor-pointer font-bold"
@@ -478,6 +490,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             <span className="px-2 py-0.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] text-[var(--on-surface)] font-medium flex items-center gap-1">
               <span>{i18n._(msg`Estado: \$\${status}`)}</span>
               <button
+                id="btn-chip-remove-status"
                 type="button"
                 onClick={() => onFilterChange({ ...filters, status: 'all' })}
                 className="text-[var(--on-surface-variant)] hover:text-rose-400 cursor-pointer font-bold"
@@ -491,6 +504,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             <span className="px-2 py-0.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] text-[var(--on-surface)] font-mono font-medium flex items-center gap-1">
               <span>{i18n._(msg`Prioridad: \$\${priority}`)}</span>
               <button
+                id="btn-chip-remove-priority"
                 type="button"
                 onClick={() => onFilterChange({ ...filters, priority: 'all' })}
                 className="text-[var(--on-surface-variant)] hover:text-rose-400 cursor-pointer font-bold"
@@ -504,6 +518,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             <span className="px-2 py-0.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] text-[var(--on-surface)] font-medium flex items-center gap-1">
               <span>{i18n._(msg`Sección: ## \$\${section}`)}</span>
               <button
+                id="btn-chip-remove-section"
                 type="button"
                 onClick={() => onFilterChange({ ...filters, section: 'all' })}
                 className="text-[var(--on-surface-variant)] hover:text-rose-400 cursor-pointer font-bold"
@@ -517,6 +532,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             <span className="px-2 py-0.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] text-[var(--on-surface)] font-mono flex items-center gap-1">
               <span>{i18n._(msg`Etiqueta: #\$\${tag}`)}</span>
               <button
+                id="btn-chip-remove-tag"
                 type="button"
                 onClick={() => onFilterChange({ ...filters, tag: 'all' })}
                 className="text-[var(--on-surface-variant)] hover:text-rose-400 cursor-pointer font-bold"
@@ -530,6 +546,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             <span className="px-2 py-0.5 rounded bg-amber-950/40 border border-amber-800/60 text-[11px] text-amber-300 font-medium flex items-center gap-1">
               <span>{i18n._(msg`Solo bloqueadas`)}</span>
               <button
+                id="btn-chip-remove-blocked"
                 type="button"
                 onClick={() => onFilterChange({ ...filters, onlyBlocked: false })}
                 className="hover:text-rose-400 cursor-pointer font-bold"
@@ -543,6 +560,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             <span className="px-2 py-0.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] text-[var(--on-surface-variant)] font-medium flex items-center gap-1">
               <span>{i18n._(msg`Orden: \$\${sort}`)}</span>
               <button
+                id="btn-chip-remove-sort"
                 type="button"
                 onClick={() => onFilterChange({ ...filters, sortBy: 'default' })}
                 className="hover:text-rose-400 cursor-pointer font-bold"
@@ -554,6 +572,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
 
           {/* Reset All Button */}
           <button
+            id="btn-chip-reset-all"
             type="button"
             onClick={onResetFilters}
             className="text-[11px] text-[var(--primary)] hover:underline ml-1 cursor-pointer font-medium"

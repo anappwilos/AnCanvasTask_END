@@ -51,6 +51,7 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
       {/* Workspace & GitHub Repo Picker Dropdown */}
       <div id="div-workspaceselector-2" className="relative" ref={wsDropdownRef}>
         <button
+          id="btn-workspace-selector-trigger"
           type="button"
           onClick={() => {
             setIsWorkspaceMenuOpen((prev) => !prev);
@@ -81,6 +82,7 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
                 {i18n._(msg`Workspaces`)}
               </span>
               <button
+                id="btn-manage-workspaces-header"
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
@@ -104,6 +106,7 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
                 return (
                   <button
                     key={ws.id}
+                    id={`btn-select-workspace-${ws.id}`}
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
@@ -144,6 +147,7 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
 
             <div id="div-workspaceselector-9" className="pt-1 border-t border-[var(--outline)] px-2 py-1">
               <button
+                id="btn-new-workspace-dropdown"
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
@@ -164,6 +168,7 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
       {/* Branch Selector Dropdown */}
       <div id="div-workspaceselector-10" className="relative" ref={branchDropdownRef}>
         <button
+          id="btn-branch-selector-trigger"
           type="button"
           onClick={() => {
             setIsBranchMenuOpen((prev) => !prev);
@@ -191,6 +196,7 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
                 {i18n._(msg`Ramas`)} ({(workspace?.branches || []).length})
               </span>
               <button
+                id="btn-sync-github-branch-header"
                 type="button"
                 onClick={() => {
                   setIsBranchMenuOpen(false);
@@ -210,6 +216,7 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
                 return (
                   <button
                     key={b.name}
+                    id={`btn-select-branch-${b.name}`}
                     type="button"
                     onClick={() => {
                       onSelectBranch(b.name);
@@ -250,6 +257,7 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
 
             <div id="div-workspaceselector-16" className="pt-1 border-t border-[var(--outline)] px-2 py-1 flex items-center gap-1.5">
               <button
+                id="btn-new-branch-dropdown"
                 type="button"
                 onClick={() => {
                   setIsBranchMenuOpen(false);
@@ -262,6 +270,7 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
               </button>
 
               <button
+                id="btn-commit-sync-branch-dropdown"
                 type="button"
                 onClick={() => {
                   setIsBranchMenuOpen(false);

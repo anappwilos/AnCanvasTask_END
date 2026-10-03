@@ -161,6 +161,7 @@ function TaskCardComponent({
       }}
     >
       <div
+        id={`task-card-container-${shape.id}`}
         className={`w-full h-full rounded-md bg-[var(--surface-container)] border transition-colors duration-120 select-none flex flex-col justify-between p-2.5 relative ${
           isSelected
             ? 'border-[var(--primary)] ring-1 ring-[var(--primary)] bg-[var(--surface-container-high)]'
@@ -172,10 +173,11 @@ function TaskCardComponent({
         }`}
       >
         {/* Top Row: Checkbox + Title / Inline Edit + Context Menu + Priority */}
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex items-start gap-2 flex-1 min-w-0">
+        <div id={`task-card-header-${shape.id}`} className="flex items-start justify-between gap-2">
+          <div id={`task-card-title-group-${shape.id}`} className="flex items-start gap-2 flex-1 min-w-0">
             {/* Checkbox */}
             <button
+              id={`btn-task-card-toggle-${shape.id}`}
               type="button"
               onPointerDown={(e) => e.stopPropagation()}
               onClick={toggleCompleted}
@@ -222,6 +224,7 @@ function TaskCardComponent({
               />
             ) : (
               <div
+                id={`task-card-title-view-${shape.id}`}
                 onDoubleClick={(e) => {
                   e.stopPropagation();
                   setIsEditingTitle(true);
@@ -237,6 +240,7 @@ function TaskCardComponent({
                   {title}
                 </span>
                 <button
+                  id={`btn-task-card-edit-${shape.id}`}
                   type="button"
                   onPointerDown={(e) => e.stopPropagation()}
                   onClick={(e) => {
@@ -254,9 +258,10 @@ function TaskCardComponent({
             )}
           </div>
 
-          <div className="flex items-center gap-1 shrink-0">
+          <div id={`task-card-actions-${shape.id}`} className="flex items-center gap-1 shrink-0">
             {/* Discreet Priority Indicator */}
             <button
+              id={`btn-task-card-priority-${shape.id}`}
               type="button"
               onPointerDown={(e) => e.stopPropagation()}
               onClick={cyclePriority}
@@ -269,6 +274,7 @@ function TaskCardComponent({
 
             {/* Contextual Action Menu Trigger ⋮ */}
             <button
+              id={`btn-task-card-menu-${shape.id}`}
               type="button"
               onPointerDown={(e) => e.stopPropagation()}
               onClick={(e) => {
@@ -290,10 +296,12 @@ function TaskCardComponent({
         {/* Popover Contextual Menu */}
         {isMenuOpen && (
           <div
+            id={`task-card-menu-dropdown-${shape.id}`}
             onPointerDown={(e) => e.stopPropagation()}
             className="absolute top-8 right-2 z-50 bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-lg p-1 flex flex-col gap-0.5 min-w-[150px] text-xs font-sans"
           >
             <button
+              id={`btn-task-card-menu-toggle-${shape.id}`}
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
@@ -306,6 +314,7 @@ function TaskCardComponent({
             </button>
 
             <button
+              id={`btn-task-card-menu-priority-${shape.id}`}
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
@@ -318,6 +327,7 @@ function TaskCardComponent({
             </button>
 
             <button
+              id={`btn-task-card-menu-details-${shape.id}`}
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
@@ -329,9 +339,10 @@ function TaskCardComponent({
               <span>{_(msg`🔍 Ver detalles`)}</span>
             </button>
 
-            <div className="h-px bg-[var(--outline)] my-0.5" />
+            <div id={`task-card-menu-divider-${shape.id}`} className="h-px bg-[var(--outline)] my-0.5" />
 
             <button
+              id={`btn-task-card-menu-delete-${shape.id}`}
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
@@ -355,7 +366,7 @@ function TaskCardComponent({
 
         {/* Middle Row: Unboxed Tags & Subtask progress */}
         {(tags?.length || subtasks) && (
-          <div className="flex items-center gap-1.5 flex-wrap py-0.5 text-[10px] text-[var(--on-surface-variant)]">
+          <div id={`task-card-tags-${shape.id}`} className="flex items-center gap-1.5 flex-wrap py-0.5 text-[10px] text-[var(--on-surface-variant)]">
             {tags?.slice(0, 3).map((t) => (
               <span key={t} className="font-mono text-[var(--on-surface-variant)]">
                 #{t}
@@ -376,8 +387,8 @@ function TaskCardComponent({
         )}
 
         {/* Bottom Row: Metadata & Status */}
-        <div className="flex items-center justify-between text-xs text-[var(--on-surface-variant)] pt-1.5 border-t border-[var(--outline)] mt-0.5">
-          <div className="flex items-center gap-1.5 truncate max-w-[200px]">
+        <div id={`task-card-footer-${shape.id}`} className="flex items-center justify-between text-xs text-[var(--on-surface-variant)] pt-1.5 border-t border-[var(--outline)] mt-0.5">
+          <div id={`task-card-footer-meta-${shape.id}`} className="flex items-center gap-1.5 truncate max-w-[200px]">
             {taskId ? (
               <span className="text-[var(--on-surface-variant)] font-mono text-[11px] truncate tracking-tight" title={`ID: ${taskId}`}>
                 #{taskId}
@@ -424,7 +435,7 @@ function TaskCardComponent({
             )}
           </div>
 
-          <div className="flex items-center gap-1 shrink-0">
+          <div id={`task-card-footer-status-${shape.id}`} className="flex items-center gap-1 shrink-0">
             <span className={`text-[10px] font-mono uppercase tracking-wider ${currentStatus.text}`}>
               {currentStatus.label}
             </span>
@@ -555,10 +566,10 @@ export class TaskGroupShapeUtil extends ShapeUtil<any> {
           pointerEvents: 'none',
         }}
       >
-        <div className="w-full h-full rounded-md bg-[var(--surface-container)]/30 border border-[var(--outline)] p-3 flex flex-col justify-start select-none transition-colors">
+        <div id={`task-group-container-${shape.id}`} className="w-full h-full rounded-md bg-[var(--surface-container)]/30 border border-[var(--outline)] p-3 flex flex-col justify-start select-none transition-colors">
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-[var(--outline)] pb-2">
-            <div className="flex items-center gap-1.5">
+          <div id={`task-group-header-${shape.id}`} className="flex items-center justify-between border-b border-[var(--outline)] pb-2">
+            <div id={`task-group-title-group-${shape.id}`} className="flex items-center gap-1.5">
               <span className="text-[var(--on-surface-variant)] font-mono text-xs font-semibold">##</span>
               <h2 className="text-xs font-semibold text-[var(--on-surface)] font-sans tracking-tight truncate max-w-[220px]">
                 {title}

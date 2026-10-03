@@ -91,6 +91,7 @@ export const SanityStudioEmbed: React.FC<SanityStudioEmbedProps> = ({
           {_(msg`Para cargar la interfaz nativa de Sanity Studio con formularios enriquecidos y validación de esquemas en tiempo real, configura tu Project ID y Dataset.`)}
         </p>
         <button
+          id="btn-sanity-studio-embed-config-credentials"
           onClick={onOpenSanityConfig}
           className="px-4 py-2 bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-medium transition cursor-pointer"
         >
@@ -131,6 +132,7 @@ export const SanityStudioEmbed: React.FC<SanityStudioEmbedProps> = ({
 
         <div id="div-sanitystudioembed-9" className="flex items-center gap-1.5 shrink-0">
           <button
+            id="btn-sanity-studio-embed-reload"
             type="button"
             onClick={() => setRenderKey((k) => k + 1)}
             className="p-1.5 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800 rounded transition cursor-pointer"
@@ -140,6 +142,7 @@ export const SanityStudioEmbed: React.FC<SanityStudioEmbedProps> = ({
           </button>
 
           <button
+            id="btn-sanity-studio-embed-fullscreen"
             type="button"
             onClick={() => setIsFullscreen(!isFullscreen)}
             className="p-1.5 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800 rounded transition cursor-pointer"
@@ -153,6 +156,7 @@ export const SanityStudioEmbed: React.FC<SanityStudioEmbedProps> = ({
           </button>
 
           <button
+            id="btn-sanity-studio-embed-settings"
             type="button"
             onClick={onOpenSanityConfig}
             className="px-2.5 py-1 text-xs bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700 flex items-center gap-1 transition cursor-pointer"
@@ -175,6 +179,7 @@ export const SanityStudioEmbed: React.FC<SanityStudioEmbedProps> = ({
 
           {onClose && (
             <button
+              id="btn-sanity-studio-embed-close"
               type="button"
               onClick={onClose}
               className="p-1.5 text-neutral-400 hover:text-rose-400 hover:bg-neutral-800 rounded transition cursor-pointer"

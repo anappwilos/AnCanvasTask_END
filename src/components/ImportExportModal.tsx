@@ -166,6 +166,7 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
 
   return (
     <div
+      id="modal-import-export-overlay"
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70"
       onClick={onClose}
       role="dialog"
@@ -173,6 +174,7 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
       aria-labelledby="import-export-title"
     >
       <div
+        id="modal-import-export-dialog"
         className="w-full sm:max-w-2xl bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-lg sm:rounded-lg shadow-xl flex flex-col overflow-hidden animate-slide-up sm:animate-none max-h-[92vh] sm:max-h-[85vh] pb-safe sm:pb-0"
         onClick={(e) => e.stopPropagation()}
       >
@@ -183,6 +185,7 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
           <div id="div-importexportmodal-3" className="flex items-center gap-3">
             <div id="div-importexportmodal-4" className="flex items-center bg-[var(--surface)] p-0.5 rounded border border-[var(--outline)]">
               <button
+                id="btn-import-export-tab-export"
                 type="button"
                 onClick={() => setActiveTab('export')}
                 className={`px-3 py-1 rounded text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer ${
@@ -196,6 +199,7 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
               </button>
 
               <button
+                id="btn-import-export-tab-import"
                 type="button"
                 onClick={() => setActiveTab('import')}
                 className={`px-3 py-1 rounded text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer ${
@@ -214,6 +218,7 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
           </div>
 
           <button
+            id="btn-import-export-close-header"
             type="button"
             onClick={onClose}
             className="btn-m3-icon w-7 h-7 cursor-pointer"
@@ -247,6 +252,7 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
                 <label className="text-xs font-semibold text-[var(--on-surface)]">{_(msg`Formato de exportación`)}</label>
                 <div id="div-importexportmodal-10" className="grid grid-cols-2 gap-2">
                   <button
+                    id="btn-export-format-md"
                     type="button"
                     onClick={() => setExportFormat('md')}
                     className={`p-2.5 rounded border text-left transition-colors cursor-pointer flex flex-col gap-0.5 ${
@@ -263,6 +269,7 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
                   </button>
 
                   <button
+                    id="btn-export-format-json"
                     type="button"
                     onClick={() => setExportFormat('json')}
                     className={`p-2.5 rounded border text-left transition-colors cursor-pointer flex flex-col gap-0.5 ${
@@ -297,6 +304,7 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
                 <div id="div-importexportmodal-15" className="flex items-center justify-between">
                   <label className="text-xs font-semibold text-[var(--on-surface)]">{_(msg`Previsualización de contenido`)}</label>
                   <button
+                    id="btn-export-copy-text"
                     type="button"
                     onClick={handleCopyExportText}
                     className="text-[11px] text-[var(--primary)] hover:underline flex items-center gap-1 cursor-pointer"
@@ -367,6 +375,7 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
                 <label className="text-xs font-semibold text-[var(--on-surface)]">{_(msg`Estrategia de importación`)}</label>
                 <div id="div-importexportmodal-21" className="grid grid-cols-2 gap-2">
                   <button
+                    id="btn-import-mode-replace"
                     type="button"
                     onClick={() => setImportMode('replace')}
                     className={`p-2.5 rounded border text-left transition-colors cursor-pointer flex flex-col gap-0.5 ${
@@ -380,6 +389,7 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
                   </button>
 
                   <button
+                    id="btn-import-mode-merge"
                     type="button"
                     onClick={() => setImportMode('merge')}
                     className={`p-2.5 rounded border text-left transition-colors cursor-pointer flex flex-col gap-0.5 ${
@@ -416,6 +426,7 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
         {/* Footer */}
         <div id="div-importexportmodal-24" className="px-5 py-3 bg-[var(--surface)] border-t border-[var(--outline)] flex items-center justify-between">
           <button
+            id="btn-import-export-cancel-footer"
             type="button"
             onClick={onClose}
             className="btn-m3-text px-3.5 py-1 text-xs cursor-pointer"
@@ -425,6 +436,7 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
 
           {activeTab === 'export' ? (
             <button
+              id="btn-import-export-execute-export"
               type="button"
               onClick={handleExecuteExport}
               className="btn-m3-primary px-4 py-1 text-xs cursor-pointer shadow-sm flex items-center gap-1.5"
@@ -434,6 +446,7 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
             </button>
           ) : (
             <button
+              id="btn-import-export-execute-import"
               type="button"
               disabled={!importInputText.trim()}
               onClick={handleExecuteImport}

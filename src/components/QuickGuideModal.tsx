@@ -32,6 +32,7 @@ export const QuickGuideModal: React.FC<QuickGuideModalProps> = ({
 
   return (
     <div
+      id="modal-quick-guide-overlay"
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70"
       onClick={onClose}
       role="dialog"
@@ -39,6 +40,7 @@ export const QuickGuideModal: React.FC<QuickGuideModalProps> = ({
       aria-labelledby="guide-title"
     >
       <div
+        id="modal-quick-guide-dialog"
         className="w-full sm:max-w-2xl bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-3xl sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-slide-up sm:animate-none max-h-[90vh] sm:max-h-[85vh] pb-safe sm:pb-0"
         onClick={(e) => e.stopPropagation()}
       >
@@ -53,6 +55,7 @@ export const QuickGuideModal: React.FC<QuickGuideModalProps> = ({
             </h2>
           </div>
           <button
+            id="btn-quick-guide-close-header"
             type="button"
             onClick={onClose}
             className="btn-m3-icon w-7 h-7 cursor-pointer"
@@ -84,9 +87,10 @@ export const QuickGuideModal: React.FC<QuickGuideModalProps> = ({
               {i18n._(msg`Atajos de teclado`)}
             </span>
             <div id="div-quickguidemodal-8" className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-              {shortcuts.map((s) => (
+              {shortcuts.map((s, idx) => (
                 <div
                   key={s.key}
+                  id={`div-shortcut-item-${idx}`}
                   className="flex items-center justify-between gap-2 p-1.5 px-2 rounded bg-[var(--surface-container)] border border-[var(--outline)] text-[11px]"
                 >
                   <span className="text-[var(--on-surface-variant)] truncate">{s.label}</span>
@@ -102,6 +106,7 @@ export const QuickGuideModal: React.FC<QuickGuideModalProps> = ({
         {/* Footer */}
         <div id="div-quickguidemodal-9" className="px-4 py-2.5 bg-[var(--surface)] border-t border-[var(--outline)] flex items-center justify-end">
           <button
+            id="btn-quick-guide-close-footer"
             type="button"
             onClick={onClose}
             className="btn-m3-primary px-4 py-1 text-xs cursor-pointer"
