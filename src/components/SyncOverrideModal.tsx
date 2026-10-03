@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useTranslation } from "react-i18next";
+import { useLingui } from '@lingui/react';
+import { msg } from '@lingui/core/macro';
+import { Trans } from '@lingui/react/macro';
 import {
   SyncComparisonResult,
   SyncItemDiff,
@@ -29,7 +31,7 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
   onShowToast,
   onOpenSanityConfig,
 }) => {
-  const { t } = useTranslation();
+  const { i18n } = useLingui();
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [result, setResult] = useState<SyncComparisonResult | null>(null);
@@ -188,13 +190,13 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
             </div>
             <div>
               <h2 id="sync-modal-title" className="text-sm font-semibold text-[var(--on-surface)] flex items-center gap-2">
-                <span>{t('sync.title')}</span>
+                <span>{i18n._(msg`Sincronización & Detección de Overrides`)}</span>
                 <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[var(--surface-container-high)] text-[var(--on-surface-variant)] border border-[var(--outline)]">
                   Sanity Cloud
                 </span>
               </h2>
               <p className="text-[11px] text-[var(--on-surface-variant)]">
-                {t('sync.dataset')}: <span className="font-mono text-[var(--on-surface)]">{sanityConfig.dataset || 'production'}</span> • {t('sync.project')}: <span className="font-mono text-[var(--on-surface)]">{sanityConfig.projectId || t('sync.notConnected')}</span>
+                {i18n._(msg`Dataset`)}: <span className="font-mono text-[var(--on-surface)]">{sanityConfig.dataset || 'production'}</span> • {i18n._(msg`Proyecto`)}: <span className="font-mono text-[var(--on-surface)]">{sanityConfig.projectId || i18n._(msg`No conectado`)}</span>
               </p>
             </div>
           </div>
@@ -219,7 +221,7 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
               <span className={`material-symbols-outlined text-[15px] ${isAnalyzing ? 'animate-spin' : ''}`}>
                 refresh
               </span>
-              <span>{isAnalyzing ? t('sync.analyzing') : t('sync.reanalyze')}</span>
+              <span>{isAnalyzing ? i18n._(msg`Analizando...`) : i18n._(msg`Re-analizar`)}</span>
             </button>
             <button id="btn-syncoverridemodal-1" type="button" onClick={onClose} className="btn-m3-icon w-7 h-7 cursor-pointer">
               <span className="material-symbols-outlined text-[16px]">close</span>
@@ -232,42 +234,42 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
           {/* Stat Counters */}
           <div id="div-syncoverridemodal-6" className="grid grid-cols-2 sm:grid-cols-6 gap-2 text-xs">
             <div id="div-syncoverridemodal-7" className="p-2 rounded bg-[var(--surface)] border border-[var(--outline)] flex flex-col">
-              <span className="text-[10px] text-[var(--on-surface-variant)]">{t('sync.totalAnalyzed')}</span>
+              <span className="text-[10px] text-[var(--on-surface-variant)]">{i18n._(msg`Total Analizados`)}</span>
               <span className="text-base font-semibold font-mono text-[var(--on-surface)]">
                 {result?.counts.total || 0}
               </span>
             </div>
 
             <div id="div-syncoverridemodal-8" className="p-2 rounded bg-[var(--surface)] border border-[var(--outline)] flex flex-col">
-              <span className="text-[10px] text-emerald-400">{t('sync.synced')}</span>
+              <span className="text-[10px] text-emerald-400">{i18n._(msg`Sincronizados`)}</span>
               <span className="text-base font-semibold font-mono text-emerald-400">
                 {result?.counts.synced || 0}
               </span>
             </div>
 
             <div id="div-syncoverridemodal-9" className="p-2 rounded bg-[var(--surface)] border border-[var(--outline)] flex flex-col">
-              <span className="text-[10px] text-sky-400">{t('sync.localOverrides')}</span>
+              <span className="text-[10px] text-sky-400">{i18n._(msg`Local Overrides`)}</span>
               <span className="text-base font-semibold font-mono text-sky-400">
                 {result?.counts.localOverrides || 0}
               </span>
             </div>
 
             <div id="div-syncoverridemodal-10" className="p-2 rounded bg-[var(--surface)] border border-[var(--outline)] flex flex-col">
-              <span className="text-[10px] text-amber-400">{t('sync.remoteOverrides')}</span>
+              <span className="text-[10px] text-amber-400">{i18n._(msg`Remote Overrides`)}</span>
               <span className="text-base font-semibold font-mono text-amber-400">
                 {result?.counts.remoteOverrides || 0}
               </span>
             </div>
 
             <div id="div-syncoverridemodal-11" className="p-2 rounded bg-[var(--surface)] border border-[var(--outline)] flex flex-col">
-              <span className="text-[10px] text-rose-400">{t('sync.conflicts')}</span>
+              <span className="text-[10px] text-rose-400">{i18n._(msg`Conflictos`)}</span>
               <span className="text-base font-semibold font-mono text-rose-400">
                 {result?.counts.conflicts || 0}
               </span>
             </div>
 
             <div id="div-syncoverridemodal-12" className="p-2 rounded bg-[var(--surface)] border border-[var(--outline)] flex flex-col">
-              <span className="text-[10px] text-purple-400">{t('sync.newUnique')}</span>
+              <span className="text-[10px] text-purple-400">{i18n._(msg`Nuevos/Únicos`)}</span>
               <span className="text-base font-semibold font-mono text-purple-400">
                 {(result?.counts.onlyLocal || 0) + (result?.counts.onlyRemote || 0)}
               </span>
@@ -334,7 +336,7 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
                 title="Resuelve automáticamente aplicando los cambios más recientes en ambas direcciones"
               >
                 <span className="material-symbols-outlined text-[15px]">auto_fix_high</span>
-                <span>{t('sync.smartSync')}</span>
+                <span>{i18n._(msg`Sincronización Inteligente`)}</span>
               </button>
 
               <button
@@ -345,7 +347,7 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
                 title="Sobrescribe Sanity con el estado local de todos los workspaces"
               >
                 <span className="material-symbols-outlined text-[14px]">cloud_upload</span>
-                <span>{t('sync.uploadAll')}</span>
+                <span>{i18n._(msg`Subir Todo (Override Remoto)`)}</span>
               </button>
 
               <button

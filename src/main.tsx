@@ -1,8 +1,10 @@
 import React, { Component, ErrorInfo, ReactNode, StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { i18n } from '@lingui/core';
+import { I18nProvider } from '@lingui/react';
 import App from './App.tsx';
 import './index.css';
-import './i18n';
+import { initI18n } from './i18n';
 
 // Ensure browser compatibility polyfills for libraries expecting Node/global conventions
 if (typeof window !== 'undefined') {
@@ -93,14 +95,20 @@ class RootErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState
   }
 }
 
-const rootElement = document.getElementById('root');
-if (rootElement) {
-  createRoot(rootElement).render(
-    <StrictMode>
-      <RootErrorBoundary>
-        <App />
-      </RootErrorBoundary>
-    </StrictMode>,
-  );
+async function renderApp() {
+  await initI18n();
+  const rootElement = document.getElementById('root');
+  if (rootElement) {
+    createRoot(rootElement).render(
+      <StrictMode>
+        <RootErrorBoundary>
+          <I18nProvider i18n={i18n}>
+            <App />
+          </I18nProvider>
+        </RootErrorBoundary>
+      </StrictMode>,
+    );
+  }
 }
 
+renderApp();

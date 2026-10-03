@@ -1,5 +1,7 @@
 import React, { useMemo, useState, useCallback, useEffect, useRef } from 'react';
-import { useTranslation } from "react-i18next";
+import { useLingui } from '@lingui/react';
+import { msg } from '@lingui/core/macro';
+import { Trans } from '@lingui/react/macro';
 import { DiffEditor } from '@monaco-editor/react';
 import {
   analyzeMarkdownNormalization,
@@ -31,7 +33,7 @@ export function SafeMarkdownNormalizerModal({
   onApply,
   onShowToast,
 }: SafeMarkdownNormalizerModalProps) {
-  const { t } = useTranslation();
+  const { i18n } = useLingui();
   const [analysis, setAnalysis] = useState<NormalizationAnalysisResult | null>(null);
   const [changes, setChanges] = useState<NormalizedChange[]>([]);
   const [selectedFilter, setSelectedFilter] = useState<FilterTab>('all');
@@ -212,7 +214,7 @@ export function SafeMarkdownNormalizerModal({
               aria-label="Alternar caracteres ocultos"
             >
               <span className="font-bold text-[11px] leading-none">¶</span>
-              <span className="hidden sm:inline">{t('common.invisibles')}</span>
+              <span className="hidden sm:inline">{i18n._(msg`Invisibles`)}</span>
             </button>
 
             {/* View Mode Toggle */}
@@ -258,7 +260,7 @@ export function SafeMarkdownNormalizerModal({
         {/* Compact Quick Actions Bar */}
         <div id="div-safemarkdownnormalizermodal-5" className="px-3.5 py-2 bg-[var(--surface)] border-b border-[var(--outline)] flex flex-wrap items-center justify-between gap-2 shrink-0 text-xs">
           <div id="div-safemarkdownnormalizermodal-6" className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-[11px] text-[var(--on-surface-variant)] mr-1">{t('common.actions')}:</span>
+            <span className="text-[11px] text-[var(--on-surface-variant)] mr-1">{i18n._(msg`Acciones`)}:</span>
             <button
               type="button"
               onClick={() => handlePreset('safe_only')}
@@ -306,7 +308,7 @@ export function SafeMarkdownNormalizerModal({
             <div id="div-safemarkdownnormalizermodal-9" className="flex items-center gap-1.5">
               <span className="material-symbols-outlined text-[16px] text-rose-400 shrink-0">warning</span>
               <span>
-                <strong>{t('common.warning')}:</strong> {currentStats.lossRisk} {t('common.potentialLosses')}.
+                <strong>{i18n._(msg`Aviso`)}:</strong> {currentStats.lossRisk} {i18n._(msg`posibles pérdidas de texto detectadas`)}.
                 {currentStats.acceptedLossRisk === 0 && ' (Protegidas / rechazadas)'}
               </span>
             </div>
@@ -479,14 +481,14 @@ export function SafeMarkdownNormalizerModal({
             {/* Diff Header */}
             <div id="div-safemarkdownnormalizermodal-19" className="h-7 px-3 bg-[var(--surface-container-high)] border-b border-[var(--outline)] flex items-center justify-between shrink-0 text-[11px] font-mono text-[var(--on-surface-variant)]">
               <div id="div-safemarkdownnormalizermodal-20" className="flex items-center gap-2">
-                <span className="text-rose-400 font-semibold">{t('common.original')}</span>
+                <span className="text-rose-400 font-semibold">{i18n._(msg`Original`)}</span>
                 <span>➔</span>
-                <span className="text-emerald-400 font-semibold">{t('common.proposal')}</span>
+                <span className="text-emerald-400 font-semibold">{i18n._(msg`Propuesta`)}</span>
               </div>
               {showInvisibles && (
                 <div id="div-safemarkdownnormalizermodal-21" className="text-[10px] text-[var(--on-surface-variant)] hidden sm:flex items-center gap-2">
-                  <span className="bg-[var(--surface)] px-1.5 py-0.2 rounded border border-[var(--outline)] font-mono">{t('common.space')}</span>
-                  <span className="bg-[var(--surface)] px-1.5 py-0.2 rounded border border-[var(--outline)] font-mono">{t('common.tab')}</span>
+                  <span className="bg-[var(--surface)] px-1.5 py-0.2 rounded border border-[var(--outline)] font-mono">{i18n._(msg`· espacio`)}</span>
+                  <span className="bg-[var(--surface)] px-1.5 py-0.2 rounded border border-[var(--outline)] font-mono">{i18n._(msg`→ tab`)}</span>
                 </div>
               )}
             </div>
@@ -543,7 +545,7 @@ export function SafeMarkdownNormalizerModal({
                   onChange={(e) => setHasAcknowledgedRisk(e.target.checked)}
                   className="rounded text-rose-600 focus:ring-rose-500 cursor-pointer"
                 />
-                <span>{t('common.confirmRiskDeletions', { count: currentStats.acceptedLossRisk })}</span>
+                <span>{i18n._(msg`Confirmar \$\${count} eliminaciones con riesgo`)}</span>
               </label>
             )}
           </div>

@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { useTranslation } from "react-i18next";
+import { useLingui } from '@lingui/react';
+import { msg } from '@lingui/core/macro';
+import { Trans } from '@lingui/react/macro';
 import { formatDocumentPath, TaskDocument } from '../services/workspaceService';
 
 interface NewFolderModalProps {
@@ -17,7 +19,7 @@ export const NewFolderModal: React.FC<NewFolderModalProps> = ({
   onCreateFolderWithDoc,
   onShowToast,
 }) => {
-  const { t } = useTranslation();
+  const { i18n } = useLingui();
   const [folderName, setFolderName] = useState('');
   const [docName, setDocName] = useState('TASKS.md');
 
@@ -95,7 +97,7 @@ export const NewFolderModal: React.FC<NewFolderModalProps> = ({
 
             {/* Quick Suggestions Chips */}
             <div id="div-newfoldermodal-4" className="flex items-center gap-1.5 flex-wrap mt-1.5">
-              <span className="text-[10px] text-[var(--on-surface-variant)]">{t('common.suggestions')}:</span>
+              <span className="text-[10px] text-[var(--on-surface-variant)]">{i18n._(msg`Sugerencias`)}:</span>
               {quickFolderSuggestions
                 .filter((s) => !existingFolders.includes(s))
                 .slice(0, 5)
@@ -129,7 +131,7 @@ export const NewFolderModal: React.FC<NewFolderModalProps> = ({
           {/* Path Preview */}
           <div id="div-newfoldermodal-6" className="p-2.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] font-mono text-[var(--on-surface-variant)] flex items-center gap-1.5">
             <span className="material-symbols-outlined text-[14px] text-emerald-400">check_circle</span>
-            <span>{t('common.finalPath')}: <strong>{formatDocumentPath(folderName, docName)}</strong></span>
+            <span>{i18n._(msg`Ruta final`)}: <strong>{formatDocumentPath(folderName, docName)}</strong></span>
           </div>
 
           <div id="div-newfoldermodal-7" className="pt-2.5 flex items-center justify-end gap-2 border-t border-[var(--outline)]">

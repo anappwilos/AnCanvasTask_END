@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-import { SUPPORTED_LANGUAGES, SupportedLanguageCode } from '../i18n';
+import { useLingui } from '@lingui/react';
+import { msg } from '@lingui/core/macro';
+import { Trans } from '@lingui/react/macro';
+import { SUPPORTED_LANGUAGES, SupportedLanguageCode, dynamicActivate } from '../i18n';
 
 interface LanguageSelectorProps {
   variant?: 'compact' | 'full';
@@ -13,11 +15,11 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   className = '',
   onLanguageChange,
 }) => {
-  const { i18n, t } = useTranslation();
+  const { i18n } = useLingui();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const currentLangCode = (i18n.resolvedLanguage || i18n.language || 'es').slice(0, 2);
+  const currentLangCode = i18n.locale || 'es';
   const currentLang =
     SUPPORTED_LANGUAGES.find((l) => l.code === currentLangCode) || SUPPORTED_LANGUAGES[0];
 
@@ -35,8 +37,8 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
     };
   }, [isOpen]);
 
-  const handleSelectLanguage = (code: SupportedLanguageCode) => {
-    i18n.changeLanguage(code);
+  const handleSelectLanguage = async (code: SupportedLanguageCode) => {
+    await dynamicActivate(code);
     setIsOpen(false);
     if (onLanguageChange) {
       onLanguageChange(code);
@@ -49,8 +51,8 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
         className="flex items-center gap-1.5 px-2 py-1 rounded bg-[var(--surface)] hover:bg-[var(--surface-container-high)] border border-[var(--outline)] text-xs font-sans text-[var(--on-surface)] transition-colors cursor-pointer select-none"
-        title={`${t('common.language')}: ${currentLang.label}`}
-        aria-label={t('common.language')}
+        title={`${i18n._(msg`Idioma`)}: ${currentLang.label}`}
+        aria-label={i18n._(msg`Idioma`)}
         aria-expanded={isOpen}
       >
         <span className="text-[13px] leading-none" role="img" aria-hidden="true">
@@ -71,7 +73,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
           aria-orientation="vertical"
         >
           <div id="div-languageselector-2" className="px-2.5 py-1 text-[10px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider border-b border-[var(--outline)] mb-1">
-            {t('common.language')}
+            {i18n._(msg`Idioma`)}
           </div>
           {SUPPORTED_LANGUAGES.map((lang) => {
             const isSelected = lang.code === currentLang.code;
