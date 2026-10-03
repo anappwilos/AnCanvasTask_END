@@ -135,3 +135,17 @@ export function formatList(
 export function formatTaskCount(count: number): string {
   return i18n._(msg`{count, plural, one {# tarea} other {# tareas}}`, { count });
 }
+
+/**
+ * ICU Plural helper for section counts
+ */
+export function formatSectionCount(count: number): string {
+  return i18n._(msg`{count, plural, one {# sección} other {# secciones}}`, { count });
+}
+
+/**
+ * ICU Plural helper for workspace counts
+ */
+export function formatWorkspaceCount(count: number): string {
+  return i18n._(msg`{count, plural, one {# workspace} other {# workspaces}}`, { count });
+}

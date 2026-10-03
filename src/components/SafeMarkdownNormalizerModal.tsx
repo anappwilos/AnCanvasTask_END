@@ -109,16 +109,16 @@ export function SafeMarkdownNormalizerModal({
       let msg = '';
       switch (preset) {
         case 'safe_only':
-          msg = 'Aplicados solo cambios de formato seguro';
+          msg = i18n._(msg`Aplicados solo cambios de formato seguro`);
           break;
         case 'no_deletions':
-          msg = 'Aplicados cambios sin eliminaciones';
+          msg = i18n._(msg`Aplicados cambios sin eliminaciones`);
           break;
         case 'accept_all':
-          msg = 'Todos los cambios aceptados';
+          msg = i18n._(msg`Todos los cambios aceptados`);
           break;
         case 'reject_all':
-          msg = 'Todos los cambios rechazados (original intacto)';
+          msg = i18n._(msg`Todos los cambios rechazados (original intacto)`);
           break;
       }
       onShowToast(msg, 'info');
@@ -130,7 +130,7 @@ export function SafeMarkdownNormalizerModal({
   const handleCopyResult = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(effectiveMarkdown);
-      onShowToast('Copiado al portapapeles', 'success');
+      onShowToast(i18n._(msg`¡Copiado!`), 'success');
     } catch {
       onShowToast('Error al copiar', 'error');
     }
@@ -155,7 +155,7 @@ export function SafeMarkdownNormalizerModal({
   const handleConfirmAndApply = useCallback(() => {
     if (currentStats.acceptedLossRisk > 0 && !hasAcknowledgedRisk) {
       onShowToast(
-        'Confirma la casilla de seguridad antes de aplicar eliminaciones con riesgo.',
+        i18n._(msg`Confirma la casilla de seguridad antes de aplicar eliminaciones con riesgo.`),
         'warning'
       );
       return;
@@ -297,7 +297,7 @@ export function SafeMarkdownNormalizerModal({
 
           <div id="div-safemarkdownnormalizermodal-7" className="text-[11px] text-[var(--on-surface-variant)]">
             <span>
-              {currentStats.accepted} de {currentStats.total} aceptados
+              {i18n._(msg`${currentStats.accepted} de ${currentStats.total} aceptados`)}
             </span>
           </div>
         </div>
@@ -393,7 +393,7 @@ export function SafeMarkdownNormalizerModal({
                     check_circle
                   </span>
                   <p className="font-medium text-[var(--on-surface)]">
-                    {changes.length === 0 ? 'Documento normalizado' : 'Sin cambios aquí'}
+                    {changes.length === 0 ? i18n._(msg`Documento normalizado`) : i18n._(msg`Sin cambios aquí`)}
                   </p>
                 </div>
               ) : (
@@ -446,7 +446,7 @@ export function SafeMarkdownNormalizerModal({
                               : 'bg-[var(--surface)] text-[var(--on-surface-variant)] border-[var(--outline)]'
                           }`}
                         >
-                          {change.isAccepted ? 'Aceptado' : 'Rechazado'}
+                          {change.isAccepted ? i18n._(msg`Aceptado`) : i18n._(msg`Rechazado`)}
                         </button>
                       </div>
 
@@ -545,7 +545,7 @@ export function SafeMarkdownNormalizerModal({
                   onChange={(e) => setHasAcknowledgedRisk(e.target.checked)}
                   className="rounded text-rose-600 focus:ring-rose-500 cursor-pointer"
                 />
-                <span>{i18n._(msg`Confirmar \$\${count} eliminaciones con riesgo`)}</span>
+                <span>{i18n._(msg`Confirmar ${currentStats.acceptedLossRisk} eliminaciones con riesgo`, { count: currentStats.acceptedLossRisk })}</span>
               </label>
             )}
           </div>
