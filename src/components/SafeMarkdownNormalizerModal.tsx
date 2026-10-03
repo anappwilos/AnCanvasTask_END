@@ -106,22 +106,22 @@ export function SafeMarkdownNormalizerModal({
     (preset: 'safe_only' | 'no_deletions' | 'accept_all' | 'reject_all') => {
       setChanges((prev) => setChangesPreset(prev, preset));
 
-      let msg = '';
+      let toastMsg = '';
       switch (preset) {
         case 'safe_only':
-          msg = i18n._(msg`Aplicados solo cambios de formato seguro`);
+          toastMsg = i18n._(msg`Aplicados solo cambios de formato seguro`);
           break;
         case 'no_deletions':
-          msg = i18n._(msg`Aplicados cambios sin eliminaciones`);
+          toastMsg = i18n._(msg`Aplicados cambios sin eliminaciones`);
           break;
         case 'accept_all':
-          msg = i18n._(msg`Todos los cambios aceptados`);
+          toastMsg = i18n._(msg`Todos los cambios aceptados`);
           break;
         case 'reject_all':
-          msg = i18n._(msg`Todos los cambios rechazados (original intacto)`);
+          toastMsg = i18n._(msg`Todos los cambios rechazados (original intacto)`);
           break;
       }
-      onShowToast(msg, 'info');
+      onShowToast(toastMsg, 'info');
     },
     [onShowToast]
   );
@@ -545,7 +545,7 @@ export function SafeMarkdownNormalizerModal({
                   onChange={(e) => setHasAcknowledgedRisk(e.target.checked)}
                   className="rounded text-rose-600 focus:ring-rose-500 cursor-pointer"
                 />
-                <span>{i18n._(msg`Confirmar ${currentStats.acceptedLossRisk} eliminaciones con riesgo`, { count: currentStats.acceptedLossRisk })}</span>
+                <span>{i18n._(msg`Confirmar ${currentStats.acceptedLossRisk} eliminaciones con riesgo`)}</span>
               </label>
             )}
           </div>

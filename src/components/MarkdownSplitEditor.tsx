@@ -4,7 +4,7 @@ import { markdown } from '@codemirror/lang-markdown';
 import { oneDark } from '@codemirror/theme-one-dark';
 import { EditorView } from '@codemirror/view';
 import { useLingui } from '@lingui/react';
-import { msg } from '@lingui/core/macro';
+import { msg, plural } from '@lingui/core/macro';
 import {
   MarkdownIssue,
   MarkdownValidationReport,
@@ -378,7 +378,7 @@ export function MarkdownSplitEditor({
             title={i18n._(msg`Ver/Ocultar problemas detectados en el Markdown`)}
           >
             <span>⚠</span>
-            <span>{i18n._(msg`{count, plural, one {# problema} other {# problemas}}`, { count: validationReport.issues.length })}</span>
+            <span>{plural(validationReport.issues.length, { one: '# problema', other: '# problemas' })}</span>
           </button>
         )}
       </div>

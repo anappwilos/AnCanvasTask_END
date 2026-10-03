@@ -221,7 +221,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   >
                     {SUPPORTED_LANGUAGES.map((l) => (
                       <option key={l.code} value={l.code}>
-                        {l.flag} {l.label}
+                        {l.label}
                       </option>
                     ))}
                   </select>

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useLingui } from '@lingui/react';
-import { msg } from '@lingui/core/macro';
+import { msg, plural } from '@lingui/core/macro';
 import { TaskPriority, TaskStatus } from '../shapes/TaskShapeUtil';
 
 export interface TaskDetailsData {
@@ -258,7 +258,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
             <div id="div-taskdetailspanel-4" className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-[var(--primary)]" />
               <h2 className="text-sm font-semibold text-[var(--on-surface)]">
-                {i18n._(msg`{count, plural, one {# tarea seleccionada} other {# tareas seleccionadas}}`, { count: selectedCount })}
+                {plural(selectedCount, { one: '# tarea seleccionada', other: '# tareas seleccionadas' })}
               </h2>
             </div>
             <button
@@ -777,7 +777,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
               <span>{i18n._(msg`Dependencias`)}</span>
             </span>
             <span className="text-[10px] font-mono text-[var(--on-surface-variant)]">
-              {i18n._(msg`{count, plural, one {# bloqueo} other {# bloqueos}}`, { count: blockerIds.length })}
+              {plural(blockerIds.length, { one: '# bloqueo', other: '# bloqueos' })}
             </span>
           </div>
 
@@ -860,7 +860,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
           {blockingTasks.length > 0 && (
             <div id="div-taskdetailspanel-37" className="flex flex-col gap-1 pt-1.5 border-t border-[var(--outline)]">
               <span className="text-[10px] text-amber-400 font-mono font-medium flex items-center gap-1">
-                <span>⚠ {i18n._(msg`Bloquea a ${blockingTasks.length} tareas:`, { count: blockingTasks.length })}</span>
+                <span>⚠ {i18n._(msg`Bloquea a ${blockingTasks.length} tareas:`)}</span>
               </span>
               <div id="div-taskdetailspanel-38" className="flex flex-col gap-1">
                 {blockingTasks.map((bTask) => (

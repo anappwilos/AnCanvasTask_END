@@ -1,3 +1,6 @@
+import { useLingui } from '@lingui/react';
+import { msg } from '@lingui/core/macro';
+import { formatDateTime } from '../i18n';
 import React, { useState } from 'react';
 import { Workspace, BranchConfig } from '../services/workspaceService';
 
@@ -22,6 +25,7 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
   onCommitBranch,
   onShowToast,
 }) => {
+  const { _ } = useLingui();
   const [tokenInput, setTokenInput] = useState(githubToken || '');
   const [isSavingToken, setIsSavingToken] = useState(false);
   const [commitMessage, setCommitMessage] = useState('');
@@ -38,12 +42,12 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
   const handleCommit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!commitMessage.trim()) {
-      onShowToast('Por favor escribe un mensaje de commit', 'warning');
+      onShowToast(_(msg`Por favor escribe un mensaje de commit`), 'warning');
       return;
     }
 
     onCommitBranch(commitMessage.trim(), authorName.trim() || 'Developer');
-    onShowToast(`Cambios confirmados en la rama "${branch.name}"`, 'success');
+    onShowToast(_(msg`Cambios confirmados en la rama "${branch.name}"`), 'success');
     setCommitMessage('');
   };
 
@@ -55,8 +59,8 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
       setIsSavingToken(false);
       onShowToast(
         tokenInput.trim()
-          ? 'GitHub Personal Access Token configurado'
-          : 'Token de GitHub eliminado',
+          ? _(msg`GitHub Personal Access Token configurado`)
+          : _(msg`Token de GitHub eliminado`),
         'success'
       );
     }, 200);
@@ -82,10 +86,10 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
             </svg>
             <div>
               <h2 id="github-sync-title" className="text-sm font-semibold text-[var(--on-surface)] font-sans">
-                GitHub Repository & Git Status
+                {_(msg`GitHub Repository & Git Status`)}
               </h2>
               <p className="text-[11px] font-mono text-[var(--on-surface-variant)]">
-                {workspace.githubRepo.fullName} · rama: <strong>{branch.name}</strong>
+                {workspace.githubRepo.fullName} · {_(msg`rama:`)} <strong>{branch.name}</strong>
               </p>
             </div>
           </div>
@@ -105,7 +109,7 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
                 : 'border-transparent text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]'
             }`}
           >
-            Confirmar Cambios ({modifiedDocs.length})
+            {_(msg`Confirmar Cambios`)} ({modifiedDocs.length})
           </button>
           <button
             type="button"
@@ -116,7 +120,7 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
                 : 'border-transparent text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]'
             }`}
           >
-            Historial de Commits
+            {_(msg`Historial de Commits`)}
           </button>
           <button
             type="button"
@@ -127,7 +131,7 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
                 : 'border-transparent text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]'
             }`}
           >
-            Token & Conexión
+            {_(msg`Token & Conexión`)}
           </button>
         </div>
 
@@ -138,7 +142,7 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
               {/* Changed files list */}
               <div id="div-githubsyncmodal-6" className="flex flex-col gap-1.5">
                 <span className="text-xs font-medium text-[var(--on-surface)]">
-                  Archivos Task MD en esta rama:
+                  {_(msg`Archivos Task MD en esta rama:`)}
                 </span>
                 <div id="div-githubsyncmodal-7" className="flex flex-col gap-1 max-h-40 overflow-y-auto">
                   {branch.taskDocuments.map((doc) => {
@@ -161,7 +165,7 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
                           <span className="truncate">{doc.path}</span>
                         </div>
                         <span className="text-[10px] uppercase font-bold shrink-0">
-                          {isMod ? 'Modificado' : 'Al día'}
+                          {isMod ? _(msg`Modificado`) : _(msg`Al día`)}
                         </span>
                       </div>
                     );
@@ -173,21 +177,21 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
               <form onSubmit={handleCommit} className="flex flex-col gap-3 pt-2 border-t border-[var(--outline)]">
                 <div id="div-githubsyncmodal-9" className="flex flex-col gap-1">
                   <label className="text-xs font-medium text-[var(--on-surface)]">
-                    Mensaje de Commit
+                    {_(msg`Mensaje de Commit`)}
                   </label>
                   <input
                     type="text"
                     required
                     value={commitMessage}
                     onChange={(e) => setCommitMessage(e.target.value)}
-                    placeholder="ej. feat(tasks): actualizar roadmap de autenticación y frontend"
+                    placeholder={_(msg`ej. feat(tasks): actualizar roadmap de autenticación y frontend`)}
                     className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-2.5 py-1.5 text-xs text-[var(--on-surface)] focus:outline-none"
                   />
                 </div>
 
                 <div id="div-githubsyncmodal-10" className="flex flex-col gap-1">
                   <label className="text-xs font-medium text-[var(--on-surface)]">
-                    Autor del commit
+                    {_(msg`Autor del commit`)}
                   </label>
                   <input
                     type="text"
@@ -204,7 +208,7 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
                     className="btn-m3-primary px-4 py-1.5 text-xs cursor-pointer shadow-sm flex items-center gap-1.5"
                   >
                     <span className="material-symbols-outlined text-[15px]">commit</span>
-                    <span>Confirmar a {branch.name}</span>
+                    <span>{_(msg`Confirmar a ${branch.name}`)}</span>
                   </button>
                 </div>
               </form>
@@ -219,7 +223,7 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
                       <span>#{branch.lastCommit.hash}</span>
                     </span>
                     <span className="text-[var(--on-surface-variant)] text-[10px]">
-                      {new Date(branch.lastCommit.timestamp).toLocaleString()}
+                      {formatDateTime(branch.lastCommit.timestamp)}
                     </span>
                   </div>
                   <p className="text-xs font-semibold text-[var(--on-surface)]">
@@ -231,14 +235,14 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
                 </div>
               ) : (
                 <p className="text-xs text-[var(--on-surface-variant)] text-center py-6">
-                  No hay commits registrados en esta rama aún.
+                  {_(msg`No hay commits registrados en esta rama aún.`)}
                 </p>
               )}
             </div>
           ) : (
             <form onSubmit={handleSaveToken} className="flex flex-col gap-3">
               <div id="div-githubsyncmodal-15" className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] text-xs text-[var(--on-surface-variant)] leading-relaxed">
-                Introduce un <strong>GitHub Personal Access Token (classic o fine-grained)</strong> para sincronizar ramas directamente con la API REST de GitHub.
+                {_(msg`Introduce un GitHub Personal Access Token (classic o fine-grained) para sincronizar ramas directamente con la API REST de GitHub.`)}
               </div>
 
               <div id="div-githubsyncmodal-16" className="flex flex-col gap-1">
@@ -260,7 +264,7 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
                   disabled={isSavingToken}
                   className="btn-m3-primary px-4 py-1.5 text-xs cursor-pointer shadow-sm"
                 >
-                  {isSavingToken ? 'Guardando...' : 'Guardar Token'}
+                  {isSavingToken ? _(msg`Guardando...`) : _(msg`Guardar Token`)}
                 </button>
               </div>
             </form>
@@ -274,7 +278,7 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
             onClick={onClose}
             className="btn-m3-secondary px-3.5 py-1 text-xs cursor-pointer"
           >
-            Cerrar
+            {_(msg`Cerrar`)}
           </button>
         </div>
       </div>

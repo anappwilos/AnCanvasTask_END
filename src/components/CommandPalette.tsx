@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useLingui } from '@lingui/react';
-import { msg } from '@lingui/core/macro';
+import { msg, plural } from '@lingui/core/macro';
 import { TaskPriority, TaskStatus } from '../shapes/TaskShapeUtil';
 
 export interface CommandPaletteTask {
@@ -524,7 +524,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
           </div>
 
           <span className="text-[10px] font-mono">
-            {i18n._(msg`{count, plural, one {# resultado} other {# resultados}}`, { count: results.length })}
+            {plural(results.length, { one: '# resultado', other: '# resultados' })}
           </span>
         </div>
       </div>

@@ -101,6 +101,7 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
             author: 'Developer',
             timestamp: new Date().toISOString(),
           },
+          activeDocumentId: initialDocs[0]?.id || "doc_root",
           taskDocuments: initialDocs,
         },
       ],

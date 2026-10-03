@@ -59,7 +59,7 @@ import { LanguageSelector } from './components/LanguageSelector';
 import { useLingui } from '@lingui/react';
 import { msg } from '@lingui/core/macro';
 import { Trans } from '@lingui/react/macro';
-import { dynamicActivate } from './i18n';
+import { dynamicActivate, formatTime, formatTaskCount, formatSectionCount, formatWorkspaceCount } from './i18n';
 import {
   loadWorkspaceStore,
   saveWorkspaceStore,
@@ -611,7 +611,7 @@ export default function App() {
         saveWorkspaceStore(nextStore);
         return nextStore;
       });
-      pushToast(`Workspace "${selectedName}" cargado`, 'success');
+      pushToast(i18n._(msg`Workspace "${selectedName}" cargado`), 'success');
     },
     [pushToast]
   );
@@ -804,7 +804,7 @@ export default function App() {
       });
 
       setActiveView('canvas');
-      pushToast(`Workspace "${targetWorkspace.name}" cargado desde Sanity`, 'success');
+      pushToast(i18n._(msg`Workspace "${targetWorkspace.name}" cargado desde Sanity`), 'success');
     },
     [editor, pushToast, triggerDebouncedVisualSave]
   );
@@ -863,7 +863,7 @@ export default function App() {
         return nextStore;
       });
 
-      pushToast(`${remoteWorkspaces.length} workspace(s) importado(s) desde Sanity`, 'success');
+      pushToast(formatWorkspaceCount(remoteWorkspaces.length) + ' ' + i18n._(msg`importados desde Sanity`), 'success');
     } catch (err) {
       pushToast(i18n._(msg`Error al importar workspaces desde Sanity`), 'error');
     }
@@ -2088,7 +2088,7 @@ export default function App() {
     setIsLiveSyncActive(true);
 
     const unsubscribe = subscribeToSanityLiveChanges((event: SanityLiveChangeEvent) => {
-      setLastLiveSyncAt(new Date().toLocaleTimeString());
+      setLastLiveSyncAt(formatTime(new Date()));
 
       if (event.type === 'task' && event.document) {
         const taskDoc = event.document;
@@ -4275,7 +4275,7 @@ export default function App() {
 
             <div id="div-app-76" className="p-4 flex flex-col gap-2.5 text-xs text-[var(--on-surface-variant)] leading-relaxed">
               <p>
-                ¿Estás seguro de que deseas eliminar la tarea <strong className="text-[var(--on-surface)]">"{deleteWarningState.title}"</strong> (#{deleteWarningState.taskId})?
+                {i18n._(msg`¿Estás seguro de que deseas eliminar la tarea "${deleteWarningState.title}" (#${deleteWarningState.taskId})?`)}
               </p>
 
               {deleteWarningState.dependents.length > 0 && (
@@ -4298,14 +4298,14 @@ export default function App() {
                 onClick={() => setDeleteWarningState(null)}
                 className="btn-m3-text px-3 py-1 text-xs cursor-pointer"
               >
-                Cancelar
+                {i18n._(msg`Cancelar`)}
               </button>
               <button
                 type="button"
                 onClick={handleConfirmDeleteTask}
                 className="btn-m3-primary bg-rose-600 hover:bg-rose-500 text-white px-4 py-1 text-xs cursor-pointer shadow-sm"
               >
-                Eliminar
+                {i18n._(msg`Eliminar`)}
               </button>
             </div>
           </div>
@@ -4330,10 +4330,10 @@ export default function App() {
             <div id="div-app-80" className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
               <div>
                 <h2 id="view-markdown-title" className="text-sm font-semibold text-[var(--on-surface)] font-sans">
-                  TASKS.md — Sincronizado en Vivo
+                  {i18n._(msg`TASKS.md — Sincronizado en Vivo`)}
                 </h2>
                 <p className="text-xs text-[var(--on-surface-variant)] mt-0.5">
-                  {parsedStats.taskCount} tareas · {parsedStats.groupCount} secciones
+                  {formatTaskCount(parsedStats.taskCount)} · {formatSectionCount(parsedStats.groupCount)}
                 </p>
               </div>
               <button
@@ -4368,7 +4368,7 @@ export default function App() {
                 onClick={() => setIsViewMarkdownOpen(false)}
                 className="btn-m3-text px-3 py-1 text-xs cursor-pointer"
               >
-                Cerrar
+                {i18n._(msg`Cerrar`)}
               </button>
             </div>
           </div>

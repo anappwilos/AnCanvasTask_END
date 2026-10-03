@@ -12,7 +12,7 @@
     "lint": "tsc --noEmit",
     "i18n:extract": "lingui extract",
     "i18n:compile": "lingui compile",
-    "i18n:check": "lingui extract --check",
+    "i18n:check": "lingui compile --strict",
     "i18n": "lingui extract && lingui compile"
   },
   "dependencies": {

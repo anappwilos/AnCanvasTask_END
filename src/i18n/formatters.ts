@@ -1,5 +1,5 @@
 import { i18n } from '@lingui/core';
-import { msg } from '@lingui/core/macro';
+import { plural } from '@lingui/core/macro';
 
 function getLocale(): string {
   return i18n.locale || 'es';
@@ -133,19 +133,19 @@ export function formatList(
  * ICU Plural helper for task counts
  */
 export function formatTaskCount(count: number): string {
-  return i18n._(msg`{count, plural, one {# tarea} other {# tareas}}`, { count });
+  return plural(count, { one: '# tarea', other: '# tareas' });
 }
 
 /**
  * ICU Plural helper for section counts
  */
 export function formatSectionCount(count: number): string {
-  return i18n._(msg`{count, plural, one {# sección} other {# secciones}}`, { count });
+  return plural(count, { one: '# sección', other: '# secciones' });
 }
 
 /**
  * ICU Plural helper for workspace counts
  */
 export function formatWorkspaceCount(count: number): string {
-  return i18n._(msg`{count, plural, one {# workspace} other {# workspaces}}`, { count });
+  return plural(count, { one: '# workspace', other: '# workspaces' });
 }

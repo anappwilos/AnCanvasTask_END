@@ -1,3 +1,5 @@
+import { useLingui } from '@lingui/react';
+import { msg } from '@lingui/core/macro';
 import React, { useState, useEffect } from 'react';
 
 interface RenameFolderModalProps {
@@ -17,6 +19,7 @@ export const RenameFolderModal: React.FC<RenameFolderModalProps> = ({
   onRenameFolder,
   onShowToast,
 }) => {
+  const { _ } = useLingui();
   const [newFolderInput, setNewFolderInput] = useState(currentFolder);
 
   useEffect(() => {
@@ -29,7 +32,7 @@ export const RenameFolderModal: React.FC<RenameFolderModalProps> = ({
     e.preventDefault();
     const cleanNewFolder = newFolderInput.trim().replace(/^\/+|\/+$/g, '');
     if (!cleanNewFolder) {
-      onShowToast('Por favor introduce un nombre válido para la carpeta', 'warning');
+      onShowToast(_(msg`Por favor introduce un nombre válido para la carpeta`), 'warning');
       return;
     }
 
@@ -39,7 +42,7 @@ export const RenameFolderModal: React.FC<RenameFolderModalProps> = ({
     }
 
     onRenameFolder(currentFolder, cleanNewFolder);
-    onShowToast(`Carpeta renombrada de "${currentFolder}/" a "${cleanNewFolder}/"`, 'success');
+    onShowToast(_(msg`Carpeta renombrada de "${currentFolder}/" a "${cleanNewFolder}/"`), 'success');
     onClose();
   };
 
@@ -59,7 +62,7 @@ export const RenameFolderModal: React.FC<RenameFolderModalProps> = ({
           <div id="div-renamefoldermodal-2" className="flex items-center gap-2">
             <span className="material-symbols-outlined text-[16px] text-amber-400">drive_file_rename_outline</span>
             <h2 id="rename-folder-modal-title" className="text-sm font-semibold text-[var(--on-surface)] font-sans">
-              Renombrar Carpeta
+              {_(msg`Renombrar Carpeta`)}
             </h2>
           </div>
           <button id="btn-renamefoldermodal-1" type="button" onClick={onClose} className="btn-m3-icon w-7 h-7 cursor-pointer">
@@ -70,7 +73,7 @@ export const RenameFolderModal: React.FC<RenameFolderModalProps> = ({
         <form onSubmit={handleSubmit} className="p-4 flex flex-col gap-3.5">
           <div id="div-renamefoldermodal-3" className="flex flex-col gap-1">
             <label className="text-xs font-medium text-[var(--on-surface)]">
-              Nombre de la carpeta
+              {_(msg`Nombre de la carpeta`)}
             </label>
             <input
               type="text"
@@ -78,13 +81,13 @@ export const RenameFolderModal: React.FC<RenameFolderModalProps> = ({
               autoFocus
               value={newFolderInput}
               onChange={(e) => setNewFolderInput(e.target.value)}
-              placeholder="ej. frontend, apps/web, services/core..."
+              placeholder={_(msg`ej. frontend, apps/web, services/core...`)}
               className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-2.5 py-1.5 text-xs font-mono text-[var(--on-surface)] focus:outline-none"
             />
           </div>
 
           <div id="div-renamefoldermodal-4" className="p-2.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] text-[var(--on-surface-variant)] leading-relaxed">
-            Se actualizará la ruta de los <strong>{docCount}</strong> archivo{docCount > 1 ? 's' : ''} Task MD contenidos en <code className="font-mono text-[var(--on-surface)]">{currentFolder}/</code>.
+            <span>{_(msg`Se actualizará la ruta de los archivos Task MD contenidos en ${currentFolder}/`)}</span>
           </div>
 
           <div id="div-renamefoldermodal-5" className="pt-2.5 flex items-center justify-end gap-2 border-t border-[var(--outline)]">
@@ -93,14 +96,14 @@ export const RenameFolderModal: React.FC<RenameFolderModalProps> = ({
               onClick={onClose}
               className="btn-m3-text px-3 py-1 text-xs cursor-pointer"
             >
-              Cancelar
+              {_(msg`Cancelar`)}
             </button>
             <button
               type="submit"
               disabled={!newFolderInput.trim()}
               className="btn-m3-primary px-4 py-1 text-xs cursor-pointer shadow-sm"
             >
-              Renombrar
+              {_(msg`Renombrar`)}
             </button>
           </div>
         </form>
