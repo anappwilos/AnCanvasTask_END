@@ -15,6 +15,7 @@ const config: LinguiConfig = {
     },
   ],
   format: formatter({ style: 'minimal' }),
+  compileNamespace: 'es',
 };
 
 export default config;
