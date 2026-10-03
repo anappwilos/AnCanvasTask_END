@@ -25,7 +25,17 @@
     "proposal": "Propuesta",
     "confirmRiskDeletions": "Confirmar {{count}} eliminaciones con riesgo",
     "suggestions": "Sugerencias",
-    "finalPath": "Ruta final"
+    "finalPath": "Ruta final",
+    "complete": "Completar",
+    "pending": "Pendiente",
+    "change": "Cambiar",
+    "errors": "Errores",
+    "warnings": "Avisos",
+    "noIssues": "Documento válido sin incidencias.",
+    "confirmDelete": "Confirmar Eliminación",
+    "dependentTasksAffected": "Tareas dependientes que quedarán afectadas",
+    "copied": "¡Copiado!",
+    "copyMarkdown": "Copiar Markdown"
   },
   "nav": {
     "toggleSidebar": "Alternar panel lateral",
@@ -39,7 +49,12 @@
     "settingsTooltip": "Configuración (⌘,)",
     "commandPaletteTooltip": "Abrir paleta de comandos (⌘K)",
     "problemsTooltip": "Ver incidencias detectadas",
-    "searchPlaceholder": "Buscar tarea o comando..."
+    "searchPlaceholder": "Buscar tarea o comando...",
+    "importMd": "Importar .md",
+    "create": "Crear",
+    "filters": "Filtros",
+    "sync": "Sincronizar",
+    "menu": "Menú"
   },
   "workspace": {
     "title": "Workspaces",
@@ -56,7 +71,10 @@
     "current": "Workspace actual",
     "branchLabel": "Rama actual",
     "createWorkspace": "Crear workspace",
-    "deleteWorkspace": "Eliminar workspace"
+    "deleteWorkspace": "Eliminar workspace",
+    "syncSanity": "Sincronizar con Sanity",
+    "openTasksMd": "Abrir TASKS.md",
+    "importExport": "Importar / Exportar (.md, JSON)"
   },
   "explorer": {
     "files": "Documentos de Tareas",
@@ -82,7 +100,9 @@
     "bulkStatus": "Cambiar estado grupal",
     "bulkDelete": "Eliminar seleccionadas",
     "grid": "Cuadrícula",
-    "snap": "Alineación magnética"
+    "snap": "Alineación magnética",
+    "createFirstTask": "Crear primera tarea",
+    "loadSample": "Cargar ejemplo"
   },
   "kanban": {
     "groupBy": "Agrupar por:",
@@ -98,13 +118,17 @@
       "in_progress": "En Progreso",
       "in_review": "En Revisión",
       "done": "Completada",
-      "cancelled": "Cancelada"
+      "cancelled": "Cancelada",
+      "allTasks": "Todas las tareas",
+      "blocked": "Bloqueadas"
     },
     "priority": {
       "urgent": "Urgente",
       "high": "Alta",
       "medium": "Media",
-      "low": "Baja"
+      "low": "Baja",
+      "label": "Prioridad",
+      "critical": "Críticas (P0)"
     },
     "details": "Detalles de la tarea",
     "title": "Título",
@@ -113,7 +137,8 @@
     "tags": "Etiquetas",
     "dependencies": "Dependencias",
     "blockedBy": "Bloqueada por",
-    "blocks": "Bloquea a"
+    "blocks": "Bloquea a",
+    "section": "Sección"
   },
   "settings": {
     "title": "Configuración & Preferencias",
@@ -179,7 +204,8 @@
     "keyboardShortcuts": "Atajos de Teclado Principales",
     "resetDefaultsWarning": "Tus tareas y archivos TASKS.md no se modificarán.",
     "resetDefaultsConfirm": "¿Restablecer preferencias?",
-    "configure": "Configurar"
+    "configure": "Configurar",
+    "sanityCloudSettings": "Ajustes de Sanity Cloud"
   },
   "toast": {
     "connectionRestored": "Conexión reestablecida",

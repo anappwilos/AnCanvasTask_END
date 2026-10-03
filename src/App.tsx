@@ -2937,7 +2937,7 @@ export default function App() {
             <div className="flex items-center justify-between lg:hidden pb-2 border-b border-[var(--outline)] mb-1">
               <div className="flex items-center gap-1.5">
                 <span className="material-symbols-outlined text-sky-400 text-[18px]">folder_open</span>
-                <span className="font-semibold text-xs text-[var(--on-surface)]">Explorador de Archivos</span>
+                <span className="font-semibold text-xs text-[var(--on-surface)]">{t('explorer.files')}</span>
               </div>
               <button
                 type="button"
@@ -3003,7 +3003,7 @@ export default function App() {
                   title="Abrir TASKS.md desde el equipo"
                 >
                   <span className="material-symbols-outlined text-[16px]">folder_open</span>
-                  <span>Importar .md</span>
+                  <span>{t('nav.importMd')}</span>
                 </button>
                 <button
                   type="button"
@@ -3035,7 +3035,7 @@ export default function App() {
                 >
                   <div className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-[16px] text-sky-400">inbox</span>
-                    <span>Todas las tareas</span>
+                    <span>{t('task.status.allTasks')}</span>
                   </div>
                   <span className="text-[11px] font-mono px-1.5 py-0.2 rounded-full bg-[var(--surface)] text-[var(--on-surface-variant)]">
                     {parsedStats.taskCount}
@@ -3056,7 +3056,7 @@ export default function App() {
                 >
                   <div className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-[16px] text-amber-400">pending</span>
-                    <span>Pendientes (Todo)</span>
+                    <span>{t('task.status.todo')}</span>
                   </div>
                   <span className="text-[11px] font-mono px-1.5 py-0.2 rounded-full bg-[var(--surface)] text-[var(--on-surface-variant)]">
                     {parsedStats.taskCount - parsedStats.completedCount}
@@ -3077,7 +3077,7 @@ export default function App() {
                 >
                   <div className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-[16px] text-emerald-400">check_circle</span>
-                    <span>Completadas (Done)</span>
+                    <span>{t('task.status.done')}</span>
                   </div>
                   <span className="text-[11px] font-mono px-1.5 py-0.2 rounded-full bg-[var(--surface)] text-[var(--on-surface-variant)]">
                     {parsedStats.completedCount}
@@ -3098,7 +3098,7 @@ export default function App() {
                 >
                   <div className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-[16px] text-rose-400">priority_high</span>
-                    <span>Críticas (P0)</span>
+                    <span>{t('task.priority.critical')}</span>
                   </div>
                   <span className="text-[11px] font-mono px-1.5 py-0.2 rounded-full bg-[var(--surface)] text-[var(--on-surface-variant)]">
                     {parsedStats.criticalCount}
@@ -3119,7 +3119,7 @@ export default function App() {
                 >
                   <div className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-[16px] text-amber-500">lock</span>
-                    <span>Bloqueadas</span>
+                    <span>{t('task.status.blocked')}</span>
                   </div>
                   <span className="text-[11px] font-mono px-1.5 py-0.2 rounded-full bg-[var(--surface)] text-[var(--on-surface-variant)]">
                     {parsedStats.blockedCount}
@@ -3186,7 +3186,7 @@ export default function App() {
                 className="btn-m3-text w-full py-1 text-xs justify-start px-2 cursor-pointer text-[var(--on-surface)]"
               >
                 <span className="material-symbols-outlined text-[16px] text-[var(--primary)]">settings</span>
-                <span>Configuración</span>
+                <span>{t('settings.title')}</span>
               </button>
 
               <button
@@ -3202,7 +3202,7 @@ export default function App() {
                 <span className="material-symbols-outlined text-[16px]">
                   {effectiveTheme === 'dark' ? 'light_mode' : 'dark_mode'}
                 </span>
-                <span>Tema {effectiveTheme === 'dark' ? 'claro' : 'oscuro'}</span>
+                <span>{t('settings.themeLabel')}</span>
               </button>
             </div>
           </aside>
@@ -3355,7 +3355,7 @@ export default function App() {
                             className="btn-m3-primary px-3.5 py-1.5 text-xs cursor-pointer shadow-sm"
                           >
                             <span className="material-symbols-outlined text-[15px]">add</span>
-                            <span>Crear primera tarea</span>
+                            <span>{t('canvas.createFirstTask')}</span>
                           </button>
                           <button
                             type="button"
@@ -3363,7 +3363,7 @@ export default function App() {
                             className="btn-m3-secondary px-3 py-1.5 text-xs cursor-pointer"
                           >
                             <span className="material-symbols-outlined text-[15px]">refresh</span>
-                            <span>Cargar ejemplo</span>
+                            <span>{t('canvas.loadSample')}</span>
                           </button>
                         </div>
                       </div>
@@ -3392,7 +3392,7 @@ export default function App() {
                         title="Marcar seleccionadas como completadas"
                       >
                         <span className="material-symbols-outlined text-[15px]">check_circle</span>
-                        <span className="hidden sm:inline">Completar</span>
+                        <span className="hidden sm:inline">{t('common.complete')}</span>
                       </button>
 
                       <button
@@ -3407,7 +3407,7 @@ export default function App() {
                         title="Marcar seleccionadas como pendientes"
                       >
                         <span className="material-symbols-outlined text-[15px]">pending</span>
-                        <span className="hidden sm:inline">Pendiente</span>
+                        <span className="hidden sm:inline">{t('common.pending')}</span>
                       </button>
 
                       {/* Quick Priorities */}
@@ -3436,7 +3436,7 @@ export default function App() {
                         title="Eliminar tareas seleccionadas"
                       >
                         <span className="material-symbols-outlined text-[15px]">delete</span>
-                        <span className="hidden sm:inline">Eliminar</span>
+                        <span className="hidden sm:inline">{t('common.delete')}</span>
                       </button>
 
                       <button
@@ -3650,7 +3650,7 @@ export default function App() {
           className="btn-m3-primary py-1 px-1 rounded-lg flex flex-col items-center justify-center text-[10px] cursor-pointer shadow-xs overflow-hidden"
         >
           <span className="material-symbols-outlined text-[18px]">add</span>
-          <span className="font-semibold truncate w-full text-center leading-none mt-0.5">{activeView === 'studio' ? 'Crear' : '+ Tarea'}</span>
+          <span className="font-semibold truncate w-full text-center leading-none mt-0.5">{activeView === 'studio' ? t('nav.create') : t('canvas.addTask')}</span>
         </button>
 
         <button
@@ -3680,7 +3680,7 @@ export default function App() {
             title="Auto organizar tareas"
           >
             <span className="material-symbols-outlined text-[18px]">account_tree</span>
-            <span className="truncate w-full text-center leading-none mt-0.5">Organizar</span>
+            <span className="truncate w-full text-center leading-none mt-0.5">{t('canvas.autoLayout')}</span>
           </button>
         ) : activeView === 'kanban' ? (
           <button
@@ -3690,7 +3690,7 @@ export default function App() {
             title="Filtros y documentos"
           >
             <span className="material-symbols-outlined text-[18px]">filter_list</span>
-            <span className="truncate w-full text-center leading-none mt-0.5">Filtros</span>
+            <span className="truncate w-full text-center leading-none mt-0.5">{t('nav.filters')}</span>
           </button>
         ) : (
           <button
@@ -3700,7 +3700,7 @@ export default function App() {
             title="Sincronizar con Sanity"
           >
             <span className="material-symbols-outlined text-[18px]">sync_problem</span>
-            <span className="truncate w-full text-center leading-none mt-0.5">Sincronizar</span>
+            <span className="truncate w-full text-center leading-none mt-0.5">{t('nav.sync')}</span>
           </button>
         )}
 
@@ -3716,7 +3716,7 @@ export default function App() {
           <span className="material-symbols-outlined text-[18px]">
             {isSplitViewOpen ? 'vertical_split' : 'splitscreen'}
           </span>
-          <span className="truncate w-full text-center leading-none mt-0.5">{isSplitViewOpen ? 'Cerrar' : 'Ver .md'}</span>
+          <span className="truncate w-full text-center leading-none mt-0.5">{isSplitViewOpen ? t('nav.splitViewClose') : t('nav.splitViewOpen')}</span>
         </button>
 
         <button
@@ -3728,7 +3728,7 @@ export default function App() {
             <span className="absolute top-1 right-2 w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
           )}
           <span className="material-symbols-outlined text-[18px]">menu</span>
-          <span className="truncate w-full text-center leading-none mt-0.5">Menú</span>
+          <span className="truncate w-full text-center leading-none mt-0.5">{t('nav.menu')}</span>
         </button>
       </nav>
 
@@ -3777,7 +3777,7 @@ export default function App() {
               >
                 <div className="flex items-center gap-2.5">
                   <span className="material-symbols-outlined text-[18px] text-emerald-400">workspaces</span>
-                  <span>Workspaces & Repositorios GitHub</span>
+                  <span>{t('workspace.title')}</span>
                 </div>
                 <span className="text-[10px] font-mono text-[var(--on-surface-variant)]">{activeWorkspace.name} ➔</span>
               </button>
@@ -3793,7 +3793,7 @@ export default function App() {
               >
                 <div className="flex items-center gap-2.5">
                   <span className="material-symbols-outlined text-[18px] text-sky-400">fork_right</span>
-                  <span>Ramas & Git Status</span>
+                  <span>{t('workspace.branches')}</span>
                 </div>
                 <span className="text-[10px] font-mono text-[var(--on-surface-variant)]">{activeBranch.name} ➔</span>
               </button>
@@ -3809,7 +3809,7 @@ export default function App() {
               >
                 <div className="flex items-center gap-2.5">
                   <span className="material-symbols-outlined text-[18px] text-amber-400">sync_problem</span>
-                  <span>Sincronizar con Sanity</span>
+                  <span>{t('workspace.syncSanity')}</span>
                 </div>
                 <span>➔</span>
               </button>
@@ -3825,7 +3825,7 @@ export default function App() {
               >
                 <div className="flex items-center gap-2.5">
                   <span className="material-symbols-outlined text-[18px] text-[var(--primary)]">folder_open</span>
-                  <span>Abrir TASKS.md</span>
+                  <span>{t('workspace.openTasksMd')}</span>
                 </div>
                 <span>➔</span>
               </button>
@@ -3865,7 +3865,7 @@ export default function App() {
               >
                 <div className="flex items-center gap-2.5">
                   <span className="material-symbols-outlined text-[18px] text-[var(--primary)]">sync_alt</span>
-                  <span>Importar / Exportar (.md, JSON)</span>
+                  <span>{t('workspace.importExport')}</span>
                 </div>
                 <span>➔</span>
               </button>
@@ -3887,7 +3887,7 @@ export default function App() {
                   </span>
                   <span>Tema: {effectiveTheme === 'dark' ? 'Oscuro' : 'Claro'}</span>
                 </div>
-                <span className="text-[10px] text-[var(--on-surface-variant)]">Cambiar</span>
+                <span className="text-[10px] text-[var(--on-surface-variant)]">{t('common.change')}</span>
               </button>
 
               {/* Language Selection */}
@@ -3910,7 +3910,7 @@ export default function App() {
               >
                 <div className="flex items-center gap-2.5">
                   <span className="material-symbols-outlined text-[18px] text-[var(--primary)]">settings</span>
-                  <span>Configuración & Preferencias</span>
+                  <span>{t('settings.title')}</span>
                 </div>
                 <span>➔</span>
               </button>
@@ -3926,7 +3926,7 @@ export default function App() {
               >
                 <div className="flex items-center gap-2.5">
                   <span className="material-symbols-outlined text-[18px] text-rose-400">cloud_sync</span>
-                  <span>Ajustes de Sanity Cloud</span>
+                  <span>{t('settings.sanityCloudSettings')}</span>
                 </div>
                 <span className="text-[10px] font-mono text-emerald-400">or19faat</span>
               </button>
@@ -3942,7 +3942,7 @@ export default function App() {
               >
                 <div className="flex items-center gap-2.5">
                   <span className="material-symbols-outlined text-[18px] text-sky-400">help</span>
-                  <span>Guía rápida y atajos</span>
+                  <span>{t('nav.quickGuideTooltip')}</span>
                 </div>
                 <span>➔</span>
               </button>
@@ -3959,7 +3959,7 @@ export default function App() {
                 >
                   <div className="flex items-center gap-2.5">
                     <span>⚠</span>
-                    <span>Problemas detectados</span>
+                    <span>{t('nav.problemsTooltip')}</span>
                   </div>
                   <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-900/60 text-amber-200">
                     {validationReport.issues.length}
@@ -3989,7 +3989,7 @@ export default function App() {
             <div className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
               <div>
                 <h2 id="problems-modal-title" className="text-sm font-semibold text-[var(--on-surface)] font-sans flex items-center gap-2">
-                  <span>Problemas detectados en TASKS.md</span>
+                  <span>{t('nav.problemsTooltip')}</span>
                 </h2>
                 <p className="text-xs text-[var(--on-surface-variant)] mt-0.5 font-sans">
                   El editor previene la corrupción manteniendo una única fuente de verdad.
@@ -4006,8 +4006,8 @@ export default function App() {
 
             <div className="px-4 py-2 bg-[var(--surface)] border-b border-[var(--outline)] flex items-center gap-4 text-xs font-mono overflow-x-auto">
               <span>Total: <strong className="text-[var(--on-surface)]">{validationReport.issues.length}</strong></span>
-              <span className="text-rose-400">Errores: <strong>{validationReport.errorCount}</strong></span>
-              <span className="text-amber-400">Avisos: <strong>{validationReport.warningCount}</strong></span>
+              <span className="text-rose-400">{t('common.errors')}: <strong>{validationReport.errorCount}</strong></span>
+              <span className="text-amber-400">{t('common.warnings')}: <strong>{validationReport.warningCount}</strong></span>
             </div>
 
             <div className="p-4 overflow-auto max-h-[50vh] flex flex-col gap-2">
@@ -4016,7 +4016,7 @@ export default function App() {
                   <div className="w-8 h-8 rounded bg-emerald-950/80 border border-emerald-700 flex items-center justify-center text-emerald-400 text-base">
                     ✓
                   </div>
-                  <p className="text-xs text-[var(--on-surface-variant)]">Documento válido sin incidencias.</p>
+                  <p className="text-xs text-[var(--on-surface-variant)]">{t('common.noIssues')}</p>
                 </div>
               ) : (
                 validationReport.issues.map((issue) => (
@@ -4078,7 +4078,7 @@ export default function App() {
             <div className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
               <h2 id="autolayout-modal-title" className="text-sm font-semibold text-[var(--on-surface)] font-sans flex items-center gap-2">
                 <span className="material-symbols-outlined text-[16px] text-sky-400">account_tree</span>
-                <span>Auto organizar Canvas (DAG)</span>
+                <span>{t('canvas.autoLayout')}</span>
               </h2>
               <button
                 type="button"
@@ -4136,7 +4136,7 @@ export default function App() {
             <div className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
               <h2 id="new-task-modal-title" className="text-sm font-semibold text-[var(--on-surface)] font-sans flex items-center gap-2">
                 <span className="material-symbols-outlined text-[16px] text-sky-400">add_task</span>
-                <span>Crear Nueva Tarea</span>
+                <span>{t('canvas.addTask')}</span>
               </h2>
               <button
                 type="button"
@@ -4149,7 +4149,7 @@ export default function App() {
 
             <form onSubmit={handleCreateTask} className="p-4 flex flex-col gap-3.5">
               <div className="flex flex-col gap-1">
-                <label className="text-xs font-medium text-[var(--on-surface)]">Título de la tarea</label>
+                <label className="text-xs font-medium text-[var(--on-surface)]">{t('task.title')}</label>
                 <input
                   type="text"
                   autoFocus
@@ -4162,7 +4162,7 @@ export default function App() {
 
               {/* Priority Selection */}
               <div className="flex flex-col gap-1">
-                <label className="text-xs font-medium text-[var(--on-surface)]">Prioridad</label>
+                <label className="text-xs font-medium text-[var(--on-surface)]">{t('task.priority.label')}</label>
                 <div className="grid grid-cols-4 gap-2">
                   {(['P0', 'P1', 'P2', 'P3'] as TaskPriority[]).map((p) => {
                     const isSelected = newTaskPriority === p;
@@ -4187,7 +4187,7 @@ export default function App() {
               {/* Section / Group */}
               <div className="flex flex-col gap-1">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-medium text-[var(--on-surface)]">Sección</label>
+                  <label className="text-xs font-medium text-[var(--on-surface)]">{t('task.section')}</label>
                   <button
                     type="button"
                     onClick={() => setIsCustomGroup(!isCustomGroup)}
@@ -4259,7 +4259,7 @@ export default function App() {
             <div className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
               <h2 id="delete-warning-title" className="text-sm font-semibold text-rose-400 font-sans flex items-center gap-2">
                 <span className="material-symbols-outlined text-[16px]">warning</span>
-                <span>Confirmar Eliminación</span>
+                <span>{t('common.confirmDelete')}</span>
               </h2>
               <button
                 type="button"
@@ -4277,7 +4277,7 @@ export default function App() {
 
               {deleteWarningState.dependents.length > 0 && (
                 <div className="p-2.5 rounded bg-rose-950/40 border border-rose-800/80 text-rose-200">
-                  <span className="font-semibold block mb-1">Tareas dependientes que quedarán afectadas:</span>
+                  <span className="font-semibold block mb-1">{t('common.dependentTasksAffected')}:</span>
                   <ul className="list-disc pl-4 space-y-0.5">
                     {deleteWarningState.dependents.map((dep) => (
                       <li key={dep.taskId}>
@@ -4357,7 +4357,7 @@ export default function App() {
                 className="btn-m3-secondary px-3 py-1 text-xs cursor-pointer flex items-center gap-1.5"
               >
                 <span className="material-symbols-outlined text-[15px]">content_copy</span>
-                <span>{copiedMarkdown ? '¡Copiado!' : 'Copiar Markdown'}</span>
+                <span>{copiedMarkdown ? t('common.copied') : t('common.copyMarkdown')}</span>
               </button>
 
               <button

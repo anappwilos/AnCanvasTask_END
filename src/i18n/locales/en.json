@@ -25,7 +25,17 @@
     "proposal": "Proposal",
     "confirmRiskDeletions": "Confirm {{count}} risk deletions",
     "suggestions": "Suggestions",
-    "finalPath": "Final path"
+    "finalPath": "Final path",
+    "complete": "Complete",
+    "pending": "Pending",
+    "change": "Change",
+    "errors": "Errors",
+    "warnings": "Warnings",
+    "noIssues": "Valid document with no issues.",
+    "confirmDelete": "Confirm Deletion",
+    "dependentTasksAffected": "Dependent tasks that will be affected",
+    "copied": "Copied!",
+    "copyMarkdown": "Copy Markdown"
   },
   "nav": {
     "toggleSidebar": "Toggle sidebar",
@@ -39,7 +49,12 @@
     "settingsTooltip": "Settings (⌘,)",
     "commandPaletteTooltip": "Open command palette (⌘K)",
     "problemsTooltip": "View detected issues",
-    "searchPlaceholder": "Search task or command..."
+    "searchPlaceholder": "Search task or command...",
+    "importMd": "Import .md",
+    "create": "Create",
+    "filters": "Filters",
+    "sync": "Sync",
+    "menu": "Menu"
   },
   "workspace": {
     "title": "Workspaces",
@@ -56,7 +71,10 @@
     "current": "Current workspace",
     "branchLabel": "Current branch",
     "createWorkspace": "Create workspace",
-    "deleteWorkspace": "Delete workspace"
+    "deleteWorkspace": "Delete workspace",
+    "syncSanity": "Sync with Sanity",
+    "openTasksMd": "Open TASKS.md",
+    "importExport": "Import / Export (.md, JSON)"
   },
   "explorer": {
     "files": "Task Documents",
@@ -82,7 +100,9 @@
     "bulkStatus": "Change bulk status",
     "bulkDelete": "Delete selected",
     "grid": "Grid",
-    "snap": "Snap to grid"
+    "snap": "Snap to grid",
+    "createFirstTask": "Create first task",
+    "loadSample": "Load sample"
   },
   "kanban": {
     "groupBy": "Group by:",
@@ -98,13 +118,17 @@
       "in_progress": "In Progress",
       "in_review": "In Review",
       "done": "Done",
-      "cancelled": "Cancelled"
+      "cancelled": "Cancelled",
+      "allTasks": "All tasks",
+      "blocked": "Blocked"
     },
     "priority": {
       "urgent": "Urgent",
       "high": "High",
       "medium": "Medium",
-      "low": "Low"
+      "low": "Low",
+      "label": "Priority",
+      "critical": "Critical (P0)"
     },
     "details": "Task details",
     "title": "Title",
@@ -113,7 +137,8 @@
     "tags": "Tags",
     "dependencies": "Dependencies",
     "blockedBy": "Blocked by",
-    "blocks": "Blocks"
+    "blocks": "Blocks",
+    "section": "Section"
   },
   "settings": {
     "title": "Settings & Preferences",
@@ -179,7 +204,8 @@
     "keyboardShortcuts": "Main Keyboard Shortcuts",
     "resetDefaultsWarning": "Your tasks and TASKS.md files will not be modified.",
     "resetDefaultsConfirm": "Reset preferences?",
-    "configure": "Configure"
+    "configure": "Configure",
+    "sanityCloudSettings": "Sanity Cloud Settings"
   },
   "toast": {
     "connectionRestored": "Connection restored",
