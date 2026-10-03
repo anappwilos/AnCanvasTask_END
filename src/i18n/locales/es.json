@@ -17,7 +17,15 @@
     "apply": "Aplicar",
     "reset": "Restablecer",
     "confirm": "Confirmar",
-    "language": "Idioma"
+    "language": "Idioma",
+    "invisibles": "Invisibles",
+    "actions": "Acciones",
+    "potentialLosses": "posibles pérdidas de texto detectadas",
+    "original": "Original",
+    "proposal": "Propuesta",
+    "confirmRiskDeletions": "Confirmar {{count}} eliminaciones con riesgo",
+    "suggestions": "Sugerencias",
+    "finalPath": "Ruta final"
   },
   "nav": {
     "toggleSidebar": "Alternar panel lateral",
@@ -171,9 +179,7 @@
     "keyboardShortcuts": "Atajos de Teclado Principales",
     "resetDefaultsWarning": "Tus tareas y archivos TASKS.md no se modificarán.",
     "resetDefaultsConfirm": "¿Restablecer preferencias?",
-    "configure": "Configurar",
-    "viewCanvas": "Lienzo (Canvas)",
-    "viewKanban": "Tablero Kanban"
+    "configure": "Configurar"
   },
   "toast": {
     "connectionRestored": "Conexión reestablecida",
@@ -218,39 +224,6 @@
     "taskImportedFromSanity": "Tarea #{{taskId}} importada de Sanity al lienzo",
     "tasksUpdated": "{{count}} tareas actualizadas",
     "tasksDeletedBulk": "{{count}} tareas eliminadas",
-    "tasksRestoredBulk": "{{count}} tareas restauradas",
-    "copiedToClipboard": "Copiado al portapapeles",
-    "copyError": "Error al copiar",
-    "enterFolderName": "Por favor introduce un nombre para la carpeta",
-    "preferencesResetSuccess": "Preferencias restablecidas a los valores predeterminados",
-    "recentHistoryCleared": "Historial de archivos recientes limpiado",
-    "syncOverrideSuccess": "Todo está al día y sincronizado con Sanity",
-    "enterValidFolderName": "Por favor introduce un nombre válido para la carpeta",
-    "writeCommitMessage": "Por favor escribe un mensaje de commit",
-    "enterValidBranchName": "Por favor introduce un nombre válido de rama",
-    "documentPublishedSanity": "Documento publicado con éxito en Sanity",
-    "documentDeletedSanity": "Documento eliminado de Sanity",
-    "deleteError": "Error al eliminar",
-    "enterWorkspaceDetails": "Ingresa un nombre y repositorio para el workspace",
-    "errorCreatingWorkspaceSanity": "Error al crear workspace en Sanity",
-    "taskCreatedSanity": "Documento _type: \"task\" creado en Sanity",
-    "errorCreatingTask": "Error al crear tarea",
-    "jsonCopied": "JSON copiado al portapapeles",
-    "completeWorkspaceDetails": "Por favor completa el nombre del workspace y el repositorio de GitHub",
-    "markdownCopied": "Markdown copiado al portapapeles",
-    "markdownCopyError": "Error al copiar al portapapeles",
-    "errorVerifyingSanity": "Error al verificar conexión con Sanity",
-    "configureSanityProject": "Configura primero el Project ID y Dataset",
-    "requireApiTokenEditor": "Se requiere un API Token con permisos de Editor para escribir datos",
-    "failedWritingSanity": "Fallo al escribir en Sanity",
-    "errorDeletingTestDoc": "Error al eliminar documento de prueba",
-    "sanityConfigSaved": "Configuración de Sanity guardada y aplicada",
-    "sanityConnectionRemoved": "Conexión con Sanity eliminada. Operando en modo local.",
-    "originCopied": "Origen copiado al portapapeles",
-    "schemaCodeCopied": "Código de Schema copiado al portapapeles",
-    "requireApiTokenSave": "Se requiere API Token con rol Editor para guardar en Sanity",
-    "reactiveDocUpdated": "Documento actualizado reactivamente vía useEditDocument",
-    "enterTaskTitle": "Ingresa un título para la tarea",
-    "docCreatedSdk": "Documento creado exitosamente mediante Sanity App SDK"
+    "tasksRestoredBulk": "{{count}} tareas restauradas"
   }
 }

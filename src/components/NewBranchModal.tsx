@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useTranslation } from "react-i18next";
 import { BranchConfig } from '../services/workspaceService';
 
 interface NewBranchModalProps {
@@ -19,7 +18,6 @@ export const NewBranchModal: React.FC<NewBranchModalProps> = ({
   onCreateBranch,
   onShowToast,
 }) => {
-  const { t } = useTranslation();
   const [branchName, setBranchName] = useState('');
   const [sourceBranch, setSourceBranch] = useState(currentBranch.name);
 
@@ -29,7 +27,7 @@ export const NewBranchModal: React.FC<NewBranchModalProps> = ({
     e.preventDefault();
     const cleanName = branchName.trim().replace(/\s+/g, '-');
     if (!cleanName) {
-      onShowToast(t('toast.enterValidBranchName'), 'warning');
+      onShowToast('Por favor introduce un nombre válido de rama', 'warning');
       return;
     }
 

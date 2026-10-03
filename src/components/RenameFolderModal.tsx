@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useTranslation } from "react-i18next";
 
 interface RenameFolderModalProps {
   isOpen: boolean;
@@ -18,7 +17,6 @@ export const RenameFolderModal: React.FC<RenameFolderModalProps> = ({
   onRenameFolder,
   onShowToast,
 }) => {
-  const { t } = useTranslation();
   const [newFolderInput, setNewFolderInput] = useState(currentFolder);
 
   useEffect(() => {
@@ -31,7 +29,7 @@ export const RenameFolderModal: React.FC<RenameFolderModalProps> = ({
     e.preventDefault();
     const cleanNewFolder = newFolderInput.trim().replace(/^\/+|\/+$/g, '');
     if (!cleanNewFolder) {
-      onShowToast(t('toast.enterValidFolderName'), 'warning');
+      onShowToast('Por favor introduce un nombre válido para la carpeta', 'warning');
       return;
     }
 

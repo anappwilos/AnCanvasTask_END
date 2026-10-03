@@ -132,7 +132,7 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
                     </div>
 
                     <div className="flex flex-col items-end shrink-0 text-[10px] font-mono text-[var(--on-surface-variant)]">
-                      <span>{(ws.branches || []).length} rama{(ws.branches || []).length !== 1 ? 's' : ''}</span>
+                      <span>{(ws.branches || []).length} {t('workspace.branches').toLowerCase()}</span>
                       <span>{totalDocs} Task MD</span>
                     </div>
                   </button>
@@ -197,7 +197,7 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
                 className="text-[10px] text-sky-400 hover:underline cursor-pointer font-medium flex items-center gap-0.5"
               >
                 <span className="material-symbols-outlined text-[12px]">sync</span>
-                <span>Git Status</span>
+                <span>{t('workspace.syncGitHub')}</span>
               </button>
             </div>
 
@@ -266,7 +266,7 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
                   onOpenGitHubSync();
                 }}
                 className="btn-m3-secondary px-2.5 py-1 text-xs cursor-pointer text-sky-400"
-                title="Historial de commits y sincronización con GitHub"
+                title={t('workspace.syncGitHub')}
               >
                 <span className="material-symbols-outlined text-[14px]">commit</span>
               </button>

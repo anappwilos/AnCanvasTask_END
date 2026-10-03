@@ -54,13 +54,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     const defaults = resetUserSettingsToDefault();
     onUpdateSettings(defaults);
     setIsResetConfirmOpen(false);
-    onShowToast(t('toast.preferencesResetSuccess'), 'success');
+    onShowToast('Preferencias restablecidas a los valores predeterminados', 'success');
   };
 
   const handleClearRecents = () => {
     clearRecentFilesHistory();
     handleUpdate('recentFiles', []);
-    onShowToast(t('toast.recentHistoryCleared'), 'info');
+    onShowToast('Historial de archivos recientes limpiado', 'info');
   };
 
   const sectionsList: Array<{ id: SettingsSection; label: string; icon: string; desc: string }> = [
@@ -236,8 +236,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     onChange={(e) => handleUpdate('defaultView', e.target.value as 'canvas' | 'kanban')}
                     className="bg-[var(--surface-container)] text-[var(--on-surface)] border border-[var(--outline)] rounded px-2.5 py-1 text-xs focus:outline-none focus:border-[var(--primary)] cursor-pointer"
                   >
-                    <option value="canvas">{t('settings.viewCanvas')}</option>
-                    <option value="kanban">{t('settings.viewKanban')}</option>
+                    <option value="canvas">Lienzo (Canvas)</option>
+                    <option value="kanban">Tablero Kanban</option>
                   </select>
                 </div>
 

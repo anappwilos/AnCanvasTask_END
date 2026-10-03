@@ -128,9 +128,9 @@ export function SafeMarkdownNormalizerModal({
   const handleCopyResult = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(effectiveMarkdown);
-      onShowToast(t('toast.copiedToClipboard'), 'success');
+      onShowToast('Copiado al portapapeles', 'success');
     } catch {
-      onShowToast(t('toast.copyError'), 'error');
+      onShowToast('Error al copiar', 'error');
     }
   }, [effectiveMarkdown, onShowToast]);
 
@@ -212,7 +212,7 @@ export function SafeMarkdownNormalizerModal({
               aria-label="Alternar caracteres ocultos"
             >
               <span className="font-bold text-[11px] leading-none">¶</span>
-              <span className="hidden sm:inline">Invisibles</span>
+              <span className="hidden sm:inline">{t('common.invisibles')}</span>
             </button>
 
             {/* View Mode Toggle */}
@@ -258,7 +258,7 @@ export function SafeMarkdownNormalizerModal({
         {/* Compact Quick Actions Bar */}
         <div className="px-3.5 py-2 bg-[var(--surface)] border-b border-[var(--outline)] flex flex-wrap items-center justify-between gap-2 shrink-0 text-xs">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-[11px] text-[var(--on-surface-variant)] mr-1">Acciones:</span>
+            <span className="text-[11px] text-[var(--on-surface-variant)] mr-1">{t('common.actions')}:</span>
             <button
               type="button"
               onClick={() => handlePreset('safe_only')}
@@ -306,7 +306,7 @@ export function SafeMarkdownNormalizerModal({
             <div className="flex items-center gap-1.5">
               <span className="material-symbols-outlined text-[16px] text-rose-400 shrink-0">warning</span>
               <span>
-                <strong>Atención:</strong> {currentStats.lossRisk} posibles pérdidas de texto detectadas.
+                <strong>{t('common.warning')}:</strong> {currentStats.lossRisk} {t('common.potentialLosses')}.
                 {currentStats.acceptedLossRisk === 0 && ' (Protegidas / rechazadas)'}
               </span>
             </div>
@@ -479,9 +479,9 @@ export function SafeMarkdownNormalizerModal({
             {/* Diff Header */}
             <div className="h-7 px-3 bg-[var(--surface-container-high)] border-b border-[var(--outline)] flex items-center justify-between shrink-0 text-[11px] font-mono text-[var(--on-surface-variant)]">
               <div className="flex items-center gap-2">
-                <span className="text-rose-400 font-semibold">Original</span>
+                <span className="text-rose-400 font-semibold">{t('common.original')}</span>
                 <span>➔</span>
-                <span className="text-emerald-400 font-semibold">Propuesta</span>
+                <span className="text-emerald-400 font-semibold">{t('common.proposal')}</span>
               </div>
               {showInvisibles && (
                 <div className="text-[10px] text-[var(--on-surface-variant)] hidden sm:flex items-center gap-2">
@@ -543,7 +543,7 @@ export function SafeMarkdownNormalizerModal({
                   onChange={(e) => setHasAcknowledgedRisk(e.target.checked)}
                   className="rounded text-rose-600 focus:ring-rose-500 cursor-pointer"
                 />
-                <span>Confirmar {currentStats.acceptedLossRisk} eliminaciones con riesgo</span>
+                <span>{t('common.confirmRiskDeletions', { count: currentStats.acceptedLossRisk })}</span>
               </label>
             )}
           </div>

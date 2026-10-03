@@ -29,7 +29,7 @@ export const NewFolderModal: React.FC<NewFolderModalProps> = ({
     e.preventDefault();
     const cleanFolder = folderName.trim().replace(/^\/+|\/+$/g, '');
     if (!cleanFolder) {
-      onShowToast(t('toast.enterFolderName'), 'warning');
+      onShowToast('Por favor introduce un nombre para la carpeta', 'warning');
       return;
     }
 
@@ -95,7 +95,7 @@ export const NewFolderModal: React.FC<NewFolderModalProps> = ({
 
             {/* Quick Suggestions Chips */}
             <div className="flex items-center gap-1.5 flex-wrap mt-1.5">
-              <span className="text-[10px] text-[var(--on-surface-variant)]">Sugerencias:</span>
+              <span className="text-[10px] text-[var(--on-surface-variant)]">{t('common.suggestions')}:</span>
               {quickFolderSuggestions
                 .filter((s) => !existingFolders.includes(s))
                 .slice(0, 5)
@@ -129,7 +129,7 @@ export const NewFolderModal: React.FC<NewFolderModalProps> = ({
           {/* Path Preview */}
           <div className="p-2.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] font-mono text-[var(--on-surface-variant)] flex items-center gap-1.5">
             <span className="material-symbols-outlined text-[14px] text-emerald-400">check_circle</span>
-            <span>Ruta final: <strong>{formatDocumentPath(folderName, docName)}</strong></span>
+            <span>{t('common.finalPath')}: <strong>{formatDocumentPath(folderName, docName)}</strong></span>
           </div>
 
           <div className="pt-2.5 flex items-center justify-end gap-2 border-t border-[var(--outline)]">
