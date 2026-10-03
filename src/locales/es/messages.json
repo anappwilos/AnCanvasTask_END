@@ -7,6 +7,7 @@
   "zOG6Ns": "\"$${fileName}\" cargado en memoria",
   "uzRjHP": "\"$${fileName}\" cargado, pero no contiene tareas válidas (- [ ] ...)",
   "LIA1jm": "{0} seleccionadas",
+  "vlhFeN": "{count, plural, one {# tarea} other {# tareas}}",
   "aDE589": "→ tab",
   "9z4oHV": "$${count} tareas actualizadas",
   "Cd9tPh": "$${count} tareas eliminadas",

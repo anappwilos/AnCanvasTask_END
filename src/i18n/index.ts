@@ -1,19 +1,20 @@
 import { i18n } from '@lingui/core';
 
+export * from './formatters';
+
 export interface LanguageOption {
   code: string;
   label: string;
-  flag: string;
 }
 
 export const SUPPORTED_LANGUAGES: LanguageOption[] = [
-  { code: 'es', label: 'Español', flag: '🇪🇸' },
-  { code: 'en', label: 'English', flag: '🇬🇧' },
+  { code: 'es', label: 'Español' },
+  { code: 'en', label: 'English' },
 ];
 
-export type SupportedLanguageCode = 'es' | 'en';
+export type SupportedLanguageCode = 'es' | 'en' | 'fr' | 'de' | 'pt' | 'it';
 
-export const defaultLocale = 'es';
+export const defaultLocale: SupportedLanguageCode = 'es';
 
 /**
  * Load messages for the requested locale and activate it in Lingui
@@ -24,26 +25,30 @@ export async function dynamicActivate(locale: string) {
     i18n.load(locale, messages);
     i18n.activate(locale);
     localStorage.setItem('antask_language', locale);
-    document.documentElement.lang = locale;
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = locale;
+    }
   } catch (error) {
     console.error(`Error loading locale ${locale}:`, error);
   }
 }
 
 /**
- * Initialize language based on localStorage, navigator, or fallback to default
+ * Initialize language based on:
+ * 1. user explicit persisted preference
+ * 2. browser navigator language
+ * 3. default locale (es)
  */
 export async function initI18n() {
-  const persisted = localStorage.getItem('antask_language');
+  const persisted = typeof localStorage !== 'undefined' ? localStorage.getItem('antask_language') : null;
   let locale = persisted;
 
   if (!locale) {
-    const browserLang = navigator.language.split('-')[0];
-    const isSupported = SUPPORTED_LANGUAGES.some(l => l.code === browserLang);
+    const browserLang = typeof navigator !== 'undefined' ? navigator.language.split('-')[0] : 'es';
+    const isSupported = SUPPORTED_LANGUAGES.some((l) => l.code === browserLang);
     locale = isSupported ? browserLang : defaultLocale;
   }
-  
+
   // ensure it's loaded before rendering
   await dynamicActivate(locale);
 }
-

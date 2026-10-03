@@ -502,13 +502,13 @@ export function KanbanBoard({
             {i18n._(msg`No hay tareas que coincidan con los filtros activos`)}
           </h3>
           <p className="text-xs text-[var(--on-surface-variant)] max-w-xs mb-4">
-            Prueba a cambiar el término de búsqueda o limpia los filtros para ver todas las {allTasks.length} tareas.
+            {i18n._(msg`Prueba a cambiar el término de búsqueda o limpia los filtros para ver todas las ${allTasks.length} tareas.`)}
           </p>
           {onResetFilters && (
             <button
               type="button"
               onClick={onResetFilters}
-              className="btn-m3-secondary px-3 py-1.5 text-xs cursor-pointer text-[var(--primary)] border-[var(--primary)]/40 hover:bg-[var(--primary-container)]/20"
+              className="btn-m3-secondary px-3.5 py-1.5 text-xs cursor-pointer text-[var(--primary)] border-[var(--primary)]/40 hover:bg-[var(--primary-container)]/20"
             >
               <span className="material-symbols-outlined text-[16px]">restart_alt</span>
               <span>{i18n._(msg`Limpiar filtros`)}</span>
@@ -575,7 +575,7 @@ export function KanbanBoard({
                           className="text-[11px] font-medium text-[var(--primary)] hover:underline cursor-pointer flex items-center gap-0.5"
                         >
                           <span className="material-symbols-outlined text-[12px]">add</span>
-                          <span>Añadir tarea</span>
+                          <span>{i18n._(msg`Añadir tarea`)}</span>
                         </button>
                       </div>
                     ) : (
@@ -1007,7 +1007,7 @@ export function KanbanBoard({
               type="button"
               onClick={() => handleBatchSetPriority('P0')}
               className="btn-m3-secondary px-2.5 py-1 text-xs cursor-pointer text-rose-400"
-              title="Asignar prioridad P0"
+              title={i18n._(msg`Asignar prioridad P0`)}
             >
               <span>P0</span>
             </button>
@@ -1016,7 +1016,7 @@ export function KanbanBoard({
               type="button"
               onClick={() => handleBatchSetPriority('P1')}
               className="btn-m3-secondary px-2.5 py-1 text-xs cursor-pointer text-amber-400"
-              title="Asignar prioridad P1"
+              title={i18n._(msg`Asignar prioridad P1`)}
             >
               <span>P1</span>
             </button>
@@ -1025,10 +1025,10 @@ export function KanbanBoard({
               type="button"
               onClick={() => handleBatchSetStatus('in_progress')}
               className="btn-m3-secondary px-2.5 py-1 text-xs cursor-pointer text-sky-400"
-              title="Mover a In Progress"
+              title={i18n._(msg`Mover a En Progreso`)}
             >
-              <span className="hidden sm:inline">In Progress</span>
-              <span className="sm:hidden">Progreso</span>
+              <span className="hidden sm:inline">{i18n._(msg`En Progreso`)}</span>
+              <span className="sm:hidden">{i18n._(msg`Progreso`)}</span>
             </button>
 
             <button
