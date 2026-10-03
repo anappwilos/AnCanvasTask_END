@@ -95,7 +95,7 @@ const ToastCard: React.FC<{ toast: ToastItem; onDismiss: () => void }> = ({ toas
         isClosing ? 'opacity-0 translate-y-1' : 'opacity-100 translate-y-0'
       }`}
     >
-      <div className="flex items-center gap-2 min-w-0">
+      <div id="div-toastsystem-1" className="flex items-center gap-2 min-w-0">
         <span className={`material-symbols-outlined text-[16px] ${config.textClass} shrink-0`}>
           {config.icon}
         </span>
@@ -104,7 +104,7 @@ const ToastCard: React.FC<{ toast: ToastItem; onDismiss: () => void }> = ({ toas
         </span>
       </div>
 
-      <div className="flex items-center gap-1.5 shrink-0">
+      <div id="div-toastsystem-2" className="flex items-center gap-1.5 shrink-0">
         {toast.action && (
           <button
             type="button"

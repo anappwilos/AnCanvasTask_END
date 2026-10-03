@@ -77,8 +77,8 @@ export const SanityStudioEmbed: React.FC<SanityStudioEmbedProps> = ({
 
   if (!isConfigured) {
     return (
-      <div className="flex-1 h-full flex flex-col items-center justify-center p-8 text-center bg-neutral-950 text-neutral-200">
-        <div className="w-14 h-14 rounded-2xl bg-rose-950/80 border border-rose-800/60 flex items-center justify-center text-rose-400 mb-3 shadow-md">
+      <div id="div-sanitystudioembed-1" className="flex-1 h-full flex flex-col items-center justify-center p-8 text-center bg-neutral-950 text-neutral-200">
+        <div id="div-sanitystudioembed-2" className="w-14 h-14 rounded-2xl bg-rose-950/80 border border-rose-800/60 flex items-center justify-center text-rose-400 mb-3 shadow-md">
           <Database className="w-7 h-7" />
         </div>
         <h2 className="text-base font-semibold text-neutral-100 mb-1">
@@ -104,15 +104,15 @@ export const SanityStudioEmbed: React.FC<SanityStudioEmbedProps> = ({
     : 'flex-1 h-full flex flex-col bg-neutral-950 overflow-hidden';
 
   return (
-    <div className={containerClasses}>
+    <div id="div-sanitystudioembed-3" className={containerClasses}>
       {/* Native Studio Control Bar */}
-      <div className="px-3.5 py-2 bg-neutral-900 border-b border-neutral-800 flex items-center justify-between gap-3 shrink-0 select-none">
-        <div className="flex items-center gap-2 min-w-0">
-          <div className="w-6 h-6 rounded bg-rose-600 flex items-center justify-center text-white font-bold text-xs shadow-xs shrink-0">
+      <div id="div-sanitystudioembed-4" className="px-3.5 py-2 bg-neutral-900 border-b border-neutral-800 flex items-center justify-between gap-3 shrink-0 select-none">
+        <div id="div-sanitystudioembed-5" className="flex items-center gap-2 min-w-0">
+          <div id="div-sanitystudioembed-6" className="w-6 h-6 rounded bg-rose-600 flex items-center justify-center text-white font-bold text-xs shadow-xs shrink-0">
             S
           </div>
-          <div className="flex flex-col min-w-0">
-            <div className="flex items-center gap-1.5">
+          <div id="div-sanitystudioembed-7" className="flex flex-col min-w-0">
+            <div id="div-sanitystudioembed-8" className="flex items-center gap-1.5">
               <span className="font-semibold text-xs text-neutral-100 truncate">
                 Sanity Studio Nativo Embebido
               </span>
@@ -126,7 +126,7 @@ export const SanityStudioEmbed: React.FC<SanityStudioEmbedProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 shrink-0">
+        <div id="div-sanitystudioembed-9" className="flex items-center gap-1.5 shrink-0">
           <button
             type="button"
             onClick={() => setRenderKey((k) => k + 1)}
@@ -184,7 +184,7 @@ export const SanityStudioEmbed: React.FC<SanityStudioEmbedProps> = ({
       </div>
 
       {/* Embedded Sanity Studio Engine */}
-      <div className="flex-1 w-full h-full overflow-hidden relative">
+      <div id="div-sanitystudioembed-10" className="flex-1 w-full h-full overflow-hidden relative">
         <Studio key={renderKey} config={studioConfig} scheme="dark" />
       </div>
     </div>

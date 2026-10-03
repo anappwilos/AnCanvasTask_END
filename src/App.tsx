@@ -2706,7 +2706,7 @@ export default function App() {
       {/* Top App Bar (DESIGN.md Section 3: Lightweight, global actions, clean M3 surface) */}
       <header className="h-14 bg-[var(--surface-container)] border-b border-[var(--outline)] px-3 sm:px-4 flex items-center justify-between z-20 select-none flex-shrink-0 gap-2 sm:gap-4 transition-colors">
         {/* Left Section: Sidebar Toggle, Brand & Workspace / Branch Picker */}
-        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+        <div id="div-app-1" className="flex items-center gap-2 sm:gap-3 min-w-0">
           <button
             type="button"
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -2719,8 +2719,8 @@ export default function App() {
             </span>
           </button>
 
-          <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-            <div className="flex items-center gap-1.5 font-semibold text-xs text-[var(--on-surface)] shrink-0">
+          <div id="div-app-2" className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+            <div id="div-app-3" className="flex items-center gap-1.5 font-semibold text-xs text-[var(--on-surface)] shrink-0">
               <span className="material-symbols-outlined text-[18px] text-[var(--primary)]">splitscreen_left</span>
               <span className="hidden sm:inline">Tasks Canvas</span>
             </div>
@@ -2750,9 +2750,9 @@ export default function App() {
         </div>
 
         {/* Center Section: View Switcher (Canvas / Kanban / Studio) & Quick Search bar */}
-        <div className="hidden md:flex items-center gap-2 flex-1 max-w-sm lg:max-w-md mx-2 justify-center min-w-0">
+        <div id="div-app-4" className="hidden md:flex items-center gap-2 flex-1 max-w-sm lg:max-w-md mx-2 justify-center min-w-0">
           {/* View Switcher Segmented Control (Canvas / Kanban / Studio) */}
-          <div className="flex items-center bg-[var(--surface)] p-0.5 rounded-md border border-[var(--outline)] shrink-0">
+          <div id="div-app-5" className="flex items-center bg-[var(--surface)] p-0.5 rounded-md border border-[var(--outline)] shrink-0">
             <button
               type="button"
               onClick={() => setActiveView('canvas')}
@@ -2793,7 +2793,7 @@ export default function App() {
             </button>
           </div>
 
-          <div className="relative w-full hidden lg:block max-w-[180px] xl:max-w-[220px]">
+          <div id="div-app-6" className="relative w-full hidden lg:block max-w-[180px] xl:max-w-[220px]">
             <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[16px] text-[var(--on-surface-variant)] pointer-events-none">
               search
             </span>
@@ -2827,7 +2827,7 @@ export default function App() {
         </div>
 
         {/* Right Section: Global Actions (Split View, Problems, Help, Settings, Language) */}
-        <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+        <div id="div-app-7" className="flex items-center gap-1 sm:gap-1.5 shrink-0">
           {!isOnline && (
             <span className="flex items-center gap-1 px-2 py-0.5 rounded bg-amber-950/80 border border-amber-700/60 text-amber-300 text-[10px] font-sans">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
@@ -2920,7 +2920,7 @@ export default function App() {
       </header>
 
       {/* Main App Body: Sidebar + Workspace (Canvas) + Details Panel (DESIGN.md Section 3 & 16) */}
-      <div className="flex-1 w-full flex overflow-hidden relative">
+      <div id="div-app-8" className="flex-1 w-full flex overflow-hidden relative">
         {/* Mobile Sidebar Overlay Backdrop */}
         {isSidebarOpen && (
           <div
@@ -2934,8 +2934,8 @@ export default function App() {
         {isSidebarOpen && (
           <aside className="fixed inset-y-0 left-0 z-50 w-72 lg:static lg:z-10 lg:w-64 bg-[var(--surface-container)] border-r border-[var(--outline)] flex flex-col justify-between p-3 select-none flex-shrink-0 transition-transform duration-200 shadow-2xl lg:shadow-none animate-slide-right lg:animate-none">
             {/* Mobile Sidebar Header with Close Button */}
-            <div className="flex items-center justify-between lg:hidden pb-2 border-b border-[var(--outline)] mb-1">
-              <div className="flex items-center gap-1.5">
+            <div id="div-app-9" className="flex items-center justify-between lg:hidden pb-2 border-b border-[var(--outline)] mb-1">
+              <div id="div-app-10" className="flex items-center gap-1.5">
                 <span className="material-symbols-outlined text-sky-400 text-[18px]">folder_open</span>
                 <span className="font-semibold text-xs text-[var(--on-surface)]">{t('explorer.files')}</span>
               </div>
@@ -2949,9 +2949,9 @@ export default function App() {
               </button>
             </div>
 
-            <div className="flex flex-col gap-3 overflow-y-auto">
+            <div id="div-app-11" className="flex flex-col gap-3 overflow-y-auto">
               {/* Task MD Documents Explorer (1 to N Task MD files in Root, Frontend, Backend, etc.) */}
-              <div className="rounded-lg bg-[var(--surface)] border border-[var(--outline)] shadow-2xs">
+              <div id="div-app-12" className="rounded-lg bg-[var(--surface)] border border-[var(--outline)] shadow-2xs">
                 <TaskDocumentExplorer
                   workspace={activeWorkspace}
                   allWorkspaces={workspaceStore.workspaces}
@@ -2995,7 +2995,7 @@ export default function App() {
               </div>
 
               {/* Quick Actions / New Task & File Button */}
-              <div className="flex items-center gap-2">
+              <div id="div-app-13" className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={handleOpenFilePicker}
@@ -3016,7 +3016,7 @@ export default function App() {
               </div>
 
               {/* Quick Filters */}
-              <div className="flex flex-col gap-1">
+              <div id="div-app-14" className="flex flex-col gap-1">
                 <span className="text-[11px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider px-2">
                   Filtros & Estados
                 </span>
@@ -3033,7 +3033,7 @@ export default function App() {
                       : 'text-[var(--on-surface-variant)] hover:bg-[var(--surface-container-high)]'
                   }`}
                 >
-                  <div className="flex items-center gap-2">
+                  <div id="div-app-15" className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-[16px] text-sky-400">inbox</span>
                     <span>{t('task.status.allTasks')}</span>
                   </div>
@@ -3054,7 +3054,7 @@ export default function App() {
                       : 'text-[var(--on-surface-variant)] hover:bg-[var(--surface-container-high)]'
                   }`}
                 >
-                  <div className="flex items-center gap-2">
+                  <div id="div-app-16" className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-[16px] text-amber-400">pending</span>
                     <span>{t('task.status.todo')}</span>
                   </div>
@@ -3075,7 +3075,7 @@ export default function App() {
                       : 'text-[var(--on-surface-variant)] hover:bg-[var(--surface-container-high)]'
                   }`}
                 >
-                  <div className="flex items-center gap-2">
+                  <div id="div-app-17" className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-[16px] text-emerald-400">check_circle</span>
                     <span>{t('task.status.done')}</span>
                   </div>
@@ -3096,7 +3096,7 @@ export default function App() {
                       : 'text-[var(--on-surface-variant)] hover:bg-[var(--surface-container-high)]'
                   }`}
                 >
-                  <div className="flex items-center gap-2">
+                  <div id="div-app-18" className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-[16px] text-rose-400">priority_high</span>
                     <span>{t('task.priority.critical')}</span>
                   </div>
@@ -3117,7 +3117,7 @@ export default function App() {
                       : 'text-[var(--on-surface-variant)] hover:bg-[var(--surface-container-high)]'
                   }`}
                 >
-                  <div className="flex items-center gap-2">
+                  <div id="div-app-19" className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-[16px] text-amber-500">lock</span>
                     <span>{t('task.status.blocked')}</span>
                   </div>
@@ -3128,8 +3128,8 @@ export default function App() {
               </div>
 
               {/* Sections & Groups List */}
-              <div className="flex flex-col gap-1">
-                <div className="flex items-center justify-between px-2">
+              <div id="div-app-20" className="flex flex-col gap-1">
+                <div id="div-app-21" className="flex items-center justify-between px-2">
                   <span className="text-[11px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
                     Secciones ({parsedGroups.length})
                   </span>
@@ -3144,7 +3144,7 @@ export default function App() {
                   )}
                 </div>
 
-                <div className="flex flex-col gap-0.5 max-h-48 overflow-y-auto pr-1">
+                <div id="div-app-22" className="flex flex-col gap-0.5 max-h-48 overflow-y-auto pr-1">
                   {parsedGroups.map((grp) => {
                     const doneInGrp = grp.tasks.filter((t) => t.completed).length;
                     const isSectionActive = taskFilters.section.toLowerCase() === grp.title.toLowerCase();
@@ -3179,7 +3179,7 @@ export default function App() {
             </div>
 
             {/* Sidebar Footer: Essential settings & theme */}
-            <div className="flex flex-col gap-1 pt-2.5 border-t border-[var(--outline)]">
+            <div id="div-app-23" className="flex flex-col gap-1 pt-2.5 border-t border-[var(--outline)]">
               <button
                 type="button"
                 onClick={() => setIsSettingsOpen(true)}
@@ -3277,7 +3277,7 @@ export default function App() {
                   />
 
                   {/* Floating Canvas Navigation Controls (DESIGN.md Section 3 & 14) */}
-                  <div className="absolute bottom-3 left-3 z-10 flex items-center gap-0.5 sm:gap-1 bg-[var(--surface-container)]/95 backdrop-blur-md border border-[var(--outline)] rounded-full p-1 shadow-md select-none">
+                  <div id="div-app-24" className="absolute bottom-3 left-3 z-10 flex items-center gap-0.5 sm:gap-1 bg-[var(--surface-container)]/95 backdrop-blur-md border border-[var(--outline)] rounded-full p-1 shadow-md select-none">
                     <button
                       type="button"
                       onClick={handleZoomOut}
@@ -3307,7 +3307,7 @@ export default function App() {
                       <span className="material-symbols-outlined text-[16px]">add</span>
                     </button>
 
-                    <div className="w-px h-4 bg-[var(--outline)] my-auto mx-0.5" />
+                    <div id="div-app-25" className="w-px h-4 bg-[var(--outline)] my-auto mx-0.5" />
 
                     <button
                       type="button"
@@ -3332,9 +3332,9 @@ export default function App() {
 
                   {/* Canvas Empty State Overlay */}
                   {allParsedTasks.length === 0 && (
-                    <div className="absolute inset-0 pointer-events-none flex items-center justify-center p-6 z-10">
-                      <div className="pointer-events-auto bg-[var(--surface-container)] border border-[var(--outline)] rounded-lg p-6 max-w-md text-center shadow-lg flex flex-col items-center">
-                        <div className="w-10 h-10 rounded bg-[var(--primary-container)]/30 border border-[var(--primary)]/30 flex items-center justify-center text-[var(--primary)] mb-3">
+                    <div id="div-app-26" className="absolute inset-0 pointer-events-none flex items-center justify-center p-6 z-10">
+                      <div id="div-app-27" className="pointer-events-auto bg-[var(--surface-container)] border border-[var(--outline)] rounded-lg p-6 max-w-md text-center shadow-lg flex flex-col items-center">
+                        <div id="div-app-28" className="w-10 h-10 rounded bg-[var(--primary-container)]/30 border border-[var(--primary)]/30 flex items-center justify-center text-[var(--primary)] mb-3">
                           <span className="material-symbols-outlined text-[22px]">grid_view</span>
                         </div>
                         <h3 className="text-sm font-semibold text-[var(--on-surface)] font-sans mb-1">
@@ -3343,7 +3343,7 @@ export default function App() {
                         <p className="text-xs text-[var(--on-surface-variant)] mb-4 leading-relaxed">
                           No hay tareas en este archivo TASKS.md. Comienza añadiendo una tarea o carga un proyecto de ejemplo.
                         </p>
-                        <div className="flex items-center gap-2 flex-wrap justify-center">
+                        <div id="div-app-29" className="flex items-center gap-2 flex-wrap justify-center">
                           <button
                             type="button"
                             onClick={() => {
@@ -3372,8 +3372,8 @@ export default function App() {
 
                   {/* Floating Canvas Multi-Selection Action Bar (DESIGN.md Section 14) */}
                   {selectedTaskIdsOnCanvas.length > 1 && (
-                    <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-20 bg-[var(--surface-container-high)] border border-[var(--outline)] rounded-lg px-2.5 sm:px-3 py-1.5 shadow-xl flex items-center gap-1.5 sm:gap-2 select-none max-w-[96vw] overflow-x-auto">
-                      <div className="flex items-center gap-1.5 pr-2 border-r border-[var(--outline)] shrink-0">
+                    <div id="div-app-30" className="absolute bottom-12 left-1/2 -translate-x-1/2 z-20 bg-[var(--surface-container-high)] border border-[var(--outline)] rounded-lg px-2.5 sm:px-3 py-1.5 shadow-xl flex items-center gap-1.5 sm:gap-2 select-none max-w-[96vw] overflow-x-auto">
+                      <div id="div-app-31" className="flex items-center gap-1.5 pr-2 border-r border-[var(--outline)] shrink-0">
                         <span className="w-2 h-2 rounded bg-[var(--primary)]" />
                         <span className="text-xs font-mono font-medium text-[var(--on-surface)]">
                           {selectedTaskIdsOnCanvas.length} seleccionadas
@@ -3411,7 +3411,7 @@ export default function App() {
                       </button>
 
                       {/* Quick Priorities */}
-                      <div className="flex items-center gap-1 shrink-0 border-l border-r border-[var(--outline)] px-1.5">
+                      <div id="div-app-32" className="flex items-center gap-1 shrink-0 border-l border-r border-[var(--outline)] px-1.5">
                         {(['P0', 'P1', 'P2', 'P3'] as TaskPriority[]).map((p) => (
                           <button
                             key={p}
@@ -3509,8 +3509,8 @@ export default function App() {
 
               {/* Drag & Drop Discrete Overlay */}
               {isDraggingOver && (
-                <div className="absolute inset-0 z-50 pointer-events-none bg-black/80 backdrop-blur-xs flex flex-col items-center justify-center animate-fade-in p-6">
-                  <div className="w-16 h-16 rounded-2xl bg-sky-950/80 border border-sky-600 flex items-center justify-center text-sky-400 mb-4 shadow-xl">
+                <div id="div-app-33" className="absolute inset-0 z-50 pointer-events-none bg-black/80 backdrop-blur-xs flex flex-col items-center justify-center animate-fade-in p-6">
+                  <div id="div-app-34" className="w-16 h-16 rounded-2xl bg-sky-950/80 border border-sky-600 flex items-center justify-center text-sky-400 mb-4 shadow-xl">
                     <span className="material-symbols-outlined text-[32px]">upload_file</span>
                   </div>
                   <h3 className="text-base font-semibold text-white font-sans mb-1">
@@ -3531,7 +3531,7 @@ export default function App() {
                 className="h-2 w-full md:h-full md:w-2 bg-[var(--outline)] hover:bg-[var(--primary)] cursor-row-resize md:cursor-col-resize transition-colors shrink-0 relative flex items-center justify-center group select-none z-20"
                 title="Arrastra para ajustar el visor en tiempo real (Doble clic para 50%)"
               >
-                <div className="w-8 h-1 md:w-1 md:h-8 rounded-full bg-[var(--on-surface-variant)] group-hover:bg-[var(--on-primary)] transition-colors" />
+                <div id="div-app-35" className="w-8 h-1 md:w-1 md:h-8 rounded-full bg-[var(--on-surface-variant)] group-hover:bg-[var(--on-primary)] transition-colors" />
               </div>
             )}
 
@@ -3745,9 +3745,9 @@ export default function App() {
             aria-modal="true"
             aria-label="Opciones y herramientas"
           >
-            <div className="w-12 h-1 bg-[var(--outline)] rounded-full mx-auto" />
+            <div id="div-app-36" className="w-12 h-1 bg-[var(--outline)] rounded-full mx-auto" />
 
-            <div className="flex items-center justify-between border-b border-[var(--outline)] pb-2.5">
+            <div id="div-app-37" className="flex items-center justify-between border-b border-[var(--outline)] pb-2.5">
               <div>
                 <h2 className="text-sm font-semibold text-[var(--on-surface)] font-sans">
                   Menú de Opciones
@@ -3765,7 +3765,7 @@ export default function App() {
               </button>
             </div>
 
-            <div className="flex flex-col gap-1.5 text-xs">
+            <div id="div-app-38" className="flex flex-col gap-1.5 text-xs">
               {/* Workspace & Repositories */}
               <button
                 type="button"
@@ -3775,7 +3775,7 @@ export default function App() {
                 }}
                 className="w-full min-h-[44px] px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer"
               >
-                <div className="flex items-center gap-2.5">
+                <div id="div-app-39" className="flex items-center gap-2.5">
                   <span className="material-symbols-outlined text-[18px] text-emerald-400">workspaces</span>
                   <span>{t('workspace.title')}</span>
                 </div>
@@ -3791,7 +3791,7 @@ export default function App() {
                 }}
                 className="w-full min-h-[44px] px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer"
               >
-                <div className="flex items-center gap-2.5">
+                <div id="div-app-40" className="flex items-center gap-2.5">
                   <span className="material-symbols-outlined text-[18px] text-sky-400">fork_right</span>
                   <span>{t('workspace.branches')}</span>
                 </div>
@@ -3807,7 +3807,7 @@ export default function App() {
                 }}
                 className="w-full min-h-[44px] px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer"
               >
-                <div className="flex items-center gap-2.5">
+                <div id="div-app-41" className="flex items-center gap-2.5">
                   <span className="material-symbols-outlined text-[18px] text-amber-400">sync_problem</span>
                   <span>{t('workspace.syncSanity')}</span>
                 </div>
@@ -3823,7 +3823,7 @@ export default function App() {
                 }}
                 className="w-full min-h-[44px] px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer"
               >
-                <div className="flex items-center gap-2.5">
+                <div id="div-app-42" className="flex items-center gap-2.5">
                   <span className="material-symbols-outlined text-[18px] text-[var(--primary)]">folder_open</span>
                   <span>{t('workspace.openTasksMd')}</span>
                 </div>
@@ -3843,7 +3843,7 @@ export default function App() {
                     : 'bg-[var(--surface)] border-[var(--outline)] text-[var(--on-surface)] hover:bg-[var(--surface-container-high)]'
                 }`}
               >
-                <div className="flex items-center gap-2.5">
+                <div id="div-app-43" className="flex items-center gap-2.5">
                   <span className="material-symbols-outlined text-[18px] text-emerald-400">save</span>
                   <span>Guardar {currentFileName}</span>
                 </div>
@@ -3863,7 +3863,7 @@ export default function App() {
                 }}
                 className="w-full min-h-[44px] px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer"
               >
-                <div className="flex items-center gap-2.5">
+                <div id="div-app-44" className="flex items-center gap-2.5">
                   <span className="material-symbols-outlined text-[18px] text-[var(--primary)]">sync_alt</span>
                   <span>{t('workspace.importExport')}</span>
                 </div>
@@ -3881,7 +3881,7 @@ export default function App() {
                 }}
                 className="w-full min-h-[44px] px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer"
               >
-                <div className="flex items-center gap-2.5">
+                <div id="div-app-45" className="flex items-center gap-2.5">
                   <span className="material-symbols-outlined text-[18px]">
                     {effectiveTheme === 'dark' ? 'light_mode' : 'dark_mode'}
                   </span>
@@ -3891,8 +3891,8 @@ export default function App() {
               </button>
 
               {/* Language Selection */}
-              <div className="w-full min-h-[44px] px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between text-[var(--on-surface)]">
-                <div className="flex items-center gap-2.5">
+              <div id="div-app-46" className="w-full min-h-[44px] px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between text-[var(--on-surface)]">
+                <div id="div-app-47" className="flex items-center gap-2.5">
                   <span className="material-symbols-outlined text-[18px] text-[var(--primary)]">language</span>
                   <span>{t('common.language')}</span>
                 </div>
@@ -3908,7 +3908,7 @@ export default function App() {
                 }}
                 className="w-full min-h-[44px] px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer"
               >
-                <div className="flex items-center gap-2.5">
+                <div id="div-app-48" className="flex items-center gap-2.5">
                   <span className="material-symbols-outlined text-[18px] text-[var(--primary)]">settings</span>
                   <span>{t('settings.title')}</span>
                 </div>
@@ -3924,7 +3924,7 @@ export default function App() {
                 }}
                 className="w-full min-h-[44px] px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer"
               >
-                <div className="flex items-center gap-2.5">
+                <div id="div-app-49" className="flex items-center gap-2.5">
                   <span className="material-symbols-outlined text-[18px] text-rose-400">cloud_sync</span>
                   <span>{t('settings.sanityCloudSettings')}</span>
                 </div>
@@ -3940,7 +3940,7 @@ export default function App() {
                 }}
                 className="w-full min-h-[44px] px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer"
               >
-                <div className="flex items-center gap-2.5">
+                <div id="div-app-50" className="flex items-center gap-2.5">
                   <span className="material-symbols-outlined text-[18px] text-sky-400">help</span>
                   <span>{t('nav.quickGuideTooltip')}</span>
                 </div>
@@ -3957,7 +3957,7 @@ export default function App() {
                   }}
                   className="w-full min-h-[44px] px-3 py-2 rounded-lg bg-amber-950/40 border border-amber-800 flex items-center justify-between text-amber-300 cursor-pointer"
                 >
-                  <div className="flex items-center gap-2.5">
+                  <div id="div-app-51" className="flex items-center gap-2.5">
                     <span>⚠</span>
                     <span>{t('nav.problemsTooltip')}</span>
                   </div>
@@ -3984,9 +3984,9 @@ export default function App() {
             aria-labelledby="problems-modal-title"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="w-10 h-1 bg-[var(--outline)] rounded mx-auto my-2 sm:hidden" />
+            <div id="div-app-52" className="w-10 h-1 bg-[var(--outline)] rounded mx-auto my-2 sm:hidden" />
 
-            <div className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
+            <div id="div-app-53" className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
               <div>
                 <h2 id="problems-modal-title" className="text-sm font-semibold text-[var(--on-surface)] font-sans flex items-center gap-2">
                   <span>{t('nav.problemsTooltip')}</span>
@@ -4004,16 +4004,16 @@ export default function App() {
               </button>
             </div>
 
-            <div className="px-4 py-2 bg-[var(--surface)] border-b border-[var(--outline)] flex items-center gap-4 text-xs font-mono overflow-x-auto">
+            <div id="div-app-54" className="px-4 py-2 bg-[var(--surface)] border-b border-[var(--outline)] flex items-center gap-4 text-xs font-mono overflow-x-auto">
               <span>Total: <strong className="text-[var(--on-surface)]">{validationReport.issues.length}</strong></span>
               <span className="text-rose-400">{t('common.errors')}: <strong>{validationReport.errorCount}</strong></span>
               <span className="text-amber-400">{t('common.warnings')}: <strong>{validationReport.warningCount}</strong></span>
             </div>
 
-            <div className="p-4 overflow-auto max-h-[50vh] flex flex-col gap-2">
+            <div id="div-app-55" className="p-4 overflow-auto max-h-[50vh] flex flex-col gap-2">
               {validationReport.issues.length === 0 ? (
-                <div className="py-8 text-center flex flex-col items-center justify-center gap-2">
-                  <div className="w-8 h-8 rounded bg-emerald-950/80 border border-emerald-700 flex items-center justify-center text-emerald-400 text-base">
+                <div id="div-app-56" className="py-8 text-center flex flex-col items-center justify-center gap-2">
+                  <div id="div-app-57" className="w-8 h-8 rounded bg-emerald-950/80 border border-emerald-700 flex items-center justify-center text-emerald-400 text-base">
                     ✓
                   </div>
                   <p className="text-xs text-[var(--on-surface-variant)]">{t('common.noIssues')}</p>
@@ -4024,9 +4024,9 @@ export default function App() {
                     key={issue.id}
                     className="p-2.5 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-start justify-between gap-3 text-xs"
                   >
-                    <div className="flex items-start gap-2 flex-1 min-w-0">
+                    <div id="div-app-58" className="flex items-start gap-2 flex-1 min-w-0">
                       <span className="text-amber-400 font-bold shrink-0 mt-0.5">⚠</span>
-                      <div className="flex flex-col gap-0.5 min-w-0">
+                      <div id="div-app-59" className="flex flex-col gap-0.5 min-w-0">
                         <span className="font-semibold text-[var(--on-surface)] truncate">{issue.message}</span>
                         {issue.details && (
                           <span className="text-[11px] text-[var(--on-surface-variant)]">{issue.details}</span>
@@ -4047,7 +4047,7 @@ export default function App() {
               )}
             </div>
 
-            <div className="px-4 py-2.5 bg-[var(--surface)] border-t border-[var(--outline)] flex justify-end">
+            <div id="div-app-60" className="px-4 py-2.5 bg-[var(--surface)] border-t border-[var(--outline)] flex justify-end">
               <button
                 type="button"
                 onClick={() => setIsProblemsModalOpen(false)}
@@ -4073,9 +4073,9 @@ export default function App() {
             aria-labelledby="autolayout-modal-title"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="w-10 h-1 bg-[var(--outline)] rounded mx-auto my-2 sm:hidden" />
+            <div id="div-app-61" className="w-10 h-1 bg-[var(--outline)] rounded mx-auto my-2 sm:hidden" />
 
-            <div className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
+            <div id="div-app-62" className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
               <h2 id="autolayout-modal-title" className="text-sm font-semibold text-[var(--on-surface)] font-sans flex items-center gap-2">
                 <span className="material-symbols-outlined text-[16px] text-sky-400">account_tree</span>
                 <span>{t('canvas.autoLayout')}</span>
@@ -4089,16 +4089,16 @@ export default function App() {
               </button>
             </div>
 
-            <div className="p-4 flex flex-col gap-2.5 text-xs text-[var(--on-surface-variant)] leading-relaxed">
+            <div id="div-app-63" className="p-4 flex flex-col gap-2.5 text-xs text-[var(--on-surface-variant)] leading-relaxed">
               <p>
                 Esta acción organizará todas las tarjetas y secciones en un grafo jerárquico según sus dependencias <code className="text-[var(--primary)] font-mono">blockedBy</code>.
               </p>
-              <div className="p-2.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] font-mono">
+              <div id="div-app-64" className="p-2.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] font-mono">
                 • {parsedStats.taskCount} tareas en {parsedStats.groupCount} secciones
               </div>
             </div>
 
-            <div className="px-4 py-2.5 bg-[var(--surface)] border-t border-[var(--outline)] flex items-center justify-end gap-2">
+            <div id="div-app-65" className="px-4 py-2.5 bg-[var(--surface)] border-t border-[var(--outline)] flex items-center justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setIsAutoLayoutConfirmOpen(false)}
@@ -4131,9 +4131,9 @@ export default function App() {
             aria-labelledby="new-task-modal-title"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="w-10 h-1 bg-[var(--outline)] rounded mx-auto my-2 sm:hidden" />
+            <div id="div-app-66" className="w-10 h-1 bg-[var(--outline)] rounded mx-auto my-2 sm:hidden" />
 
-            <div className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
+            <div id="div-app-67" className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
               <h2 id="new-task-modal-title" className="text-sm font-semibold text-[var(--on-surface)] font-sans flex items-center gap-2">
                 <span className="material-symbols-outlined text-[16px] text-sky-400">add_task</span>
                 <span>{t('canvas.addTask')}</span>
@@ -4148,7 +4148,7 @@ export default function App() {
             </div>
 
             <form onSubmit={handleCreateTask} className="p-4 flex flex-col gap-3.5">
-              <div className="flex flex-col gap-1">
+              <div id="div-app-68" className="flex flex-col gap-1">
                 <label className="text-xs font-medium text-[var(--on-surface)]">{t('task.title')}</label>
                 <input
                   type="text"
@@ -4161,9 +4161,9 @@ export default function App() {
               </div>
 
               {/* Priority Selection */}
-              <div className="flex flex-col gap-1">
+              <div id="div-app-69" className="flex flex-col gap-1">
                 <label className="text-xs font-medium text-[var(--on-surface)]">{t('task.priority.label')}</label>
-                <div className="grid grid-cols-4 gap-2">
+                <div id="div-app-70" className="grid grid-cols-4 gap-2">
                   {(['P0', 'P1', 'P2', 'P3'] as TaskPriority[]).map((p) => {
                     const isSelected = newTaskPriority === p;
                     return (
@@ -4185,8 +4185,8 @@ export default function App() {
               </div>
 
               {/* Section / Group */}
-              <div className="flex flex-col gap-1">
-                <div className="flex items-center justify-between">
+              <div id="div-app-71" className="flex flex-col gap-1">
+                <div id="div-app-72" className="flex items-center justify-between">
                   <label className="text-xs font-medium text-[var(--on-surface)]">{t('task.section')}</label>
                   <button
                     type="button"
@@ -4220,7 +4220,7 @@ export default function App() {
                 )}
               </div>
 
-              <div className="pt-2.5 flex items-center justify-end gap-2 border-t border-[var(--outline)]">
+              <div id="div-app-73" className="pt-2.5 flex items-center justify-end gap-2 border-t border-[var(--outline)]">
                 <button
                   type="button"
                   onClick={() => setIsNewTaskModalOpen(false)}
@@ -4254,9 +4254,9 @@ export default function App() {
             aria-labelledby="delete-warning-title"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="w-10 h-1 bg-[var(--outline)] rounded mx-auto my-2 sm:hidden" />
+            <div id="div-app-74" className="w-10 h-1 bg-[var(--outline)] rounded mx-auto my-2 sm:hidden" />
 
-            <div className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
+            <div id="div-app-75" className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
               <h2 id="delete-warning-title" className="text-sm font-semibold text-rose-400 font-sans flex items-center gap-2">
                 <span className="material-symbols-outlined text-[16px]">warning</span>
                 <span>{t('common.confirmDelete')}</span>
@@ -4270,13 +4270,13 @@ export default function App() {
               </button>
             </div>
 
-            <div className="p-4 flex flex-col gap-2.5 text-xs text-[var(--on-surface-variant)] leading-relaxed">
+            <div id="div-app-76" className="p-4 flex flex-col gap-2.5 text-xs text-[var(--on-surface-variant)] leading-relaxed">
               <p>
                 ¿Estás seguro de que deseas eliminar la tarea <strong className="text-[var(--on-surface)]">"{deleteWarningState.title}"</strong> (#{deleteWarningState.taskId})?
               </p>
 
               {deleteWarningState.dependents.length > 0 && (
-                <div className="p-2.5 rounded bg-rose-950/40 border border-rose-800/80 text-rose-200">
+                <div id="div-app-77" className="p-2.5 rounded bg-rose-950/40 border border-rose-800/80 text-rose-200">
                   <span className="font-semibold block mb-1">{t('common.dependentTasksAffected')}:</span>
                   <ul className="list-disc pl-4 space-y-0.5">
                     {deleteWarningState.dependents.map((dep) => (
@@ -4289,7 +4289,7 @@ export default function App() {
               )}
             </div>
 
-            <div className="px-4 py-2.5 bg-[var(--surface)] border-t border-[var(--outline)] flex items-center justify-end gap-2">
+            <div id="div-app-78" className="px-4 py-2.5 bg-[var(--surface)] border-t border-[var(--outline)] flex items-center justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setDeleteWarningState(null)}
@@ -4322,9 +4322,9 @@ export default function App() {
             aria-labelledby="view-markdown-title"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="w-10 h-1 bg-[var(--outline)] rounded mx-auto my-2 sm:hidden" />
+            <div id="div-app-79" className="w-10 h-1 bg-[var(--outline)] rounded mx-auto my-2 sm:hidden" />
 
-            <div className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
+            <div id="div-app-80" className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
               <div>
                 <h2 id="view-markdown-title" className="text-sm font-semibold text-[var(--on-surface)] font-sans">
                   TASKS.md — Sincronizado en Vivo
@@ -4342,15 +4342,15 @@ export default function App() {
               </button>
             </div>
 
-            <div className="p-4 flex flex-col gap-2.5 overflow-hidden">
-              <div className="relative w-full rounded bg-[var(--surface)] border border-[var(--outline)] overflow-hidden">
+            <div id="div-app-81" className="p-4 flex flex-col gap-2.5 overflow-hidden">
+              <div id="div-app-82" className="relative w-full rounded bg-[var(--surface)] border border-[var(--outline)] overflow-hidden">
                 <pre className="p-3 text-xs font-mono text-[var(--on-surface)] overflow-auto max-h-[46vh] leading-relaxed select-text whitespace-pre-wrap">
                   {markdownInput}
                 </pre>
               </div>
             </div>
 
-            <div className="px-4 py-2.5 bg-[var(--surface)] border-t border-[var(--outline)] flex items-center justify-between">
+            <div id="div-app-83" className="px-4 py-2.5 bg-[var(--surface)] border-t border-[var(--outline)] flex items-center justify-between">
               <button
                 type="button"
                 onClick={handleCopyMarkdown}
@@ -4393,8 +4393,8 @@ export default function App() {
 
       {/* Modal: Sanity Studio Nativo Embebido (Formularios y Esquemas en vivo) */}
       {isNativeStudioModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4">
-          <div className="w-full max-w-6xl h-[90vh] bg-neutral-950 border border-neutral-800 rounded-lg shadow-2xl overflow-hidden flex flex-col">
+        <div id="div-app-84" className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4">
+          <div id="div-app-85" className="w-full max-w-6xl h-[90vh] bg-neutral-950 border border-neutral-800 rounded-lg shadow-2xl overflow-hidden flex flex-col">
             <SanityStudioEmbed
               isModal={true}
               onClose={() => setIsNativeStudioModalOpen(false)}

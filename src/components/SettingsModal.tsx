@@ -94,12 +94,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         className="w-full sm:max-w-3xl bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-lg sm:rounded-lg shadow-xl flex flex-col overflow-hidden animate-slide-up sm:animate-none h-[88vh] sm:h-[640px] max-h-[90vh] pb-safe sm:pb-0"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="w-10 h-1 bg-[var(--outline)] rounded mx-auto my-2 sm:hidden" />
+        <div id="div-settingsmodal-1" className="w-10 h-1 bg-[var(--outline)] rounded mx-auto my-2 sm:hidden" />
 
         {/* Modal Header */}
-        <div className="px-5 py-3 border-b border-[var(--outline)] flex items-center justify-between shrink-0 bg-[var(--surface)]">
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded bg-[var(--surface-container-high)] border border-[var(--outline)] flex items-center justify-center text-[var(--primary)]">
+        <div id="div-settingsmodal-2" className="px-5 py-3 border-b border-[var(--outline)] flex items-center justify-between shrink-0 bg-[var(--surface)]">
+          <div id="div-settingsmodal-3" className="flex items-center gap-2.5">
+            <div id="div-settingsmodal-4" className="w-7 h-7 rounded bg-[var(--surface-container-high)] border border-[var(--outline)] flex items-center justify-center text-[var(--primary)]">
               <span className="material-symbols-outlined text-[17px]">settings</span>
             </div>
             <div>
@@ -108,9 +108,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div id="div-settingsmodal-5" className="flex items-center gap-2">
             {/* Quick search input */}
-            <div className="hidden sm:flex items-center bg-[var(--surface-container-high)] border border-[var(--outline)] rounded px-2.5 py-1 text-xs text-[var(--on-surface)] gap-1.5 focus-within:border-[var(--primary)]">
+            <div id="div-settingsmodal-6" className="hidden sm:flex items-center bg-[var(--surface-container-high)] border border-[var(--outline)] rounded px-2.5 py-1 text-xs text-[var(--on-surface)] gap-1.5 focus-within:border-[var(--primary)]">
               <span className="material-symbols-outlined text-[14px] text-[var(--on-surface-variant)]">search</span>
               <input
                 type="text"
@@ -142,7 +142,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         </div>
 
         {/* Mobile Tab Bar */}
-        <div className="sm:hidden flex overflow-x-auto border-b border-[var(--outline)] bg-[var(--surface)] px-2 py-1.5 gap-1 shrink-0">
+        <div id="div-settingsmodal-7" className="sm:hidden flex overflow-x-auto border-b border-[var(--outline)] bg-[var(--surface)] px-2 py-1.5 gap-1 shrink-0">
           {sectionsList.map((sec) => (
             <button
               key={sec.id}
@@ -161,7 +161,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         </div>
 
         {/* Desktop Layout: Sidebar + Content */}
-        <div className="flex-1 flex overflow-hidden">
+        <div id="div-settingsmodal-8" className="flex-1 flex overflow-hidden">
           {/* Desktop Left Sidebar */}
           <aside className="w-52 bg-[var(--surface)] border-r border-[var(--outline)] p-2 hidden sm:flex flex-col gap-0.5 shrink-0 select-none overflow-y-auto">
             {filteredSections.map((sec) => {
@@ -180,7 +180,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   <span className={`material-symbols-outlined text-[16px] ${isActive ? 'text-[var(--primary)]' : ''}`}>
                     {sec.icon}
                   </span>
-                  <div className="flex flex-col min-w-0">
+                  <div id="div-settingsmodal-9" className="flex flex-col min-w-0">
                     <span className="truncate">{sec.label}</span>
                   </div>
                 </button>
@@ -192,7 +192,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           <main className="flex-1 p-4 sm:p-5 overflow-y-auto flex flex-col gap-4 text-xs">
             {/* GENERAL SECTION */}
             {activeSection === 'general' && (
-              <div className="flex flex-col gap-3">
+              <div id="div-settingsmodal-10" className="flex flex-col gap-3">
                 <div>
                   <h3 className="text-sm font-semibold text-[var(--on-surface)]">{t('settings.sections.general')}</h3>
                   <p className="text-[var(--on-surface-variant)] mt-0.5">
@@ -201,8 +201,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </div>
 
                 {/* Interface Language */}
-                <div className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between gap-4">
-                  <div className="flex flex-col gap-0.5">
+                <div id="div-settingsmodal-11" className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between gap-4">
+                  <div id="div-settingsmodal-12" className="flex flex-col gap-0.5">
                     <span className="font-medium text-[var(--on-surface)]">{t('settings.languageLabel')}</span>
                     <span className="text-[var(--on-surface-variant)] text-[11px]">{t('settings.languageDesc')}</span>
                   </div>
@@ -226,8 +226,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </div>
 
                 {/* Default View */}
-                <div className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between gap-4">
-                  <div className="flex flex-col gap-0.5">
+                <div id="div-settingsmodal-13" className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between gap-4">
+                  <div id="div-settingsmodal-14" className="flex flex-col gap-0.5">
                     <span className="font-medium text-[var(--on-surface)]">{t('settings.defaultView')}</span>
                     <span className="text-[var(--on-surface-variant)] text-[11px]">{t('settings.defaultViewDesc')}</span>
                   </div>
@@ -242,8 +242,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </div>
 
                 {/* Confirm Delete with Dependents */}
-                <div className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between gap-4">
-                  <div className="flex flex-col gap-0.5">
+                <div id="div-settingsmodal-15" className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between gap-4">
+                  <div id="div-settingsmodal-16" className="flex flex-col gap-0.5">
                     <span className="font-medium text-[var(--on-surface)]">{t('settings.confirmDelete')}</span>
                     <span className="text-[var(--on-surface-variant)] text-[11px]">
                       {t('settings.confirmDeleteDesc')}
@@ -261,7 +261,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
             {/* APPEARANCE SECTION */}
             {activeSection === 'appearance' && (
-              <div className="flex flex-col gap-4">
+              <div id="div-settingsmodal-17" className="flex flex-col gap-4">
                 <div>
                   <h3 className="text-sm font-semibold text-[var(--on-surface)]">{t('settings.sections.appearance')}</h3>
                   <p className="text-[var(--on-surface-variant)] mt-0.5">
@@ -270,9 +270,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </div>
 
                 {/* Theme Selection */}
-                <div className="flex flex-col gap-1.5">
+                <div id="div-settingsmodal-18" className="flex flex-col gap-1.5">
                   <label className="font-semibold text-[var(--on-surface)]">{t('settings.themeLabel')}</label>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div id="div-settingsmodal-19" className="grid grid-cols-3 gap-2">
                     {[
                       { id: 'dark', label: t('settings.themes.dark'), icon: 'dark_mode' },
                       { id: 'light', label: t('settings.themes.light'), icon: 'light_mode' },
@@ -299,9 +299,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </div>
 
                 {/* Density Selection */}
-                <div className="flex flex-col gap-1.5 pt-1">
+                <div id="div-settingsmodal-20" className="flex flex-col gap-1.5 pt-1">
                   <label className="font-semibold text-[var(--on-surface)]">{t('settings.densityLabel')}</label>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div id="div-settingsmodal-21" className="grid grid-cols-3 gap-2">
                     {[
                       { id: 'compact', label: t('settings.densities.compact'), desc: 'Menor padding y alturas para más datos' },
                       { id: 'normal', label: t('settings.densities.normal'), desc: 'Equilibrio estándar de productividad' },
@@ -331,15 +331,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
             {/* WORKSPACE SECTION */}
             {activeSection === 'workspace' && (
-              <div className="flex flex-col gap-3">
+              <div id="div-settingsmodal-22" className="flex flex-col gap-3">
                 <div>
                   <h3 className="text-sm font-semibold text-[var(--on-surface)]">Workspace</h3>
                   <p className="text-[var(--on-surface-variant)] mt-0.5">{t('settings.workspaceDesc')}</p>
                 </div>
 
                 {/* Show Sidebar Default */}
-                <div className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between gap-4">
-                  <div className="flex flex-col gap-0.5">
+                <div id="div-settingsmodal-23" className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between gap-4">
+                  <div id="div-settingsmodal-24" className="flex flex-col gap-0.5">
                     <span className="font-medium text-[var(--on-surface)]">{t('settings.showSidebar')}</span>
                     <span className="text-[var(--on-surface-variant)] text-[11px]">{t('settings.showSidebarDesc')}</span>
                   </div>
@@ -355,15 +355,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
             {/* CANVAS SECTION */}
             {activeSection === 'canvas' && (
-              <div className="flex flex-col gap-3">
+              <div id="div-settingsmodal-25" className="flex flex-col gap-3">
                 <div>
                   <h3 className="text-sm font-semibold text-[var(--on-surface)]">Canvas</h3>
                   <p className="text-[var(--on-surface-variant)] mt-0.5">{t('settings.canvasDesc')}</p>
                 </div>
 
                 {/* Show Grid */}
-                <div className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between gap-4">
-                  <div className="flex flex-col gap-0.5">
+                <div id="div-settingsmodal-26" className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between gap-4">
+                  <div id="div-settingsmodal-27" className="flex flex-col gap-0.5">
                     <span className="font-medium text-[var(--on-surface)]">{t('settings.showGrid')}</span>
                     <span className="text-[var(--on-surface-variant)] text-[11px]">{t('settings.showGridDesc')}</span>
                   </div>
@@ -376,8 +376,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </div>
 
                 {/* Snap to Grid */}
-                <div className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between gap-4">
-                  <div className="flex flex-col gap-0.5">
+                <div id="div-settingsmodal-28" className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between gap-4">
+                  <div id="div-settingsmodal-29" className="flex flex-col gap-0.5">
                     <span className="font-medium text-[var(--on-surface)]">{t('settings.snapToGrid')}</span>
                     <span className="text-[var(--on-surface-variant)] text-[11px]">{t('settings.snapToGridDesc')}</span>
                   </div>
@@ -393,15 +393,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
             {/* KANBAN SECTION */}
             {activeSection === 'kanban' && (
-              <div className="flex flex-col gap-3">
+              <div id="div-settingsmodal-30" className="flex flex-col gap-3">
                 <div>
                   <h3 className="text-sm font-semibold text-[var(--on-surface)]">Kanban</h3>
                   <p className="text-[var(--on-surface-variant)] mt-0.5">{t('settings.kanbanDesc')}</p>
                 </div>
 
                 {/* Default Group By */}
-                <div className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between gap-4">
-                  <div className="flex flex-col gap-0.5">
+                <div id="div-settingsmodal-31" className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between gap-4">
+                  <div id="div-settingsmodal-32" className="flex flex-col gap-0.5">
                     <span className="font-medium text-[var(--on-surface)]">{t('settings.kanbanDefaultGroupBy')}</span>
                     <span className="text-[var(--on-surface-variant)] text-[11px]">{t('settings.kanbanDefaultGroupByDesc')}</span>
                   </div>
@@ -416,8 +416,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </div>
 
                 {/* Show Tags in Kanban Cards */}
-                <div className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between gap-4">
-                  <div className="flex flex-col gap-0.5">
+                <div id="div-settingsmodal-33" className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between gap-4">
+                  <div id="div-settingsmodal-34" className="flex flex-col gap-0.5">
                     <span className="font-medium text-[var(--on-surface)]">{t('settings.kanbanShowTags')}</span>
                     <span className="text-[var(--on-surface-variant)] text-[11px]">{t('settings.kanbanShowTagsDesc')}</span>
                   </div>
@@ -430,8 +430,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </div>
 
                 {/* Show Subtasks in Kanban */}
-                <div className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between gap-4">
-                  <div className="flex flex-col gap-0.5">
+                <div id="div-settingsmodal-35" className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between gap-4">
+                  <div id="div-settingsmodal-36" className="flex flex-col gap-0.5">
                     <span className="font-medium text-[var(--on-surface)]">{t('settings.kanbanShowSubtasks')}</span>
                     <span className="text-[var(--on-surface-variant)] text-[11px]">{t('settings.kanbanShowSubtasksDesc')}</span>
                   </div>
@@ -447,8 +447,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
             {/* FILES & RECENTS SECTION */}
             {activeSection === 'files' && (
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center justify-between">
+              <div id="div-settingsmodal-37" className="flex flex-col gap-3">
+                <div id="div-settingsmodal-38" className="flex items-center justify-between">
                   <div>
                     <h3 className="text-sm font-semibold text-[var(--on-surface)]">{t('settings.recentFiles')}</h3>
                     <p className="text-[var(--on-surface-variant)] mt-0.5">
@@ -466,9 +466,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   )}
                 </div>
 
-                <div className="flex flex-col gap-1.5">
+                <div id="div-settingsmodal-39" className="flex flex-col gap-1.5">
                   {(!settings.recentFiles || settings.recentFiles.length === 0) ? (
-                    <div className="p-4 rounded bg-[var(--surface)] border border-[var(--outline)] text-center text-[var(--on-surface-variant)] text-xs">
+                    <div id="div-settingsmodal-40" className="p-4 rounded bg-[var(--surface)] border border-[var(--outline)] text-center text-[var(--on-surface-variant)] text-xs">
                       No hay archivos recientes registrados.
                     </div>
                   ) : (
@@ -477,9 +477,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         key={file.name}
                         className="p-2.5 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between gap-3"
                       >
-                        <div className="flex items-center gap-2 min-w-0">
+                        <div id="div-settingsmodal-41" className="flex items-center gap-2 min-w-0">
                           <span className="material-symbols-outlined text-[16px] text-sky-400 shrink-0">description</span>
-                          <div className="flex flex-col min-w-0">
+                          <div id="div-settingsmodal-42" className="flex flex-col min-w-0">
                             <span className="font-medium text-[var(--on-surface)] truncate font-mono text-xs">{file.name}</span>
                             <span className="text-[10px] text-[var(--on-surface-variant)] font-mono">
                               {new Date(file.lastOpened).toLocaleDateString()} · {file.taskCount || 0} tareas
@@ -492,8 +492,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </div>
 
                 {/* Cloud Persistence */}
-                <div className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between gap-4 mt-1">
-                  <div className="flex flex-col gap-0.5">
+                <div id="div-settingsmodal-43" className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between gap-4 mt-1">
+                  <div id="div-settingsmodal-44" className="flex flex-col gap-0.5">
                     <span className="font-medium text-[var(--on-surface)]">{t('settings.cloudPersistence')}</span>
                     <span className="text-[var(--on-surface-variant)] text-[11px]">{t('settings.cloudPersistenceDesc')}</span>
                   </div>
@@ -511,7 +511,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
             {/* ACCESSIBILITY SECTION */}
             {activeSection === 'accessibility' && (
-              <div className="flex flex-col gap-3">
+              <div id="div-settingsmodal-45" className="flex flex-col gap-3">
                 <div>
                   <h3 className="text-sm font-semibold text-[var(--on-surface)]">Accesibilidad & Atajos</h3>
                   <p className="text-[var(--on-surface-variant)] mt-0.5">
@@ -520,8 +520,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </div>
 
                 {/* Reduced Motion */}
-                <div className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between gap-4">
-                  <div className="flex flex-col gap-0.5">
+                <div id="div-settingsmodal-46" className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between gap-4">
+                  <div id="div-settingsmodal-47" className="flex flex-col gap-0.5">
                     <span className="font-medium text-[var(--on-surface)]">{t('settings.reducedMotion')}</span>
                     <span className="text-[var(--on-surface-variant)] text-[11px]">{t('settings.reducedMotionDesc')}</span>
                   </div>
@@ -534,8 +534,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </div>
 
                 {/* High Contrast */}
-                <div className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between gap-4">
-                  <div className="flex flex-col gap-0.5">
+                <div id="div-settingsmodal-48" className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between gap-4">
+                  <div id="div-settingsmodal-49" className="flex flex-col gap-0.5">
                     <span className="font-medium text-[var(--on-surface)]">{t('settings.highContrast')}</span>
                     <span className="text-[var(--on-surface-variant)] text-[11px]">{t('settings.highContrastDesc')}</span>
                   </div>
@@ -548,9 +548,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </div>
 
                 {/* Keyboard Shortcuts Reference Table */}
-                <div className="flex flex-col gap-1.5 pt-1">
+                <div id="div-settingsmodal-50" className="flex flex-col gap-1.5 pt-1">
                   <span className="font-semibold text-xs text-[var(--on-surface)]">{t('settings.keyboardShortcuts')}</span>
-                  <div className="rounded border border-[var(--outline)] bg-[var(--surface)] overflow-hidden divide-y divide-[var(--outline)]">
+                  <div id="div-settingsmodal-51" className="rounded border border-[var(--outline)] bg-[var(--surface)] overflow-hidden divide-y divide-[var(--outline)]">
                     {[
                       { key: 'Ctrl/Cmd + K', desc: 'Búsqueda global y Command Palette' },
                       { key: 'Ctrl/Cmd + ,', desc: 'Abrir Configuración y Preferencias' },
@@ -559,7 +559,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       { key: 'D / Delete', desc: 'Eliminar tarea seleccionada (con confirmación)' },
                       { key: 'Space + Arrastrar', desc: 'Desplazamiento panorámico (Pan) en Canvas' },
                     ].map((item) => (
-                      <div key={item.key} className="p-2 px-2.5 flex items-center justify-between gap-3 text-xs">
+                      <div id="div-settingsmodal-52" key={item.key} className="p-2 px-2.5 flex items-center justify-between gap-3 text-xs">
                         <span className="text-[var(--on-surface-variant)]">{item.desc}</span>
                         <kbd className="px-1.5 py-0.5 rounded bg-[var(--surface-container)] text-[var(--on-surface)] font-mono text-[10px] border border-[var(--outline)]">
                           {item.key}
@@ -573,7 +573,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
             {/* ADVANCED SECTION */}
             {activeSection === 'advanced' && (
-              <div className="flex flex-col gap-3">
+              <div id="div-settingsmodal-53" className="flex flex-col gap-3">
                 <div>
                   <h3 className="text-sm font-semibold text-[var(--on-surface)]">Avanzado</h3>
                   <p className="text-[var(--on-surface-variant)] mt-0.5">
@@ -582,8 +582,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </div>
 
                 {/* Reset Layout */}
-                <div className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between gap-4">
-                  <div className="flex flex-col gap-0.5">
+                <div id="div-settingsmodal-54" className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between gap-4">
+                  <div id="div-settingsmodal-55" className="flex flex-col gap-0.5">
                     <span className="font-medium text-[var(--on-surface)]">{t('settings.resetCanvas')}</span>
                     <span className="text-[var(--on-surface-variant)] text-[11px]">{t('settings.resetCanvasDesc')}</span>
                   </div>
@@ -600,8 +600,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </div>
 
                 {/* Danger Zone: Reset Preferences */}
-                <div className="p-3 rounded bg-rose-950/20 border border-rose-900/40 flex flex-col gap-2 mt-1">
-                  <div className="flex items-center gap-2 text-rose-400 font-semibold">
+                <div id="div-settingsmodal-56" className="p-3 rounded bg-rose-950/20 border border-rose-900/40 flex flex-col gap-2 mt-1">
+                  <div id="div-settingsmodal-57" className="flex items-center gap-2 text-rose-400 font-semibold">
                     <span className="material-symbols-outlined text-[16px]">warning</span>
                     <span>{t('settings.resetDefaults')}</span>
                   </div>
@@ -609,7 +609,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     {t('settings.resetDefaultsDesc')}
                     <strong className="text-[var(--on-surface)]"> {t('settings.resetDefaultsWarning')}</strong>
                   </p>
-                  <div className="flex justify-end pt-1">
+                  <div id="div-settingsmodal-58" className="flex justify-end pt-1">
                     <button
                       type="button"
                       onClick={() => setIsResetConfirmOpen(true)}
@@ -625,7 +625,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         </div>
 
         {/* Modal Footer */}
-        <div className="px-5 py-3 bg-[var(--surface)] border-t border-[var(--outline)] flex items-center justify-between shrink-0">
+        <div id="div-settingsmodal-59" className="px-5 py-3 bg-[var(--surface)] border-t border-[var(--outline)] flex items-center justify-between shrink-0">
           <span className="text-[11px] text-[var(--on-surface-variant)] font-mono">
             AnTaskCanvas
           </span>
@@ -659,7 +659,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             <p className="text-xs text-[var(--on-surface-variant)] leading-relaxed">
               Se restablecerán los ajustes visuales y de comportamiento. Tus tareas y archivos no se modificarán.
             </p>
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-[var(--outline)]">
+            <div id="div-settingsmodal-60" className="flex items-center justify-end gap-2 pt-2 border-t border-[var(--outline)]">
               <button
                 type="button"
                 onClick={() => setIsResetConfirmOpen(false)}

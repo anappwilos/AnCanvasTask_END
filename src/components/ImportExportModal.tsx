@@ -172,12 +172,12 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
         className="w-full sm:max-w-2xl bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-lg sm:rounded-lg shadow-xl flex flex-col overflow-hidden animate-slide-up sm:animate-none max-h-[92vh] sm:max-h-[85vh] pb-safe sm:pb-0"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="w-10 h-1 bg-[var(--outline)] rounded mx-auto my-2 sm:hidden" />
+        <div id="div-importexportmodal-1" className="w-10 h-1 bg-[var(--outline)] rounded mx-auto my-2 sm:hidden" />
 
         {/* Header with segmented switch */}
-        <div className="px-5 py-3 border-b border-[var(--outline)] flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center bg-[var(--surface)] p-0.5 rounded border border-[var(--outline)]">
+        <div id="div-importexportmodal-2" className="px-5 py-3 border-b border-[var(--outline)] flex items-center justify-between">
+          <div id="div-importexportmodal-3" className="flex items-center gap-3">
+            <div id="div-importexportmodal-4" className="flex items-center bg-[var(--surface)] p-0.5 rounded border border-[var(--outline)]">
               <button
                 type="button"
                 onClick={() => setActiveTab('export')}
@@ -220,11 +220,11 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
         </div>
 
         {/* Tab Content: Export vs Import */}
-        <div className="p-4 sm:p-5 overflow-y-auto flex flex-col gap-3.5 text-xs">
+        <div id="div-importexportmodal-5" className="p-4 sm:p-5 overflow-y-auto flex flex-col gap-3.5 text-xs">
           {activeTab === 'export' ? (
             /* EXPORT TAB */
-            <div className="flex flex-col gap-3.5">
-              <div className="p-3 rounded-md bg-[var(--surface)] border border-[var(--outline)] flex flex-col gap-1.5">
+            <div id="div-importexportmodal-6" className="flex flex-col gap-3.5">
+              <div id="div-importexportmodal-7" className="p-3 rounded-md bg-[var(--surface)] border border-[var(--outline)] flex flex-col gap-1.5">
                 <span className="font-semibold text-[var(--on-surface)] flex items-center gap-1.5 text-xs">
                   <span className="material-symbols-outlined text-[16px] text-emerald-400">save</span>
                   <span>Exportar proyecto actual</span>
@@ -232,16 +232,16 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
                 <p className="text-[var(--on-surface-variant)] leading-relaxed text-[11px]">
                   Descarga tus tareas manteniendo las dependencias <code className="font-mono text-[var(--primary)]">blockedBy</code>, secciones y prioridades.
                 </p>
-                <div className="flex items-center gap-3 pt-0.5 text-[11px] font-mono text-[var(--on-surface-variant)]">
+                <div id="div-importexportmodal-8" className="flex items-center gap-3 pt-0.5 text-[11px] font-mono text-[var(--on-surface-variant)]">
                   <span>• {currentStats.tasks} tareas</span>
                   <span>• {currentStats.groups} secciones</span>
                 </div>
               </div>
 
               {/* Format selection */}
-              <div className="flex flex-col gap-1.5">
+              <div id="div-importexportmodal-9" className="flex flex-col gap-1.5">
                 <label className="text-xs font-semibold text-[var(--on-surface)]">Formato de exportación</label>
-                <div className="grid grid-cols-2 gap-2">
+                <div id="div-importexportmodal-10" className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
                     onClick={() => setExportFormat('md')}
@@ -251,7 +251,7 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
                         : 'bg-[var(--surface)] border-[var(--outline)] text-[var(--on-surface-variant)] hover:bg-[var(--surface-container-high)]'
                     }`}
                   >
-                    <div className="flex items-center justify-between">
+                    <div id="div-importexportmodal-11" className="flex items-center justify-between">
                       <span className="font-semibold text-xs text-[var(--on-surface)]">Markdown (.md)</span>
                       <span className="material-symbols-outlined text-[15px] text-sky-400">description</span>
                     </div>
@@ -267,7 +267,7 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
                         : 'bg-[var(--surface)] border-[var(--outline)] text-[var(--on-surface-variant)] hover:bg-[var(--surface-container-high)]'
                     }`}
                   >
-                    <div className="flex items-center justify-between">
+                    <div id="div-importexportmodal-12" className="flex items-center justify-between">
                       <span className="font-semibold text-xs text-[var(--on-surface)]">JSON Estructurado (.json)</span>
                       <span className="material-symbols-outlined text-[15px] text-purple-400">data_object</span>
                     </div>
@@ -277,7 +277,7 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
               </div>
 
               {/* File name */}
-              <div className="flex flex-col gap-1.5">
+              <div id="div-importexportmodal-13" className="flex flex-col gap-1.5">
                 <label className="text-xs font-semibold text-[var(--on-surface)]">Nombre del archivo</label>
                 <input
                   type="text"
@@ -289,8 +289,8 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
               </div>
 
               {/* Quick Preview Box */}
-              <div className="flex flex-col gap-1.5">
-                <div className="flex items-center justify-between">
+              <div id="div-importexportmodal-14" className="flex flex-col gap-1.5">
+                <div id="div-importexportmodal-15" className="flex items-center justify-between">
                   <label className="text-xs font-semibold text-[var(--on-surface)]">Previsualización de contenido</label>
                   <button
                     type="button"
@@ -318,8 +318,8 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
             </div>
           ) : (
             /* IMPORT TAB */
-            <div className="flex flex-col gap-3.5">
-              <div className="p-3 rounded-md bg-[var(--surface)] border border-[var(--outline)] flex flex-col gap-1.5">
+            <div id="div-importexportmodal-16" className="flex flex-col gap-3.5">
+              <div id="div-importexportmodal-17" className="p-3 rounded-md bg-[var(--surface)] border border-[var(--outline)] flex flex-col gap-1.5">
                 <span className="font-semibold text-[var(--on-surface)] flex items-center gap-1.5 text-xs">
                   <span className="material-symbols-outlined text-[16px] text-sky-400">upload_file</span>
                   <span>Importar o cargar TASKS.md</span>
@@ -330,7 +330,7 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
               </div>
 
               {/* Upload or Paste Choice */}
-              <div className="flex items-center gap-2">
+              <div id="div-importexportmodal-18" className="flex items-center gap-2">
                 <label className="btn-m3-secondary flex-1 py-1.5 text-xs cursor-pointer text-center justify-center">
                   <span className="material-symbols-outlined text-[15px]">folder_open</span>
                   <span>Seleccionar archivo (.md, .json)</span>
@@ -344,7 +344,7 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
               </div>
 
               {/* Text Area */}
-              <div className="flex flex-col gap-1.5">
+              <div id="div-importexportmodal-19" className="flex flex-col gap-1.5">
                 <label className="text-xs font-semibold text-[var(--on-surface)]">Contenido Markdown</label>
                 <textarea
                   value={importInputText}
@@ -359,9 +359,9 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
               </div>
 
               {/* Import Mode: Replace vs Merge */}
-              <div className="flex flex-col gap-1.5">
+              <div id="div-importexportmodal-20" className="flex flex-col gap-1.5">
                 <label className="text-xs font-semibold text-[var(--on-surface)]">Estrategia de importación</label>
-                <div className="grid grid-cols-2 gap-2">
+                <div id="div-importexportmodal-21" className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
                     onClick={() => setImportMode('replace')}
@@ -392,13 +392,13 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
 
               {/* Validation & Preview Summary */}
               {importPreview && (
-                <div className="p-2.5 rounded bg-[var(--surface)] border border-[var(--outline)] flex flex-col gap-1">
+                <div id="div-importexportmodal-22" className="p-2.5 rounded bg-[var(--surface)] border border-[var(--outline)] flex flex-col gap-1">
                   <span className="font-semibold text-xs text-[var(--on-surface)] flex items-center gap-1.5">
                     <span className="material-symbols-outlined text-[15px] text-emerald-400">check_circle</span>
                     <span>Análisis previo: {importPreview.taskCount} tareas detectadas en {importPreview.groupCount} secciones</span>
                   </span>
                   {importPreview.validation.issues.length > 0 && (
-                    <div className="text-[11px] text-amber-400 flex items-center gap-1">
+                    <div id="div-importexportmodal-23" className="text-[11px] text-amber-400 flex items-center gap-1">
                       <span>⚠</span>
                       <span>Se detectaron {importPreview.validation.issues.length} avisos de sintaxis en el archivo importado.</span>
                     </div>
@@ -410,7 +410,7 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="px-5 py-3 bg-[var(--surface)] border-t border-[var(--outline)] flex items-center justify-between">
+        <div id="div-importexportmodal-24" className="px-5 py-3 bg-[var(--surface)] border-t border-[var(--outline)] flex items-center justify-between">
           <button
             type="button"
             onClick={onClose}

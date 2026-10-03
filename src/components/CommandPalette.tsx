@@ -290,7 +290,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         className="w-full max-w-xl bg-[var(--surface-container)] border border-[var(--outline)] rounded-lg shadow-xl overflow-hidden flex flex-col max-h-[82vh]"
       >
         {/* Search Input Header */}
-        <div className="flex items-center gap-2.5 px-3.5 py-2.5 border-b border-[var(--outline)] bg-[var(--surface)]">
+        <div id="div-commandpalette-1" className="flex items-center gap-2.5 px-3.5 py-2.5 border-b border-[var(--outline)] bg-[var(--surface)]">
           <span className="material-symbols-outlined text-[18px] text-[var(--primary)] shrink-0">
             search
           </span>
@@ -329,7 +329,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
           className="flex-1 overflow-y-auto p-2 flex flex-col gap-0.5 min-h-[220px]"
         >
           {results.length === 0 ? (
-            <div className="flex flex-col items-center justify-center p-8 text-center gap-2 text-[var(--on-surface-variant)]">
+            <div id="div-commandpalette-2" className="flex flex-col items-center justify-center p-8 text-center gap-2 text-[var(--on-surface-variant)]">
               <span className="material-symbols-outlined text-[32px] opacity-40">
                 search_off
               </span>
@@ -347,7 +347,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
               return (
                 <React.Fragment key={`${res.type}-${index}`}>
                   {res.groupHeader && (
-                    <div className="text-[10px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider px-3 pt-2.5 pb-1 select-none">
+                    <div id="div-commandpalette-3" className="text-[10px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider px-3 pt-2.5 pb-1 select-none">
                       {res.groupHeader}
                     </div>
                   )}
@@ -364,7 +364,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                           : 'text-[var(--on-surface)] hover:bg-[var(--surface-container-high)]'
                       }`}
                     >
-                      <div className="flex items-center gap-2.5 truncate">
+                      <div id="div-commandpalette-4" className="flex items-center gap-2.5 truncate">
                         <span
                           className={`material-symbols-outlined text-[18px] ${
                             isSelected ? 'text-[var(--on-primary)]' : 'text-sky-400'
@@ -400,7 +400,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                           : 'text-[var(--on-surface)] hover:bg-[var(--surface-container-high)]'
                       }`}
                     >
-                      <div className="flex items-center gap-2 truncate flex-1 min-w-0">
+                      <div id="div-commandpalette-5" className="flex items-center gap-2 truncate flex-1 min-w-0">
                         <span
                           className={`w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold shrink-0 border ${
                             res.item.completed
@@ -430,7 +430,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                         />
                       </div>
 
-                      <div className="flex items-center gap-1.5 shrink-0">
+                      <div id="div-commandpalette-6" className="flex items-center gap-1.5 shrink-0">
                         <span
                           className={`text-[10px] font-mono px-1.5 py-0.2 rounded border ${
                             isSelected
@@ -459,7 +459,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                           : 'text-[var(--on-surface)] hover:bg-[var(--surface-container-high)]'
                       }`}
                     >
-                      <div className="flex items-center gap-2">
+                      <div id="div-commandpalette-7" className="flex items-center gap-2">
                         <span className="material-symbols-outlined text-[16px] text-amber-400">
                           folder
                         </span>
@@ -483,7 +483,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                           : 'text-[var(--on-surface)] hover:bg-[var(--surface-container-high)]'
                       }`}
                     >
-                      <div className="flex items-center gap-2">
+                      <div id="div-commandpalette-8" className="flex items-center gap-2">
                         <span className="material-symbols-outlined text-[16px] text-purple-400">
                           label
                         </span>
@@ -501,8 +501,8 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         </div>
 
         {/* Footer with keyboard hints */}
-        <div className="px-4 py-2 bg-[var(--surface)] border-t border-[var(--outline)] flex items-center justify-between text-[11px] text-[var(--on-surface-variant)]">
-          <div className="flex items-center gap-3">
+        <div id="div-commandpalette-9" className="px-4 py-2 bg-[var(--surface)] border-t border-[var(--outline)] flex items-center justify-between text-[11px] text-[var(--on-surface-variant)]">
+          <div id="div-commandpalette-10" className="flex items-center gap-3">
             <span className="flex items-center gap-1">
               <kbd className="px-1 py-0.2 rounded bg-[var(--surface-container)] border border-[var(--outline)] font-mono text-[10px]">
                 ↑

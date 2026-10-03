@@ -135,8 +135,8 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        <div id="div-workspacemanagermodal-1" className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
+          <div id="div-workspacemanagermodal-2" className="flex items-center gap-2">
             <svg className="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
               <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
             </svg>
@@ -144,13 +144,13 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
               Gestión de Workspaces & Repositorios GitHub
             </h2>
           </div>
-          <button type="button" onClick={onClose} className="btn-m3-icon w-7 h-7 cursor-pointer">
+          <button id="btn-workspacemanagermodal-1" type="button" onClick={onClose} className="btn-m3-icon w-7 h-7 cursor-pointer">
             <span className="material-symbols-outlined text-[16px]">close</span>
           </button>
         </div>
 
         {/* Tab switcher */}
-        <div className="flex border-b border-[var(--outline)] px-4 bg-[var(--surface)]">
+        <div id="div-workspacemanagermodal-3" className="flex border-b border-[var(--outline)] px-4 bg-[var(--surface)]">
           <button
             type="button"
             onClick={() => setActiveTab('list')}
@@ -176,17 +176,17 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
         </div>
 
         {/* Content */}
-        <div className="p-4 overflow-y-auto max-h-[60vh]">
+        <div id="div-workspacemanagermodal-4" className="p-4 overflow-y-auto max-h-[60vh]">
           {activeTab === 'list' ? (
-            <div className="flex flex-col gap-3">
+            <div id="div-workspacemanagermodal-5" className="flex flex-col gap-3">
               {/* Sanity Cloud Persistence Bar */}
-              <div className="p-3 rounded-lg bg-[var(--surface)] border border-[var(--outline)] flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-                <div className="flex items-center gap-2 min-w-0">
-                  <div className="w-6 h-6 rounded bg-rose-600 flex items-center justify-center text-white font-bold text-[10px] shadow-xs shrink-0">
+              <div id="div-workspacemanagermodal-6" className="p-3 rounded-lg bg-[var(--surface)] border border-[var(--outline)] flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                <div id="div-workspacemanagermodal-7" className="flex items-center gap-2 min-w-0">
+                  <div id="div-workspacemanagermodal-8" className="w-6 h-6 rounded bg-rose-600 flex items-center justify-center text-white font-bold text-[10px] shadow-xs shrink-0">
                     S
                   </div>
-                  <div className="flex flex-col min-w-0">
-                    <div className="flex items-center gap-1.5">
+                  <div id="div-workspacemanagermodal-9" className="flex flex-col min-w-0">
+                    <div id="div-workspacemanagermodal-10" className="flex items-center gap-1.5">
                       <span className="font-semibold text-xs text-[var(--on-surface)]">Estructura en Sanity</span>
                       <span
                         className={`px-1.5 py-0.2 rounded text-[9px] font-mono border ${
@@ -204,7 +204,7 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1.5 shrink-0 flex-wrap">
+                <div id="div-workspacemanagermodal-11" className="flex items-center gap-1.5 shrink-0 flex-wrap">
                   {onOpenSyncDiffModal && (
                     <button
                       type="button"
@@ -281,9 +281,9 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
                         : 'bg-[var(--surface)] border-[var(--outline)] hover:border-[var(--outline-variant)]'
                     }`}
                   >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex flex-col min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
+                    <div id="div-workspacemanagermodal-12" className="flex items-start justify-between gap-3">
+                      <div id="div-workspacemanagermodal-13" className="flex flex-col min-w-0 flex-1">
+                        <div id="div-workspacemanagermodal-14" className="flex items-center gap-2">
                           <span className="text-sm font-semibold text-[var(--on-surface)] font-sans truncate">
                             {ws.name}
                           </span>
@@ -295,7 +295,7 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
                         </div>
 
                         {/* GitHub Repo info */}
-                        <div className="flex items-center gap-1.5 text-xs font-mono text-[var(--on-surface-variant)] mt-1">
+                        <div id="div-workspacemanagermodal-15" className="flex items-center gap-1.5 text-xs font-mono text-[var(--on-surface-variant)] mt-1">
                           <svg className="w-3.5 h-3.5 fill-current shrink-0 opacity-70" viewBox="0 0 24 24">
                             <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
                           </svg>
@@ -316,7 +316,7 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
                         )}
 
                         {/* Stats */}
-                        <div className="flex items-center gap-3 text-[11px] font-mono text-[var(--on-surface-variant)] mt-2">
+                        <div id="div-workspacemanagermodal-16" className="flex items-center gap-3 text-[11px] font-mono text-[var(--on-surface-variant)] mt-2">
                           <span className="flex items-center gap-1">
                             <span className="material-symbols-outlined text-[13px] text-sky-400">fork_right</span>
                             <span>{ws.branches.length} ramas ({ws.activeBranchName})</span>
@@ -329,7 +329,7 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
                       </div>
 
                       {/* Actions */}
-                      <div className="flex items-center gap-1.5 shrink-0">
+                      <div id="div-workspacemanagermodal-17" className="flex items-center gap-1.5 shrink-0">
                         {onSaveSingleWorkspaceToSanity && isSanityConfigured && (
                           <button
                             type="button"
@@ -378,13 +378,13 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
 
                     {/* Inline Delete Confirmation (No window.confirm, 100% iframe safe) */}
                     {isConfirmingThis && (
-                      <div className="mt-3 p-2.5 rounded bg-rose-950/30 border border-rose-800/40 flex items-center justify-between gap-2 animate-fade-in">
-                        <div className="flex items-center gap-1.5 text-xs text-rose-300">
+                      <div id="div-workspacemanagermodal-18" className="mt-3 p-2.5 rounded bg-rose-950/30 border border-rose-800/40 flex items-center justify-between gap-2 animate-fade-in">
+                        <div id="div-workspacemanagermodal-19" className="flex items-center gap-1.5 text-xs text-rose-300">
                           <span className="material-symbols-outlined text-[15px]">warning</span>
                           <span>¿Eliminar este workspace y todos sus archivos?</span>
                         </div>
 
-                        <div className="flex items-center gap-1.5 shrink-0">
+                        <div id="div-workspacemanagermodal-20" className="flex items-center gap-1.5 shrink-0">
                           <button
                             type="button"
                             onClick={() => setConfirmDeleteId(null)}
@@ -408,7 +408,7 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
             </div>
           ) : (
             <form onSubmit={handleCreate} className="flex flex-col gap-3.5">
-              <div className="flex flex-col gap-1">
+              <div id="div-workspacemanagermodal-21" className="flex flex-col gap-1">
                 <label className="text-xs font-medium text-[var(--on-surface)]">
                   Nombre del Workspace
                 </label>
@@ -422,7 +422,7 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
                 />
               </div>
 
-              <div className="flex flex-col gap-1">
+              <div id="div-workspacemanagermodal-22" className="flex flex-col gap-1">
                 <label className="text-xs font-medium text-[var(--on-surface)]">
                   Repositorio de GitHub (URL o usuario/repo)
                 </label>
@@ -436,7 +436,7 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
                 />
               </div>
 
-              <div className="flex flex-col gap-1">
+              <div id="div-workspacemanagermodal-23" className="flex flex-col gap-1">
                 <label className="text-xs font-medium text-[var(--on-surface)]">
                   Rama por defecto
                 </label>
@@ -449,7 +449,7 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
                 />
               </div>
 
-              <div className="flex flex-col gap-1">
+              <div id="div-workspacemanagermodal-24" className="flex flex-col gap-1">
                 <label className="text-xs font-medium text-[var(--on-surface)]">
                   Descripción (opcional)
                 </label>
@@ -462,7 +462,7 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
                 />
               </div>
 
-              <div className="pt-3 flex items-center justify-end gap-2 border-t border-[var(--outline)]">
+              <div id="div-workspacemanagermodal-25" className="pt-3 flex items-center justify-end gap-2 border-t border-[var(--outline)]">
                 <button
                   type="button"
                   onClick={() => setActiveTab('list')}
@@ -483,7 +483,7 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="px-4 py-2.5 bg-[var(--surface)] border-t border-[var(--outline)] flex justify-end">
+        <div id="div-workspacemanagermodal-26" className="px-4 py-2.5 bg-[var(--surface)] border-t border-[var(--outline)] flex justify-end">
           <button
             type="button"
             onClick={onClose}

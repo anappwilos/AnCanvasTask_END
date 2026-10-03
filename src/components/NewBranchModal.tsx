@@ -53,20 +53,20 @@ export const NewBranchModal: React.FC<NewBranchModalProps> = ({
         aria-labelledby="new-branch-title"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        <div id="div-newbranchmodal-1" className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
+          <div id="div-newbranchmodal-2" className="flex items-center gap-2">
             <span className="material-symbols-outlined text-[16px] text-sky-400">fork_right</span>
             <h2 id="new-branch-title" className="text-sm font-semibold text-[var(--on-surface)] font-sans">
               Crear Nueva Rama de Git
             </h2>
           </div>
-          <button type="button" onClick={onClose} className="btn-m3-icon w-7 h-7 cursor-pointer">
+          <button id="btn-newbranchmodal-1" type="button" onClick={onClose} className="btn-m3-icon w-7 h-7 cursor-pointer">
             <span className="material-symbols-outlined text-[16px]">close</span>
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-4 flex flex-col gap-3.5">
-          <div className="flex flex-col gap-1">
+          <div id="div-newbranchmodal-3" className="flex flex-col gap-1">
             <label className="text-xs font-medium text-[var(--on-surface)]">
               Nombre de la nueva rama
             </label>
@@ -81,7 +81,7 @@ export const NewBranchModal: React.FC<NewBranchModalProps> = ({
             />
           </div>
 
-          <div className="flex flex-col gap-1">
+          <div id="div-newbranchmodal-4" className="flex flex-col gap-1">
             <label className="text-xs font-medium text-[var(--on-surface)]">
               Crear a partir de la rama
             </label>
@@ -98,11 +98,11 @@ export const NewBranchModal: React.FC<NewBranchModalProps> = ({
             </select>
           </div>
 
-          <div className="p-2.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] text-[var(--on-surface-variant)] leading-relaxed">
+          <div id="div-newbranchmodal-5" className="p-2.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] text-[var(--on-surface-variant)] leading-relaxed">
             Se clonarán todos los archivos Task MD (raíz, frontend, backend, etc.) y su distribución visual hacia la nueva rama.
           </div>
 
-          <div className="pt-2.5 flex items-center justify-end gap-2 border-t border-[var(--outline)]">
+          <div id="div-newbranchmodal-6" className="pt-2.5 flex items-center justify-end gap-2 border-t border-[var(--outline)]">
             <button
               type="button"
               onClick={onClose}

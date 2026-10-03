@@ -362,12 +362,12 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
         className="w-full sm:max-w-xl bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-lg sm:rounded-lg shadow-xl flex flex-col overflow-hidden animate-slide-up sm:animate-none max-h-[92vh] sm:max-h-[85vh] pb-safe sm:pb-0"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="w-10 h-1 bg-[var(--outline)] rounded mx-auto my-2 sm:hidden" />
+        <div id="div-sanityconfigmodal-1" className="w-10 h-1 bg-[var(--outline)] rounded mx-auto my-2 sm:hidden" />
 
         {/* Modal Header */}
-        <div className="px-5 py-3 border-b border-[var(--outline)] flex items-center justify-between shrink-0 bg-[var(--surface)]">
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded bg-sky-950/80 border border-sky-600/50 flex items-center justify-center text-sky-400">
+        <div id="div-sanityconfigmodal-2" className="px-5 py-3 border-b border-[var(--outline)] flex items-center justify-between shrink-0 bg-[var(--surface)]">
+          <div id="div-sanityconfigmodal-3" className="flex items-center gap-2.5">
+            <div id="div-sanityconfigmodal-4" className="w-7 h-7 rounded bg-sky-950/80 border border-sky-600/50 flex items-center justify-center text-sky-400">
               <span className="material-symbols-outlined text-[17px]">cloud_sync</span>
             </div>
             <div>
@@ -391,7 +391,7 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-[var(--outline)] bg-[var(--surface)] px-4 gap-2 shrink-0">
+        <div id="div-sanityconfigmodal-5" className="flex border-b border-[var(--outline)] bg-[var(--surface)] px-4 gap-2 shrink-0">
           {[
             { id: 'config' as ModalTab, label: 'Configuración & Conexión', icon: 'settings' },
             { id: 'write-test' as ModalTab, label: 'Verificar Escritura en Vivo', icon: 'edit_note' },
@@ -422,12 +422,12 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
         </div>
 
         {/* Modal Content Body */}
-        <div className="p-4 sm:p-5 overflow-y-auto flex-1 flex flex-col gap-4 text-xs">
+        <div id="div-sanityconfigmodal-6" className="p-4 sm:p-5 overflow-y-auto flex-1 flex flex-col gap-4 text-xs">
           {/* TAB 1: CONFIGURATION & CONNECTION */}
           {activeTab === 'config' && (
             <>
               {/* Concept Banner */}
-              <div className="p-2.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] text-[var(--on-surface-variant)] leading-relaxed flex items-start gap-2">
+              <div id="div-sanityconfigmodal-7" className="p-2.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] text-[var(--on-surface-variant)] leading-relaxed flex items-start gap-2">
                 <span className="material-symbols-outlined text-[15px] text-sky-400 shrink-0 mt-0.5">info</span>
                 <div>
                   <strong className="text-[var(--on-surface)] font-medium">Single Source of Truth: </strong>
@@ -438,7 +438,7 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
               {/* Form */}
               <form id="sanity-config-form" onSubmit={handleSave} className="flex flex-col gap-3">
                 {/* Project ID */}
-                <div className="flex flex-col gap-1">
+                <div id="div-sanityconfigmodal-8" className="flex flex-col gap-1">
                   <label htmlFor="sanity-project-id" className="font-medium text-[var(--on-surface)] flex items-center justify-between">
                     <span>Project ID <span className="text-rose-400">*</span></span>
                     <span className="text-[10px] text-[var(--on-surface-variant)] font-normal">manage.sanity.io</span>
@@ -458,10 +458,10 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
                 </div>
 
                 {/* Dataset */}
-                <div className="flex flex-col gap-1">
+                <div id="div-sanityconfigmodal-9" className="flex flex-col gap-1">
                   <label htmlFor="sanity-dataset" className="font-medium text-[var(--on-surface)] flex items-center justify-between">
                     <span>Dataset <span className="text-rose-400">*</span></span>
-                    <div className="flex items-center gap-1">
+                    <div id="div-sanityconfigmodal-10" className="flex items-center gap-1">
                       <button
                         type="button"
                         onClick={() => {
@@ -500,7 +500,7 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
                 </div>
 
                 {/* API Token */}
-                <div className="flex flex-col gap-1">
+                <div id="div-sanityconfigmodal-11" className="flex flex-col gap-1">
                   <label htmlFor="sanity-token" className="font-medium text-[var(--on-surface)] flex items-center justify-between">
                     <span>API Token <span className="text-[10px] text-[var(--on-surface-variant)] font-normal">(Requerido para escribir en producción)</span></span>
                     <button
@@ -530,8 +530,8 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
               </form>
 
               {/* Test Connection Button & Status Box */}
-              <div className="pt-1 flex flex-col gap-2.5">
-                <div className="flex items-center justify-between gap-2">
+              <div id="div-sanityconfigmodal-12" className="pt-1 flex flex-col gap-2.5">
+                <div id="div-sanityconfigmodal-13" className="flex items-center justify-between gap-2">
                   <span className="font-medium text-[var(--on-surface)] text-xs">Comprobación de conectividad</span>
                   <button
                     type="button"
@@ -565,8 +565,8 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
                     }`}
                     role="status"
                   >
-                    <div className="flex items-center justify-between font-semibold">
-                      <div className="flex items-center gap-1.5">
+                    <div id="div-sanityconfigmodal-14" className="flex items-center justify-between font-semibold">
+                      <div id="div-sanityconfigmodal-15" className="flex items-center gap-1.5">
                         <span className="material-symbols-outlined text-[16px]">
                           {testResult.ok ? 'check_circle' : 'error'}
                         </span>
@@ -586,7 +586,7 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
                     )}
 
                     {!testResult.ok && (
-                      <div className="mt-1 pt-2 border-t border-rose-900/40 flex items-center justify-between gap-2 text-[11px]">
+                      <div id="div-sanityconfigmodal-16" className="mt-1 pt-2 border-t border-rose-900/40 flex items-center justify-between gap-2 text-[11px]">
                         <span className="text-slate-300 truncate">Origen CORS de la app:</span>
                         <button
                           type="button"
@@ -607,10 +607,10 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
 
           {/* TAB 2: LIVE WRITE TEST (VERIFY WRITING IN PRODUCTION & CREATE TEST TASK SCHEMA) */}
           {activeTab === 'write-test' && (
-            <div className="flex flex-col gap-3.5">
-              <div className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] flex flex-col gap-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
+            <div id="div-sanityconfigmodal-17" className="flex flex-col gap-3.5">
+              <div id="div-sanityconfigmodal-18" className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] flex flex-col gap-2">
+                <div id="div-sanityconfigmodal-19" className="flex items-center justify-between">
+                  <div id="div-sanityconfigmodal-20" className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded bg-emerald-400" />
                     <span className="font-semibold text-xs text-[var(--on-surface)]">
                       Prueba de Escritura en Sanity Dataset ({dataset})
@@ -624,7 +624,7 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
                   Esta acción enviará una mutación real de tipo <strong className="text-[var(--on-surface)]">task</strong> a tu dataset de Sanity y comprobará inmediatamente la lectura del documento creado (Read-After-Write).
                 </p>
 
-                <div className="flex items-center gap-2 pt-1">
+                <div id="div-sanityconfigmodal-21" className="flex items-center gap-2 pt-1">
                   <button
                     type="button"
                     onClick={handleExecuteWriteTest}
@@ -660,9 +660,9 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
 
               {/* Automatic Sync Info & Manual Sync All Button */}
               {onSyncAllToSanity && (
-                <div className="p-3 rounded bg-sky-950/20 border border-sky-800/50 flex flex-col gap-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 font-semibold text-xs text-sky-300">
+                <div id="div-sanityconfigmodal-22" className="p-3 rounded bg-sky-950/20 border border-sky-800/50 flex flex-col gap-2">
+                  <div id="div-sanityconfigmodal-23" className="flex items-center justify-between">
+                    <div id="div-sanityconfigmodal-24" className="flex items-center gap-1.5 font-semibold text-xs text-sky-300">
                       <span className="material-symbols-outlined text-[16px]">sync</span>
                       <span>Sincronización Automática Bidireccional</span>
                     </div>
@@ -718,8 +718,8 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
                       : 'bg-rose-950/30 border-rose-800/70 text-rose-300'
                   }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 font-semibold">
+                  <div id="div-sanityconfigmodal-25" className="flex items-center justify-between">
+                    <div id="div-sanityconfigmodal-26" className="flex items-center gap-1.5 font-semibold">
                       <span className="material-symbols-outlined text-[16px]">
                         {writeTestResult.ok ? 'task_alt' : 'error'}
                       </span>
@@ -740,8 +740,8 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
 
                   {/* Document JSON Preview */}
                   {writeTestResult.document && (
-                    <div className="flex flex-col gap-1.5 mt-1">
-                      <div className="flex items-center justify-between text-[11px] text-[var(--on-surface-variant)]">
+                    <div id="div-sanityconfigmodal-27" className="flex flex-col gap-1.5 mt-1">
+                      <div id="div-sanityconfigmodal-28" className="flex items-center justify-between text-[11px] text-[var(--on-surface-variant)]">
                         <span>Payload persistido en Sanity:</span>
                         <button
                           type="button"
@@ -762,8 +762,8 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
               )}
 
               {/* Remote Documents Explorer */}
-              <div className="flex flex-col gap-1.5">
-                <div className="flex items-center justify-between">
+              <div id="div-sanityconfigmodal-29" className="flex flex-col gap-1.5">
+                <div id="div-sanityconfigmodal-30" className="flex items-center justify-between">
                   <span className="font-semibold text-xs text-[var(--on-surface)]">
                     Documentos existentes en Sanity ({remoteDocs.length})
                   </span>
@@ -771,18 +771,18 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
                 </div>
 
                 {remoteDocs.length === 0 ? (
-                  <div className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] text-center text-[var(--on-surface-variant)] text-[11px]">
+                  <div id="div-sanityconfigmodal-31" className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] text-center text-[var(--on-surface-variant)] text-[11px]">
                     {isLoadingDocs ? 'Cargando documentos de Sanity...' : 'No se han listado documentos aún. Pulsa "Actualizar lista" o crea el primer task.'}
                   </div>
                 ) : (
-                  <div className="divide-y divide-[var(--outline)] rounded border border-[var(--outline)] bg-[var(--surface)] max-h-48 overflow-y-auto">
+                  <div id="div-sanityconfigmodal-32" className="divide-y divide-[var(--outline)] rounded border border-[var(--outline)] bg-[var(--surface)] max-h-48 overflow-y-auto">
                     {remoteDocs.map((doc) => (
-                      <div key={doc._id} className="p-2 px-2.5 flex items-center justify-between gap-2 text-xs hover:bg-[var(--surface-container-high)]">
-                        <div className="flex items-center gap-2 min-w-0">
+                      <div id="div-sanityconfigmodal-33" key={doc._id} className="p-2 px-2.5 flex items-center justify-between gap-2 text-xs hover:bg-[var(--surface-container-high)]">
+                        <div id="div-sanityconfigmodal-34" className="flex items-center gap-2 min-w-0">
                           <span className={`material-symbols-outlined text-[15px] shrink-0 ${doc._type === 'task' ? 'text-sky-400' : 'text-purple-400'}`}>
                             {doc._type === 'task' ? 'check_box' : 'grid_view'}
                           </span>
-                          <div className="flex flex-col min-w-0">
+                          <div id="div-sanityconfigmodal-35" className="flex flex-col min-w-0">
                             <span className="font-medium text-[var(--on-surface)] truncate">
                               {doc.title || doc.projectId || doc._id}
                             </span>
@@ -805,13 +805,13 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
 
           {/* TAB 3: SANITY SCHEMAS (STUDIO COMPATIBILITY) */}
           {activeTab === 'schemas' && (
-            <div className="flex flex-col gap-3">
-              <div className="p-2.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] text-[var(--on-surface-variant)] leading-relaxed">
+            <div id="div-sanityconfigmodal-36" className="flex flex-col gap-3">
+              <div id="div-sanityconfigmodal-37" className="p-2.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] text-[var(--on-surface-variant)] leading-relaxed">
                 Archivos de esquema listos para incluir en tu proyecto de <strong className="text-[var(--on-surface)]">Sanity Studio</strong> (<code className="font-mono text-sky-300">src/sanity/schemas/</code>).
               </div>
 
               {/* Schema selector buttons */}
-              <div className="flex items-center gap-1 border-b border-[var(--outline)] pb-2">
+              <div id="div-sanityconfigmodal-38" className="flex items-center gap-1 border-b border-[var(--outline)] pb-2">
                 {[
                   { id: 'task' as const, label: 'task.ts (Documento de Tarea)' },
                   { id: 'canvasVisualState' as const, label: 'canvasVisualState.ts (Canvas)' },
@@ -833,8 +833,8 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
               </div>
 
               {/* Code viewer */}
-              <div className="relative rounded bg-black/60 border border-[var(--outline)] overflow-hidden">
-                <div className="px-3 py-1.5 bg-[var(--surface)] border-b border-[var(--outline)] flex items-center justify-between text-[11px]">
+              <div id="div-sanityconfigmodal-39" className="relative rounded bg-black/60 border border-[var(--outline)] overflow-hidden">
+                <div id="div-sanityconfigmodal-40" className="px-3 py-1.5 bg-[var(--surface)] border-b border-[var(--outline)] flex items-center justify-between text-[11px]">
                   <span className="font-mono text-[var(--on-surface-variant)]">{selectedSchema}.ts</span>
                   <button
                     type="button"
@@ -855,7 +855,7 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
         </div>
 
         {/* Modal Footer */}
-        <div className="px-5 py-3 bg-[var(--surface)] border-t border-[var(--outline)] flex items-center justify-between shrink-0">
+        <div id="div-sanityconfigmodal-41" className="px-5 py-3 bg-[var(--surface)] border-t border-[var(--outline)] flex items-center justify-between shrink-0">
           <div>
             {hasConfig && (
               <button
@@ -868,7 +868,7 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
             )}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div id="div-sanityconfigmodal-42" className="flex items-center gap-2">
             <button
               type="button"
               onClick={onClose}

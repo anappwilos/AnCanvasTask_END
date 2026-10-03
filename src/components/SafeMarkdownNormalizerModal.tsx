@@ -179,10 +179,10 @@ export function SafeMarkdownNormalizerModal({
       aria-labelledby="normalizer-title"
       className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/75 backdrop-blur-xs font-sans text-[var(--on-surface)]"
     >
-      <div className="w-full max-w-[96vw] xl:max-w-7xl h-[92vh] flex flex-col bg-[var(--surface-container)] border border-[var(--outline)] rounded-lg shadow-2xl overflow-hidden">
+      <div id="div-safemarkdownnormalizermodal-1" className="w-full max-w-[96vw] xl:max-w-7xl h-[92vh] flex flex-col bg-[var(--surface-container)] border border-[var(--outline)] rounded-lg shadow-2xl overflow-hidden">
         {/* Compact Header */}
         <header className="h-12 px-3.5 bg-[var(--surface-container-high)] border-b border-[var(--outline)] flex items-center justify-between gap-3 shrink-0">
-          <div className="flex items-center gap-2 min-w-0">
+          <div id="div-safemarkdownnormalizermodal-2" className="flex items-center gap-2 min-w-0">
             <span className="material-symbols-outlined text-[18px] text-sky-400 shrink-0">
               verified
             </span>
@@ -194,7 +194,7 @@ export function SafeMarkdownNormalizerModal({
             </span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div id="div-safemarkdownnormalizermodal-3" className="flex items-center gap-2">
             {/* Toggle Hidden / Invisible Characters */}
             <button
               type="button"
@@ -216,7 +216,7 @@ export function SafeMarkdownNormalizerModal({
             </button>
 
             {/* View Mode Toggle */}
-            <div className="flex items-center bg-[var(--surface)] p-0.5 rounded border border-[var(--outline)] text-[11px]">
+            <div id="div-safemarkdownnormalizermodal-4" className="flex items-center bg-[var(--surface)] p-0.5 rounded border border-[var(--outline)] text-[11px]">
               <button
                 type="button"
                 onClick={() => setRenderSideBySide(true)}
@@ -256,8 +256,8 @@ export function SafeMarkdownNormalizerModal({
         </header>
 
         {/* Compact Quick Actions Bar */}
-        <div className="px-3.5 py-2 bg-[var(--surface)] border-b border-[var(--outline)] flex flex-wrap items-center justify-between gap-2 shrink-0 text-xs">
-          <div className="flex items-center gap-1.5 flex-wrap">
+        <div id="div-safemarkdownnormalizermodal-5" className="px-3.5 py-2 bg-[var(--surface)] border-b border-[var(--outline)] flex flex-wrap items-center justify-between gap-2 shrink-0 text-xs">
+          <div id="div-safemarkdownnormalizermodal-6" className="flex items-center gap-1.5 flex-wrap">
             <span className="text-[11px] text-[var(--on-surface-variant)] mr-1">{t('common.actions')}:</span>
             <button
               type="button"
@@ -293,7 +293,7 @@ export function SafeMarkdownNormalizerModal({
             </button>
           </div>
 
-          <div className="text-[11px] text-[var(--on-surface-variant)]">
+          <div id="div-safemarkdownnormalizermodal-7" className="text-[11px] text-[var(--on-surface-variant)]">
             <span>
               {currentStats.accepted} de {currentStats.total} aceptados
             </span>
@@ -302,8 +302,8 @@ export function SafeMarkdownNormalizerModal({
 
         {/* Compact Loss Alert Banner (only when risk exists) */}
         {currentStats.lossRisk > 0 && (
-          <div className="px-3.5 py-1.5 bg-rose-950/60 border-b border-rose-800/80 text-rose-200 text-xs flex items-center justify-between gap-2 shrink-0">
-            <div className="flex items-center gap-1.5">
+          <div id="div-safemarkdownnormalizermodal-8" className="px-3.5 py-1.5 bg-rose-950/60 border-b border-rose-800/80 text-rose-200 text-xs flex items-center justify-between gap-2 shrink-0">
+            <div id="div-safemarkdownnormalizermodal-9" className="flex items-center gap-1.5">
               <span className="material-symbols-outlined text-[16px] text-rose-400 shrink-0">warning</span>
               <span>
                 <strong>{t('common.warning')}:</strong> {currentStats.lossRisk} {t('common.potentialLosses')}.
@@ -321,11 +321,11 @@ export function SafeMarkdownNormalizerModal({
         )}
 
         {/* Main Body: Split View */}
-        <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden">
+        <div id="div-safemarkdownnormalizermodal-10" className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden">
           {/* Left Panel: Scannable Changes List */}
           <aside className="w-full md:w-80 flex flex-col bg-[var(--surface-container)] border-r border-[var(--outline)] shrink-0 overflow-hidden">
             {/* Filter Tabs */}
-            <div className="p-1.5 border-b border-[var(--outline)] bg-[var(--surface-container-high)] flex flex-wrap gap-1 text-[10px]">
+            <div id="div-safemarkdownnormalizermodal-11" className="p-1.5 border-b border-[var(--outline)] bg-[var(--surface-container-high)] flex flex-wrap gap-1 text-[10px]">
               <button
                 type="button"
                 onClick={() => setSelectedFilter('all')}
@@ -384,9 +384,9 @@ export function SafeMarkdownNormalizerModal({
             </div>
 
             {/* Changes List */}
-            <div className="flex-1 overflow-y-auto p-1.5 space-y-1.5">
+            <div id="div-safemarkdownnormalizermodal-12" className="flex-1 overflow-y-auto p-1.5 space-y-1.5">
               {filteredChanges.length === 0 ? (
-                <div className="p-6 text-center text-xs text-[var(--on-surface-variant)] flex flex-col items-center justify-center h-40">
+                <div id="div-safemarkdownnormalizermodal-13" className="p-6 text-center text-xs text-[var(--on-surface-variant)] flex flex-col items-center justify-center h-40">
                   <span className="material-symbols-outlined text-[24px] text-emerald-400/80 mb-1">
                     check_circle
                   </span>
@@ -417,8 +417,8 @@ export function SafeMarkdownNormalizerModal({
                           : 'border-[var(--outline)] bg-[var(--surface)] hover:border-[var(--on-surface-variant)]'
                       }`}
                     >
-                      <div className="flex items-center justify-between gap-1.5">
-                        <div className="flex items-center gap-1.5 min-w-0">
+                      <div id="div-safemarkdownnormalizermodal-14" className="flex items-center justify-between gap-1.5">
+                        <div id="div-safemarkdownnormalizermodal-15" className="flex items-center gap-1.5 min-w-0">
                           <span className={`px-1.5 py-0.2 rounded text-[10px] font-semibold border ${badgeClass}`}>
                             {change.categoryLabel}
                           </span>
@@ -453,14 +453,14 @@ export function SafeMarkdownNormalizerModal({
                       </p>
 
                       {/* Visual Inline Space / Text Diff Preview */}
-                      <div className="mt-1.5 p-1.5 rounded bg-[var(--surface-container-highest)] border border-[var(--outline)] font-mono text-[10px] space-y-1">
-                        <div className="text-rose-400 flex items-start gap-1 overflow-x-auto">
+                      <div id="div-safemarkdownnormalizermodal-16" className="mt-1.5 p-1.5 rounded bg-[var(--surface-container-highest)] border border-[var(--outline)] font-mono text-[10px] space-y-1">
+                        <div id="div-safemarkdownnormalizermodal-17" className="text-rose-400 flex items-start gap-1 overflow-x-auto">
                           <span className="font-bold text-rose-500 select-none">-</span>
                           <span className="break-all whitespace-pre-wrap">
                             {change.originalLines.map((l) => l.replace(/ /g, '·').replace(/\t/g, '→ ')).join('\n') || '(vacío)'}
                           </span>
                         </div>
-                        <div className="text-emerald-400 flex items-start gap-1 overflow-x-auto">
+                        <div id="div-safemarkdownnormalizermodal-18" className="text-emerald-400 flex items-start gap-1 overflow-x-auto">
                           <span className="font-bold text-emerald-500 select-none">+</span>
                           <span className="break-all whitespace-pre-wrap">
                             {change.proposedLines.map((l) => l.replace(/ /g, '·').replace(/\t/g, '→ ')).join('\n') || '(vacío)'}
@@ -477,14 +477,14 @@ export function SafeMarkdownNormalizerModal({
           {/* Right Panel: Monaco DiffEditor */}
           <main className="flex-1 flex flex-col min-w-0 bg-[var(--surface)] overflow-hidden">
             {/* Diff Header */}
-            <div className="h-7 px-3 bg-[var(--surface-container-high)] border-b border-[var(--outline)] flex items-center justify-between shrink-0 text-[11px] font-mono text-[var(--on-surface-variant)]">
-              <div className="flex items-center gap-2">
+            <div id="div-safemarkdownnormalizermodal-19" className="h-7 px-3 bg-[var(--surface-container-high)] border-b border-[var(--outline)] flex items-center justify-between shrink-0 text-[11px] font-mono text-[var(--on-surface-variant)]">
+              <div id="div-safemarkdownnormalizermodal-20" className="flex items-center gap-2">
                 <span className="text-rose-400 font-semibold">{t('common.original')}</span>
                 <span>➔</span>
                 <span className="text-emerald-400 font-semibold">{t('common.proposal')}</span>
               </div>
               {showInvisibles && (
-                <div className="text-[10px] text-[var(--on-surface-variant)] hidden sm:flex items-center gap-2">
+                <div id="div-safemarkdownnormalizermodal-21" className="text-[10px] text-[var(--on-surface-variant)] hidden sm:flex items-center gap-2">
                   <span className="bg-[var(--surface)] px-1.5 py-0.2 rounded border border-[var(--outline)] font-mono">{t('common.space')}</span>
                   <span className="bg-[var(--surface)] px-1.5 py-0.2 rounded border border-[var(--outline)] font-mono">{t('common.tab')}</span>
                 </div>
@@ -492,7 +492,7 @@ export function SafeMarkdownNormalizerModal({
             </div>
 
             {/* Monaco DiffEditor */}
-            <div className="flex-1 min-h-0 w-full relative">
+            <div id="div-safemarkdownnormalizermodal-22" className="flex-1 min-h-0 w-full relative">
               <DiffEditor
                 height="100%"
                 language="markdown"
@@ -523,7 +523,7 @@ export function SafeMarkdownNormalizerModal({
                   diffWordWrap: 'on',
                 }}
                 loading={
-                  <div className="h-full flex items-center justify-center text-xs text-[var(--on-surface-variant)]">
+                  <div id="div-safemarkdownnormalizermodal-23" className="h-full flex items-center justify-center text-xs text-[var(--on-surface-variant)]">
                     Cargando comparador...
                   </div>
                 }
@@ -534,7 +534,7 @@ export function SafeMarkdownNormalizerModal({
 
         {/* Clean Footer */}
         <footer className="h-12 px-3.5 bg-[var(--surface-container-high)] border-t border-[var(--outline)] flex items-center justify-between gap-2 shrink-0">
-          <div className="flex items-center gap-2 text-xs">
+          <div id="div-safemarkdownnormalizermodal-24" className="flex items-center gap-2 text-xs">
             {currentStats.acceptedLossRisk > 0 && (
               <label className="flex items-center gap-1.5 text-[11px] bg-rose-950/60 text-rose-200 px-2 py-0.5 rounded border border-rose-800/80 cursor-pointer">
                 <input
@@ -548,7 +548,7 @@ export function SafeMarkdownNormalizerModal({
             )}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div id="div-safemarkdownnormalizermodal-25" className="flex items-center gap-2">
             <button
               type="button"
               onClick={handleCopyResult}

@@ -112,14 +112,14 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   ];
 
   return (
-    <div className="w-full bg-[var(--surface-container)] border-b border-[var(--outline)] px-3 sm:px-4 py-2 flex flex-col gap-2 select-none shrink-0 z-10">
+    <div id="div-filterbar-1" className="w-full bg-[var(--surface-container)] border-b border-[var(--outline)] px-3 sm:px-4 py-2 flex flex-col gap-2 select-none shrink-0 z-10">
       {/* Top row of FilterBar: Filter popover toggle + Search trigger + Quick view summary */}
-      <div className="flex items-center justify-between gap-1.5 sm:gap-2">
-        <div className="flex items-center gap-1.5 sm:gap-2 flex-1 min-w-0">
+      <div id="div-filterbar-2" className="flex items-center justify-between gap-1.5 sm:gap-2">
+        <div id="div-filterbar-3" className="flex items-center gap-1.5 sm:gap-2 flex-1 min-w-0">
           {activeView !== 'studio' && (
             <>
               {/* Filter Popover Button */}
-              <div className="relative shrink-0" ref={popoverRef}>
+              <div id="div-filterbar-4" className="relative shrink-0" ref={popoverRef}>
                 <button
                   type="button"
                   aria-expanded={isFilterPopoverOpen}
@@ -148,7 +148,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                     onPointerDown={(e) => e.stopPropagation()}
                     className="absolute left-0 top-9 z-40 w-72 sm:w-80 max-w-[calc(100vw-2rem)] bg-[var(--surface-container-high)] border border-[var(--outline)] rounded-lg shadow-lg p-3 flex flex-col gap-2.5 text-xs"
                   >
-                    <div className="flex items-center justify-between border-b border-[var(--outline)] pb-2">
+                    <div id="div-filterbar-5" className="flex items-center justify-between border-b border-[var(--outline)] pb-2">
                       <span className="font-semibold text-[var(--on-surface)] flex items-center gap-1.5">
                         <span className="material-symbols-outlined text-[16px] text-sky-400">filter_list</span>
                         <span>{t('nav.advancedFilters')}</span>
@@ -163,7 +163,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                     </div>
 
                     {/* 1. Estado */}
-                    <div className="flex flex-col gap-1">
+                    <div id="div-filterbar-6" className="flex flex-col gap-1">
                       <label className="text-[10px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
                         Estado
                       </label>
@@ -183,7 +183,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                     </div>
 
                     {/* 2. Prioridad */}
-                    <div className="flex flex-col gap-1">
+                    <div id="div-filterbar-7" className="flex flex-col gap-1">
                       <label className="text-[10px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
                         Prioridad
                       </label>
@@ -204,7 +204,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
 
                     {/* 3. Sección */}
                     {availableSections.length > 0 && (
-                      <div className="flex flex-col gap-1">
+                      <div id="div-filterbar-8" className="flex flex-col gap-1">
                         <label className="text-[10px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
                           Sección (Grupo)
                         </label>
@@ -227,7 +227,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
 
                     {/* 4. Etiqueta */}
                     {availableTags.length > 0 && (
-                      <div className="flex flex-col gap-1">
+                      <div id="div-filterbar-9" className="flex flex-col gap-1">
                         <label className="text-[10px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
                           Etiqueta
                         </label>
@@ -264,7 +264,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                     </label>
 
                     {/* 6. Ordenación */}
-                    <div className="flex flex-col gap-1 pt-1 border-t border-[var(--outline)]">
+                    <div id="div-filterbar-10" className="flex flex-col gap-1 pt-1 border-t border-[var(--outline)]">
                       <label className="text-[10px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
                         Ordenar por
                       </label>
@@ -284,7 +284,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                     </div>
 
                     {/* Footer Buttons */}
-                    <div className="flex items-center justify-between pt-2 border-t border-[var(--outline)] mt-1">
+                    <div id="div-filterbar-11" className="flex items-center justify-between pt-2 border-t border-[var(--outline)] mt-1">
                       <button
                         type="button"
                         onClick={() => {
@@ -347,7 +347,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           )}
 
           {/* Mobile Quick Search Input */}
-          <div className="relative flex-1 sm:hidden min-w-[110px] max-w-[200px]">
+          <div id="div-filterbar-12" className="relative flex-1 sm:hidden min-w-[110px] max-w-[200px]">
             <span className="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-[14px] text-[var(--on-surface-variant)] pointer-events-none">
               search
             </span>
@@ -371,9 +371,9 @@ export const FilterBar: React.FC<FilterBarProps> = ({
         </div>
 
         {/* Current Document Indicator & Counter of matching tasks */}
-        <div className="flex items-center gap-2 text-xs font-mono text-[var(--on-surface-variant)] shrink-0">
+        <div id="div-filterbar-13" className="flex items-center gap-2 text-xs font-mono text-[var(--on-surface-variant)] shrink-0">
           {activeView === 'studio' ? (
-            <div className="flex items-center gap-1.5 shrink-0">
+            <div id="div-filterbar-14" className="flex items-center gap-1.5 shrink-0">
               {onOpenSanityModal && (
                 <button
                   type="button"
@@ -453,7 +453,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
 
       {/* Active Filter Chips Bar (Visible when any filter or query is active) */}
       {hasActiveFilters && (
-        <div className="flex items-center gap-1.5 flex-wrap pt-1 border-t border-[var(--outline)]">
+        <div id="div-filterbar-15" className="flex items-center gap-1.5 flex-wrap pt-1 border-t border-[var(--outline)]">
           <span className="text-[11px] text-[var(--on-surface-variant)] font-medium">
             Filtros activos:
           </span>

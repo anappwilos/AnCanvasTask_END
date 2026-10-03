@@ -55,20 +55,20 @@ export const RenameFolderModal: React.FC<RenameFolderModalProps> = ({
         aria-labelledby="rename-folder-modal-title"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        <div id="div-renamefoldermodal-1" className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
+          <div id="div-renamefoldermodal-2" className="flex items-center gap-2">
             <span className="material-symbols-outlined text-[16px] text-amber-400">drive_file_rename_outline</span>
             <h2 id="rename-folder-modal-title" className="text-sm font-semibold text-[var(--on-surface)] font-sans">
               Renombrar Carpeta
             </h2>
           </div>
-          <button type="button" onClick={onClose} className="btn-m3-icon w-7 h-7 cursor-pointer">
+          <button id="btn-renamefoldermodal-1" type="button" onClick={onClose} className="btn-m3-icon w-7 h-7 cursor-pointer">
             <span className="material-symbols-outlined text-[16px]">close</span>
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-4 flex flex-col gap-3.5">
-          <div className="flex flex-col gap-1">
+          <div id="div-renamefoldermodal-3" className="flex flex-col gap-1">
             <label className="text-xs font-medium text-[var(--on-surface)]">
               Nombre de la carpeta
             </label>
@@ -83,11 +83,11 @@ export const RenameFolderModal: React.FC<RenameFolderModalProps> = ({
             />
           </div>
 
-          <div className="p-2.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] text-[var(--on-surface-variant)] leading-relaxed">
+          <div id="div-renamefoldermodal-4" className="p-2.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] text-[var(--on-surface-variant)] leading-relaxed">
             Se actualizará la ruta de los <strong>{docCount}</strong> archivo{docCount > 1 ? 's' : ''} Task MD contenidos en <code className="font-mono text-[var(--on-surface)]">{currentFolder}/</code>.
           </div>
 
-          <div className="pt-2.5 flex items-center justify-end gap-2 border-t border-[var(--outline)]">
+          <div id="div-renamefoldermodal-5" className="pt-2.5 flex items-center justify-end gap-2 border-t border-[var(--outline)]">
             <button
               type="button"
               onClick={onClose}

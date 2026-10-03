@@ -258,11 +258,11 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
           aria-label="Panel de edición múltiple"
           className="fixed inset-x-0 bottom-0 max-h-[85vh] sm:static sm:max-h-none sm:w-96 bg-[var(--surface-container)] border-t sm:border-t-0 sm:border-l border-[var(--outline)] rounded-t-xl sm:rounded-none flex flex-col justify-between p-4 z-40 flex-shrink-0 animate-slide-up sm:animate-none overflow-y-auto shadow-2xl sm:shadow-none pb-safe"
         >
-          <div className="w-10 h-1 bg-[var(--outline)] rounded mx-auto mb-2 sm:hidden shrink-0" />
-          <div className="flex flex-col gap-4">
+          <div id="div-taskdetailspanel-1" className="w-10 h-1 bg-[var(--outline)] rounded mx-auto mb-2 sm:hidden shrink-0" />
+          <div id="div-taskdetailspanel-2" className="flex flex-col gap-4">
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-[var(--outline)] pb-3">
-            <div className="flex items-center gap-2">
+          <div id="div-taskdetailspanel-3" className="flex items-center justify-between border-b border-[var(--outline)] pb-3">
+            <div id="div-taskdetailspanel-4" className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-[var(--primary)]" />
               <h2 className="text-sm font-semibold text-[var(--on-surface)]">
                 {selectedTaskIds.length} tareas seleccionadas
@@ -283,11 +283,11 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
           </p>
 
           {/* Batch Status Change */}
-          <div className="flex flex-col gap-1.5">
+          <div id="div-taskdetailspanel-5" className="flex flex-col gap-1.5">
             <span className="text-[11px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
               Cambiar Estado en Lote
             </span>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+            <div id="div-taskdetailspanel-6" className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
               {statusOptions.map((st) => (
                 <button
                   key={st.id}
@@ -311,11 +311,11 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
           </div>
 
           {/* Batch Priority Change */}
-          <div className="flex flex-col gap-1.5">
+          <div id="div-taskdetailspanel-7" className="flex flex-col gap-1.5">
             <span className="text-[11px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
               Cambiar Prioridad en Lote
             </span>
-            <div className="grid grid-cols-4 gap-1.5">
+            <div id="div-taskdetailspanel-8" className="grid grid-cols-4 gap-1.5">
               {priorityOptions.map((p) => (
                 <button
                   key={p.id}
@@ -331,7 +331,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
 
           {/* Batch Section Change */}
           {allSections.length > 0 && (
-            <div className="flex flex-col gap-1.5">
+            <div id="div-taskdetailspanel-9" className="flex flex-col gap-1.5">
               <span className="text-[11px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
                 Mover a Sección
               </span>
@@ -358,7 +358,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
         </div>
 
         {/* Footer Actions */}
-        <div className="pt-3 border-t border-[var(--outline)] flex items-center justify-between gap-2 mt-4">
+        <div id="div-taskdetailspanel-10" className="pt-3 border-t border-[var(--outline)] flex items-center justify-between gap-2 mt-4">
           <button
             type="button"
             onClick={() => onBatchDeleteTasks(selectedTaskIds)}
@@ -401,11 +401,11 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
         aria-label="Panel de detalles de la tarea"
         className="fixed inset-x-0 bottom-0 max-h-[85vh] sm:static sm:max-h-none sm:w-88 bg-[var(--surface-container)] border-t sm:border-t-0 sm:border-l border-[var(--outline)] rounded-t-xl sm:rounded-none flex flex-col justify-between p-3.5 z-40 flex-shrink-0 animate-slide-up sm:animate-none overflow-y-auto shadow-2xl sm:shadow-none pb-safe"
       >
-        <div className="w-10 h-1 bg-[var(--outline)] rounded mx-auto mb-2 sm:hidden shrink-0" />
-        <div className="flex flex-col gap-3.5">
+        <div id="div-taskdetailspanel-11" className="w-10 h-1 bg-[var(--outline)] rounded mx-auto mb-2 sm:hidden shrink-0" />
+        <div id="div-taskdetailspanel-12" className="flex flex-col gap-3.5">
         {/* 1. Header: #ID + Navigation + Menu + Close */}
-        <div className="flex items-center justify-between border-b border-[var(--outline)] pb-2.5">
-          <div className="flex items-center gap-1.5">
+        <div id="div-taskdetailspanel-13" className="flex items-center justify-between border-b border-[var(--outline)] pb-2.5">
+          <div id="div-taskdetailspanel-14" className="flex items-center gap-1.5">
             <button
               type="button"
               onClick={handleCopyId}
@@ -426,7 +426,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
             )}
           </div>
 
-          <div className="flex items-center gap-0.5">
+          <div id="div-taskdetailspanel-15" className="flex items-center gap-0.5">
             {/* Previous Task */}
             <button
               type="button"
@@ -450,7 +450,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
             </button>
 
             {/* Context Menu Trigger ⋮ */}
-            <div className="relative">
+            <div id="div-taskdetailspanel-16" className="relative">
               <button
                 type="button"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -500,7 +500,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
                     </button>
                   )}
 
-                  <div className="h-px bg-[var(--outline)] my-0.5" />
+                  <div id="div-taskdetailspanel-17" className="h-px bg-[var(--outline)] my-0.5" />
 
                   <button
                     type="button"
@@ -530,8 +530,8 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
         </div>
 
         {/* 2. Title (Direct Inline Edit with clean focus) */}
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center justify-between">
+        <div id="div-taskdetailspanel-18" className="flex flex-col gap-1">
+          <div id="div-taskdetailspanel-19" className="flex items-center justify-between">
             <label className="text-[10px] font-mono font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
               Título
             </label>
@@ -581,7 +581,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
 
         {/* 3. Section / Group Selection */}
         {allSections.length > 0 && (
-          <div className="flex flex-col gap-1">
+          <div id="div-taskdetailspanel-20" className="flex flex-col gap-1">
             <label className="text-[10px] font-mono font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
               Sección
             </label>
@@ -602,11 +602,11 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
         )}
 
         {/* 4. Status Grid */}
-        <div className="flex flex-col gap-1.5">
+        <div id="div-taskdetailspanel-21" className="flex flex-col gap-1.5">
           <label className="text-[10px] font-mono font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
             Estado
           </label>
-          <div className="grid grid-cols-3 gap-1">
+          <div id="div-taskdetailspanel-22" className="grid grid-cols-3 gap-1">
             {statusOptions.map((st) => {
               const isCurrent = currentStatusId === st.id;
               return (
@@ -641,11 +641,11 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
         </div>
 
         {/* 5. Priority Selector */}
-        <div className="flex flex-col gap-1.5">
+        <div id="div-taskdetailspanel-23" className="flex flex-col gap-1.5">
           <label className="text-[10px] font-mono font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
             Prioridad
           </label>
-          <div className="grid grid-cols-4 gap-1">
+          <div id="div-taskdetailspanel-24" className="grid grid-cols-4 gap-1">
             {priorityOptions.map((p) => {
               const isSelected = task.priority === p.id;
               return (
@@ -669,8 +669,8 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
         </div>
 
         {/* 6. Tags Section */}
-        <div className="flex flex-col gap-1.5">
-          <div className="flex items-center justify-between">
+        <div id="div-taskdetailspanel-25" className="flex flex-col gap-1.5">
+          <div id="div-taskdetailspanel-26" className="flex items-center justify-between">
             <label className="text-[10px] font-mono font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
               Etiquetas
             </label>
@@ -685,7 +685,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
             )}
           </div>
 
-          <div className="flex flex-wrap gap-1 min-h-[24px] items-center">
+          <div id="div-taskdetailspanel-27" className="flex flex-wrap gap-1 min-h-[24px] items-center">
             {task.tags && task.tags.length > 0 ? (
               task.tags.map((tag) => (
                 <span
@@ -712,7 +712,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
 
           {/* New Tag Input */}
           {isAddingTag && (
-            <div className="flex items-center gap-1 mt-1">
+            <div id="div-taskdetailspanel-28" className="flex items-center gap-1 mt-1">
               <input
                 type="text"
                 autoFocus
@@ -750,8 +750,8 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
 
         {/* 7. Subtasks / Checklist Progress - Structure instead of nested card */}
         {task.subtasks && (
-          <div className="flex flex-col gap-1 pt-2 border-t border-[var(--outline)]">
-            <div className="flex items-center justify-between">
+          <div id="div-taskdetailspanel-29" className="flex flex-col gap-1 pt-2 border-t border-[var(--outline)]">
+            <div id="div-taskdetailspanel-30" className="flex items-center justify-between">
               <span className="text-[10px] font-mono font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
                 Subtareas
               </span>
@@ -761,7 +761,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
               </span>
             </div>
 
-            <div className="w-full h-1 bg-[var(--surface-container-highest)] rounded overflow-hidden">
+            <div id="div-taskdetailspanel-31" className="w-full h-1 bg-[var(--surface-container-highest)] rounded overflow-hidden">
               <div
                 className="h-full bg-[var(--primary)] transition-all duration-200"
                 style={{
@@ -773,8 +773,8 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
         )}
 
         {/* 8. Dependencies & Blockers Section - Clean structure instead of nested card */}
-        <div className="flex flex-col gap-2 pt-2 border-t border-[var(--outline)] text-xs">
-          <div className="flex items-center justify-between">
+        <div id="div-taskdetailspanel-32" className="flex flex-col gap-2 pt-2 border-t border-[var(--outline)] text-xs">
+          <div id="div-taskdetailspanel-33" className="flex items-center justify-between">
             <span className="text-[10px] font-mono font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider flex items-center gap-1">
               <span>Dependencias</span>
             </span>
@@ -784,13 +784,13 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
           </div>
 
           {/* Blocked by (Depende de) */}
-          <div className="flex flex-col gap-1">
+          <div id="div-taskdetailspanel-34" className="flex flex-col gap-1">
             <span className="text-[10px] text-[var(--on-surface-variant)] font-medium">
               Depende de:
             </span>
 
             {blockerIds.length > 0 ? (
-              <div className="flex flex-col gap-1">
+              <div id="div-taskdetailspanel-35" className="flex flex-col gap-1">
                 {blockerIds.map((bId) => {
                   const blockerTask = allTasks.find(
                     (t) => t.taskId.toLowerCase() === bId.toLowerCase()
@@ -833,7 +833,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
             )}
 
             {/* Quick Add Blocker Dropdown */}
-            <div className="mt-0.5">
+            <div id="div-taskdetailspanel-36" className="mt-0.5">
               <select
                 defaultValue=""
                 onChange={(e) => {
@@ -860,11 +860,11 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
 
           {/* Reverse dependencies */}
           {blockingTasks.length > 0 && (
-            <div className="flex flex-col gap-1 pt-1.5 border-t border-[var(--outline)]">
+            <div id="div-taskdetailspanel-37" className="flex flex-col gap-1 pt-1.5 border-t border-[var(--outline)]">
               <span className="text-[10px] text-amber-400 font-mono font-medium flex items-center gap-1">
                 <span>⚠ Bloquea a {blockingTasks.length} tareas:</span>
               </span>
-              <div className="flex flex-col gap-1">
+              <div id="div-taskdetailspanel-38" className="flex flex-col gap-1">
                 {blockingTasks.map((bTask) => (
                   <div
                     key={bTask.taskId}
@@ -892,7 +892,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
       </div>
 
       {/* Footer Actions */}
-      <div className="pt-3 border-t border-[var(--outline)] flex items-center justify-between gap-2 mt-4">
+      <div id="div-taskdetailspanel-39" className="pt-3 border-t border-[var(--outline)] flex items-center justify-between gap-2 mt-4">
         {onFocusOnCanvas && (
           <button
             type="button"

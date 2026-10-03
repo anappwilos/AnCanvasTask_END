@@ -75,8 +75,8 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        <div id="div-githubsyncmodal-1" className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
+          <div id="div-githubsyncmodal-2" className="flex items-center gap-2">
             <svg className="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
               <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
             </svg>
@@ -89,13 +89,13 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
               </p>
             </div>
           </div>
-          <button type="button" onClick={onClose} className="btn-m3-icon w-7 h-7 cursor-pointer">
+          <button id="btn-githubsyncmodal-1" type="button" onClick={onClose} className="btn-m3-icon w-7 h-7 cursor-pointer">
             <span className="material-symbols-outlined text-[16px]">close</span>
           </button>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-[var(--outline)] px-4 bg-[var(--surface)]">
+        <div id="div-githubsyncmodal-3" className="flex border-b border-[var(--outline)] px-4 bg-[var(--surface)]">
           <button
             type="button"
             onClick={() => setActiveTab('commit')}
@@ -132,15 +132,15 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
         </div>
 
         {/* Tab Content */}
-        <div className="p-4 overflow-y-auto max-h-[60vh]">
+        <div id="div-githubsyncmodal-4" className="p-4 overflow-y-auto max-h-[60vh]">
           {activeTab === 'commit' ? (
-            <div className="flex flex-col gap-3.5">
+            <div id="div-githubsyncmodal-5" className="flex flex-col gap-3.5">
               {/* Changed files list */}
-              <div className="flex flex-col gap-1.5">
+              <div id="div-githubsyncmodal-6" className="flex flex-col gap-1.5">
                 <span className="text-xs font-medium text-[var(--on-surface)]">
                   Archivos Task MD en esta rama:
                 </span>
-                <div className="flex flex-col gap-1 max-h-40 overflow-y-auto">
+                <div id="div-githubsyncmodal-7" className="flex flex-col gap-1 max-h-40 overflow-y-auto">
                   {branch.taskDocuments.map((doc) => {
                     const isMod = doc.content !== doc.lastSavedContent;
                     return (
@@ -152,7 +152,7 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
                             : 'bg-[var(--surface)] border-[var(--outline)] text-[var(--on-surface-variant)]'
                         }`}
                       >
-                        <div className="flex items-center gap-2 truncate">
+                        <div id="div-githubsyncmodal-8" className="flex items-center gap-2 truncate">
                           <span
                             className={`w-2 h-2 rounded-full ${
                               isMod ? 'bg-amber-400' : 'bg-emerald-500'
@@ -171,7 +171,7 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
 
               {/* Commit form */}
               <form onSubmit={handleCommit} className="flex flex-col gap-3 pt-2 border-t border-[var(--outline)]">
-                <div className="flex flex-col gap-1">
+                <div id="div-githubsyncmodal-9" className="flex flex-col gap-1">
                   <label className="text-xs font-medium text-[var(--on-surface)]">
                     Mensaje de Commit
                   </label>
@@ -185,7 +185,7 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
                   />
                 </div>
 
-                <div className="flex flex-col gap-1">
+                <div id="div-githubsyncmodal-10" className="flex flex-col gap-1">
                   <label className="text-xs font-medium text-[var(--on-surface)]">
                     Autor del commit
                   </label>
@@ -197,7 +197,7 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
                   />
                 </div>
 
-                <div className="pt-2 flex items-center justify-end gap-2">
+                <div id="div-githubsyncmodal-11" className="pt-2 flex items-center justify-end gap-2">
                   <button
                     type="submit"
                     disabled={!commitMessage.trim()}
@@ -210,10 +210,10 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
               </form>
             </div>
           ) : activeTab === 'history' ? (
-            <div className="flex flex-col gap-3">
+            <div id="div-githubsyncmodal-12" className="flex flex-col gap-3">
               {branch.lastCommit ? (
-                <div className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] flex flex-col gap-1.5">
-                  <div className="flex items-center justify-between text-xs font-mono">
+                <div id="div-githubsyncmodal-13" className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] flex flex-col gap-1.5">
+                  <div id="div-githubsyncmodal-14" className="flex items-center justify-between text-xs font-mono">
                     <span className="text-sky-400 font-bold flex items-center gap-1">
                       <span className="material-symbols-outlined text-[14px]">commit</span>
                       <span>#{branch.lastCommit.hash}</span>
@@ -237,11 +237,11 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
             </div>
           ) : (
             <form onSubmit={handleSaveToken} className="flex flex-col gap-3">
-              <div className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] text-xs text-[var(--on-surface-variant)] leading-relaxed">
+              <div id="div-githubsyncmodal-15" className="p-3 rounded bg-[var(--surface)] border border-[var(--outline)] text-xs text-[var(--on-surface-variant)] leading-relaxed">
                 Introduce un <strong>GitHub Personal Access Token (classic o fine-grained)</strong> para sincronizar ramas directamente con la API REST de GitHub.
               </div>
 
-              <div className="flex flex-col gap-1">
+              <div id="div-githubsyncmodal-16" className="flex flex-col gap-1">
                 <label className="text-xs font-medium text-[var(--on-surface)]">
                   GitHub Personal Access Token
                 </label>
@@ -254,7 +254,7 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
                 />
               </div>
 
-              <div className="pt-2 flex justify-end">
+              <div id="div-githubsyncmodal-17" className="pt-2 flex justify-end">
                 <button
                   type="submit"
                   disabled={isSavingToken}
@@ -268,7 +268,7 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="px-4 py-2.5 bg-[var(--surface)] border-t border-[var(--outline)] flex justify-end">
+        <div id="div-githubsyncmodal-18" className="px-4 py-2.5 bg-[var(--surface)] border-t border-[var(--outline)] flex justify-end">
           <button
             type="button"
             onClick={onClose}

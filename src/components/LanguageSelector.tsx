@@ -44,7 +44,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   };
 
   return (
-    <div className={`relative inline-block ${className}`} ref={dropdownRef}>
+    <div id="div-languageselector-1" className={`relative inline-block ${className}`} ref={dropdownRef}>
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
@@ -70,7 +70,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
           role="menu"
           aria-orientation="vertical"
         >
-          <div className="px-2.5 py-1 text-[10px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider border-b border-[var(--outline)] mb-1">
+          <div id="div-languageselector-2" className="px-2.5 py-1 text-[10px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider border-b border-[var(--outline)] mb-1">
             {t('common.language')}
           </div>
           {SUPPORTED_LANGUAGES.map((lang) => {
@@ -87,7 +87,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
                 }`}
                 role="menuitem"
               >
-                <div className="flex items-center gap-2">
+                <div id="div-languageselector-3" className="flex items-center gap-2">
                   <span className="text-[13px] leading-none">{lang.flag}</span>
                   <span className="text-xs">{lang.label}</span>
                 </div>

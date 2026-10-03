@@ -168,12 +168,12 @@ export function MarkdownSplitEditor({
   return (
     <aside className="h-full flex flex-col bg-[var(--surface-container)] border-l border-[var(--outline)] select-none overflow-hidden relative font-sans text-[var(--on-surface)] transition-all">
       {/* Top Header */}
-      <div className="h-11 px-3 bg-[var(--surface-container-high)] border-b border-[var(--outline)] flex items-center justify-between shrink-0 gap-2">
-        <div className="flex items-center gap-2 min-w-0">
+      <div id="div-markdownspliteditor-1" className="h-11 px-3 bg-[var(--surface-container-high)] border-b border-[var(--outline)] flex items-center justify-between shrink-0 gap-2">
+        <div id="div-markdownspliteditor-2" className="flex items-center gap-2 min-w-0">
           <span className="material-symbols-outlined text-[16px] text-sky-400 shrink-0">
             code_blocks
           </span>
-          <div className="flex items-center gap-1.5 truncate">
+          <div id="div-markdownspliteditor-3" className="flex items-center gap-1.5 truncate">
             <span className="text-xs font-semibold text-[var(--on-surface)] font-mono truncate">
               {fileName || 'TASKS.md'}
             </span>
@@ -189,10 +189,10 @@ export function MarkdownSplitEditor({
         </div>
 
         {/* Header Right Actions */}
-        <div className="flex items-center gap-1 shrink-0">
+        <div id="div-markdownspliteditor-4" className="flex items-center gap-1 shrink-0">
           {/* Preset Split Width Buttons */}
           {onChangeSplitRatio && (
-            <div className="hidden lg:flex items-center gap-0.5 bg-[var(--surface)] p-0.5 rounded border border-[var(--outline)] mr-1">
+            <div id="div-markdownspliteditor-5" className="hidden lg:flex items-center gap-0.5 bg-[var(--surface)] p-0.5 rounded border border-[var(--outline)] mr-1">
               <button
                 type="button"
                 onClick={() => onChangeSplitRatio(35)}
@@ -268,7 +268,7 @@ export function MarkdownSplitEditor({
             <span className="material-symbols-outlined text-[15px]">download</span>
           </button>
 
-          <div className="w-px h-3.5 bg-[var(--outline)] my-auto mx-0.5" />
+          <div id="div-markdownspliteditor-6" className="w-px h-3.5 bg-[var(--outline)] my-auto mx-0.5" />
 
           {/* Close split view */}
           <button
@@ -284,8 +284,8 @@ export function MarkdownSplitEditor({
       </div>
 
       {/* Markdown Snippet & Structure Toolbar */}
-      <div className="px-2.5 py-1.5 bg-[var(--surface)] border-b border-[var(--outline)] flex items-center justify-between gap-1 overflow-x-auto select-none shrink-0">
-        <div className="flex items-center gap-1 shrink-0">
+      <div id="div-markdownspliteditor-7" className="px-2.5 py-1.5 bg-[var(--surface)] border-b border-[var(--outline)] flex items-center justify-between gap-1 overflow-x-auto select-none shrink-0">
+        <div id="div-markdownspliteditor-8" className="flex items-center gap-1 shrink-0">
           <button
             type="button"
             onClick={() => insertText('\n- [ ] Nueva tarea\n  - Priority: P1\n')}
@@ -306,10 +306,10 @@ export function MarkdownSplitEditor({
             <span>Sección</span>
           </button>
 
-          <div className="w-px h-3.5 bg-[var(--outline)] mx-1" />
+          <div id="div-markdownspliteditor-9" className="w-px h-3.5 bg-[var(--outline)] mx-1" />
 
           {/* Quick Priorities */}
-          <div className="flex items-center gap-0.5">
+          <div id="div-markdownspliteditor-10" className="flex items-center gap-0.5">
             <button
               type="button"
               onClick={() => insertText('  - Priority: P0\n')}
@@ -336,7 +336,7 @@ export function MarkdownSplitEditor({
             </button>
           </div>
 
-          <div className="w-px h-3.5 bg-[var(--outline)] mx-1" />
+          <div id="div-markdownspliteditor-11" className="w-px h-3.5 bg-[var(--outline)] mx-1" />
 
           <button
             type="button"
@@ -379,8 +379,8 @@ export function MarkdownSplitEditor({
 
       {/* Embedded Issues Drawer (if active) */}
       {showIssuesPanel && validationReport.issues.length > 0 && (
-        <div className="bg-[var(--surface-container-high)] border-b border-[var(--outline)] p-2 max-h-36 overflow-y-auto flex flex-col gap-1.5 select-none shrink-0 animate-slide-down">
-          <div className="flex items-center justify-between px-1">
+        <div id="div-markdownspliteditor-12" className="bg-[var(--surface-container-high)] border-b border-[var(--outline)] p-2 max-h-36 overflow-y-auto flex flex-col gap-1.5 select-none shrink-0 animate-slide-down">
+          <div id="div-markdownspliteditor-13" className="flex items-center justify-between px-1">
             <span className="text-[11px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
               Diagnósticos de sincronización
             </span>
@@ -403,7 +403,7 @@ export function MarkdownSplitEditor({
               className="p-1.5 rounded bg-[var(--surface)] hover:bg-[var(--surface-container-highest)] border border-[var(--outline)] flex items-center justify-between gap-2 text-xs font-mono cursor-pointer transition-colors"
               title="Clic para saltar a esta línea en el editor"
             >
-              <div className="flex items-center gap-1.5 truncate">
+              <div id="div-markdownspliteditor-14" className="flex items-center gap-1.5 truncate">
                 <span
                   className={
                     issue.severity === 'error'
@@ -430,7 +430,7 @@ export function MarkdownSplitEditor({
       )}
 
       {/* Main CodeMirror Editor Area */}
-      <div className="flex-1 w-full h-full overflow-auto bg-[var(--surface)] text-xs font-mono">
+      <div id="div-markdownspliteditor-15" className="flex-1 w-full h-full overflow-auto bg-[var(--surface)] text-xs font-mono">
         <CodeMirror
           ref={editorRef}
           value={value}
@@ -469,8 +469,8 @@ export function MarkdownSplitEditor({
       </div>
 
       {/* Status Bar */}
-      <div className="h-7 px-3 bg-[var(--surface-container-high)] border-t border-[var(--outline)] flex items-center justify-between text-[11px] font-mono text-[var(--on-surface-variant)] select-none shrink-0">
-        <div className="flex items-center gap-3">
+      <div id="div-markdownspliteditor-16" className="h-7 px-3 bg-[var(--surface-container-high)] border-t border-[var(--outline)] flex items-center justify-between text-[11px] font-mono text-[var(--on-surface-variant)] select-none shrink-0">
+        <div id="div-markdownspliteditor-17" className="flex items-center gap-3">
           <span>
             Tareas: <strong className="text-[var(--on-surface)]">{stats.totalTasks}</strong> (
             <span className="text-emerald-400">{stats.completedTasks} done</span> /{' '}
@@ -486,7 +486,7 @@ export function MarkdownSplitEditor({
           )}
         </div>
 
-        <div className="flex items-center gap-3">
+        <div id="div-markdownspliteditor-18" className="flex items-center gap-3">
           <span>
             Ln {cursorPos.line}, Col {cursorPos.col}
           </span>

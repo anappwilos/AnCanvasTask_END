@@ -181,9 +181,9 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-4 py-3 border-b border-[var(--outline)] bg-[var(--surface)] flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded bg-rose-600 flex items-center justify-center text-white font-bold text-xs shadow-xs shrink-0">
+        <div id="div-syncoverridemodal-1" className="px-4 py-3 border-b border-[var(--outline)] bg-[var(--surface)] flex items-center justify-between">
+          <div id="div-syncoverridemodal-2" className="flex items-center gap-2.5">
+            <div id="div-syncoverridemodal-3" className="w-7 h-7 rounded bg-rose-600 flex items-center justify-center text-white font-bold text-xs shadow-xs shrink-0">
               S
             </div>
             <div>
@@ -199,7 +199,7 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div id="div-syncoverridemodal-4" className="flex items-center gap-2">
             {!isSanityConfigured && (
               <button
                 type="button"
@@ -221,52 +221,52 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
               </span>
               <span>{isAnalyzing ? t('sync.analyzing') : t('sync.reanalyze')}</span>
             </button>
-            <button type="button" onClick={onClose} className="btn-m3-icon w-7 h-7 cursor-pointer">
+            <button id="btn-syncoverridemodal-1" type="button" onClick={onClose} className="btn-m3-icon w-7 h-7 cursor-pointer">
               <span className="material-symbols-outlined text-[16px]">close</span>
             </button>
           </div>
         </div>
 
         {/* Status Summary & Quick Batch Actions */}
-        <div className="px-4 py-3 bg-[var(--surface-container-low)] border-b border-[var(--outline)] flex flex-col gap-3">
+        <div id="div-syncoverridemodal-5" className="px-4 py-3 bg-[var(--surface-container-low)] border-b border-[var(--outline)] flex flex-col gap-3">
           {/* Stat Counters */}
-          <div className="grid grid-cols-2 sm:grid-cols-6 gap-2 text-xs">
-            <div className="p-2 rounded bg-[var(--surface)] border border-[var(--outline)] flex flex-col">
+          <div id="div-syncoverridemodal-6" className="grid grid-cols-2 sm:grid-cols-6 gap-2 text-xs">
+            <div id="div-syncoverridemodal-7" className="p-2 rounded bg-[var(--surface)] border border-[var(--outline)] flex flex-col">
               <span className="text-[10px] text-[var(--on-surface-variant)]">{t('sync.totalAnalyzed')}</span>
               <span className="text-base font-semibold font-mono text-[var(--on-surface)]">
                 {result?.counts.total || 0}
               </span>
             </div>
 
-            <div className="p-2 rounded bg-[var(--surface)] border border-[var(--outline)] flex flex-col">
+            <div id="div-syncoverridemodal-8" className="p-2 rounded bg-[var(--surface)] border border-[var(--outline)] flex flex-col">
               <span className="text-[10px] text-emerald-400">{t('sync.synced')}</span>
               <span className="text-base font-semibold font-mono text-emerald-400">
                 {result?.counts.synced || 0}
               </span>
             </div>
 
-            <div className="p-2 rounded bg-[var(--surface)] border border-[var(--outline)] flex flex-col">
+            <div id="div-syncoverridemodal-9" className="p-2 rounded bg-[var(--surface)] border border-[var(--outline)] flex flex-col">
               <span className="text-[10px] text-sky-400">{t('sync.localOverrides')}</span>
               <span className="text-base font-semibold font-mono text-sky-400">
                 {result?.counts.localOverrides || 0}
               </span>
             </div>
 
-            <div className="p-2 rounded bg-[var(--surface)] border border-[var(--outline)] flex flex-col">
+            <div id="div-syncoverridemodal-10" className="p-2 rounded bg-[var(--surface)] border border-[var(--outline)] flex flex-col">
               <span className="text-[10px] text-amber-400">{t('sync.remoteOverrides')}</span>
               <span className="text-base font-semibold font-mono text-amber-400">
                 {result?.counts.remoteOverrides || 0}
               </span>
             </div>
 
-            <div className="p-2 rounded bg-[var(--surface)] border border-[var(--outline)] flex flex-col">
+            <div id="div-syncoverridemodal-11" className="p-2 rounded bg-[var(--surface)] border border-[var(--outline)] flex flex-col">
               <span className="text-[10px] text-rose-400">{t('sync.conflicts')}</span>
               <span className="text-base font-semibold font-mono text-rose-400">
                 {result?.counts.conflicts || 0}
               </span>
             </div>
 
-            <div className="p-2 rounded bg-[var(--surface)] border border-[var(--outline)] flex flex-col">
+            <div id="div-syncoverridemodal-12" className="p-2 rounded bg-[var(--surface)] border border-[var(--outline)] flex flex-col">
               <span className="text-[10px] text-purple-400">{t('sync.newUnique')}</span>
               <span className="text-base font-semibold font-mono text-purple-400">
                 {(result?.counts.onlyLocal || 0) + (result?.counts.onlyRemote || 0)}
@@ -275,9 +275,9 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
           </div>
 
           {/* Batch Actions Toolbar */}
-          <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+          <div id="div-syncoverridemodal-13" className="flex flex-wrap items-center justify-between gap-2 pt-1">
             {/* Filter Tabs */}
-            <div className="flex items-center gap-1 bg-[var(--surface)] p-0.5 rounded border border-[var(--outline)] text-xs overflow-x-auto max-w-full">
+            <div id="div-syncoverridemodal-14" className="flex items-center gap-1 bg-[var(--surface)] p-0.5 rounded border border-[var(--outline)] text-xs overflow-x-auto max-w-full">
               <button
                 type="button"
                 onClick={() => setFilterType('all')}
@@ -325,7 +325,7 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
             </div>
 
             {/* Batch execution buttons */}
-            <div className="flex items-center gap-2">
+            <div id="div-syncoverridemodal-15" className="flex items-center gap-2">
               <button
                 type="button"
                 disabled={isProcessing || !result?.hasPendingChanges || !isSanityConfigured}
@@ -363,9 +363,9 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
         </div>
 
         {/* Diff List */}
-        <div className="p-4 overflow-y-auto flex-1 flex flex-col gap-3">
+        <div id="div-syncoverridemodal-16" className="p-4 overflow-y-auto flex-1 flex flex-col gap-3">
           {filteredItems.length === 0 ? (
-            <div className="p-8 text-center text-[var(--on-surface-variant)] flex flex-col items-center justify-center gap-2">
+            <div id="div-syncoverridemodal-17" className="p-8 text-center text-[var(--on-surface-variant)] flex flex-col items-center justify-center gap-2">
               <span className="material-symbols-outlined text-4xl text-emerald-400">check_circle</span>
               <p className="text-sm font-medium text-[var(--on-surface)]">
                 {filterType === 'pending'
@@ -395,9 +395,9 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
                   }`}
                 >
                   {/* Item Row Header */}
-                  <div className="p-3 flex items-start justify-between gap-3">
-                    <div className="flex flex-col min-w-0 flex-1">
-                      <div className="flex items-center gap-2 flex-wrap">
+                  <div id="div-syncoverridemodal-18" className="p-3 flex items-start justify-between gap-3">
+                    <div id="div-syncoverridemodal-19" className="flex flex-col min-w-0 flex-1">
+                      <div id="div-syncoverridemodal-20" className="flex items-center gap-2 flex-wrap">
                         <span className="text-xs font-semibold text-[var(--on-surface)] font-sans truncate">
                           {item.title}
                         </span>
@@ -411,7 +411,7 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
                       )}
 
                       {/* Timestamps comparison */}
-                      <div className="flex items-center gap-4 text-[11px] font-mono text-[var(--on-surface-variant)] mt-1.5">
+                      <div id="div-syncoverridemodal-21" className="flex items-center gap-4 text-[11px] font-mono text-[var(--on-surface-variant)] mt-1.5">
                         <span className="flex items-center gap-1">
                           <span className="material-symbols-outlined text-[13px] text-sky-400">laptop</span>
                           <span>Local: {formatRelativeTime(item.localTimestamp)}</span>
@@ -424,7 +424,7 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
                     </div>
 
                     {/* Actions */}
-                    <div className="flex items-center gap-1.5 shrink-0">
+                    <div id="div-syncoverridemodal-22" className="flex items-center gap-1.5 shrink-0">
                       {item.diffType !== 'synced' && (
                         <>
                           <button
@@ -466,8 +466,8 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
 
                   {/* Expanded Diff Viewer */}
                   {isExpanded && (
-                    <div className="px-3 pb-3 pt-2 border-t border-[var(--outline)] bg-[var(--surface-container-high)]/40 flex flex-col gap-2 animate-fade-in text-xs">
-                      <div className="font-semibold text-[var(--on-surface)] flex items-center gap-1.5">
+                    <div id="div-syncoverridemodal-23" className="px-3 pb-3 pt-2 border-t border-[var(--outline)] bg-[var(--surface-container-high)]/40 flex flex-col gap-2 animate-fade-in text-xs">
+                      <div id="div-syncoverridemodal-24" className="font-semibold text-[var(--on-surface)] flex items-center gap-1.5">
                         <span className="material-symbols-outlined text-[15px] text-amber-400">difference</span>
                         <span>Cambios detectados y discrepancias:</span>
                       </div>
@@ -481,9 +481,9 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
                       </ul>
 
                       {/* Side by side preview */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2 pt-2 border-t border-[var(--outline)]">
+                      <div id="div-syncoverridemodal-25" className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2 pt-2 border-t border-[var(--outline)]">
                         {/* Local side */}
-                        <div className="p-2 rounded bg-[var(--surface)] border border-[var(--outline)] flex flex-col">
+                        <div id="div-syncoverridemodal-26" className="p-2 rounded bg-[var(--surface)] border border-[var(--outline)] flex flex-col">
                           <span className="font-semibold text-sky-400 text-[11px] mb-1 flex items-center gap-1">
                             <span className="material-symbols-outlined text-[13px]">laptop</span>
                             <span>Versión Local</span>
@@ -509,7 +509,7 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
                         </div>
 
                         {/* Remote side */}
-                        <div className="p-2 rounded bg-[var(--surface)] border border-[var(--outline)] flex flex-col">
+                        <div id="div-syncoverridemodal-27" className="p-2 rounded bg-[var(--surface)] border border-[var(--outline)] flex flex-col">
                           <span className="font-semibold text-rose-400 text-[11px] mb-1 flex items-center gap-1">
                             <span className="material-symbols-outlined text-[13px]">cloud</span>
                             <span>Versión Sanity Remote</span>
@@ -545,7 +545,7 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="px-4 py-2.5 bg-[var(--surface)] border-t border-[var(--outline)] flex items-center justify-between">
+        <div id="div-syncoverridemodal-28" className="px-4 py-2.5 bg-[var(--surface)] border-t border-[var(--outline)] flex items-center justify-between">
           <span className="text-[11px] text-[var(--on-surface-variant)]">
             {result?.hasPendingChanges
               ? 'Existen diferencias que puedes resolver individualmente o con Sincronización Inteligente.'

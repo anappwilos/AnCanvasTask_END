@@ -67,20 +67,20 @@ export const RenameDocumentModal: React.FC<RenameDocumentModalProps> = ({
         aria-labelledby="rename-doc-title"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        <div id="div-renamedocumentmodal-1" className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
+          <div id="div-renamedocumentmodal-2" className="flex items-center gap-2">
             <span className="material-symbols-outlined text-[16px] text-sky-400">edit_note</span>
             <h2 id="rename-doc-title" className="text-sm font-semibold text-[var(--on-surface)] font-sans">
               Renombrar / Mover Archivo Task MD
             </h2>
           </div>
-          <button type="button" onClick={onClose} className="btn-m3-icon w-7 h-7 cursor-pointer">
+          <button id="btn-renamedocumentmodal-1" type="button" onClick={onClose} className="btn-m3-icon w-7 h-7 cursor-pointer">
             <span className="material-symbols-outlined text-[16px]">close</span>
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-4 flex flex-col gap-3.5">
-          <div className="flex flex-col gap-1">
+          <div id="div-renamedocumentmodal-3" className="flex flex-col gap-1">
             <label className="text-xs font-medium text-[var(--on-surface)]">
               Nombre del archivo
             </label>
@@ -94,7 +94,7 @@ export const RenameDocumentModal: React.FC<RenameDocumentModalProps> = ({
             />
           </div>
 
-          <div className="flex flex-col gap-1">
+          <div id="div-renamedocumentmodal-4" className="flex flex-col gap-1">
             <label className="text-xs font-medium text-[var(--on-surface)]">
               Nombre o ruta de la carpeta (ej. <code>frontend</code>, <code>backend</code>, <code>packages/ui</code>, o vacío para raíz)
             </label>
@@ -107,7 +107,7 @@ export const RenameDocumentModal: React.FC<RenameDocumentModalProps> = ({
             />
 
             {/* Quick Folder Chips */}
-            <div className="flex items-center gap-1.5 flex-wrap mt-1">
+            <div id="div-renamedocumentmodal-5" className="flex items-center gap-1.5 flex-wrap mt-1">
               {quickFolderChips.slice(0, 6).map((chip) => {
                 const isSelected = folderInput.trim().replace(/^\/+|\/+$/g, '') === chip.value;
                 return (
@@ -128,12 +128,12 @@ export const RenameDocumentModal: React.FC<RenameDocumentModalProps> = ({
             </div>
           </div>
 
-          <div className="p-2.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] font-mono text-[var(--on-surface-variant)] flex items-center gap-1.5">
+          <div id="div-renamedocumentmodal-6" className="p-2.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] font-mono text-[var(--on-surface-variant)] flex items-center gap-1.5">
             <span className="material-symbols-outlined text-[14px] text-emerald-400">check_circle</span>
             <span>Nueva ruta: <strong>{formatDocumentPath(folderInput, name)}</strong></span>
           </div>
 
-          <div className="pt-2.5 flex items-center justify-end gap-2 border-t border-[var(--outline)]">
+          <div id="div-renamedocumentmodal-7" className="pt-2.5 flex items-center justify-end gap-2 border-t border-[var(--outline)]">
             <button
               type="button"
               onClick={onClose}
