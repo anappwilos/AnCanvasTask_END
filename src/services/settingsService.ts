@@ -1,6 +1,6 @@
 export type ThemeMode = 'dark' | 'light' | 'system';
 export type DensityMode = 'compact' | 'normal' | 'comfortable';
-export type LanguageMode = 'es' | 'en' | 'fr' | 'pt';
+export type LanguageMode = 'es' | 'en' | 'fr' | 'de' | 'pt' | 'it' | 'zh' | 'hi' | 'ar' | 'bn' | 'ru' | 'ur';
 
 export interface RecentFileInfo {
   name: string;

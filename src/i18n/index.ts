@@ -1,49 +1,74 @@
-import i18n from 'i18next';
-import { initReactI18next } from 'react-i18next';
-import LanguageDetector from 'i18next-browser-languagedetector';
+import { i18n } from '@lingui/core';
+export { i18n } from '@lingui/core';
 
-import es from './locales/es.json';
-import en from './locales/en.json';
-import fr from './locales/fr.json';
-import pt from './locales/pt.json';
+export * from './formatters';
 
 export interface LanguageOption {
   code: string;
   label: string;
-  flag: string;
 }
 
 export const SUPPORTED_LANGUAGES: LanguageOption[] = [
-  { code: 'es', label: 'Español', flag: '🇪🇸' },
-  { code: 'en', label: 'English', flag: '🇬🇧' },
-  { code: 'fr', label: 'Français', flag: '🇫🇷' },
-  { code: 'pt', label: 'Português', flag: '🇵🇹' },
+  { code: 'es', label: 'Español' },
+  { code: 'en', label: 'English' },
+  { code: 'zh', label: '中文' },
+  { code: 'hi', label: 'हिन्दी' },
+  { code: 'fr', label: 'Français' },
+  { code: 'ar', label: 'العربية' },
+  { code: 'bn', label: 'বাংলা' },
+  { code: 'pt', label: 'Português' },
+  { code: 'ru', label: 'Русский' },
+  { code: 'ur', label: 'اردو' },
 ];
 
-export type SupportedLanguageCode = 'es' | 'en' | 'fr' | 'pt';
+export type SupportedLanguageCode =
+  | 'es'
+  | 'en'
+  | 'zh'
+  | 'hi'
+  | 'fr'
+  | 'ar'
+  | 'bn'
+  | 'pt'
+  | 'ru'
+  | 'ur';
 
-const resources = {
-  es: { translation: es },
-  en: { translation: en },
-  fr: { translation: fr },
-  pt: { translation: pt },
-};
+export const defaultLocale: SupportedLanguageCode = 'es';
 
-i18n
-  .use(LanguageDetector)
-  .use(initReactI18next)
-  .init({
-    resources,
-    fallbackLng: 'es',
-    supportedLngs: ['es', 'en', 'fr', 'pt'],
-    detection: {
-      order: ['localStorage', 'navigator'],
-      lookupLocalStorage: 'antask_language',
-      caches: ['localStorage'],
-    },
-    interpolation: {
-      escapeValue: false,
-    },
-  });
+/**
+ * Load messages for the requested locale and activate it in Lingui
+ */
+export async function dynamicActivate(locale: string) {
+  try {
+    const { messages } = await import(`../locales/${locale}/messages.mjs`);
+    i18n.load(locale, messages);
+    i18n.activate(locale);
+    localStorage.setItem('antask_language', locale);
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = locale;
+      document.documentElement.dir = locale === 'ar' || locale === 'ur' ? 'rtl' : 'ltr';
+    }
+  } catch (error) {
+    console.error(`Error loading locale ${locale}:`, error);
+  }
+}
 
-export default i18n;
+/**
+ * Initialize language based on:
+ * 1. user explicit persisted preference
+ * 2. browser navigator language
+ * 3. default locale (es)
+ */
+export async function initI18n() {
+  const persisted = typeof localStorage !== 'undefined' ? localStorage.getItem('antask_language') : null;
+  let locale = persisted;
+
+  if (!locale) {
+    const browserLang = typeof navigator !== 'undefined' ? navigator.language.split('-')[0] : 'es';
+    const isSupported = SUPPORTED_LANGUAGES.some((l) => l.code === browserLang);
+    locale = isSupported ? browserLang : defaultLocale;
+  }
+
+  // ensure it's loaded before rendering
+  await dynamicActivate(locale);
+}

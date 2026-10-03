@@ -1,14 +1,26 @@
 import React, { Component, ErrorInfo, ReactNode, StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { i18n } from '@lingui/core';
+import { msg } from '@lingui/core/macro';
+import { I18nProvider } from '@lingui/react';
 import App from './App.tsx';
 import './index.css';
-import './i18n';
+import { initI18n } from './i18n';
 
 // Ensure browser compatibility polyfills for libraries expecting Node/global conventions
 if (typeof window !== 'undefined') {
   (window as unknown as { global: unknown }).global = window;
   (window as unknown as { process: unknown }).process =
     (window as unknown as { process: unknown }).process || { env: {} };
+
+  // Clean up any stale service workers from previous apps on this origin (e.g. localhost)
+  if ('serviceWorker' in navigator && import.meta.env.DEV) {
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      for (const registration of registrations) {
+        registration.unregister();
+      }
+    });
+  }
 }
 
 interface ErrorBoundaryProps {
@@ -58,13 +70,13 @@ class RootErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState
                 <span className="material-symbols-outlined text-[22px]">warning</span>
               </div>
               <div className="min-w-0">
-                <h2 className="text-sm font-semibold text-[#e6edf3]">Error de inicialización</h2>
-                <p className="text-xs text-[#8b949e]">Se evitó una pantalla en blanco inesperada</p>
+                <h2 className="text-sm font-semibold text-[#e6edf3]">{i18n._(msg`Error de inicialización`)}</h2>
+                <p className="text-xs text-[#8b949e]">{i18n._(msg`Se evitó una pantalla en blanco inesperada`)}</p>
               </div>
             </div>
 
             <div className="p-3 bg-[#0d1117] border border-[#30363d] rounded text-[11px] font-mono text-red-300 break-words max-h-36 overflow-y-auto">
-              {this.state.error?.message || 'Error desconocido al cargar los componentes.'}
+              {this.state.error?.message || i18n._(msg`Error desconocido al cargar los componentes.`)}
             </div>
 
             <div className="flex items-center gap-2 pt-2">
@@ -73,15 +85,15 @@ class RootErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState
                 onClick={this.handleReload}
                 className="flex-1 py-1.5 px-3 bg-[#3b82f6] hover:bg-[#2563eb] text-white rounded text-xs font-medium transition cursor-pointer"
               >
-                Recargar página
+                {i18n._(msg`Recargar página`)}
               </button>
               <button
                 type="button"
                 onClick={this.handleResetState}
                 className="py-1.5 px-3 bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] text-[#e6edf3] rounded text-xs font-medium transition cursor-pointer"
-                title="Limpia la memoria local guardada y reinicia la aplicación"
+                title={i18n._(msg`Limpia la memoria local guardada y reinicia la aplicación`)}
               >
-                Restablecer datos
+                {i18n._(msg`Restablecer datos`)}
               </button>
             </div>
           </div>
@@ -93,14 +105,20 @@ class RootErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState
   }
 }
 
-const rootElement = document.getElementById('root');
-if (rootElement) {
-  createRoot(rootElement).render(
-    <StrictMode>
-      <RootErrorBoundary>
-        <App />
-      </RootErrorBoundary>
-    </StrictMode>,
-  );
+async function renderApp() {
+  await initI18n();
+  const rootElement = document.getElementById('root');
+  if (rootElement) {
+    createRoot(rootElement).render(
+      <StrictMode>
+        <RootErrorBoundary>
+          <I18nProvider i18n={i18n}>
+            <App />
+          </I18nProvider>
+        </RootErrorBoundary>
+      </StrictMode>,
+    );
+  }
 }
 
+renderApp();

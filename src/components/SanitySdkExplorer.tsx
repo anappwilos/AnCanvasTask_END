@@ -134,7 +134,7 @@ function SdkDocumentInspector({
 
   if (!document) {
     return (
-      <div className="p-4 bg-neutral-900 border border-neutral-800 text-xs text-neutral-400 flex items-center gap-2">
+      <div id="div-sanitysdkexplorer-1" className="p-4 bg-neutral-900 border border-neutral-800 text-xs text-neutral-400 flex items-center gap-2">
         <RefreshCw className="w-3.5 h-3.5 animate-spin text-neutral-500" />
         Sincronizando documento reactivo {handle.documentId}...
       </div>
@@ -165,11 +165,11 @@ function SdkDocumentInspector({
   const isWorkspace = handle.documentType === 'workspace';
 
   return (
-    <div className="bg-neutral-900 border border-neutral-800 p-4 space-y-4">
+    <div id="div-sanitysdkexplorer-2" className="bg-neutral-900 border border-neutral-800 p-4 space-y-4">
       {/* Header */}
-      <div className="flex items-start justify-between gap-3 border-b border-neutral-800 pb-3">
-        <div className="space-y-1 min-w-0">
-          <div className="flex items-center gap-2 text-xs font-mono text-neutral-400">
+      <div id="div-sanitysdkexplorer-3" className="flex items-start justify-between gap-3 border-b border-neutral-800 pb-3">
+        <div id="div-sanitysdkexplorer-4" className="space-y-1 min-w-0">
+          <div id="div-sanitysdkexplorer-5" className="flex items-center gap-2 text-xs font-mono text-neutral-400">
             <span className="text-emerald-400 font-semibold">{handle.documentType}</span>
             <span>·</span>
             <span className="truncate max-w-[200px]">{handle.documentId}</span>
@@ -191,7 +191,7 @@ function SdkDocumentInspector({
       </div>
 
       {/* Integration Actions */}
-      <div className="flex flex-wrap gap-2">
+      <div id="div-sanitysdkexplorer-6" className="flex flex-wrap gap-2">
         {isTask && onImportTaskToMarkdown && (
           <button
             onClick={() => onImportTaskToMarkdown(document)}
@@ -216,7 +216,7 @@ function SdkDocumentInspector({
 
       {/* Quick Edit Form */}
       {isEditing ? (
-        <div className="space-y-3 p-3 bg-neutral-950 border border-neutral-800">
+        <div id="div-sanitysdkexplorer-7" className="space-y-3 p-3 bg-neutral-950 border border-neutral-800">
           <div>
             <label className="text-[11px] uppercase tracking-wider text-neutral-400 font-mono block mb-1">
               Título / Nombre
@@ -245,7 +245,7 @@ function SdkDocumentInspector({
               </select>
             </div>
           )}
-          <div className="flex gap-2 justify-end pt-1">
+          <div id="div-sanitysdkexplorer-8" className="flex gap-2 justify-end pt-1">
             <button
               onClick={() => setIsEditing(false)}
               className="px-2.5 py-1 text-xs text-neutral-400 hover:text-neutral-200 bg-neutral-800 hover:bg-neutral-700"
@@ -263,8 +263,8 @@ function SdkDocumentInspector({
           </div>
         </div>
       ) : (
-        <div className="flex items-center justify-between">
-          <div className="text-xs text-neutral-400">
+        <div id="div-sanitysdkexplorer-9" className="flex items-center justify-between">
+          <div id="div-sanitysdkexplorer-10" className="text-xs text-neutral-400">
             Última actualización:{' '}
             <span className="font-mono text-neutral-300">
               {document.updatedAt || document._updatedAt || 'Reciente'}
@@ -282,7 +282,7 @@ function SdkDocumentInspector({
 
       {/* JSON Payload Inspector */}
       <div>
-        <div className="text-[11px] uppercase tracking-wider text-neutral-400 font-mono mb-1.5 flex items-center gap-1.5">
+        <div id="div-sanitysdkexplorer-11" className="text-[11px] uppercase tracking-wider text-neutral-400 font-mono mb-1.5 flex items-center gap-1.5">
           <Code2 className="w-3.5 h-3.5 text-neutral-500" />
           Estado reactivo en memoria (Content Lake)
         </div>
@@ -315,8 +315,8 @@ function SdkDocumentsList({
   });
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between text-xs text-neutral-400 px-1">
+    <div id="div-sanitysdkexplorer-12" className="space-y-3">
+      <div id="div-sanitysdkexplorer-13" className="flex items-center justify-between text-xs text-neutral-400 px-1">
         <span>
           Documentos en el dataset:{' '}
           <strong className="text-neutral-200 font-mono">{count ?? handles.length}</strong>
@@ -330,12 +330,12 @@ function SdkDocumentsList({
       </div>
 
       {handles.length === 0 ? (
-        <div className="p-8 text-center bg-neutral-900 border border-neutral-800 text-neutral-400 text-xs">
+        <div id="div-sanitysdkexplorer-14" className="p-8 text-center bg-neutral-900 border border-neutral-800 text-neutral-400 text-xs">
           No se encontraron documentos de tipo{' '}
           <span className="font-mono text-neutral-200 font-semibold">{docType}</span> en el dataset activo.
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <div id="div-sanitysdkexplorer-15" className="grid grid-cols-1 md:grid-cols-2 gap-2">
           {handles.map((h) => {
             const isSelected = selectedHandleId === h.documentId;
             return (
@@ -348,7 +348,7 @@ function SdkDocumentsList({
                     : 'bg-neutral-900 border-neutral-800 hover:border-neutral-700'
                 }`}
               >
-                <div className="flex items-center justify-between gap-2">
+                <div id="div-sanitysdkexplorer-16" className="flex items-center justify-between gap-2">
                   <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 bg-neutral-950 border border-neutral-800 text-neutral-300">
                     {h.documentType}
                   </span>
@@ -356,7 +356,7 @@ function SdkDocumentsList({
                     {h.documentId}
                   </span>
                 </div>
-                <div className="text-xs font-medium text-neutral-200 truncate">
+                <div id="div-sanitysdkexplorer-17" className="text-xs font-medium text-neutral-200 truncate">
                   {h.documentId}
                 </div>
               </button>
@@ -366,7 +366,7 @@ function SdkDocumentsList({
       )}
 
       {hasMore && (
-        <div className="pt-2 text-center">
+        <div id="div-sanitysdkexplorer-18" className="pt-2 text-center">
           <button
             onClick={() => loadMore()}
             disabled={isPending}
@@ -399,9 +399,9 @@ function SdkGroqSandbox({ onShowToast }: { onShowToast: (msg: string, type?: any
   });
 
   return (
-    <div className="space-y-4">
+    <div id="div-sanitysdkexplorer-19" className="space-y-4">
       {/* Preset buttons */}
-      <div className="flex flex-wrap gap-2">
+      <div id="div-sanitysdkexplorer-20" className="flex flex-wrap gap-2">
         {PRESET_QUERIES.map((preset) => (
           <button
             key={preset.label}
@@ -421,8 +421,8 @@ function SdkGroqSandbox({ onShowToast }: { onShowToast: (msg: string, type?: any
       </div>
 
       {/* Query input editor */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
+      <div id="div-sanitysdkexplorer-21" className="space-y-2">
+        <div id="div-sanitysdkexplorer-22" className="flex items-center justify-between">
           <label className="text-[11px] font-mono uppercase tracking-wider text-neutral-400 flex items-center gap-1.5">
             <Terminal className="w-3.5 h-3.5 text-emerald-400" />
             Consulta GROQ Reactiva (useQuery)
@@ -434,7 +434,7 @@ function SdkGroqSandbox({ onShowToast }: { onShowToast: (msg: string, type?: any
             </span>
           )}
         </div>
-        <div className="flex gap-2">
+        <div id="div-sanitysdkexplorer-23" className="flex gap-2">
           <textarea
             value={inputQuery}
             onChange={(e) => setInputQuery(e.target.value)}
@@ -454,7 +454,7 @@ function SdkGroqSandbox({ onShowToast }: { onShowToast: (msg: string, type?: any
 
       {/* Query output */}
       <div>
-        <div className="text-[11px] font-mono text-neutral-400 mb-1 flex items-center justify-between">
+        <div id="div-sanitysdkexplorer-24" className="text-[11px] font-mono text-neutral-400 mb-1 flex items-center justify-between">
           <span>
             Resultados devueltos:{' '}
             <strong className="text-neutral-200 font-mono">
@@ -523,13 +523,13 @@ function SdkDocumentCreator({
 
   return (
     <form onSubmit={handleCreate} className="bg-neutral-900 border border-neutral-800 p-4 space-y-3">
-      <div className="flex items-center gap-2 text-xs font-mono text-neutral-300 border-b border-neutral-800 pb-2">
+      <div id="div-sanitysdkexplorer-25" className="flex items-center gap-2 text-xs font-mono text-neutral-300 border-b border-neutral-800 pb-2">
         <Plus className="w-3.5 h-3.5 text-emerald-400" />
         <span>Crear tarea con useCreateDocument</span>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <div className="md:col-span-2">
+      <div id="div-sanitysdkexplorer-26" className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div id="div-sanitysdkexplorer-27" className="md:col-span-2">
           <label className="text-[11px] font-mono uppercase text-neutral-400 block mb-1">
             Título de la tarea
           </label>
@@ -558,7 +558,7 @@ function SdkDocumentCreator({
         </div>
       </div>
 
-      <div className="flex items-center justify-between pt-1">
+      <div id="div-sanitysdkexplorer-28" className="flex items-center justify-between pt-1">
         <span className="text-[11px] text-neutral-500 font-mono">
           Escribe a la Content Lake con sincronización reactiva
         </span>
@@ -615,14 +615,14 @@ function SdkExplorerInner({
   }, []);
 
   return (
-    <div className="space-y-4">
+    <div id="div-sanitysdkexplorer-29" className="space-y-4">
       {/* Listen to document events in real time */}
       <SdkDocumentEventListener onEventReceived={handleDocumentEvent} />
 
       {/* Top Banner: Sanity App SDK Active Status */}
-      <div className="bg-neutral-900 border border-neutral-800 p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
+      <div id="div-sanitysdkexplorer-30" className="bg-neutral-900 border border-neutral-800 p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div id="div-sanitysdkexplorer-31" className="space-y-1">
+          <div id="div-sanitysdkexplorer-32" className="flex items-center gap-2">
             <span className="flex h-2 w-2 relative">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
@@ -632,7 +632,7 @@ function SdkExplorerInner({
             </span>
             <span className="text-xs text-neutral-500 font-mono">v{String(CORE_SDK_VERSION || '3.7.0')}</span>
           </div>
-          <div className="text-xs text-neutral-400 flex flex-wrap items-center gap-2">
+          <div id="div-sanitysdkexplorer-33" className="text-xs text-neutral-400 flex flex-wrap items-center gap-2">
             <span>
               Proyecto: <strong className="font-mono text-neutral-200">{config.projectId}</strong>
             </span>
@@ -645,14 +645,14 @@ function SdkExplorerInner({
           </div>
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap">
+        <div id="div-sanitysdkexplorer-34" className="flex items-center gap-2 flex-wrap">
           {onSwitchToNativeStudio && (
             <button
               onClick={onSwitchToNativeStudio}
               className="px-3 py-1.5 text-xs bg-rose-950 hover:bg-rose-900 text-rose-200 border border-rose-800/80 flex items-center gap-1.5 transition cursor-pointer"
               title="Abrir interfaz nativa de Sanity Studio con formularios enriquecidos"
             >
-              <div className="w-3.5 h-3.5 rounded bg-rose-600 flex items-center justify-center text-white font-bold text-[9px]">S</div>
+              <div id="div-sanitysdkexplorer-35" className="w-3.5 h-3.5 rounded bg-rose-600 flex items-center justify-center text-white font-bold text-[9px]">S</div>
               <span>Studio Nativo Embebido</span>
             </button>
           )}
@@ -685,7 +685,7 @@ function SdkExplorerInner({
       </div>
 
       {/* Navigation Tabs */}
-      <div className="flex border-b border-neutral-800 gap-1">
+      <div id="div-sanitysdkexplorer-36" className="flex border-b border-neutral-800 gap-1">
         <button
           onClick={() => setActiveTab('documents')}
           className={`px-4 py-2 text-xs font-medium border-b-2 transition flex items-center gap-1.5 ${
@@ -723,7 +723,7 @@ function SdkExplorerInner({
 
       {/* Tab: Documents */}
       {activeTab === 'documents' && (
-        <div className="space-y-4">
+        <div id="div-sanitysdkexplorer-37" className="space-y-4">
           {/* Creator Form */}
           <SdkDocumentCreator
             onCreated={(handle) => setSelectedHandle(handle)}
@@ -731,8 +731,8 @@ function SdkExplorerInner({
           />
 
           {/* Controls: Type selector and Search */}
-          <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center justify-between">
-            <div className="flex gap-1 bg-neutral-900 p-1 border border-neutral-800">
+          <div id="div-sanitysdkexplorer-38" className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center justify-between">
+            <div id="div-sanitysdkexplorer-39" className="flex gap-1 bg-neutral-900 p-1 border border-neutral-800">
               {['task', 'workspace', 'canvasVisualState', 'all'].map((t) => (
                 <button
                   key={t}
@@ -751,7 +751,7 @@ function SdkExplorerInner({
               ))}
             </div>
 
-            <div className="relative min-w-[220px]">
+            <div id="div-sanitysdkexplorer-40" className="relative min-w-[220px]">
               <Search className="w-3.5 h-3.5 text-neutral-500 absolute left-2.5 top-2.5" />
               <input
                 type="text"
@@ -764,11 +764,11 @@ function SdkExplorerInner({
           </div>
 
           {/* Split View: List and Selected Document Inspector */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-            <div className={selectedHandle ? 'lg:col-span-7' : 'lg:col-span-12'}>
+          <div id="div-sanitysdkexplorer-41" className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+            <div id="div-sanitysdkexplorer-42" className={selectedHandle ? 'lg:col-span-7' : 'lg:col-span-12'}>
               <Suspense
                 fallback={
-                  <div className="p-8 text-center text-xs text-neutral-400 bg-neutral-900 border border-neutral-800 flex items-center justify-center gap-2">
+                  <div id="div-sanitysdkexplorer-43" className="p-8 text-center text-xs text-neutral-400 bg-neutral-900 border border-neutral-800 flex items-center justify-center gap-2">
                     <RefreshCw className="w-4 h-4 animate-spin text-neutral-500" />
                     Cargando stream de documentos desde Sanity Content Lake...
                   </div>
@@ -784,10 +784,10 @@ function SdkExplorerInner({
             </div>
 
             {selectedHandle && (
-              <div className="lg:col-span-5">
+              <div id="div-sanitysdkexplorer-44" className="lg:col-span-5">
                 <Suspense
                   fallback={
-                    <div className="p-4 bg-neutral-900 border border-neutral-800 text-xs text-neutral-400">
+                    <div id="div-sanitysdkexplorer-45" className="p-4 bg-neutral-900 border border-neutral-800 text-xs text-neutral-400">
                       Cargando inspector reactivo...
                     </div>
                   }
@@ -810,7 +810,7 @@ function SdkExplorerInner({
       {activeTab === 'groq' && (
         <Suspense
           fallback={
-            <div className="p-8 text-center text-xs text-neutral-400 bg-neutral-900 border border-neutral-800 flex items-center justify-center gap-2">
+            <div id="div-sanitysdkexplorer-46" className="p-8 text-center text-xs text-neutral-400 bg-neutral-900 border border-neutral-800 flex items-center justify-center gap-2">
               <RefreshCw className="w-4 h-4 animate-spin text-neutral-500" />
               Conectando con el motor GROQ de Sanity App SDK...
             </div>
@@ -822,8 +822,8 @@ function SdkExplorerInner({
 
       {/* Tab: Real-Time Event Log */}
       {activeTab === 'events' && (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between text-xs text-neutral-400">
+        <div id="div-sanitysdkexplorer-47" className="space-y-3">
+          <div id="div-sanitysdkexplorer-48" className="flex items-center justify-between text-xs text-neutral-400">
             <span>
               Registro de eventos en vivo interceptados por{' '}
               <code className="text-sky-400">useDocumentEvent</code>
@@ -839,18 +839,18 @@ function SdkExplorerInner({
           </div>
 
           {eventsLog.length === 0 ? (
-            <div className="p-8 text-center bg-neutral-900 border border-neutral-800 text-neutral-400 text-xs">
+            <div id="div-sanitysdkexplorer-49" className="p-8 text-center bg-neutral-900 border border-neutral-800 text-neutral-400 text-xs">
               <Activity className="w-6 h-6 mx-auto mb-2 text-neutral-600 animate-pulse" />
               Esperando eventos de mutación en el dataset... Edita un documento o crea una tarea para ver el evento en tiempo real.
             </div>
           ) : (
-            <div className="space-y-1 max-h-96 overflow-y-auto font-mono text-xs">
+            <div id="div-sanitysdkexplorer-50" className="space-y-1 max-h-96 overflow-y-auto font-mono text-xs">
               {eventsLog.map((evt) => (
                 <div
                   key={evt.id}
                   className="p-2.5 bg-neutral-900 border border-neutral-800 flex items-center justify-between gap-2"
                 >
-                  <div className="flex items-center gap-2">
+                  <div id="div-sanitysdkexplorer-51" className="flex items-center gap-2">
                     <span className="text-[10px] text-neutral-500">{evt.time}</span>
                     <span className="px-1.5 py-0.5 text-[10px] uppercase font-semibold bg-sky-950 text-sky-300 border border-sky-800">
                       {evt.type}
@@ -896,11 +896,11 @@ export const SanitySdkExplorer: React.FC<SanitySdkExplorerProps> = ({
 
   if (!isConfigured) {
     return (
-      <div className="p-8 bg-neutral-900 border border-neutral-800 text-center space-y-4 max-w-xl mx-auto my-8">
-        <div className="w-12 h-12 mx-auto rounded-full bg-neutral-800 flex items-center justify-center text-neutral-400">
+      <div id="div-sanitysdkexplorer-52" className="p-8 bg-neutral-900 border border-neutral-800 text-center space-y-4 max-w-xl mx-auto my-8">
+        <div id="div-sanitysdkexplorer-53" className="w-12 h-12 mx-auto rounded-full bg-neutral-800 flex items-center justify-center text-neutral-400">
           <Database className="w-6 h-6 text-neutral-300" />
         </div>
-        <div className="space-y-1">
+        <div id="div-sanitysdkexplorer-54" className="space-y-1">
           <h3 className="text-base font-semibold text-neutral-100">
             Sanity App SDK no configurado
           </h3>
@@ -921,18 +921,18 @@ export const SanitySdkExplorer: React.FC<SanitySdkExplorerProps> = ({
   return (
     <SdkErrorBoundary
       fallback={(error, reset) => (
-        <div className="p-6 bg-neutral-900 border border-red-900/60 text-xs text-neutral-300 space-y-3">
-          <div className="flex items-center gap-2 text-red-400 font-semibold">
+        <div id="div-sanitysdkexplorer-55" className="p-6 bg-neutral-900 border border-red-900/60 text-xs text-neutral-300 space-y-3">
+          <div id="div-sanitysdkexplorer-56" className="flex items-center gap-2 text-red-400 font-semibold">
             <AlertCircle className="w-4 h-4" />
             <span>Error al conectar con Sanity App SDK</span>
           </div>
           <p className="text-neutral-400">{error.message || String(error)}</p>
-          <div className="text-[11px] text-neutral-400 bg-neutral-950 p-2.5 border border-neutral-800">
+          <div id="div-sanitysdkexplorer-57" className="text-[11px] text-neutral-400 bg-neutral-950 p-2.5 border border-neutral-800">
             Si se trata de un error de red o política CORS, recuerda agregar{' '}
             <code className="text-emerald-400">{typeof window !== 'undefined' ? window.location.origin : 'esta URL'}</code>{' '}
             en la sección de <strong>CORS Origins</strong> en manage.sanity.io.
           </div>
-          <div className="flex gap-2 pt-1">
+          <div id="div-sanitysdkexplorer-58" className="flex gap-2 pt-1">
             <button
               onClick={reset}
               className="px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200"
@@ -963,7 +963,7 @@ export const SanitySdkExplorer: React.FC<SanitySdkExplorerProps> = ({
           dataset: config.dataset.trim(),
         }}
         fallback={
-          <div className="p-8 text-center text-xs text-neutral-400 bg-neutral-900 border border-neutral-800 flex items-center justify-center gap-2">
+          <div id="div-sanitysdkexplorer-59" className="p-8 text-center text-xs text-neutral-400 bg-neutral-900 border border-neutral-800 flex items-center justify-center gap-2">
             <RefreshCw className="w-4 h-4 animate-spin text-neutral-500" />
             Inicializando Sanity App SDK (@sanity/sdk-react)...
           </div>

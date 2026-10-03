@@ -1,3 +1,5 @@
+import { useLingui } from '@lingui/react';
+import { msg } from '@lingui/core/macro';
 import React, { useState } from 'react';
 import { BranchConfig } from '../services/workspaceService';
 
@@ -18,6 +20,7 @@ export const NewBranchModal: React.FC<NewBranchModalProps> = ({
   onCreateBranch,
   onShowToast,
 }) => {
+  const { _ } = useLingui();
   const [branchName, setBranchName] = useState('');
   const [sourceBranch, setSourceBranch] = useState(currentBranch.name);
 
@@ -27,17 +30,17 @@ export const NewBranchModal: React.FC<NewBranchModalProps> = ({
     e.preventDefault();
     const cleanName = branchName.trim().replace(/\s+/g, '-');
     if (!cleanName) {
-      onShowToast('Por favor introduce un nombre válido de rama', 'warning');
+      onShowToast(_(msg`Por favor introduce un nombre válido de rama`), 'warning');
       return;
     }
 
     if (allBranches.some((b) => b.name.toLowerCase() === cleanName.toLowerCase())) {
-      onShowToast(`Ya existe una rama con el nombre "${cleanName}"`, 'error');
+      onShowToast(_(msg`Ya existe una rama con el nombre "${cleanName}"`), 'error');
       return;
     }
 
     onCreateBranch(cleanName, sourceBranch);
-    onShowToast(`Rama "${cleanName}" creada a partir de "${sourceBranch}"`, 'success');
+    onShowToast(_(msg`Rama "${cleanName}" creada a partir de "${sourceBranch}"`), 'success');
     onClose();
   };
 
@@ -53,22 +56,22 @@ export const NewBranchModal: React.FC<NewBranchModalProps> = ({
         aria-labelledby="new-branch-title"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        <div id="div-newbranchmodal-1" className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
+          <div id="div-newbranchmodal-2" className="flex items-center gap-2">
             <span className="material-symbols-outlined text-[16px] text-sky-400">fork_right</span>
             <h2 id="new-branch-title" className="text-sm font-semibold text-[var(--on-surface)] font-sans">
-              Crear Nueva Rama de Git
+              {_(msg`Crear Nueva Rama de Git`)}
             </h2>
           </div>
-          <button type="button" onClick={onClose} className="btn-m3-icon w-7 h-7 cursor-pointer">
+          <button id="btn-newbranchmodal-1" type="button" onClick={onClose} className="btn-m3-icon w-7 h-7 cursor-pointer">
             <span className="material-symbols-outlined text-[16px]">close</span>
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-4 flex flex-col gap-3.5">
-          <div className="flex flex-col gap-1">
+          <div id="div-newbranchmodal-3" className="flex flex-col gap-1">
             <label className="text-xs font-medium text-[var(--on-surface)]">
-              Nombre de la nueva rama
+              {_(msg`Nombre de la nueva rama`)}
             </label>
             <input
               type="text"
@@ -76,14 +79,14 @@ export const NewBranchModal: React.FC<NewBranchModalProps> = ({
               autoFocus
               value={branchName}
               onChange={(e) => setBranchName(e.target.value)}
-              placeholder="ej. feature/auth-passkey, bugfix/canvas-zoom..."
+              placeholder={_(msg`ej. feature/auth-passkey, bugfix/canvas-zoom...`)}
               className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-2.5 py-1.5 text-xs font-mono text-[var(--on-surface)] focus:outline-none"
             />
           </div>
 
-          <div className="flex flex-col gap-1">
+          <div id="div-newbranchmodal-4" className="flex flex-col gap-1">
             <label className="text-xs font-medium text-[var(--on-surface)]">
-              Crear a partir de la rama
+              {_(msg`Crear a partir de la rama`)}
             </label>
             <select
               value={sourceBranch}
@@ -92,30 +95,30 @@ export const NewBranchModal: React.FC<NewBranchModalProps> = ({
             >
               {allBranches.map((b) => (
                 <option key={b.name} value={b.name}>
-                  {b.name} ({b.taskDocuments.length} Task MDs)
+                  {b.name} ({b.taskDocuments.length} {_(msg`archivos Task MD`)})
                 </option>
               ))}
             </select>
           </div>
 
-          <div className="p-2.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] text-[var(--on-surface-variant)] leading-relaxed">
-            Se clonarán todos los archivos Task MD (raíz, frontend, backend, etc.) y su distribución visual hacia la nueva rama.
+          <div id="div-newbranchmodal-5" className="p-2.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] text-[var(--on-surface-variant)] leading-relaxed">
+            {_(msg`Se clonarán todos los archivos Task MD (raíz, frontend, backend, etc.) y su distribución visual hacia la nueva rama.`)}
           </div>
 
-          <div className="pt-2.5 flex items-center justify-end gap-2 border-t border-[var(--outline)]">
+          <div id="div-newbranchmodal-6" className="pt-2.5 flex items-center justify-end gap-2 border-t border-[var(--outline)]">
             <button
               type="button"
               onClick={onClose}
               className="btn-m3-text px-3 py-1 text-xs cursor-pointer"
             >
-              Cancelar
+              {_(msg`Cancelar`)}
             </button>
             <button
               type="submit"
               disabled={!branchName.trim()}
               className="btn-m3-primary px-4 py-1 text-xs cursor-pointer shadow-sm"
             >
-              Crear Rama
+              {_(msg`Crear Rama`)}
             </button>
           </div>
         </form>

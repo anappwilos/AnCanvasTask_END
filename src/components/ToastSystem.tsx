@@ -1,3 +1,5 @@
+import { useLingui } from '@lingui/react';
+import { msg } from '@lingui/core/macro';
 import React, { useEffect, useState } from 'react';
 
 export type ToastType = 'success' | 'info' | 'warning' | 'error';
@@ -35,6 +37,7 @@ export const ToastContainer: React.FC<ToastContainerProps> = ({ toasts, onDismis
 };
 
 const ToastCard: React.FC<{ toast: ToastItem; onDismiss: () => void }> = ({ toast, onDismiss }) => {
+  const { _ } = useLingui();
   const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
@@ -95,7 +98,7 @@ const ToastCard: React.FC<{ toast: ToastItem; onDismiss: () => void }> = ({ toas
         isClosing ? 'opacity-0 translate-y-1' : 'opacity-100 translate-y-0'
       }`}
     >
-      <div className="flex items-center gap-2 min-w-0">
+      <div id="div-toastsystem-1" className="flex items-center gap-2 min-w-0">
         <span className={`material-symbols-outlined text-[16px] ${config.textClass} shrink-0`}>
           {config.icon}
         </span>
@@ -104,7 +107,7 @@ const ToastCard: React.FC<{ toast: ToastItem; onDismiss: () => void }> = ({ toas
         </span>
       </div>
 
-      <div className="flex items-center gap-1.5 shrink-0">
+      <div id="div-toastsystem-2" className="flex items-center gap-1.5 shrink-0">
         {toast.action && (
           <button
             type="button"
@@ -122,7 +125,7 @@ const ToastCard: React.FC<{ toast: ToastItem; onDismiss: () => void }> = ({ toas
           type="button"
           onClick={handleManualDismiss}
           className="p-0.5 rounded text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--surface-container-highest)] cursor-pointer transition-colors"
-          aria-label="Cerrar notificación"
+          aria-label={_(msg`Cerrar notificación`)}
         >
           <span className="material-symbols-outlined text-[15px]">close</span>
         </button>

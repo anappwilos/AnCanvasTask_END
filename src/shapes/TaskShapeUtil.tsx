@@ -1,3 +1,6 @@
+import { useLingui } from '@lingui/react';
+import { msg } from '@lingui/core/macro';
+import { i18n, formatTaskCount } from '../i18n';
 import React, { useEffect, useState } from 'react';
 import {
   createShapeId,
@@ -40,6 +43,7 @@ function TaskCardComponent({
   shape: ITaskShape;
   editor: Editor;
 }) {
+  const { _ } = useLingui();
   const {
     title,
     completed,
@@ -127,21 +131,21 @@ function TaskCardComponent({
   };
 
   const priorityConfig: Record<TaskPriority, { label: string; dot: string; text: string }> = {
-    P0: { label: 'P0 · Critical', dot: 'bg-rose-500', text: 'text-rose-400' },
-    P1: { label: 'P1 · High', dot: 'bg-amber-500', text: 'text-amber-400' },
-    P2: { label: 'P2 · Medium', dot: 'bg-blue-500', text: 'text-blue-400' },
-    P3: { label: 'P3 · Low', dot: 'bg-zinc-500', text: 'text-zinc-400' },
+    P0: { label: _(msg`P0 · Crítica`), dot: 'bg-rose-500', text: 'text-rose-400' },
+    P1: { label: _(msg`P1 · Alta`), dot: 'bg-amber-500', text: 'text-amber-400' },
+    P2: { label: _(msg`P2 · Media`), dot: 'bg-blue-500', text: 'text-blue-400' },
+    P3: { label: _(msg`P3 · Baja`), dot: 'bg-zinc-500', text: 'text-zinc-400' },
   };
 
   const currentPriority = priorityConfig[priority] || priorityConfig.P1;
 
   const statusConfig: Record<string, { label: string; text: string }> = {
-    backlog: { label: 'Backlog', text: 'text-slate-400' },
-    todo: { label: 'Todo', text: 'text-amber-400' },
-    in_progress: { label: 'In Progress', text: 'text-blue-400' },
-    review: { label: 'Review', text: 'text-purple-400' },
-    done: { label: 'Done', text: 'text-emerald-400' },
-    blocked: { label: 'Blocked', text: 'text-rose-400' },
+    backlog: { label: _(msg`Backlog`), text: 'text-slate-400' },
+    todo: { label: _(msg`Por hacer`), text: 'text-amber-400' },
+    in_progress: { label: _(msg`En progreso`), text: 'text-blue-400' },
+    review: { label: _(msg`Revisión`), text: 'text-purple-400' },
+    done: { label: _(msg`Hecho`), text: 'text-emerald-400' },
+    blocked: { label: _(msg`Bloqueado`), text: 'text-rose-400' },
   };
 
   const normalizedStatus = completed ? 'done' : status || 'todo';
@@ -175,7 +179,7 @@ function TaskCardComponent({
               type="button"
               onPointerDown={(e) => e.stopPropagation()}
               onClick={toggleCompleted}
-              aria-label={completed ? 'Marcar tarea como pendiente' : 'Marcar tarea como completada'}
+              aria-label={completed ? _(msg`Marcar tarea como pendiente`) : _(msg`Marcar tarea como completada`)}
               className="mt-0.5 flex-shrink-0 flex items-center justify-center cursor-pointer focus:outline-none"
             >
               <span
@@ -222,7 +226,7 @@ function TaskCardComponent({
                   e.stopPropagation();
                   setIsEditingTitle(true);
                 }}
-                title="Doble clic para editar título"
+                title={_(msg`Doble clic para editar título`)}
                 className="group/title flex items-start gap-1 flex-1 cursor-text min-w-0"
               >
                 <span
@@ -240,7 +244,7 @@ function TaskCardComponent({
                     setIsEditingTitle(true);
                   }}
                   className="opacity-0 group-hover/title:opacity-100 transition-opacity text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] p-0.5 shrink-0 cursor-pointer"
-                  title="Editar título"
+                  title={_(msg`Editar título`)}
                 >
                   <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -256,7 +260,7 @@ function TaskCardComponent({
               type="button"
               onPointerDown={(e) => e.stopPropagation()}
               onClick={cyclePriority}
-              title="Clic para cambiar prioridad (P0-P3)"
+              title={_(msg`Clic para cambiar prioridad (P0-P3)`)}
               className={`px-1.5 py-0.5 text-[11px] font-mono font-medium rounded border border-[var(--outline)] bg-[var(--surface)] hover:border-[var(--on-surface-variant)] cursor-pointer shrink-0 transition-colors flex items-center gap-1 ${currentPriority.text}`}
             >
               <span className={`w-1.5 h-1.5 rounded-full ${currentPriority.dot}`} />
@@ -272,7 +276,7 @@ function TaskCardComponent({
                 setIsMenuOpen(!isMenuOpen);
               }}
               className="w-5 h-5 flex items-center justify-center text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] rounded hover:bg-[var(--surface-container-high)] cursor-pointer"
-              title="Más acciones"
+              title={_(msg`Más acciones`)}
             >
               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
                 <circle cx="12" cy="5" r="2" />
@@ -298,7 +302,7 @@ function TaskCardComponent({
               }}
               className="px-2 py-1 rounded text-left text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] flex items-center gap-2 cursor-pointer"
             >
-              <span>{completed ? '↺ Marcar pendiente' : '✓ Marcar completada'}</span>
+              <span>{completed ? _(msg`↺ Marcar pendiente`) : _(msg`✓ Marcar completada`)}</span>
             </button>
 
             <button
@@ -310,7 +314,7 @@ function TaskCardComponent({
               }}
               className="px-2 py-1 rounded text-left text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] flex items-center gap-2 cursor-pointer"
             >
-              <span>⚡ Cambiar prioridad</span>
+              <span>{_(msg`⚡ Cambiar prioridad`)}</span>
             </button>
 
             <button
@@ -322,7 +326,7 @@ function TaskCardComponent({
               }}
               className="px-2 py-1 rounded text-left text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] flex items-center gap-2 cursor-pointer"
             >
-              <span>🔍 Ver detalles</span>
+              <span>{_(msg`🔍 Ver detalles`)}</span>
             </button>
 
             <div className="h-px bg-[var(--outline)] my-0.5" />
@@ -344,7 +348,7 @@ function TaskCardComponent({
               }}
               className="px-2 py-1 rounded text-left text-[var(--error)] hover:bg-[var(--surface-container-high)] flex items-center gap-2 cursor-pointer"
             >
-              <span>🗑 Eliminar</span>
+              <span>{_(msg`🗑 Eliminar`)}</span>
             </button>
           </div>
         )}
@@ -385,7 +389,7 @@ function TaskCardComponent({
             {isDuplicateId && (
               <span
                 className="px-1 py-0.2 text-[10px] font-semibold text-rose-400 border border-rose-800/80 rounded"
-                title="ID duplicado en TASKS.md"
+                title={_(msg`ID duplicado en TASKS.md`)}
               >
                 dup
               </span>
@@ -394,7 +398,7 @@ function TaskCardComponent({
             {hasMissingId && (
               <span
                 className="px-1 py-0.2 text-[10px] font-semibold text-amber-400 border border-amber-800/80 rounded"
-                title="Tarea sin ID explícito en TASKS.md"
+                title={_(msg`Tarea sin ID explícito en TASKS.md`)}
               >
                 sin-id
               </span>
@@ -403,7 +407,7 @@ function TaskCardComponent({
             {unresolvedBlockers && unresolvedBlockers.length > 0 && (
               <span
                 className="px-1 py-0.2 text-[10px] font-semibold text-amber-400 border border-amber-800/80 rounded"
-                title={`Dependencia no resuelta: #${unresolvedBlockers.join(', #')}`}
+                title={_(msg`Dependencia no resuelta: #${unresolvedBlockers.join(', #')}`)}
               >
                 dep?
               </span>
@@ -412,7 +416,7 @@ function TaskCardComponent({
             {blockedBy && !completed && !unresolvedBlockers?.length && (
               <span
                 className="text-[10px] font-mono text-amber-400 flex items-center gap-0.5"
-                title={`Bloqueada por #${blockedBy}`}
+                title={_(msg`Bloqueada por #${blockedBy}`)}
               >
                 <span>🔒</span>
                 <span>#{blockedBy}</span>
@@ -563,8 +567,8 @@ export class TaskGroupShapeUtil extends ShapeUtil<any> {
             {count > 0 && (
               <span className="text-[11px] font-mono text-[var(--on-surface-variant)] tabular-nums">
                 {completedCount > 0
-                  ? `${completedCount}/${count} completadas`
-                  : `${count} ${count === 1 ? 'tarea' : 'tareas'}`}
+                  ? i18n._(msg`${completedCount}/${count} completadas`)
+                  : formatTaskCount(count)}
               </span>
             )}
           </div>

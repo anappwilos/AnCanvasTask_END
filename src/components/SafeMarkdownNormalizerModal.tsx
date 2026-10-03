@@ -1,4 +1,7 @@
 import React, { useMemo, useState, useCallback, useEffect, useRef } from 'react';
+import { useLingui } from '@lingui/react';
+import { msg } from '@lingui/core/macro';
+import { Trans } from '@lingui/react/macro';
 import { DiffEditor } from '@monaco-editor/react';
 import {
   analyzeMarkdownNormalization,
@@ -30,6 +33,7 @@ export function SafeMarkdownNormalizerModal({
   onApply,
   onShowToast,
 }: SafeMarkdownNormalizerModalProps) {
+  const { i18n } = useLingui();
   const [analysis, setAnalysis] = useState<NormalizationAnalysisResult | null>(null);
   const [changes, setChanges] = useState<NormalizedChange[]>([]);
   const [selectedFilter, setSelectedFilter] = useState<FilterTab>('all');
@@ -102,22 +106,22 @@ export function SafeMarkdownNormalizerModal({
     (preset: 'safe_only' | 'no_deletions' | 'accept_all' | 'reject_all') => {
       setChanges((prev) => setChangesPreset(prev, preset));
 
-      let msg = '';
+      let toastMsg = '';
       switch (preset) {
         case 'safe_only':
-          msg = 'Aplicados solo cambios de formato seguro';
+          toastMsg = i18n._(msg`Aplicados solo cambios de formato seguro`);
           break;
         case 'no_deletions':
-          msg = 'Aplicados cambios sin eliminaciones';
+          toastMsg = i18n._(msg`Aplicados cambios sin eliminaciones`);
           break;
         case 'accept_all':
-          msg = 'Todos los cambios aceptados';
+          toastMsg = i18n._(msg`Todos los cambios aceptados`);
           break;
         case 'reject_all':
-          msg = 'Todos los cambios rechazados (original intacto)';
+          toastMsg = i18n._(msg`Todos los cambios rechazados (original intacto)`);
           break;
       }
-      onShowToast(msg, 'info');
+      onShowToast(toastMsg, 'info');
     },
     [onShowToast]
   );
@@ -126,9 +130,9 @@ export function SafeMarkdownNormalizerModal({
   const handleCopyResult = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(effectiveMarkdown);
-      onShowToast('Copiado al portapapeles', 'success');
+      onShowToast(i18n._(msg`¡Copiado!`), 'success');
     } catch {
-      onShowToast('Error al copiar', 'error');
+      onShowToast(i18n._(msg`Error al copiar`), 'error');
     }
   }, [effectiveMarkdown, onShowToast]);
 
@@ -151,7 +155,7 @@ export function SafeMarkdownNormalizerModal({
   const handleConfirmAndApply = useCallback(() => {
     if (currentStats.acceptedLossRisk > 0 && !hasAcknowledgedRisk) {
       onShowToast(
-        'Confirma la casilla de seguridad antes de aplicar eliminaciones con riesgo.',
+        i18n._(msg`Confirma la casilla de seguridad antes de aplicar eliminaciones con riesgo.`),
         'warning'
       );
       return;
@@ -177,22 +181,22 @@ export function SafeMarkdownNormalizerModal({
       aria-labelledby="normalizer-title"
       className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/75 backdrop-blur-xs font-sans text-[var(--on-surface)]"
     >
-      <div className="w-full max-w-[96vw] xl:max-w-7xl h-[92vh] flex flex-col bg-[var(--surface-container)] border border-[var(--outline)] rounded-lg shadow-2xl overflow-hidden">
+      <div id="div-safemarkdownnormalizermodal-1" className="w-full max-w-[96vw] xl:max-w-7xl h-[92vh] flex flex-col bg-[var(--surface-container)] border border-[var(--outline)] rounded-lg shadow-2xl overflow-hidden">
         {/* Compact Header */}
         <header className="h-12 px-3.5 bg-[var(--surface-container-high)] border-b border-[var(--outline)] flex items-center justify-between gap-3 shrink-0">
-          <div className="flex items-center gap-2 min-w-0">
+          <div id="div-safemarkdownnormalizermodal-2" className="flex items-center gap-2 min-w-0">
             <span className="material-symbols-outlined text-[18px] text-sky-400 shrink-0">
               verified
             </span>
             <h2 id="normalizer-title" className="text-xs sm:text-sm font-semibold text-[var(--on-surface)] truncate">
-              Normalización Segura
+              {i18n._(msg`Normalización Segura`)}
             </h2>
             <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-[var(--surface)] border border-[var(--outline)] text-[var(--on-surface-variant)] truncate">
               {documentTitle}
             </span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div id="div-safemarkdownnormalizermodal-3" className="flex items-center gap-2">
             {/* Toggle Hidden / Invisible Characters */}
             <button
               type="button"
@@ -204,17 +208,17 @@ export function SafeMarkdownNormalizerModal({
               }`}
               title={
                 showInvisibles
-                  ? 'Ocultar caracteres invisibles (espacios, tabs, saltos de línea)'
-                  : 'Mostrar caracteres ocultos (espacios, tabs, saltos de línea)'
+                  ? i18n._(msg`Ocultar caracteres invisibles (espacios, tabs, saltos de línea)`)
+                  : i18n._(msg`Mostrar caracteres ocultos (espacios, tabs, saltos de línea)`)
               }
-              aria-label="Alternar caracteres ocultos"
+              aria-label={i18n._(msg`Alternar caracteres ocultos`)}
             >
               <span className="font-bold text-[11px] leading-none">¶</span>
-              <span className="hidden sm:inline">Invisibles</span>
+              <span className="hidden sm:inline">{i18n._(msg`Invisibles`)}</span>
             </button>
 
             {/* View Mode Toggle */}
-            <div className="flex items-center bg-[var(--surface)] p-0.5 rounded border border-[var(--outline)] text-[11px]">
+            <div id="div-safemarkdownnormalizermodal-4" className="flex items-center bg-[var(--surface)] p-0.5 rounded border border-[var(--outline)] text-[11px]">
               <button
                 type="button"
                 onClick={() => setRenderSideBySide(true)}
@@ -223,9 +227,9 @@ export function SafeMarkdownNormalizerModal({
                     ? 'bg-[var(--primary)] text-[var(--on-primary)] font-medium'
                     : 'text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]'
                 }`}
-                title="Lado a lado"
+                title={i18n._(msg`Lado a lado`)}
               >
-                Lado a lado
+                {i18n._(msg`Lado a lado`)}
               </button>
               <button
                 type="button"
@@ -235,9 +239,9 @@ export function SafeMarkdownNormalizerModal({
                     ? 'bg-[var(--primary)] text-[var(--on-primary)] font-medium'
                     : 'text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]'
                 }`}
-                title="En línea"
+                title={i18n._(msg`En línea`)}
               >
-                En línea
+                {i18n._(msg`En línea`)}
               </button>
             </div>
 
@@ -245,8 +249,8 @@ export function SafeMarkdownNormalizerModal({
               type="button"
               onClick={onClose}
               className="p-1 rounded text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--surface-container-highest)] cursor-pointer transition-colors"
-              title="Cerrar sin guardar"
-              aria-label="Cerrar modal"
+              title={i18n._(msg`Cerrar sin guardar`)}
+              aria-label={i18n._(msg`Cerrar modal`)}
             >
               <span className="material-symbols-outlined text-[18px]">close</span>
             </button>
@@ -254,58 +258,58 @@ export function SafeMarkdownNormalizerModal({
         </header>
 
         {/* Compact Quick Actions Bar */}
-        <div className="px-3.5 py-2 bg-[var(--surface)] border-b border-[var(--outline)] flex flex-wrap items-center justify-between gap-2 shrink-0 text-xs">
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-[11px] text-[var(--on-surface-variant)] mr-1">Acciones:</span>
+        <div id="div-safemarkdownnormalizermodal-5" className="px-3.5 py-2 bg-[var(--surface)] border-b border-[var(--outline)] flex flex-wrap items-center justify-between gap-2 shrink-0 text-xs">
+          <div id="div-safemarkdownnormalizermodal-6" className="flex items-center gap-1.5 flex-wrap">
+            <span className="text-[11px] text-[var(--on-surface-variant)] mr-1">{i18n._(msg`Acciones`)}:</span>
             <button
               type="button"
               onClick={() => handlePreset('safe_only')}
               className="px-2 py-0.5 rounded text-[11px] font-medium bg-sky-950/40 text-sky-300 border border-sky-800/60 hover:bg-sky-900/60 cursor-pointer transition-colors"
-              title="Aceptar cambios seguros de formato"
+              title={i18n._(msg`Aceptar cambios seguros de formato`)}
             >
-              Seguros ({currentStats.safeFormat})
+              {i18n._(msg`Seguros`)} ({currentStats.safeFormat})
             </button>
             <button
               type="button"
               onClick={() => handlePreset('no_deletions')}
               className="px-2 py-0.5 rounded text-[11px] font-medium bg-amber-950/40 text-amber-300 border border-amber-800/60 hover:bg-amber-900/60 cursor-pointer transition-colors"
-              title="Aceptar todo excepto eliminaciones"
+              title={i18n._(msg`Aceptar todo excepto eliminaciones`)}
             >
-              Sin eliminaciones
+              {i18n._(msg`Sin eliminaciones`)}
             </button>
             <button
               type="button"
               onClick={() => handlePreset('accept_all')}
               className="px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-950/40 text-emerald-300 border border-emerald-800/60 hover:bg-emerald-900/60 cursor-pointer transition-colors"
-              title="Aceptar todos los cambios"
+              title={i18n._(msg`Aceptar todos los cambios`)}
             >
-              Aceptar todo
+              {i18n._(msg`Aceptar todo`)}
             </button>
             <button
               type="button"
               onClick={() => handlePreset('reject_all')}
               className="px-2 py-0.5 rounded text-[11px] font-medium bg-[var(--surface-container)] text-[var(--on-surface-variant)] border border-[var(--outline)] hover:text-[var(--on-surface)] cursor-pointer transition-colors"
-              title="Rechazar todos los cambios"
+              title={i18n._(msg`Rechazar todos los cambios`)}
             >
-              Rechazar todo
+              {i18n._(msg`Rechazar todo`)}
             </button>
           </div>
 
-          <div className="text-[11px] text-[var(--on-surface-variant)]">
+          <div id="div-safemarkdownnormalizermodal-7" className="text-[11px] text-[var(--on-surface-variant)]">
             <span>
-              {currentStats.accepted} de {currentStats.total} aceptados
+              {i18n._(msg`${currentStats.accepted} de ${currentStats.total} aceptados`)}
             </span>
           </div>
         </div>
 
         {/* Compact Loss Alert Banner (only when risk exists) */}
         {currentStats.lossRisk > 0 && (
-          <div className="px-3.5 py-1.5 bg-rose-950/60 border-b border-rose-800/80 text-rose-200 text-xs flex items-center justify-between gap-2 shrink-0">
-            <div className="flex items-center gap-1.5">
+          <div id="div-safemarkdownnormalizermodal-8" className="px-3.5 py-1.5 bg-rose-950/60 border-b border-rose-800/80 text-rose-200 text-xs flex items-center justify-between gap-2 shrink-0">
+            <div id="div-safemarkdownnormalizermodal-9" className="flex items-center gap-1.5">
               <span className="material-symbols-outlined text-[16px] text-rose-400 shrink-0">warning</span>
               <span>
-                <strong>Atención:</strong> {currentStats.lossRisk} posibles pérdidas de texto detectadas.
-                {currentStats.acceptedLossRisk === 0 && ' (Protegidas / rechazadas)'}
+                <strong>{i18n._(msg`Aviso`)}:</strong> {currentStats.lossRisk} {i18n._(msg`posibles pérdidas de texto detectadas`)}.
+                {currentStats.acceptedLossRisk === 0 && ` ${i18n._(msg`(Protegidas / rechazadas)`)}`}
               </span>
             </div>
             <button
@@ -313,17 +317,17 @@ export function SafeMarkdownNormalizerModal({
               onClick={() => setSelectedFilter('loss_risk')}
               className="text-[11px] font-medium underline text-rose-300 hover:text-rose-100 cursor-pointer"
             >
-              Filtrar riesgos
+              {i18n._(msg`Filtrar riesgos`)}
             </button>
           </div>
         )}
 
         {/* Main Body: Split View */}
-        <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden">
+        <div id="div-safemarkdownnormalizermodal-10" className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden">
           {/* Left Panel: Scannable Changes List */}
           <aside className="w-full md:w-80 flex flex-col bg-[var(--surface-container)] border-r border-[var(--outline)] shrink-0 overflow-hidden">
             {/* Filter Tabs */}
-            <div className="p-1.5 border-b border-[var(--outline)] bg-[var(--surface-container-high)] flex flex-wrap gap-1 text-[10px]">
+            <div id="div-safemarkdownnormalizermodal-11" className="p-1.5 border-b border-[var(--outline)] bg-[var(--surface-container-high)] flex flex-wrap gap-1 text-[10px]">
               <button
                 type="button"
                 onClick={() => setSelectedFilter('all')}
@@ -333,7 +337,7 @@ export function SafeMarkdownNormalizerModal({
                     : 'bg-[var(--surface)] text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]'
                 }`}
               >
-                Todos ({currentStats.total})
+                {i18n._(msg`Todos`)} ({currentStats.total})
               </button>
               <button
                 type="button"
@@ -344,7 +348,7 @@ export function SafeMarkdownNormalizerModal({
                     : 'bg-[var(--surface)] text-sky-400 hover:text-sky-300'
                 }`}
               >
-                Seguros ({currentStats.safeFormat})
+                {i18n._(msg`Seguros`)} ({currentStats.safeFormat})
               </button>
               <button
                 type="button"
@@ -355,7 +359,7 @@ export function SafeMarkdownNormalizerModal({
                     : 'bg-[var(--surface)] text-amber-400 hover:text-amber-300'
                 }`}
               >
-                Estructura ({currentStats.structural})
+                {i18n._(msg`Estructura`)} ({currentStats.structural})
               </button>
               <button
                 type="button"
@@ -382,14 +386,14 @@ export function SafeMarkdownNormalizerModal({
             </div>
 
             {/* Changes List */}
-            <div className="flex-1 overflow-y-auto p-1.5 space-y-1.5">
+            <div id="div-safemarkdownnormalizermodal-12" className="flex-1 overflow-y-auto p-1.5 space-y-1.5">
               {filteredChanges.length === 0 ? (
-                <div className="p-6 text-center text-xs text-[var(--on-surface-variant)] flex flex-col items-center justify-center h-40">
+                <div id="div-safemarkdownnormalizermodal-13" className="p-6 text-center text-xs text-[var(--on-surface-variant)] flex flex-col items-center justify-center h-40">
                   <span className="material-symbols-outlined text-[24px] text-emerald-400/80 mb-1">
                     check_circle
                   </span>
                   <p className="font-medium text-[var(--on-surface)]">
-                    {changes.length === 0 ? 'Documento normalizado' : 'Sin cambios aquí'}
+                    {changes.length === 0 ? i18n._(msg`Documento normalizado`) : i18n._(msg`Sin cambios aquí`)}
                   </p>
                 </div>
               ) : (
@@ -415,8 +419,8 @@ export function SafeMarkdownNormalizerModal({
                           : 'border-[var(--outline)] bg-[var(--surface)] hover:border-[var(--on-surface-variant)]'
                       }`}
                     >
-                      <div className="flex items-center justify-between gap-1.5">
-                        <div className="flex items-center gap-1.5 min-w-0">
+                      <div id="div-safemarkdownnormalizermodal-14" className="flex items-center justify-between gap-1.5">
+                        <div id="div-safemarkdownnormalizermodal-15" className="flex items-center gap-1.5 min-w-0">
                           <span className={`px-1.5 py-0.2 rounded text-[10px] font-semibold border ${badgeClass}`}>
                             {change.categoryLabel}
                           </span>
@@ -425,7 +429,7 @@ export function SafeMarkdownNormalizerModal({
                           </span>
                           {change.hasLossRisk && (
                             <span className="text-[10px] font-bold text-rose-400 flex items-center">
-                              ⚠️ Riesgo
+                              ⚠️ {i18n._(msg`Riesgo`)}
                             </span>
                           )}
                         </div>
@@ -442,7 +446,7 @@ export function SafeMarkdownNormalizerModal({
                               : 'bg-[var(--surface)] text-[var(--on-surface-variant)] border-[var(--outline)]'
                           }`}
                         >
-                          {change.isAccepted ? 'Aceptado' : 'Rechazado'}
+                          {change.isAccepted ? i18n._(msg`Aceptado`) : i18n._(msg`Rechazado`)}
                         </button>
                       </div>
 
@@ -451,14 +455,14 @@ export function SafeMarkdownNormalizerModal({
                       </p>
 
                       {/* Visual Inline Space / Text Diff Preview */}
-                      <div className="mt-1.5 p-1.5 rounded bg-[var(--surface-container-highest)] border border-[var(--outline)] font-mono text-[10px] space-y-1">
-                        <div className="text-rose-400 flex items-start gap-1 overflow-x-auto">
+                      <div id="div-safemarkdownnormalizermodal-16" className="mt-1.5 p-1.5 rounded bg-[var(--surface-container-highest)] border border-[var(--outline)] font-mono text-[10px] space-y-1">
+                        <div id="div-safemarkdownnormalizermodal-17" className="text-rose-400 flex items-start gap-1 overflow-x-auto">
                           <span className="font-bold text-rose-500 select-none">-</span>
                           <span className="break-all whitespace-pre-wrap">
                             {change.originalLines.map((l) => l.replace(/ /g, '·').replace(/\t/g, '→ ')).join('\n') || '(vacío)'}
                           </span>
                         </div>
-                        <div className="text-emerald-400 flex items-start gap-1 overflow-x-auto">
+                        <div id="div-safemarkdownnormalizermodal-18" className="text-emerald-400 flex items-start gap-1 overflow-x-auto">
                           <span className="font-bold text-emerald-500 select-none">+</span>
                           <span className="break-all whitespace-pre-wrap">
                             {change.proposedLines.map((l) => l.replace(/ /g, '·').replace(/\t/g, '→ ')).join('\n') || '(vacío)'}
@@ -475,22 +479,22 @@ export function SafeMarkdownNormalizerModal({
           {/* Right Panel: Monaco DiffEditor */}
           <main className="flex-1 flex flex-col min-w-0 bg-[var(--surface)] overflow-hidden">
             {/* Diff Header */}
-            <div className="h-7 px-3 bg-[var(--surface-container-high)] border-b border-[var(--outline)] flex items-center justify-between shrink-0 text-[11px] font-mono text-[var(--on-surface-variant)]">
-              <div className="flex items-center gap-2">
-                <span className="text-rose-400 font-semibold">Original</span>
+            <div id="div-safemarkdownnormalizermodal-19" className="h-7 px-3 bg-[var(--surface-container-high)] border-b border-[var(--outline)] flex items-center justify-between shrink-0 text-[11px] font-mono text-[var(--on-surface-variant)]">
+              <div id="div-safemarkdownnormalizermodal-20" className="flex items-center gap-2">
+                <span className="text-rose-400 font-semibold">{i18n._(msg`Original`)}</span>
                 <span>➔</span>
-                <span className="text-emerald-400 font-semibold">Propuesta</span>
+                <span className="text-emerald-400 font-semibold">{i18n._(msg`Propuesta`)}</span>
               </div>
               {showInvisibles && (
-                <div className="text-[10px] text-[var(--on-surface-variant)] hidden sm:flex items-center gap-2">
-                  <span className="bg-[var(--surface)] px-1.5 py-0.2 rounded border border-[var(--outline)] font-mono">· espacio</span>
-                  <span className="bg-[var(--surface)] px-1.5 py-0.2 rounded border border-[var(--outline)] font-mono">→ tab</span>
+                <div id="div-safemarkdownnormalizermodal-21" className="text-[10px] text-[var(--on-surface-variant)] hidden sm:flex items-center gap-2">
+                  <span className="bg-[var(--surface)] px-1.5 py-0.2 rounded border border-[var(--outline)] font-mono">{i18n._(msg`· espacio`)}</span>
+                  <span className="bg-[var(--surface)] px-1.5 py-0.2 rounded border border-[var(--outline)] font-mono">{i18n._(msg`→ tab`)}</span>
                 </div>
               )}
             </div>
 
             {/* Monaco DiffEditor */}
-            <div className="flex-1 min-h-0 w-full relative">
+            <div id="div-safemarkdownnormalizermodal-22" className="flex-1 min-h-0 w-full relative">
               <DiffEditor
                 height="100%"
                 language="markdown"
@@ -521,8 +525,8 @@ export function SafeMarkdownNormalizerModal({
                   diffWordWrap: 'on',
                 }}
                 loading={
-                  <div className="h-full flex items-center justify-center text-xs text-[var(--on-surface-variant)]">
-                    Cargando comparador...
+                  <div id="div-safemarkdownnormalizermodal-23" className="h-full flex items-center justify-center text-xs text-[var(--on-surface-variant)]">
+                    {i18n._(msg`Cargando comparador...`)}
                   </div>
                 }
               />
@@ -532,7 +536,7 @@ export function SafeMarkdownNormalizerModal({
 
         {/* Clean Footer */}
         <footer className="h-12 px-3.5 bg-[var(--surface-container-high)] border-t border-[var(--outline)] flex items-center justify-between gap-2 shrink-0">
-          <div className="flex items-center gap-2 text-xs">
+          <div id="div-safemarkdownnormalizermodal-24" className="flex items-center gap-2 text-xs">
             {currentStats.acceptedLossRisk > 0 && (
               <label className="flex items-center gap-1.5 text-[11px] bg-rose-950/60 text-rose-200 px-2 py-0.5 rounded border border-rose-800/80 cursor-pointer">
                 <input
@@ -541,25 +545,25 @@ export function SafeMarkdownNormalizerModal({
                   onChange={(e) => setHasAcknowledgedRisk(e.target.checked)}
                   className="rounded text-rose-600 focus:ring-rose-500 cursor-pointer"
                 />
-                <span>Confirmar {currentStats.acceptedLossRisk} eliminaciones con riesgo</span>
+                <span>{i18n._(msg`Confirmar \$\${count} eliminaciones con riesgo`, { count: currentStats.acceptedLossRisk })}</span>
               </label>
             )}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div id="div-safemarkdownnormalizermodal-25" className="flex items-center gap-2">
             <button
               type="button"
               onClick={handleCopyResult}
               className="px-2.5 py-1 rounded text-xs font-medium bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--outline)] hover:bg-[var(--surface-container-highest)] cursor-pointer transition-colors"
             >
-              Copiar
+              {i18n._(msg`Copiar`)}
             </button>
             <button
               type="button"
               onClick={onClose}
               className="px-2.5 py-1 rounded text-xs font-medium text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] cursor-pointer transition-colors"
             >
-              Cancelar
+              {i18n._(msg`Cancelar`)}
             </button>
             <button
               type="button"
@@ -571,7 +575,7 @@ export function SafeMarkdownNormalizerModal({
                   : 'bg-[var(--primary)] text-[var(--on-primary)] hover:brightness-110'
               }`}
             >
-              Confirmar y Aplicar
+              {i18n._(msg`Confirmar y Aplicar`)}
             </button>
           </div>
         </footer>

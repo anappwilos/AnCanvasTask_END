@@ -1,4 +1,6 @@
 import React from 'react';
+import { useLingui } from '@lingui/react';
+import { msg } from '@lingui/core/macro';
 
 interface QuickGuideModalProps {
   isOpen: boolean;
@@ -9,22 +11,23 @@ interface QuickGuideModalProps {
 export const QuickGuideModal: React.FC<QuickGuideModalProps> = ({
   isOpen,
   onClose,
-  onOpenSampleProject,
 }) => {
+  const { i18n } = useLingui();
+
   if (!isOpen) return null;
 
   const shortcuts = [
-    { key: '⌘ / Ctrl + K', label: 'Abrir paleta de comandos y búsqueda global' },
-    { key: 'N', label: 'Crear nueva tarea en modal rápido' },
-    { key: 'V', label: 'Cambiar a vista espacial Canvas' },
-    { key: 'K', label: 'Cambiar a vista de Tablero Kanban' },
-    { key: 'A', label: 'Auto-organizar Canvas jerárquicamente (DAG)' },
-    { key: '⌘ / Ctrl + S', label: 'Guardar y exportar archivo TASKS.md' },
-    { key: 'T', label: 'Alternar tema claro / oscuro' },
-    { key: 'P', label: 'Ver problemas de sintaxis y diagnóstico' },
-    { key: 'M', label: 'Ver archivo TASKS.md en vivo' },
-    { key: '⌘ / Ctrl + ⇧ + N', label: 'Normalización segura de Markdown (Diff Git)' },
-    { key: 'ESC', label: 'Limpiar filtros activos o cerrar modal' },
+    { key: '⌘ / Ctrl + K', label: i18n._(msg`Abrir paleta de comandos y búsqueda global`) },
+    { key: 'N', label: i18n._(msg`Crear nueva tarea en modal rápido`) },
+    { key: 'V', label: i18n._(msg`Cambiar a vista espacial Canvas`) },
+    { key: 'K', label: i18n._(msg`Cambiar a vista de Tablero Kanban`) },
+    { key: 'A', label: i18n._(msg`Auto-organizar Canvas jerárquicamente (DAG)`) },
+    { key: '⌘ / Ctrl + S', label: i18n._(msg`Guardar y exportar archivo TASKS.md`) },
+    { key: 'T', label: i18n._(msg`Alternar tema claro / oscuro`) },
+    { key: 'P', label: i18n._(msg`Ver problemas de sintaxis y diagnóstico`) },
+    { key: 'M', label: i18n._(msg`Ver archivo TASKS.md en vivo`) },
+    { key: '⌘ / Ctrl + ⇧ + N', label: i18n._(msg`Normalización segura de Markdown (Diff Git)`) },
+    { key: 'ESC', label: i18n._(msg`Limpiar filtros activos o cerrar modal`) },
   ];
 
   return (
@@ -39,34 +42,34 @@ export const QuickGuideModal: React.FC<QuickGuideModalProps> = ({
         className="w-full sm:max-w-2xl bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-3xl sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-slide-up sm:animate-none max-h-[90vh] sm:max-h-[85vh] pb-safe sm:pb-0"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="w-10 h-1 bg-[var(--outline)] rounded mx-auto my-2 sm:hidden" />
+        <div id="div-quickguidemodal-1" className="w-10 h-1 bg-[var(--outline)] rounded mx-auto my-2 sm:hidden" />
 
         {/* Header */}
-        <div className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        <div id="div-quickguidemodal-2" className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
+          <div id="div-quickguidemodal-3" className="flex items-center gap-2">
             <span className="material-symbols-outlined text-[18px] text-[var(--primary)]">keyboard</span>
             <h2 id="guide-title" className="text-sm font-semibold text-[var(--on-surface)] font-sans">
-              Atajos de Teclado y Formato TASKS.md
+              {i18n._(msg`Atajos de Teclado y Formato TASKS.md`)}
             </h2>
           </div>
           <button
             type="button"
             onClick={onClose}
             className="btn-m3-icon w-7 h-7 cursor-pointer"
-            aria-label="Cerrar"
+            aria-label={i18n._(msg`Cerrar`)}
           >
             <span className="material-symbols-outlined text-[16px]">close</span>
           </button>
         </div>
 
         {/* Body */}
-        <div className="p-4 overflow-y-auto flex flex-col gap-3 text-xs">
+        <div id="div-quickguidemodal-4" className="p-4 overflow-y-auto flex flex-col gap-3 text-xs">
           {/* Section 1: Formato TASKS.md */}
-          <div className="rounded bg-[var(--surface)] border border-[var(--outline)] p-2.5 flex flex-col gap-1.5">
+          <div id="div-quickguidemodal-5" className="rounded bg-[var(--surface)] border border-[var(--outline)] p-2.5 flex flex-col gap-1.5">
             <span className="font-semibold text-xs text-[var(--on-surface)]">
-              Formato de tareas en TASKS.md
+              {i18n._(msg`Formato de tareas en TASKS.md`)}
             </span>
-            <div className="p-2 rounded bg-[var(--surface-container)] font-mono text-[11px] text-[var(--on-surface)] border border-[var(--outline)] leading-relaxed">
+            <div id="div-quickguidemodal-6" className="p-2 rounded bg-[var(--surface-container)] font-mono text-[11px] text-[var(--on-surface)] border border-[var(--outline)] leading-relaxed">
               ## Sección<br />
               - [ ] Tarea pendiente<br />
               &nbsp;&nbsp;id: auth-1<br />
@@ -76,11 +79,11 @@ export const QuickGuideModal: React.FC<QuickGuideModalProps> = ({
           </div>
 
           {/* Section 2: Atajos de Teclado */}
-          <div className="rounded bg-[var(--surface)] border border-[var(--outline)] p-2.5 flex flex-col gap-1.5">
+          <div id="div-quickguidemodal-7" className="rounded bg-[var(--surface)] border border-[var(--outline)] p-2.5 flex flex-col gap-1.5">
             <span className="font-semibold text-xs text-[var(--on-surface)]">
-              Atajos de teclado
+              {i18n._(msg`Atajos de teclado`)}
             </span>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+            <div id="div-quickguidemodal-8" className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
               {shortcuts.map((s) => (
                 <div
                   key={s.key}
@@ -97,13 +100,13 @@ export const QuickGuideModal: React.FC<QuickGuideModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="px-4 py-2.5 bg-[var(--surface)] border-t border-[var(--outline)] flex items-center justify-end">
+        <div id="div-quickguidemodal-9" className="px-4 py-2.5 bg-[var(--surface)] border-t border-[var(--outline)] flex items-center justify-end">
           <button
             type="button"
             onClick={onClose}
             className="btn-m3-primary px-4 py-1 text-xs cursor-pointer"
           >
-            Cerrar
+            {i18n._(msg`Cerrar`)}
           </button>
         </div>
       </div>

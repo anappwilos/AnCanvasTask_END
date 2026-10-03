@@ -1,4 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useLingui } from '@lingui/react';
+import { msg, plural } from '@lingui/core/macro';
 import { TaskPriority, TaskStatus } from '../shapes/TaskShapeUtil';
 
 export interface CommandPaletteTask {
@@ -88,6 +90,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
   onSelectTag,
   actions,
 }) => {
+  const { i18n } = useLingui();
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -119,7 +122,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
           items.push({
             type: 'recent-task',
             item: t,
-            groupHeader: i === 0 ? 'Tareas recientes' : undefined,
+            groupHeader: i === 0 ? i18n._(msg`Tareas recientes`) : undefined,
           })
         );
       }
@@ -129,7 +132,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         items.push({
           type: 'action',
           item: a,
-          groupHeader: i === 0 ? 'Acciones y Comandos' : undefined,
+          groupHeader: i === 0 ? i18n._(msg`Acciones y Comandos`) : undefined,
         })
       );
 
@@ -138,7 +141,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         items.push({
           type: 'section',
           item: s,
-          groupHeader: i === 0 ? 'Secciones (Grupos)' : undefined,
+          groupHeader: i === 0 ? i18n._(msg`Secciones (Grupos)`) : undefined,
         })
       );
 
@@ -147,7 +150,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         items.push({
           type: 'tag',
           item: tag,
-          groupHeader: i === 0 ? 'Etiquetas (#)' : undefined,
+          groupHeader: i === 0 ? i18n._(msg`Etiquetas (#)`) : undefined,
         })
       );
 
@@ -162,7 +165,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       items.push({
         type: 'action',
         item: a,
-        groupHeader: i === 0 ? 'Acciones' : undefined,
+        groupHeader: i === 0 ? i18n._(msg`Acciones`) : undefined,
       })
     );
 
@@ -181,7 +184,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       items.push({
         type: 'task',
         item: t,
-        groupHeader: i === 0 ? `Tareas (${matchingTasks.length})` : undefined,
+        groupHeader: i === 0 ? `${i18n._(msg`Tareas`)} (${matchingTasks.length})` : undefined,
       })
     );
 
@@ -194,7 +197,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       items.push({
         type: 'section',
         item: s,
-        groupHeader: i === 0 ? 'Secciones' : undefined,
+        groupHeader: i === 0 ? i18n._(msg`Secciones`) : undefined,
       })
     );
 
@@ -207,12 +210,12 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       items.push({
         type: 'tag',
         item: tag,
-        groupHeader: i === 0 ? 'Etiquetas' : undefined,
+        groupHeader: i === 0 ? i18n._(msg`Etiquetas`) : undefined,
       })
     );
 
     return items;
-  }, [query, tasks, sections, tags, recentTaskIds, actions]);
+  }, [query, tasks, sections, tags, recentTaskIds, actions, i18n]);
 
   // Keep selected index within bounds
   useEffect(() => {
@@ -281,7 +284,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Paleta de comandos y búsqueda global"
+      aria-label={i18n._(msg`Paleta de comandos y búsqueda global`)}
       onClick={onClose}
       className="fixed inset-0 z-50 bg-black/70 flex items-start justify-center p-3 sm:p-6 pt-16 sm:pt-20"
     >
@@ -290,7 +293,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         className="w-full max-w-xl bg-[var(--surface-container)] border border-[var(--outline)] rounded-lg shadow-xl overflow-hidden flex flex-col max-h-[82vh]"
       >
         {/* Search Input Header */}
-        <div className="flex items-center gap-2.5 px-3.5 py-2.5 border-b border-[var(--outline)] bg-[var(--surface)]">
+        <div id="div-commandpalette-1" className="flex items-center gap-2.5 px-3.5 py-2.5 border-b border-[var(--outline)] bg-[var(--surface)]">
           <span className="material-symbols-outlined text-[18px] text-[var(--primary)] shrink-0">
             search
           </span>
@@ -303,7 +306,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
               setSelectedIndex(0);
             }}
             onKeyDown={handleKeyDown}
-            placeholder="Escribe un comando o busca tareas, etiquetas (#), secciones (##)..."
+            placeholder={i18n._(msg`Escribe un comando o busca tareas, etiquetas (#), secciones (##)...`)}
             className="w-full bg-transparent text-[var(--on-surface)] placeholder:text-[var(--on-surface-variant)] text-xs sm:text-sm font-sans focus:outline-none"
           />
           {query && (
@@ -329,15 +332,15 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
           className="flex-1 overflow-y-auto p-2 flex flex-col gap-0.5 min-h-[220px]"
         >
           {results.length === 0 ? (
-            <div className="flex flex-col items-center justify-center p-8 text-center gap-2 text-[var(--on-surface-variant)]">
+            <div id="div-commandpalette-2" className="flex flex-col items-center justify-center p-8 text-center gap-2 text-[var(--on-surface-variant)]">
               <span className="material-symbols-outlined text-[32px] opacity-40">
                 search_off
               </span>
               <p className="text-xs font-medium">
-                No se encontraron resultados para &ldquo;{query}&rdquo;
+                {i18n._(msg`No se encontraron resultados para “${query}”`)}
               </p>
               <p className="text-[11px] text-[var(--on-surface-variant)]/80">
-                Prueba buscando por título, #ID, etiqueta o comando como &ldquo;Kanban&rdquo;
+                {i18n._(msg`Prueba buscando por título, #ID, etiqueta o comando como “Kanban”`)}
               </p>
             </div>
           ) : (
@@ -347,7 +350,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
               return (
                 <React.Fragment key={`${res.type}-${index}`}>
                   {res.groupHeader && (
-                    <div className="text-[10px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider px-3 pt-2.5 pb-1 select-none">
+                    <div id="div-commandpalette-3" className="text-[10px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider px-3 pt-2.5 pb-1 select-none">
                       {res.groupHeader}
                     </div>
                   )}
@@ -364,7 +367,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                           : 'text-[var(--on-surface)] hover:bg-[var(--surface-container-high)]'
                       }`}
                     >
-                      <div className="flex items-center gap-2.5 truncate">
+                      <div id="div-commandpalette-4" className="flex items-center gap-2.5 truncate">
                         <span
                           className={`material-symbols-outlined text-[18px] ${
                             isSelected ? 'text-[var(--on-primary)]' : 'text-sky-400'
@@ -400,7 +403,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                           : 'text-[var(--on-surface)] hover:bg-[var(--surface-container-high)]'
                       }`}
                     >
-                      <div className="flex items-center gap-2 truncate flex-1 min-w-0">
+                      <div id="div-commandpalette-5" className="flex items-center gap-2 truncate flex-1 min-w-0">
                         <span
                           className={`w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold shrink-0 border ${
                             res.item.completed
@@ -430,7 +433,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                         />
                       </div>
 
-                      <div className="flex items-center gap-1.5 shrink-0">
+                      <div id="div-commandpalette-6" className="flex items-center gap-1.5 shrink-0">
                         <span
                           className={`text-[10px] font-mono px-1.5 py-0.2 rounded border ${
                             isSelected
@@ -459,15 +462,15 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                           : 'text-[var(--on-surface)] hover:bg-[var(--surface-container-high)]'
                       }`}
                     >
-                      <div className="flex items-center gap-2">
+                      <div id="div-commandpalette-7" className="flex items-center gap-2">
                         <span className="material-symbols-outlined text-[16px] text-amber-400">
                           folder
                         </span>
                         <span>
-                          Filtrar por sección: <strong>## <HighlightText text={res.item} query={query} /></strong>
+                          {i18n._(msg`Filtrar por sección:`)} <strong>## <HighlightText text={res.item} query={query} /></strong>
                         </span>
                       </div>
-                      <span className="text-[10px] opacity-70">Sección</span>
+                      <span className="text-[10px] opacity-70">{i18n._(msg`Sección`)}</span>
                     </button>
                   )}
 
@@ -483,15 +486,15 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                           : 'text-[var(--on-surface)] hover:bg-[var(--surface-container-high)]'
                       }`}
                     >
-                      <div className="flex items-center gap-2">
+                      <div id="div-commandpalette-8" className="flex items-center gap-2">
                         <span className="material-symbols-outlined text-[16px] text-purple-400">
                           label
                         </span>
                         <span>
-                          Filtrar por etiqueta: <strong>#<HighlightText text={res.item} query={query} /></strong>
+                          {i18n._(msg`Filtrar por etiqueta:`)} <strong>#<HighlightText text={res.item} query={query} /></strong>
                         </span>
                       </div>
-                      <span className="text-[10px] opacity-70">Etiqueta</span>
+                      <span className="text-[10px] opacity-70">{i18n._(msg`Etiqueta`)}</span>
                     </button>
                   )}
                 </React.Fragment>
@@ -501,8 +504,8 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         </div>
 
         {/* Footer with keyboard hints */}
-        <div className="px-4 py-2 bg-[var(--surface)] border-t border-[var(--outline)] flex items-center justify-between text-[11px] text-[var(--on-surface-variant)]">
-          <div className="flex items-center gap-3">
+        <div id="div-commandpalette-9" className="px-4 py-2 bg-[var(--surface)] border-t border-[var(--outline)] flex items-center justify-between text-[11px] text-[var(--on-surface-variant)]">
+          <div id="div-commandpalette-10" className="flex items-center gap-3">
             <span className="flex items-center gap-1">
               <kbd className="px-1 py-0.2 rounded bg-[var(--surface-container)] border border-[var(--outline)] font-mono text-[10px]">
                 ↑
@@ -510,18 +513,18 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
               <kbd className="px-1 py-0.2 rounded bg-[var(--surface-container)] border border-[var(--outline)] font-mono text-[10px]">
                 ↓
               </kbd>
-              <span>Navegar</span>
+              <span>{i18n._(msg`Navegar`)}</span>
             </span>
             <span className="flex items-center gap-1">
               <kbd className="px-1.5 py-0.2 rounded bg-[var(--surface-container)] border border-[var(--outline)] font-mono text-[10px]">
                 ↵
               </kbd>
-              <span>Seleccionar</span>
+              <span>{i18n._(msg`Seleccionar`)}</span>
             </span>
           </div>
 
           <span className="text-[10px] font-mono">
-            {results.length} {results.length === 1 ? 'resultado' : 'resultados'}
+            {plural(results.length, { one: '# resultado', other: '# resultados' })}
           </span>
         </div>
       </div>
