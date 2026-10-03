@@ -12,6 +12,15 @@ if (typeof window !== 'undefined') {
   (window as unknown as { global: unknown }).global = window;
   (window as unknown as { process: unknown }).process =
     (window as unknown as { process: unknown }).process || { env: {} };
+
+  // Clean up any stale service workers from previous apps on this origin (e.g. localhost)
+  if ('serviceWorker' in navigator && import.meta.env.DEV) {
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      for (const registration of registrations) {
+        registration.unregister();
+      }
+    });
+  }
 }
 
 interface ErrorBoundaryProps {
