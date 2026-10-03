@@ -485,8 +485,8 @@ export function SafeMarkdownNormalizerModal({
               </div>
               {showInvisibles && (
                 <div className="text-[10px] text-[var(--on-surface-variant)] hidden sm:flex items-center gap-2">
-                  <span className="bg-[var(--surface)] px-1.5 py-0.2 rounded border border-[var(--outline)] font-mono">· espacio</span>
-                  <span className="bg-[var(--surface)] px-1.5 py-0.2 rounded border border-[var(--outline)] font-mono">→ tab</span>
+                  <span className="bg-[var(--surface)] px-1.5 py-0.2 rounded border border-[var(--outline)] font-mono">{t('common.space')}</span>
+                  <span className="bg-[var(--surface)] px-1.5 py-0.2 rounded border border-[var(--outline)] font-mono">{t('common.tab')}</span>
                 </div>
               )}
             </div>

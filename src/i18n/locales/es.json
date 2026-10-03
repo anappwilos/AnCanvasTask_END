@@ -35,7 +35,9 @@
     "confirmDelete": "Confirmar Eliminación",
     "dependentTasksAffected": "Tareas dependientes que quedarán afectadas",
     "copied": "¡Copiado!",
-    "copyMarkdown": "Copiar Markdown"
+    "copyMarkdown": "Copiar Markdown",
+    "space": "· espacio",
+    "tab": "→ tab"
   },
   "nav": {
     "toggleSidebar": "Alternar panel lateral",
@@ -60,7 +62,15 @@
     "allTags": "Todas las etiquetas",
     "commands": "Comandos",
     "modified": "modificado",
-    "upToDate": "al día"
+    "upToDate": "al día",
+    "tasksCount": "{{filtered}} de {{total}} tareas",
+    "searchQuery": "Búsqueda: “{{query}}”",
+    "statusFilter": "Estado: {{status}}",
+    "priorityFilter": "Prioridad: {{priority}}",
+    "sectionFilter": "Sección: ## {{section}}",
+    "tagFilter": "Etiqueta: #{{tag}}",
+    "onlyBlocked": "Solo bloqueadas",
+    "sortByFilter": "Orden: {{sort}}"
   },
   "workspace": {
     "title": "Workspaces",
@@ -80,7 +90,8 @@
     "deleteWorkspace": "Eliminar workspace",
     "syncSanity": "Sincronizar con Sanity",
     "openTasksMd": "Abrir TASKS.md",
-    "importExport": "Importar / Exportar (.md, JSON)"
+    "importExport": "Importar / Exportar (.md, JSON)",
+    "taskMd": "Task MD"
   },
   "explorer": {
     "files": "Documentos de Tareas",
@@ -257,5 +268,21 @@
     "tasksUpdated": "{{count}} tareas actualizadas",
     "tasksDeletedBulk": "{{count}} tareas eliminadas",
     "tasksRestoredBulk": "{{count}} tareas restauradas"
+  },
+  "sync": {
+    "title": "Sincronización & Detección de Overrides",
+    "dataset": "Dataset",
+    "project": "Proyecto",
+    "notConnected": "No conectado",
+    "analyzing": "Analizando...",
+    "reanalyze": "Re-analizar",
+    "totalAnalyzed": "Total Analizados",
+    "synced": "Sincronizados",
+    "localOverrides": "Local Overrides",
+    "remoteOverrides": "Remote Overrides",
+    "conflicts": "Conflictos",
+    "newUnique": "Nuevos/Únicos",
+    "smartSync": "Sincronización Inteligente",
+    "uploadAll": "Subir Todo (Override Remoto)"
   }
 }

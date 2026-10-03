@@ -133,7 +133,7 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
 
                     <div className="flex flex-col items-end shrink-0 text-[10px] font-mono text-[var(--on-surface-variant)]">
                       <span>{(ws.branches || []).length} {t('workspace.branches').toLowerCase()}</span>
-                      <span>{totalDocs} Task MD</span>
+                      <span>{totalDocs} {t('workspace.taskMd', 'Task MD')}</span>
                     </div>
                   </button>
                 );

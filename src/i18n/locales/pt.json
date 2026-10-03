@@ -25,7 +25,9 @@
     "proposal": "Proposta",
     "confirmRiskDeletions": "Confirmar {{count}} exclusões de risco",
     "suggestions": "Sugestões",
-    "finalPath": "Caminho final"
+    "finalPath": "Caminho final",
+    "space": "· espaço",
+    "tab": "→ tab"
   },
   "nav": {
     "toggleSidebar": "Alternar barra lateral",
@@ -62,7 +64,8 @@
     "current": "Workspace atual",
     "branchLabel": "Branch atual",
     "createWorkspace": "Criar workspace",
-    "deleteWorkspace": "Excluir workspace"
+    "deleteWorkspace": "Excluir workspace",
+    "taskMd": "Task MD"
   },
   "explorer": {
     "files": "Documentos de Tarefas",
@@ -231,5 +234,21 @@
     "tasksUpdated": "{{count}} tarefas atualizadas",
     "tasksDeletedBulk": "{{count}} tarefas excluídas",
     "tasksRestoredBulk": "{{count}} tarefas restauradas"
+  },
+  "sync": {
+    "title": "Sincronização e Detecção de Overrides",
+    "dataset": "Dataset",
+    "project": "Projeto",
+    "notConnected": "Não conectado",
+    "analyzing": "Analisando...",
+    "reanalyze": "Reanalisar",
+    "totalAnalyzed": "Total Analisado",
+    "synced": "Sincronizado",
+    "localOverrides": "Overrides Locais",
+    "remoteOverrides": "Overrides Remotos",
+    "conflicts": "Conflitos",
+    "newUnique": "Novos/Únicos",
+    "smartSync": "Sincronização Inteligente",
+    "uploadAll": "Enviar Tudo (Override Remoto)"
   }
 }

@@ -444,7 +444,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
 
               <span className="px-2 py-0.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px]">
                 <span className="sm:hidden">{filteredTasksCount}/{totalTasksCount}</span>
-                <span className="hidden sm:inline">{filteredTasksCount} de {totalTasksCount} tareas</span>
+                <span className="hidden sm:inline">{t('nav.tasksCount', { filtered: filteredTasksCount, total: totalTasksCount })}</span>
               </span>
             </>
           )}
@@ -460,7 +460,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
 
           {searchQuery.trim() && (
             <span className="px-2 py-0.5 rounded bg-[var(--surface)] border border-[var(--primary)]/60 text-[11px] text-[var(--primary)] font-medium flex items-center gap-1">
-              <span>Búsqueda: &ldquo;{searchQuery}&rdquo;</span>
+              <span>{t('nav.searchQuery', { query: searchQuery })}</span>
               <button
                 type="button"
                 onClick={() => onSearchChange('')}
@@ -474,7 +474,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
 
           {filters.status !== 'all' && (
             <span className="px-2 py-0.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] text-[var(--on-surface)] font-medium flex items-center gap-1">
-              <span>Estado: {filters.status.toUpperCase()}</span>
+              <span>{t('nav.statusFilter', { status: filters.status.toUpperCase() })}</span>
               <button
                 type="button"
                 onClick={() => onFilterChange({ ...filters, status: 'all' })}
@@ -487,7 +487,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
 
           {filters.priority !== 'all' && (
             <span className="px-2 py-0.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] text-[var(--on-surface)] font-mono font-medium flex items-center gap-1">
-              <span>Prioridad: {filters.priority}</span>
+              <span>{t('nav.priorityFilter', { priority: filters.priority })}</span>
               <button
                 type="button"
                 onClick={() => onFilterChange({ ...filters, priority: 'all' })}
@@ -500,7 +500,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
 
           {filters.section !== 'all' && (
             <span className="px-2 py-0.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] text-[var(--on-surface)] font-medium flex items-center gap-1">
-              <span>Sección: ## {filters.section}</span>
+              <span>{t('nav.sectionFilter', { section: filters.section })}</span>
               <button
                 type="button"
                 onClick={() => onFilterChange({ ...filters, section: 'all' })}
@@ -513,7 +513,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
 
           {filters.tag !== 'all' && (
             <span className="px-2 py-0.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] text-[var(--on-surface)] font-mono flex items-center gap-1">
-              <span>Etiqueta: #{filters.tag}</span>
+              <span>{t('nav.tagFilter', { tag: filters.tag })}</span>
               <button
                 type="button"
                 onClick={() => onFilterChange({ ...filters, tag: 'all' })}
@@ -526,7 +526,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
 
           {filters.onlyBlocked && (
             <span className="px-2 py-0.5 rounded bg-amber-950/40 border border-amber-800/60 text-[11px] text-amber-300 font-medium flex items-center gap-1">
-              <span>Solo bloqueadas</span>
+              <span>{t('nav.onlyBlocked')}</span>
               <button
                 type="button"
                 onClick={() => onFilterChange({ ...filters, onlyBlocked: false })}
@@ -539,7 +539,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
 
           {filters.sortBy !== 'default' && (
             <span className="px-2 py-0.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] text-[var(--on-surface-variant)] font-medium flex items-center gap-1">
-              <span>Orden: {filters.sortBy}</span>
+              <span>{t('nav.sortByFilter', { sort: filters.sortBy })}</span>
               <button
                 type="button"
                 onClick={() => onFilterChange({ ...filters, sortBy: 'default' })}

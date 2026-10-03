@@ -35,7 +35,9 @@
     "confirmDelete": "Confirm Deletion",
     "dependentTasksAffected": "Dependent tasks that will be affected",
     "copied": "Copied!",
-    "copyMarkdown": "Copy Markdown"
+    "copyMarkdown": "Copy Markdown",
+    "space": "· space",
+    "tab": "→ tab"
   },
   "nav": {
     "toggleSidebar": "Toggle sidebar",
@@ -60,7 +62,15 @@
     "allTags": "All tags",
     "commands": "Commands",
     "modified": "modified",
-    "upToDate": "up to date"
+    "upToDate": "up to date",
+    "tasksCount": "{{filtered}} of {{total}} tasks",
+    "searchQuery": "Search: “{{query}}”",
+    "statusFilter": "Status: {{status}}",
+    "priorityFilter": "Priority: {{priority}}",
+    "sectionFilter": "Section: ## {{section}}",
+    "tagFilter": "Tag: #{{tag}}",
+    "onlyBlocked": "Blocked only",
+    "sortByFilter": "Sort by: {{sort}}"
   },
   "workspace": {
     "title": "Workspaces",
@@ -80,7 +90,8 @@
     "deleteWorkspace": "Delete workspace",
     "syncSanity": "Sync with Sanity",
     "openTasksMd": "Open TASKS.md",
-    "importExport": "Import / Export (.md, JSON)"
+    "importExport": "Import / Export (.md, JSON)",
+    "taskMd": "Task MD"
   },
   "explorer": {
     "files": "Task Documents",
@@ -257,5 +268,21 @@
     "tasksUpdated": "{{count}} tasks updated",
     "tasksDeletedBulk": "{{count}} tasks deleted",
     "tasksRestoredBulk": "{{count}} tasks restored"
+  },
+  "sync": {
+    "title": "Sync & Overrides Detection",
+    "dataset": "Dataset",
+    "project": "Project",
+    "notConnected": "Not connected",
+    "analyzing": "Analyzing...",
+    "reanalyze": "Re-analyze",
+    "totalAnalyzed": "Total Analyzed",
+    "synced": "Synced",
+    "localOverrides": "Local Overrides",
+    "remoteOverrides": "Remote Overrides",
+    "conflicts": "Conflicts",
+    "newUnique": "New/Unique",
+    "smartSync": "Smart Sync",
+    "uploadAll": "Upload All (Remote Override)"
   }
 }

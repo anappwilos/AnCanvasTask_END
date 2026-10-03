@@ -25,7 +25,9 @@
     "proposal": "Proposal",
     "confirmRiskDeletions": "Confirm {{count}} risk deletions",
     "suggestions": "Suggestions",
-    "finalPath": "Final path"
+    "finalPath": "Final path",
+    "space": "· space",
+    "tab": "→ tab"
   },
   "nav": {
     "toggleSidebar": "Toggle sidebar",
@@ -56,7 +58,8 @@
     "current": "Current workspace",
     "branchLabel": "Current branch",
     "createWorkspace": "Create workspace",
-    "deleteWorkspace": "Delete workspace"
+    "deleteWorkspace": "Delete workspace",
+    "taskMd": "Task MD"
   },
   "explorer": {
     "files": "Task Documents",
@@ -225,5 +228,21 @@
     "tasksUpdated": "{{count}} tasks updated",
     "tasksDeletedBulk": "{{count}} tasks deleted",
     "tasksRestoredBulk": "{{count}} tasks restored"
+  },
+  "sync": {
+    "title": "Sync & Overrides Detection",
+    "dataset": "Dataset",
+    "project": "Project",
+    "notConnected": "Not connected",
+    "analyzing": "Analyzing...",
+    "reanalyze": "Re-analyze",
+    "totalAnalyzed": "Total Analyzed",
+    "synced": "Synced",
+    "localOverrides": "Local Overrides",
+    "remoteOverrides": "Remote Overrides",
+    "conflicts": "Conflicts",
+    "newUnique": "New/Unique",
+    "smartSync": "Smart Sync",
+    "uploadAll": "Upload All (Remote Override)"
   }
 }
