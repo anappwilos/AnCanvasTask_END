@@ -126,14 +126,14 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                   type="button"
                   aria-expanded={isFilterPopoverOpen}
                   aria-haspopup="true"
-                  aria-label="Abrir panel de filtros y ordenación"
+                  aria-label={i18n._(msg`Abrir panel de filtros y ordenación`)}
                   onClick={() => setIsFilterPopoverOpen(!isFilterPopoverOpen)}
                   className={`btn-m3-secondary px-2.5 sm:px-3 py-1.5 text-xs font-medium cursor-pointer ${
                     activeFiltersCount > (searchQuery ? 1 : 0)
                       ? 'border-[var(--primary)] text-[var(--primary)] bg-[var(--primary-container)]/20'
                       : ''
                   }`}
-                  title="Abrir panel de filtros y ordenación"
+                  title={i18n._(msg`Abrir panel de filtros y ordenación`)}
                 >
                   <span className="material-symbols-outlined text-[16px]">tune</span>
                   <span className="hidden xs:inline">{i18n._(msg`Filtros`)}</span>
@@ -167,7 +167,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                     {/* 1. Estado */}
                     <div id="div-filterbar-6" className="flex flex-col gap-1">
                       <label className="text-[10px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
-                        Estado
+                        {i18n._(msg`Estado`)}
                       </label>
                       <select
                         value={filters.status}
@@ -187,7 +187,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                     {/* 2. Prioridad */}
                     <div id="div-filterbar-7" className="flex flex-col gap-1">
                       <label className="text-[10px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
-                        Prioridad
+                        {i18n._(msg`Prioridad`)}
                       </label>
                       <select
                         value={filters.priority}
@@ -208,7 +208,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                     {availableSections.length > 0 && (
                       <div id="div-filterbar-8" className="flex flex-col gap-1">
                         <label className="text-[10px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
-                          Sección (Grupo)
+                          {i18n._(msg`Sección (Grupo)`)}
                         </label>
                         <select
                           value={filters.section}
@@ -231,7 +231,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                     {availableTags.length > 0 && (
                       <div id="div-filterbar-9" className="flex flex-col gap-1">
                         <label className="text-[10px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
-                          Etiqueta
+                          {i18n._(msg`Etiqueta`)}
                         </label>
                         <select
                           value={filters.tag}
@@ -261,14 +261,14 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                         className="w-3.5 h-3.5 rounded text-[var(--primary)] focus:ring-0 cursor-pointer"
                       />
                       <span className="text-xs text-[var(--on-surface)] font-medium">
-                        Mostrar únicamente tareas bloqueadas
+                        {i18n._(msg`Mostrar únicamente tareas bloqueadas`)}
                       </span>
                     </label>
 
                     {/* 6. Ordenación */}
                     <div id="div-filterbar-10" className="flex flex-col gap-1 pt-1 border-t border-[var(--outline)]">
                       <label className="text-[10px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
-                        Ordenar por
+                        {i18n._(msg`Ordenar por`)}
                       </label>
                       <select
                         value={filters.sortBy}
@@ -295,7 +295,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                         }}
                         className="btn-m3-text py-1 text-[11px] text-[var(--on-surface-variant)] hover:text-rose-400 cursor-pointer"
                       >
-                        Restablecer
+                        {i18n._(msg`Restablecer`)}
                       </button>
 
                       <button
@@ -303,7 +303,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                         onClick={() => setIsFilterPopoverOpen(false)}
                         className="btn-m3-primary px-3 py-1 text-xs cursor-pointer"
                       >
-                        Listo
+                        {i18n._(msg`Listo`)}
                       </button>
                     </div>
                   </div>
@@ -315,7 +315,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                 type="button"
                 onClick={onOpenCommandPalette}
                 className="btn-m3-secondary px-3 py-1.5 text-xs cursor-pointer hidden sm:flex items-center gap-1.5 shrink-0"
-                title="Abrir paleta de comandos y búsqueda global (Ctrl/Cmd + K)"
+                title={i18n._(msg`Abrir paleta de comandos y búsqueda global (Ctrl/Cmd + K)`)}
               >
                 <span className="material-symbols-outlined text-[16px] text-sky-400">terminal</span>
                 <span>{i18n._(msg`Comandos`)}</span>
@@ -331,7 +331,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                   disabled={isAutoOrganizing}
                   onClick={onAutoOrganize}
                   className="btn-m3-secondary hidden md:inline-flex px-2.5 py-1 text-xs cursor-pointer text-sky-400 border-sky-800/60 bg-sky-950/30 shrink-0"
-                  title="Organizar automáticamente dependencias y grupos jerárquicamente (DAG)"
+                  title={i18n._(msg`Organizar automáticamente dependencias y grupos jerárquicamente (DAG)`)}
                 >
                   <span
                     className={`material-symbols-outlined text-[15px] ${
@@ -341,7 +341,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                     {isAutoOrganizing ? 'progress_activity' : 'account_tree'}
                   </span>
                   <span className="hidden lg:inline">
-                    {isAutoOrganizing ? 'Organizando...' : 'Auto organizar'}
+                    {isAutoOrganizing ? i18n._(msg`Organizando...`) : i18n._(msg`Auto organizar`)}
                   </span>
                 </button>
               )}
@@ -357,7 +357,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
               type="text"
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
-              placeholder="Buscar..."
+              placeholder={i18n._(msg`Buscar...`)}
               className="w-full bg-[var(--surface)] text-[var(--on-surface)] placeholder:text-[var(--on-surface-variant)] border border-[var(--outline)] rounded pl-6 pr-5 py-1 text-xs font-sans focus:outline-none focus:border-[var(--primary)]"
             />
             {searchQuery && (
@@ -381,7 +381,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                   type="button"
                   onClick={onOpenSanityModal}
                   className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-mono border transition-colors cursor-pointer bg-[var(--surface)] border-[var(--outline)] text-[var(--on-surface)] hover:bg-[var(--surface-container-high)]"
-                  title="Estado y configuración de Sanity"
+                  title={i18n._(msg`Estado y configuración de Sanity`)}
                 >
                   <span
                     className={`w-2 h-2 rounded-full ${
@@ -396,7 +396,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                     {syncStatus === 'synced'
                       ? 'Sanity Sync'
                       : syncStatus === 'saving'
-                      ? 'Guardando...'
+                      ? i18n._(msg`Guardando...`)
                       : 'Sanity Local'}
                   </span>
                 </button>
@@ -407,7 +407,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                   type="button"
                   onClick={onOpenSyncOverrideModal}
                   className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--outline)] hover:border-[var(--primary)] hover:bg-[var(--surface-container-high)] transition-colors cursor-pointer shadow-xs"
-                  title="Sincronizar y detectar diferencias, overrides y conflictos con Sanity Cloud"
+                  title={i18n._(msg`Sincronizar y detectar diferencias, overrides y conflictos con Sanity Cloud`)}
                 >
                   <span className="material-symbols-outlined text-[15px] text-amber-400">
                     sync_problem
@@ -422,7 +422,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                 <div
                   className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] font-mono truncate shadow-xs cursor-pointer hover:bg-[var(--surface-container-high)] transition-colors"
                   onClick={onRenameDocument}
-                  title={`Documento activo: ${currentFileName} (Clic para renombrar/mover)`}
+                  title={i18n._(msg`Documento activo: ${currentFileName} (Clic para renombrar/mover)`)}
                 >
                   <span className="material-symbols-outlined text-[14px] text-sky-400">
                     description
@@ -457,7 +457,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
       {hasActiveFilters && (
         <div id="div-filterbar-15" className="flex items-center gap-1.5 flex-wrap pt-1 border-t border-[var(--outline)]">
           <span className="text-[11px] text-[var(--on-surface-variant)] font-medium">
-            Filtros activos:
+            {i18n._(msg`Filtros activos:`)}
           </span>
 
           {searchQuery.trim() && (
@@ -467,7 +467,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                 type="button"
                 onClick={() => onSearchChange('')}
                 className="hover:text-rose-400 cursor-pointer font-bold"
-                title="Quitar búsqueda"
+                title={i18n._(msg`Quitar búsqueda`)}
               >
                 ×
               </button>
@@ -558,7 +558,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             onClick={onResetFilters}
             className="text-[11px] text-[var(--primary)] hover:underline ml-1 cursor-pointer font-medium"
           >
-            Limpiar todos
+            {i18n._(msg`Limpiar todos`)}
           </button>
         </div>
       )}

@@ -2714,8 +2714,8 @@ export default function App() {
             type="button"
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             className="btn-m3-icon shrink-0 cursor-pointer"
-            title={isSidebarOpen ? 'Ocultar panel lateral' : 'Mostrar panel lateral'}
-            aria-label="Toggle Sidebar"
+            title={isSidebarOpen ? i18n._(msg`Ocultar panel lateral`) : i18n._(msg`Mostrar panel lateral`)}
+            aria-label={i18n._(msg`Alternar panel lateral`)}
           >
             <span className="material-symbols-outlined text-[20px]">
               {isSidebarOpen ? 'menu_open' : 'menu'}
@@ -2812,7 +2812,7 @@ export default function App() {
                 type="button"
                 onClick={() => setSearchQuery('')}
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] cursor-pointer"
-                title="Limpiar búsqueda"
+                title={i18n._(msg`Limpiar búsqueda`)}
               >
                 <span className="material-symbols-outlined text-[14px]">close</span>
               </button>
@@ -2915,7 +2915,7 @@ export default function App() {
             type="button"
             onClick={() => setIsMobileMenuOpen(true)}
             className="btn-m3-icon sm:hidden shrink-0 cursor-pointer"
-            aria-label="Abrir menú"
+            aria-label={i18n._(msg`Abrir menú`)}
           >
             <span className="material-symbols-outlined text-[20px]">more_vert</span>
           </button>
@@ -2946,7 +2946,7 @@ export default function App() {
                 type="button"
                 onClick={() => setIsSidebarOpen(false)}
                 className="btn-m3-icon w-7 h-7 cursor-pointer"
-                aria-label="Cerrar explorador"
+                aria-label={i18n._(msg`Cerrar explorador`)}
               >
                 <span className="material-symbols-outlined text-[16px]">close</span>
               </button>
@@ -3003,7 +3003,7 @@ export default function App() {
                   type="button"
                   onClick={handleOpenFilePicker}
                   className="btn-m3-secondary flex-1 py-1.5 text-xs cursor-pointer"
-                  title="Abrir TASKS.md desde el equipo"
+                  title={i18n._(msg`Abrir TASKS.md desde el equipo`)}
                 >
                   <span className="material-symbols-outlined text-[16px]">folder_open</span>
                   <span>{i18n._(msg`Importar .md`)}</span>
@@ -3012,7 +3012,7 @@ export default function App() {
                   type="button"
                   onClick={() => setIsImportExportOpen(true)}
                   className="btn-m3-secondary px-2.5 py-1.5 text-xs cursor-pointer"
-                  title="Importar o Exportar TASKS.md / JSON"
+                  title={i18n._(msg`Importar o Exportar TASKS.md / JSON`)}
                 >
                   <span className="material-symbols-outlined text-[16px]">sync_alt</span>
                 </button>
@@ -3021,7 +3021,7 @@ export default function App() {
               {/* Quick Filters */}
               <div id="div-app-14" className="flex flex-col gap-1">
                 <span className="text-[11px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider px-2">
-                  Filtros & Estados
+                  {i18n._(msg`Filtros & Estados`)}
                 </span>
 
                 <button
@@ -3134,7 +3134,7 @@ export default function App() {
               <div id="div-app-20" className="flex flex-col gap-1">
                 <div id="div-app-21" className="flex items-center justify-between px-2">
                   <span className="text-[11px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
-                    Secciones ({parsedGroups.length})
+                    {i18n._(msg`Secciones`)} ({parsedGroups.length})
                   </span>
                   {taskFilters.section !== 'all' && (
                     <button
@@ -3142,7 +3142,7 @@ export default function App() {
                       onClick={() => setTaskFilters((prev) => ({ ...prev, section: 'all' }))}
                       className="text-[10px] text-[var(--primary)] hover:underline cursor-pointer"
                     >
-                      Ver todas
+                      {i18n._(msg`Ver todas`)}
                     </button>
                   )}
                 </div>
@@ -3285,8 +3285,8 @@ export default function App() {
                       type="button"
                       onClick={handleZoomOut}
                       className="btn-m3-icon w-7 h-7 cursor-pointer"
-                      title="Alejar zoom (Zoom Out)"
-                      aria-label="Zoom out"
+                      title={i18n._(msg`Alejar zoom (Zoom Out)`)}
+                      aria-label={i18n._(msg`Alejar zoom`)}
                     >
                       <span className="material-symbols-outlined text-[16px]">remove</span>
                     </button>
@@ -3295,7 +3295,7 @@ export default function App() {
                       type="button"
                       onClick={handleResetZoom}
                       className="px-2 py-0.5 text-xs font-mono font-medium text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] rounded-full transition-colors cursor-pointer"
-                      title="Clic para restablecer zoom al 100%"
+                      title={i18n._(msg`Clic para restablecer zoom al 100%`)}
                     >
                       {canvasZoom}%
                     </button>
@@ -3304,8 +3304,8 @@ export default function App() {
                       type="button"
                       onClick={handleZoomIn}
                       className="btn-m3-icon w-7 h-7 cursor-pointer"
-                      title="Acercar zoom (Zoom In)"
-                      aria-label="Zoom in"
+                      title={i18n._(msg`Acercar zoom (Zoom In)`)}
+                      aria-label={i18n._(msg`Acercar zoom`)}
                     >
                       <span className="material-symbols-outlined text-[16px]">add</span>
                     </button>
@@ -3316,8 +3316,8 @@ export default function App() {
                       type="button"
                       onClick={handleZoomToFit}
                       className="btn-m3-icon w-7 h-7 cursor-pointer"
-                      title="Ajustar zoom al contenido (Zoom to Fit)"
-                      aria-label="Zoom to fit"
+                      title={i18n._(msg`Ajustar zoom al contenido (Zoom to Fit)`)}
+                      aria-label={i18n._(msg`Ajustar zoom`)}
                     >
                       <span className="material-symbols-outlined text-[16px]">fit_screen</span>
                     </button>
@@ -3326,8 +3326,8 @@ export default function App() {
                       type="button"
                       onClick={() => setIsAutoLayoutConfirmOpen(true)}
                       className="btn-m3-icon w-7 h-7 cursor-pointer text-sky-400"
-                      title="Auto organizar canvas jerárquicamente (DAG)"
-                      aria-label="Auto organizar"
+                      title={i18n._(msg`Auto organizar canvas jerárquicamente (DAG)`)}
+                      aria-label={i18n._(msg`Auto organizar`)}
                     >
                       <span className="material-symbols-outlined text-[16px]">account_tree</span>
                     </button>
@@ -3341,10 +3341,10 @@ export default function App() {
                           <span className="material-symbols-outlined text-[22px]">grid_view</span>
                         </div>
                         <h3 className="text-sm font-semibold text-[var(--on-surface)] font-sans mb-1">
-                          Lienzo vacío
+                          {i18n._(msg`Lienzo vacío`)}
                         </h3>
                         <p className="text-xs text-[var(--on-surface-variant)] mb-4 leading-relaxed">
-                          No hay tareas en este archivo TASKS.md. Comienza añadiendo una tarea o carga un proyecto de ejemplo.
+                          {i18n._(msg`No hay tareas en este archivo TASKS.md. Comienza añadiendo una tarea o carga un proyecto de ejemplo.`)}
                         </p>
                         <div id="div-app-29" className="flex items-center gap-2 flex-wrap justify-center">
                           <button
@@ -3363,7 +3363,7 @@ export default function App() {
                           <button
                             type="button"
                             onClick={handleLoadSampleProject}
-                            className="btn-m3-secondary px-3 py-1.5 text-xs cursor-pointer"
+                            className="btn-m3-secondary px-3.5 py-1.5 text-xs cursor-pointer"
                           >
                             <span className="material-symbols-outlined text-[15px]">refresh</span>
                             <span>{i18n._(msg`Cargar ejemplo`)}</span>
@@ -3379,7 +3379,7 @@ export default function App() {
                       <div id="div-app-31" className="flex items-center gap-1.5 pr-2 border-r border-[var(--outline)] shrink-0">
                         <span className="w-2 h-2 rounded bg-[var(--primary)]" />
                         <span className="text-xs font-mono font-medium text-[var(--on-surface)]">
-                          {selectedTaskIdsOnCanvas.length} seleccionadas
+                          {selectedTaskIdsOnCanvas.length} {i18n._(msg`seleccionadas`)}
                         </span>
                       </div>
 
@@ -3392,7 +3392,7 @@ export default function App() {
                           })
                         }
                         className="btn-m3-secondary px-2 py-1 text-xs text-emerald-400 border-emerald-800/60 bg-emerald-950/30 cursor-pointer shrink-0"
-                        title="Marcar seleccionadas como completadas"
+                        title={i18n._(msg`Marcar seleccionadas como completadas`)}
                       >
                         <span className="material-symbols-outlined text-[15px]">check_circle</span>
                         <span className="hidden sm:inline">{i18n._(msg`Completar`)}</span>
@@ -3407,7 +3407,7 @@ export default function App() {
                           })
                         }
                         className="btn-m3-secondary px-2 py-1 text-xs text-amber-400 border-amber-800/60 bg-amber-950/30 cursor-pointer shrink-0"
-                        title="Marcar seleccionadas como pendientes"
+                        title={i18n._(msg`Marcar seleccionadas como pendientes`)}
                       >
                         <span className="material-symbols-outlined text-[15px]">pending</span>
                         <span className="hidden sm:inline">{i18n._(msg`Pendiente`)}</span>
@@ -3423,7 +3423,7 @@ export default function App() {
                               handleBatchUpdateTasksFromKanban(selectedTaskIdsOnCanvas, { priority: p })
                             }
                             className="px-1.5 py-0.5 text-[10px] font-mono font-medium rounded border border-[var(--outline)] text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer"
-                            title={`Establecer prioridad ${p}`}
+                            title={i18n._(msg`Establecer prioridad ${p}`)}
                           >
                             {p}
                           </button>
@@ -3436,7 +3436,7 @@ export default function App() {
                           handleBatchDeleteTasksFromKanban(selectedTaskIdsOnCanvas);
                         }}
                         className="btn-m3-secondary px-2 py-1 text-xs text-[var(--error)] border-rose-800/60 bg-rose-950/30 cursor-pointer shrink-0"
-                        title="Eliminar tareas seleccionadas"
+                        title={i18n._(msg`Eliminar tareas seleccionadas`)}
                       >
                         <span className="material-symbols-outlined text-[15px]">delete</span>
                         <span className="hidden sm:inline">{i18n._(msg`Eliminar`)}</span>
@@ -3452,7 +3452,7 @@ export default function App() {
                           setSelectedTaskShapeId(null);
                         }}
                         className="btn-m3-icon w-6 h-6 shrink-0 cursor-pointer"
-                        title="Deseleccionar"
+                        title={i18n._(msg`Deseleccionar`)}
                       >
                         <span className="material-symbols-outlined text-[14px]">close</span>
                       </button>
@@ -3517,10 +3517,10 @@ export default function App() {
                     <span className="material-symbols-outlined text-[32px]">upload_file</span>
                   </div>
                   <h3 className="text-base font-semibold text-white font-sans mb-1">
-                    Suelta tu archivo TASKS.md aquí
+                    {i18n._(msg`Suelta tu archivo TASKS.md aquí`)}
                   </h3>
                   <p className="text-xs text-slate-400 font-sans">
-                    Se parseará automáticamente manteniendo coordenadas y jerarquía
+                    {i18n._(msg`Se parseará automáticamente manteniendo coordenadas y jerarquía`)}
                   </p>
                 </div>
               )}
@@ -3532,7 +3532,7 @@ export default function App() {
                 onPointerDown={handleSplitterPointerDown}
                 onDoubleClick={() => handleSetSplitRatio(50)}
                 className="h-2 w-full md:h-full md:w-2 bg-[var(--outline)] hover:bg-[var(--primary)] cursor-row-resize md:cursor-col-resize transition-colors shrink-0 relative flex items-center justify-center group select-none z-20"
-                title="Arrastra para ajustar el visor en tiempo real (Doble clic para 50%)"
+                title={i18n._(msg`Arrastra para ajustar el visor en tiempo real (Doble clic para 50%)`)}
               >
                 <div id="div-app-35" className="w-8 h-1 md:w-1 md:h-8 rounded-full bg-[var(--on-surface-variant)] group-hover:bg-[var(--on-primary)] transition-colors" />
               </div>
@@ -3574,8 +3574,8 @@ export default function App() {
               setIsNewTaskModalOpen(true);
             }}
             className="absolute bottom-16 sm:bottom-6 right-6 z-30 w-12 h-12 rounded-full bg-[var(--primary)] text-[var(--on-primary)] shadow-2xl flex items-center justify-center cursor-pointer hover:scale-105 active:scale-95 transition-transform select-none"
-            title="Crear nueva tarea (N)"
-            aria-label="Crear nueva tarea"
+            title={i18n._(msg`Crear nueva tarea (N)`)}
+            aria-label={i18n._(msg`Crear nueva tarea`)}
           >
             <span className="material-symbols-outlined text-[26px]">add</span>
           </button>
@@ -3635,7 +3635,7 @@ export default function App() {
 
       {/* Mobile Bottom Navigation Bar (Docked, reliable, no button superposition) */}
       <nav
-        aria-label="Acciones rápidas móviles"
+        aria-label={i18n._(msg`Acciones rápidas móviles`)}
         className="sm:hidden h-14 bg-[var(--surface-container)]/98 border-t border-[var(--outline)] shrink-0 z-30 grid grid-cols-5 gap-1 px-1.5 py-1 pb-[calc(0.25rem+env(safe-area-inset-bottom,0px))] backdrop-blur-md select-none"
       >
         <button
@@ -3680,7 +3680,7 @@ export default function App() {
             type="button"
             onClick={() => setIsAutoLayoutConfirmOpen(true)}
             className="flex flex-col items-center justify-center py-1 px-0.5 rounded-lg text-[10px] text-sky-400 hover:text-sky-300 transition-colors cursor-pointer overflow-hidden"
-            title="Auto organizar tareas"
+            title={i18n._(msg`Auto organizar tareas`)}
           >
             <span className="material-symbols-outlined text-[18px]">account_tree</span>
             <span className="truncate w-full text-center leading-none mt-0.5">{i18n._(msg`Auto-ordenar`)}</span>
@@ -3690,7 +3690,7 @@ export default function App() {
             type="button"
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             className="flex flex-col items-center justify-center py-1 px-0.5 rounded-lg text-[10px] text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] transition-colors cursor-pointer overflow-hidden"
-            title="Filtros y documentos"
+            title={i18n._(msg`Filtros y documentos`)}
           >
             <span className="material-symbols-outlined text-[18px]">filter_list</span>
             <span className="truncate w-full text-center leading-none mt-0.5">{i18n._(msg`Filtros`)}</span>
@@ -3700,7 +3700,7 @@ export default function App() {
             type="button"
             onClick={() => setIsSyncOverrideModalOpen(true)}
             className="flex flex-col items-center justify-center py-1 px-0.5 rounded-lg text-[10px] text-amber-400 hover:text-amber-300 transition-colors cursor-pointer overflow-hidden"
-            title="Sincronizar con Sanity"
+            title={i18n._(msg`Sincronizar con Sanity`)}
           >
             <span className="material-symbols-outlined text-[18px]">sync_problem</span>
             <span className="truncate w-full text-center leading-none mt-0.5">{i18n._(msg`Sincronizar`)}</span>
@@ -3746,17 +3746,17 @@ export default function App() {
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
-            aria-label="Opciones y herramientas"
+            aria-label={i18n._(msg`Opciones y herramientas`)}
           >
             <div id="div-app-36" className="w-12 h-1 bg-[var(--outline)] rounded-full mx-auto" />
 
             <div id="div-app-37" className="flex items-center justify-between border-b border-[var(--outline)] pb-2.5">
               <div>
                 <h2 className="text-sm font-semibold text-[var(--on-surface)] font-sans">
-                  Menú de Opciones
+                  {i18n._(msg`Menú de Opciones`)}
                 </h2>
                 <p className="text-xs text-[var(--on-surface-variant)] font-mono">
-                  {currentFileName} · {parsedStats.taskCount} tareas
+                  {currentFileName} · {parsedStats.taskCount} {i18n._(msg`tareas`)}
                 </p>
               </div>
               <button
@@ -3848,11 +3848,11 @@ export default function App() {
               >
                 <div id="div-app-43" className="flex items-center gap-2.5">
                   <span className="material-symbols-outlined text-[18px] text-emerald-400">save</span>
-                  <span>Guardar {currentFileName}</span>
+                  <span>{i18n._(msg`Guardar`)} {currentFileName}</span>
                 </div>
                 {hasUnsavedChanges && (
                   <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px]">
-                    Modificado
+                    {i18n._(msg`Modificado`)}
                   </span>
                 )}
               </button>
@@ -3888,7 +3888,7 @@ export default function App() {
                   <span className="material-symbols-outlined text-[18px]">
                     {effectiveTheme === 'dark' ? 'light_mode' : 'dark_mode'}
                   </span>
-                  <span>Tema: {effectiveTheme === 'dark' ? 'Oscuro' : 'Claro'}</span>
+                  <span>{i18n._(msg`Tema:`)} {effectiveTheme === 'dark' ? i18n._(msg`Oscuro`) : i18n._(msg`Claro`)}</span>
                 </div>
                 <span className="text-[10px] text-[var(--on-surface-variant)]">{i18n._(msg`Cambiar`)}</span>
               </button>
@@ -3995,7 +3995,7 @@ export default function App() {
                   <span>{i18n._(msg`Ver incidencias detectadas`)}</span>
                 </h2>
                 <p className="text-xs text-[var(--on-surface-variant)] mt-0.5 font-sans">
-                  El editor previene la corrupción manteniendo una única fuente de verdad.
+                  {i18n._(msg`El editor previene la corrupción manteniendo una única fuente de verdad.`)}
                 </p>
               </div>
               <button
@@ -4008,7 +4008,7 @@ export default function App() {
             </div>
 
             <div id="div-app-54" className="px-4 py-2 bg-[var(--surface)] border-b border-[var(--outline)] flex items-center gap-4 text-xs font-mono overflow-x-auto">
-              <span>Total: <strong className="text-[var(--on-surface)]">{validationReport.issues.length}</strong></span>
+              <span>{i18n._(msg`Total:`)} <strong className="text-[var(--on-surface)]">{validationReport.issues.length}</strong></span>
               <span className="text-rose-400">{i18n._(msg`Errores`)}: <strong>{validationReport.errorCount}</strong></span>
               <span className="text-amber-400">{i18n._(msg`Avisos`)}: <strong>{validationReport.warningCount}</strong></span>
             </div>
@@ -4042,7 +4042,7 @@ export default function App() {
                         onClick={() => handleFocusTaskOnCanvas(issue.taskId, issue.taskTitle)}
                         className="btn-m3-secondary px-2.5 py-1 text-[11px] cursor-pointer"
                       >
-                        Localizar
+                        {i18n._(msg`Localizar`)}
                       </button>
                     )}
                   </div>
@@ -4056,7 +4056,7 @@ export default function App() {
                 onClick={() => setIsProblemsModalOpen(false)}
                 className="btn-m3-secondary px-3.5 py-1 text-xs cursor-pointer"
               >
-                Cerrar
+                {i18n._(msg`Cerrar`)}
               </button>
             </div>
           </div>
@@ -4094,10 +4094,10 @@ export default function App() {
 
             <div id="div-app-63" className="p-4 flex flex-col gap-2.5 text-xs text-[var(--on-surface-variant)] leading-relaxed">
               <p>
-                Esta acción organizará todas las tarjetas y secciones en un grafo jerárquico según sus dependencias <code className="text-[var(--primary)] font-mono">blockedBy</code>.
+                {i18n._(msg`Esta acción organizará todas las tarjetas y secciones en un grafo jerárquico según sus dependencias`)} <code className="text-[var(--primary)] font-mono">blockedBy</code>.
               </p>
               <div id="div-app-64" className="p-2.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] font-mono">
-                • {parsedStats.taskCount} tareas en {parsedStats.groupCount} secciones
+                • {parsedStats.taskCount} {i18n._(msg`tareas en`)} {parsedStats.groupCount} {i18n._(msg`secciones`)}
               </div>
             </div>
 
@@ -4107,14 +4107,14 @@ export default function App() {
                 onClick={() => setIsAutoLayoutConfirmOpen(false)}
                 className="btn-m3-text px-3 py-1 text-xs cursor-pointer"
               >
-                Cancelar
+                {i18n._(msg`Cancelar`)}
               </button>
               <button
                 type="button"
                 onClick={handleExecuteAutoLayout}
                 className="btn-m3-primary px-3.5 py-1 text-xs cursor-pointer shadow-sm"
               >
-                Auto organizar
+                {i18n._(msg`Auto organizar`)}
               </button>
             </div>
           </div>
@@ -4158,7 +4158,7 @@ export default function App() {
                   autoFocus
                   value={newTaskTitle}
                   onChange={(e) => setNewTaskTitle(e.target.value)}
-                  placeholder="ej. Crear recuperación de contraseña"
+                  placeholder={i18n._(msg`ej. Crear recuperación de contraseña`)}
                   className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-2.5 py-1.5 text-xs font-sans text-[var(--on-surface)] focus:outline-none"
                 />
               </div>
@@ -4196,7 +4196,7 @@ export default function App() {
                     onClick={() => setIsCustomGroup(!isCustomGroup)}
                     className="text-[11px] text-[var(--primary)] hover:underline cursor-pointer"
                   >
-                    {isCustomGroup ? 'Elegir existente' : '+ Nueva sección'}
+                    {isCustomGroup ? i18n._(msg`Elegir existente`) : i18n._(msg`+ Nueva sección`)}
                   </button>
                 </div>
 
@@ -4205,7 +4205,7 @@ export default function App() {
                     type="text"
                     value={customGroupInput}
                     onChange={(e) => setCustomGroupInput(e.target.value)}
-                    placeholder="ej. Notificaciones"
+                    placeholder={i18n._(msg`ej. Notificaciones`)}
                     className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-2.5 py-1.5 text-xs font-sans text-[var(--on-surface)] focus:outline-none"
                   />
                 ) : (
@@ -4229,14 +4229,14 @@ export default function App() {
                   onClick={() => setIsNewTaskModalOpen(false)}
                   className="btn-m3-text px-3 py-1 text-xs cursor-pointer"
                 >
-                  Cancelar
+                  {i18n._(msg`Cancelar`)}
                 </button>
                 <button
                   type="submit"
                   disabled={!newTaskTitle.trim()}
                   className="btn-m3-primary px-4 py-1 text-xs cursor-pointer shadow-sm"
                 >
-                  Crear Tarea
+                  {i18n._(msg`Crear Tarea`)}
                 </button>
               </div>
             </form>
@@ -4284,7 +4284,7 @@ export default function App() {
                   <ul className="list-disc pl-4 space-y-0.5">
                     {deleteWarningState.dependents.map((dep) => (
                       <li key={dep.taskId}>
-                        #{dep.taskId} ({dep.title}) en <em>{dep.groupTitle}</em>
+                        #{dep.taskId} ({dep.title}) {i18n._(msg`en`)} <em>{dep.groupTitle}</em>
                       </li>
                     ))}
                   </ul>

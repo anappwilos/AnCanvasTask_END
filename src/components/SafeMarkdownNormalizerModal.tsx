@@ -132,7 +132,7 @@ export function SafeMarkdownNormalizerModal({
       await navigator.clipboard.writeText(effectiveMarkdown);
       onShowToast(i18n._(msg`¡Copiado!`), 'success');
     } catch {
-      onShowToast('Error al copiar', 'error');
+      onShowToast(i18n._(msg`Error al copiar`), 'error');
     }
   }, [effectiveMarkdown, onShowToast]);
 
@@ -189,7 +189,7 @@ export function SafeMarkdownNormalizerModal({
               verified
             </span>
             <h2 id="normalizer-title" className="text-xs sm:text-sm font-semibold text-[var(--on-surface)] truncate">
-              Normalización Segura
+              {i18n._(msg`Normalización Segura`)}
             </h2>
             <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-[var(--surface)] border border-[var(--outline)] text-[var(--on-surface-variant)] truncate">
               {documentTitle}
@@ -208,10 +208,10 @@ export function SafeMarkdownNormalizerModal({
               }`}
               title={
                 showInvisibles
-                  ? 'Ocultar caracteres invisibles (espacios, tabs, saltos de línea)'
-                  : 'Mostrar caracteres ocultos (espacios, tabs, saltos de línea)'
+                  ? i18n._(msg`Ocultar caracteres invisibles (espacios, tabs, saltos de línea)`)
+                  : i18n._(msg`Mostrar caracteres ocultos (espacios, tabs, saltos de línea)`)
               }
-              aria-label="Alternar caracteres ocultos"
+              aria-label={i18n._(msg`Alternar caracteres ocultos`)}
             >
               <span className="font-bold text-[11px] leading-none">¶</span>
               <span className="hidden sm:inline">{i18n._(msg`Invisibles`)}</span>
@@ -227,9 +227,9 @@ export function SafeMarkdownNormalizerModal({
                     ? 'bg-[var(--primary)] text-[var(--on-primary)] font-medium'
                     : 'text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]'
                 }`}
-                title="Lado a lado"
+                title={i18n._(msg`Lado a lado`)}
               >
-                Lado a lado
+                {i18n._(msg`Lado a lado`)}
               </button>
               <button
                 type="button"
@@ -239,9 +239,9 @@ export function SafeMarkdownNormalizerModal({
                     ? 'bg-[var(--primary)] text-[var(--on-primary)] font-medium'
                     : 'text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]'
                 }`}
-                title="En línea"
+                title={i18n._(msg`En línea`)}
               >
-                En línea
+                {i18n._(msg`En línea`)}
               </button>
             </div>
 
@@ -249,8 +249,8 @@ export function SafeMarkdownNormalizerModal({
               type="button"
               onClick={onClose}
               className="p-1 rounded text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--surface-container-highest)] cursor-pointer transition-colors"
-              title="Cerrar sin guardar"
-              aria-label="Cerrar modal"
+              title={i18n._(msg`Cerrar sin guardar`)}
+              aria-label={i18n._(msg`Cerrar modal`)}
             >
               <span className="material-symbols-outlined text-[18px]">close</span>
             </button>
@@ -265,33 +265,33 @@ export function SafeMarkdownNormalizerModal({
               type="button"
               onClick={() => handlePreset('safe_only')}
               className="px-2 py-0.5 rounded text-[11px] font-medium bg-sky-950/40 text-sky-300 border border-sky-800/60 hover:bg-sky-900/60 cursor-pointer transition-colors"
-              title="Aceptar cambios seguros de formato"
+              title={i18n._(msg`Aceptar cambios seguros de formato`)}
             >
-              Seguros ({currentStats.safeFormat})
+              {i18n._(msg`Seguros`)} ({currentStats.safeFormat})
             </button>
             <button
               type="button"
               onClick={() => handlePreset('no_deletions')}
               className="px-2 py-0.5 rounded text-[11px] font-medium bg-amber-950/40 text-amber-300 border border-amber-800/60 hover:bg-amber-900/60 cursor-pointer transition-colors"
-              title="Aceptar todo excepto eliminaciones"
+              title={i18n._(msg`Aceptar todo excepto eliminaciones`)}
             >
-              Sin eliminaciones
+              {i18n._(msg`Sin eliminaciones`)}
             </button>
             <button
               type="button"
               onClick={() => handlePreset('accept_all')}
               className="px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-950/40 text-emerald-300 border border-emerald-800/60 hover:bg-emerald-900/60 cursor-pointer transition-colors"
-              title="Aceptar todos los cambios"
+              title={i18n._(msg`Aceptar todos los cambios`)}
             >
-              Aceptar todo
+              {i18n._(msg`Aceptar todo`)}
             </button>
             <button
               type="button"
               onClick={() => handlePreset('reject_all')}
               className="px-2 py-0.5 rounded text-[11px] font-medium bg-[var(--surface-container)] text-[var(--on-surface-variant)] border border-[var(--outline)] hover:text-[var(--on-surface)] cursor-pointer transition-colors"
-              title="Rechazar todos los cambios"
+              title={i18n._(msg`Rechazar todos los cambios`)}
             >
-              Rechazar todo
+              {i18n._(msg`Rechazar todo`)}
             </button>
           </div>
 
@@ -309,7 +309,7 @@ export function SafeMarkdownNormalizerModal({
               <span className="material-symbols-outlined text-[16px] text-rose-400 shrink-0">warning</span>
               <span>
                 <strong>{i18n._(msg`Aviso`)}:</strong> {currentStats.lossRisk} {i18n._(msg`posibles pérdidas de texto detectadas`)}.
-                {currentStats.acceptedLossRisk === 0 && ' (Protegidas / rechazadas)'}
+                {currentStats.acceptedLossRisk === 0 && ` ${i18n._(msg`(Protegidas / rechazadas)`)}`}
               </span>
             </div>
             <button
@@ -317,7 +317,7 @@ export function SafeMarkdownNormalizerModal({
               onClick={() => setSelectedFilter('loss_risk')}
               className="text-[11px] font-medium underline text-rose-300 hover:text-rose-100 cursor-pointer"
             >
-              Filtrar riesgos
+              {i18n._(msg`Filtrar riesgos`)}
             </button>
           </div>
         )}
@@ -337,7 +337,7 @@ export function SafeMarkdownNormalizerModal({
                     : 'bg-[var(--surface)] text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]'
                 }`}
               >
-                Todos ({currentStats.total})
+                {i18n._(msg`Todos`)} ({currentStats.total})
               </button>
               <button
                 type="button"
@@ -348,7 +348,7 @@ export function SafeMarkdownNormalizerModal({
                     : 'bg-[var(--surface)] text-sky-400 hover:text-sky-300'
                 }`}
               >
-                Seguros ({currentStats.safeFormat})
+                {i18n._(msg`Seguros`)} ({currentStats.safeFormat})
               </button>
               <button
                 type="button"
@@ -359,7 +359,7 @@ export function SafeMarkdownNormalizerModal({
                     : 'bg-[var(--surface)] text-amber-400 hover:text-amber-300'
                 }`}
               >
-                Estructura ({currentStats.structural})
+                {i18n._(msg`Estructura`)} ({currentStats.structural})
               </button>
               <button
                 type="button"
@@ -429,7 +429,7 @@ export function SafeMarkdownNormalizerModal({
                           </span>
                           {change.hasLossRisk && (
                             <span className="text-[10px] font-bold text-rose-400 flex items-center">
-                              ⚠️ Riesgo
+                              ⚠️ {i18n._(msg`Riesgo`)}
                             </span>
                           )}
                         </div>
@@ -526,7 +526,7 @@ export function SafeMarkdownNormalizerModal({
                 }}
                 loading={
                   <div id="div-safemarkdownnormalizermodal-23" className="h-full flex items-center justify-center text-xs text-[var(--on-surface-variant)]">
-                    Cargando comparador...
+                    {i18n._(msg`Cargando comparador...`)}
                   </div>
                 }
               />
@@ -545,7 +545,7 @@ export function SafeMarkdownNormalizerModal({
                   onChange={(e) => setHasAcknowledgedRisk(e.target.checked)}
                   className="rounded text-rose-600 focus:ring-rose-500 cursor-pointer"
                 />
-                <span>{i18n._(msg`Confirmar ${currentStats.acceptedLossRisk} eliminaciones con riesgo`)}</span>
+                <span>{i18n._(msg`Confirmar \$\${count} eliminaciones con riesgo`, { count: currentStats.acceptedLossRisk })}</span>
               </label>
             )}
           </div>
@@ -556,14 +556,14 @@ export function SafeMarkdownNormalizerModal({
               onClick={handleCopyResult}
               className="px-2.5 py-1 rounded text-xs font-medium bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--outline)] hover:bg-[var(--surface-container-highest)] cursor-pointer transition-colors"
             >
-              Copiar
+              {i18n._(msg`Copiar`)}
             </button>
             <button
               type="button"
               onClick={onClose}
               className="px-2.5 py-1 rounded text-xs font-medium text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] cursor-pointer transition-colors"
             >
-              Cancelar
+              {i18n._(msg`Cancelar`)}
             </button>
             <button
               type="button"
@@ -575,7 +575,7 @@ export function SafeMarkdownNormalizerModal({
                   : 'bg-[var(--primary)] text-[var(--on-primary)] hover:brightness-110'
               }`}
             >
-              Confirmar y Aplicar
+              {i18n._(msg`Confirmar y Aplicar`)}
             </button>
           </div>
         </footer>

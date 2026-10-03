@@ -95,7 +95,7 @@ export const NewBranchModal: React.FC<NewBranchModalProps> = ({
             >
               {allBranches.map((b) => (
                 <option key={b.name} value={b.name}>
-                  {b.name} ({b.taskDocuments.length} Task MDs)
+                  {b.name} ({b.taskDocuments.length} {_(msg`archivos Task MD`)})
                 </option>
               ))}
             </select>

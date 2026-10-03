@@ -55,16 +55,18 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
       const res = await analyzeSyncDifferences(workspaceStore);
       setResult(res);
       if (res.hasPendingChanges) {
-        onShowToast(`Detección completada: ${res.counts.localOverrides + res.counts.remoteOverrides + res.counts.conflicts} overrides/diferencias encontrados`, 'info');
+        onShowToast(i18n._(msg`Detección completada: \$\${count} overrides/diferencias encontrados`, {
+          count: res.counts.localOverrides + res.counts.remoteOverrides + res.counts.conflicts
+        }), 'info');
       } else {
-        onShowToast('Todo está al día y sincronizado con Sanity', 'success');
+        onShowToast(i18n._(msg`Todo está al día y sincronizado con Sanity`), 'success');
       }
     } catch (err: any) {
-      onShowToast(err?.message || 'Error al analizar diferencias', 'error');
+      onShowToast(err?.message || i18n._(msg`Error al analizar diferencias`), 'error');
     } finally {
       setIsAnalyzing(false);
     }
-  }, [workspaceStore, onShowToast]);
+  }, [workspaceStore, onShowToast, i18n]);
 
   useEffect(() => {
     if (isOpen) {
@@ -134,37 +136,37 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
       case 'synced':
         return (
           <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-950/60 text-emerald-300 border border-emerald-800">
-            Sincronizado
+            {i18n._(msg`Sincronizado`)}
           </span>
         );
       case 'local_override':
         return (
           <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-sky-950/60 text-sky-300 border border-sky-800">
-            Local más reciente (Override)
+            {i18n._(msg`Local más reciente (Override)`)}
           </span>
         );
       case 'remote_override':
         return (
           <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-amber-950/60 text-amber-300 border border-amber-800">
-            Remoto más reciente (Override)
+            {i18n._(msg`Remoto más reciente (Override)`)}
           </span>
         );
       case 'conflict':
         return (
           <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-rose-950/60 text-rose-300 border border-rose-800">
-            Conflicto detectado
+            {i18n._(msg`Conflicto detectado`)}
           </span>
         );
       case 'only_local':
         return (
           <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-indigo-950/60 text-indigo-300 border border-indigo-800">
-            Solo local (Nuevo)
+            {i18n._(msg`Solo local (Nuevo)`)}
           </span>
         );
       case 'only_remote':
         return (
           <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-purple-950/60 text-purple-300 border border-purple-800">
-            Solo remoto (Por descargar)
+            {i18n._(msg`Solo remoto (Por descargar)`)}
           </span>
         );
     }
@@ -208,7 +210,7 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
                 onClick={onOpenSanityConfig}
                 className="btn-m3-secondary px-2.5 py-1 text-xs cursor-pointer text-amber-300"
               >
-                Configurar Credenciales
+                {i18n._(msg`Configurar Credenciales`)}
               </button>
             )}
             <button
@@ -216,7 +218,7 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
               onClick={handleRunAnalysis}
               disabled={isAnalyzing || isProcessing}
               className="btn-m3-secondary px-2.5 py-1 text-xs flex items-center gap-1 cursor-pointer disabled:opacity-50"
-              title="Volver a analizar diferencias entre Local y Sanity"
+              title={i18n._(msg`Volver a analizar diferencias entre Local y Sanity`)}
             >
               <span className={`material-symbols-outlined text-[15px] ${isAnalyzing ? 'animate-spin' : ''}`}>
                 refresh
@@ -289,7 +291,7 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
                     : 'text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]'
                 }`}
               >
-                Todos ({result?.items.length || 0})
+                {i18n._(msg`Todos`)} ({result?.items.length || 0})
               </button>
               <button
                 type="button"
@@ -300,7 +302,7 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
                     : 'text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]'
                 }`}
               >
-                Con Diferencias ({(result?.counts.total || 0) - (result?.counts.synced || 0)})
+                {i18n._(msg`Con Diferencias`)} ({(result?.counts.total || 0) - (result?.counts.synced || 0)})
               </button>
               <button
                 type="button"
@@ -311,7 +313,7 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
                     : 'text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]'
                 }`}
               >
-                Conflictos & Remoto ({(result?.counts.conflicts || 0) + (result?.counts.remoteOverrides || 0)})
+                {i18n._(msg`Conflictos & Remoto`)} ({(result?.counts.conflicts || 0) + (result?.counts.remoteOverrides || 0)})
               </button>
               <button
                 type="button"
@@ -322,7 +324,7 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
                     : 'text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]'
                 }`}
               >
-                Al Día ({result?.counts.synced || 0})
+                {i18n._(msg`Al Día`)} ({result?.counts.synced || 0})
               </button>
             </div>
 
@@ -333,7 +335,7 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
                 disabled={isProcessing || !result?.hasPendingChanges || !isSanityConfigured}
                 onClick={() => handleBatchSyncAction('smart')}
                 className="btn-m3-primary px-3 py-1 text-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-40 shadow-xs"
-                title="Resuelve automáticamente aplicando los cambios más recientes en ambas direcciones"
+                title={i18n._(msg`Resuelve automáticamente aplicando los cambios más recientes en ambas direcciones`)}
               >
                 <span className="material-symbols-outlined text-[15px]">auto_fix_high</span>
                 <span>{i18n._(msg`Sincronización Inteligente`)}</span>
@@ -344,7 +346,7 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
                 disabled={isProcessing || !result?.hasPendingChanges || !isSanityConfigured}
                 onClick={() => handleBatchSyncAction('push_all')}
                 className="btn-m3-secondary px-2.5 py-1 text-xs flex items-center gap-1 cursor-pointer disabled:opacity-40"
-                title="Sobrescribe Sanity con el estado local de todos los workspaces"
+                title={i18n._(msg`Sobrescribe Sanity con el estado local de todos los workspaces`)}
               >
                 <span className="material-symbols-outlined text-[14px]">cloud_upload</span>
                 <span>{i18n._(msg`Subir Todo (Override Remoto)`)}</span>
@@ -355,10 +357,10 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
                 disabled={isProcessing || !result?.hasPendingChanges || !isSanityConfigured}
                 onClick={() => handleBatchSyncAction('pull_all')}
                 className="btn-m3-secondary px-2.5 py-1 text-xs flex items-center gap-1 cursor-pointer disabled:opacity-40"
-                title="Sobrescribe el estado local con los datos almacenados en Sanity"
+                title={i18n._(msg`Sobrescribe el estado local con los datos almacenados en Sanity`)}
               >
                 <span className="material-symbols-outlined text-[14px]">cloud_download</span>
-                <span>Descargar Todo (Override Local)</span>
+                <span>{i18n._(msg`Descargar Todo (Override Local)`)}</span>
               </button>
             </div>
           </div>
@@ -371,11 +373,11 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
               <span className="material-symbols-outlined text-4xl text-emerald-400">check_circle</span>
               <p className="text-sm font-medium text-[var(--on-surface)]">
                 {filterType === 'pending'
-                  ? 'No hay diferencias pendientes en esta vista'
-                  : 'Todos los elementos analizados están en sincronía'}
+                  ? i18n._(msg`No hay diferencias pendientes en esta vista`)
+                  : i18n._(msg`Todos los elementos analizados están en sincronía`)}
               </p>
               <p className="text-xs">
-                Los workspaces y tareas coinciden exactamente entre el almacenamiento local y Sanity Cloud.
+                {i18n._(msg`Los workspaces y tareas coinciden exactamente entre el almacenamiento local y Sanity Cloud.`)}
               </p>
             </div>
           ) : (
@@ -416,11 +418,11 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
                       <div id="div-syncoverridemodal-21" className="flex items-center gap-4 text-[11px] font-mono text-[var(--on-surface-variant)] mt-1.5">
                         <span className="flex items-center gap-1">
                           <span className="material-symbols-outlined text-[13px] text-sky-400">laptop</span>
-                          <span>Local: {formatRelativeTime(item.localTimestamp)}</span>
+                          <span>{i18n._(msg`Local`)}: {formatRelativeTime(item.localTimestamp)}</span>
                         </span>
                         <span className="flex items-center gap-1">
                           <span className="material-symbols-outlined text-[13px] text-rose-400">cloud</span>
-                          <span>Remoto: {formatRelativeTime(item.remoteTimestamp)}</span>
+                          <span>{i18n._(msg`Remoto`)}: {formatRelativeTime(item.remoteTimestamp)}</span>
                         </span>
                       </div>
                     </div>
@@ -434,10 +436,10 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
                             disabled={isResolving || !isSanityConfigured}
                             onClick={() => handleResolveSingle(item, 'keep_local')}
                             className="btn-m3-secondary px-2 py-1 text-xs flex items-center gap-1 cursor-pointer disabled:opacity-40"
-                            title="Sobrescribir versión remota en Sanity con la versión local"
+                            title={i18n._(msg`Sobrescribir versión remota en Sanity con la versión local`)}
                           >
                             <span className="material-symbols-outlined text-[13px]">cloud_upload</span>
-                            <span>Subir Local</span>
+                            <span>{i18n._(msg`Subir Local`)}</span>
                           </button>
 
                           <button
@@ -445,10 +447,10 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
                             disabled={isResolving || !isSanityConfigured || !item.remoteData}
                             onClick={() => handleResolveSingle(item, 'keep_remote')}
                             className="btn-m3-secondary px-2 py-1 text-xs flex items-center gap-1 cursor-pointer disabled:opacity-40"
-                            title="Sobrescribir versión local con los datos de Sanity"
+                            title={i18n._(msg`Sobrescribir versión local con los datos de Sanity`)}
                           >
                             <span className="material-symbols-outlined text-[13px]">cloud_download</span>
-                            <span>Bajar Remoto</span>
+                            <span>{i18n._(msg`Bajar Remoto`)}</span>
                           </button>
                         </>
                       )}
@@ -457,7 +459,7 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
                         type="button"
                         onClick={() => setExpandedItemId(isExpanded ? null : item.id)}
                         className="btn-m3-icon w-7 h-7 cursor-pointer"
-                        title={isExpanded ? 'Ocultar detalles de diferencias' : 'Ver detalle de cambios'}
+                        title={isExpanded ? i18n._(msg`Ocultar detalles de diferencias`) : i18n._(msg`Ver detalle de cambios`)}
                       >
                         <span className="material-symbols-outlined text-[16px]">
                           {isExpanded ? 'expand_less' : 'expand_more'}
@@ -471,7 +473,7 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
                     <div id="div-syncoverridemodal-23" className="px-3 pb-3 pt-2 border-t border-[var(--outline)] bg-[var(--surface-container-high)]/40 flex flex-col gap-2 animate-fade-in text-xs">
                       <div id="div-syncoverridemodal-24" className="font-semibold text-[var(--on-surface)] flex items-center gap-1.5">
                         <span className="material-symbols-outlined text-[15px] text-amber-400">difference</span>
-                        <span>Cambios detectados y discrepancias:</span>
+                        <span>{i18n._(msg`Cambios detectados y discrepancias:`)}</span>
                       </div>
 
                       <ul className="list-disc list-inside space-y-1 text-[var(--on-surface)] pl-1">
@@ -488,7 +490,7 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
                         <div id="div-syncoverridemodal-26" className="p-2 rounded bg-[var(--surface)] border border-[var(--outline)] flex flex-col">
                           <span className="font-semibold text-sky-400 text-[11px] mb-1 flex items-center gap-1">
                             <span className="material-symbols-outlined text-[13px]">laptop</span>
-                            <span>Versión Local</span>
+                            <span>{i18n._(msg`Versión Local`)}</span>
                           </span>
                           {item.localData ? (
                             <pre className="text-[10px] font-mono text-[var(--on-surface)] overflow-x-auto p-1.5 bg-[var(--surface-container)] rounded max-h-32">
@@ -505,7 +507,7 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
                             </pre>
                           ) : (
                             <span className="text-[11px] text-[var(--on-surface-variant)] italic">
-                              No existe en almacenamiento local
+                              {i18n._(msg`No existe en almacenamiento local`)}
                             </span>
                           )}
                         </div>
@@ -514,7 +516,7 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
                         <div id="div-syncoverridemodal-27" className="p-2 rounded bg-[var(--surface)] border border-[var(--outline)] flex flex-col">
                           <span className="font-semibold text-rose-400 text-[11px] mb-1 flex items-center gap-1">
                             <span className="material-symbols-outlined text-[13px]">cloud</span>
-                            <span>Versión Sanity Remote</span>
+                            <span>{i18n._(msg`Versión Sanity Remote`)}</span>
                           </span>
                           {item.remoteData ? (
                             <pre className="text-[10px] font-mono text-[var(--on-surface)] overflow-x-auto p-1.5 bg-[var(--surface-container)] rounded max-h-32">
@@ -533,7 +535,7 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
                             </pre>
                           ) : (
                             <span className="text-[11px] text-[var(--on-surface-variant)] italic">
-                              No existe aún en Sanity Cloud
+                              {i18n._(msg`No existe aún en Sanity Cloud`)}
                             </span>
                           )}
                         </div>
@@ -550,15 +552,15 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
         <div id="div-syncoverridemodal-28" className="px-4 py-2.5 bg-[var(--surface)] border-t border-[var(--outline)] flex items-center justify-between">
           <span className="text-[11px] text-[var(--on-surface-variant)]">
             {result?.hasPendingChanges
-              ? 'Existen diferencias que puedes resolver individualmente o con Sincronización Inteligente.'
-              : 'Todo sincronizado y al día.'}
+              ? i18n._(msg`Existen diferencias que puedes resolver individualmente o con Sincronización Inteligente.`)
+              : i18n._(msg`Todo sincronizado y al día.`)}
           </span>
           <button
             type="button"
             onClick={onClose}
             className="btn-m3-secondary px-3.5 py-1 text-xs cursor-pointer"
           >
-            Cerrar
+            {i18n._(msg`Cerrar`)}
           </button>
         </div>
       </div>

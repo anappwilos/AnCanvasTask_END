@@ -256,7 +256,7 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
                     }`}
                   >
                     <div id="div-importexportmodal-11" className="flex items-center justify-between">
-                      <span className="font-semibold text-xs text-[var(--on-surface)]">Markdown (.md)</span>
+                      <span className="font-semibold text-xs text-[var(--on-surface)]">{_(msg`Markdown (.md)`)}</span>
                       <span className="material-symbols-outlined text-[15px] text-sky-400">description</span>
                     </div>
                     <span className="text-[11px] opacity-80">{_(msg`Formato nativo TASKS.md estándar`)}</span>

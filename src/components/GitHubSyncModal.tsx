@@ -230,7 +230,7 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
                     {branch.lastCommit.message}
                   </p>
                   <span className="text-[11px] text-[var(--on-surface-variant)]">
-                    Por <strong>{branch.lastCommit.author}</strong> en rama <code>{branch.name}</code>
+                    {_(msg`Por`)} <strong>{branch.lastCommit.author}</strong> {_(msg`en rama`)} <code>{branch.name}</code>
                   </span>
                 </div>
               ) : (
@@ -247,7 +247,7 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
 
               <div id="div-githubsyncmodal-16" className="flex flex-col gap-1">
                 <label className="text-xs font-medium text-[var(--on-surface)]">
-                  GitHub Personal Access Token
+                  {_(msg`GitHub Personal Access Token`)}
                 </label>
                 <input
                   type="password"
