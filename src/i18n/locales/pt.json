@@ -39,7 +39,13 @@
     "settingsTooltip": "Configurações (⌘,)",
     "commandPaletteTooltip": "Abrir paleta de comandos (⌘K)",
     "problemsTooltip": "Ver problemas detectados",
-    "searchPlaceholder": "Pesquisar tarefa ou comando..."
+    "searchPlaceholder": "Pesquisar tarefa ou comando...",
+    "advancedFilters": "Filtros avançados",
+    "allSections": "Todas as seções",
+    "allTags": "Todas as tags",
+    "commands": "Comandos",
+    "modified": "modificado",
+    "upToDate": "atualizado"
   },
   "workspace": {
     "title": "Workspaces",

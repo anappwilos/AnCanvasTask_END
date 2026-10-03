@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from "react-i18next";
 import { TaskPriority, TaskStatus } from '../shapes/TaskShapeUtil';
 
 export type TaskSortOption = 'default' | 'priority' | 'status' | 'title';
@@ -55,6 +56,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   onOpenSanityModal,
   onOpenSyncOverrideModal,
 }) => {
+  const { t } = useTranslation();
   const [isFilterPopoverOpen, setIsFilterPopoverOpen] = useState(false);
   const popoverRef = useRef<HTMLDivElement>(null);
 
@@ -132,7 +134,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                   title="Abrir panel de filtros y ordenación"
                 >
                   <span className="material-symbols-outlined text-[16px]">tune</span>
-                  <span className="hidden xs:inline">Filtros</span>
+                  <span className="hidden xs:inline">{t('nav.filters')}</span>
                   {activeFiltersCount > 0 && (
                     <span className="w-4 h-4 rounded-full bg-[var(--primary)] text-[var(--on-primary)] text-[10px] font-bold flex items-center justify-center font-mono">
                       {activeFiltersCount}
@@ -149,7 +151,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                     <div className="flex items-center justify-between border-b border-[var(--outline)] pb-2">
                       <span className="font-semibold text-[var(--on-surface)] flex items-center gap-1.5">
                         <span className="material-symbols-outlined text-[16px] text-sky-400">filter_list</span>
-                        <span>Filtros avanzados</span>
+                        <span>{t('nav.advancedFilters')}</span>
                       </span>
                       <button
                         type="button"
@@ -213,7 +215,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                           }
                           className="w-full bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--outline)] rounded px-2.5 py-1 text-xs font-sans focus:outline-none focus:border-[var(--primary)] cursor-pointer"
                         >
-                          <option value="all">Todas las secciones</option>
+                          <option value="all">{t('nav.allSections')}</option>
                           {availableSections.map((sec) => (
                             <option key={sec} value={sec}>
                               ## {sec}
@@ -236,7 +238,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                           }
                           className="w-full bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--outline)] rounded px-2.5 py-1 text-xs font-sans focus:outline-none focus:border-[var(--primary)] cursor-pointer"
                         >
-                          <option value="all">Todas las etiquetas</option>
+                          <option value="all">{t('nav.allTags')}</option>
                           {availableTags.map((tag) => (
                             <option key={tag} value={tag}>
                               #{tag}
@@ -314,7 +316,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                 title="Abrir paleta de comandos y búsqueda global (Ctrl/Cmd + K)"
               >
                 <span className="material-symbols-outlined text-[16px] text-sky-400">terminal</span>
-                <span>Comandos</span>
+                <span>{t('nav.commands')}</span>
                 <kbd className="px-1.5 py-0.2 rounded bg-[var(--surface)] border border-[var(--outline)] font-mono text-[10px] text-[var(--on-surface-variant)]">
                   ⌘K
                 </kbd>
@@ -408,7 +410,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                   <span className="material-symbols-outlined text-[15px] text-amber-400">
                     sync_problem
                   </span>
-                  <span>Sincronizar</span>
+                  <span>{t('nav.sync')}</span>
                 </button>
               )}
             </div>
@@ -429,12 +431,12 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                   {hasUnsavedChanges ? (
                     <span className="flex items-center gap-1 text-amber-400 text-[10px] shrink-0 font-sans">
                       <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                      <span className="hidden xl:inline">modificado</span>
+                      <span className="hidden xl:inline">{t('nav.modified')}</span>
                     </span>
                   ) : (
                     <span className="flex items-center gap-1 text-emerald-400 text-[10px] shrink-0 font-sans">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                      <span className="hidden xl:inline">al día</span>
+                      <span className="hidden xl:inline">{t('nav.upToDate')}</span>
                     </span>
                   )}
                 </div>

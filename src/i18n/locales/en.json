@@ -54,7 +54,13 @@
     "create": "Create",
     "filters": "Filters",
     "sync": "Sync",
-    "menu": "Menu"
+    "menu": "Menu",
+    "advancedFilters": "Advanced filters",
+    "allSections": "All sections",
+    "allTags": "All tags",
+    "commands": "Commands",
+    "modified": "modified",
+    "upToDate": "up to date"
   },
   "workspace": {
     "title": "Workspaces",
