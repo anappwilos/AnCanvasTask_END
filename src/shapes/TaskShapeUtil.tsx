@@ -330,7 +330,19 @@ function TaskCardComponent({
       <div
         id={`task-card-container-${shape.id}`}
         onClick={handleCardClick}
-        onDoubleClick={() => setIsConnectionPointsVisible(!isConnectionPointsVisible)}
+        onDoubleClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          (e.nativeEvent as any)?.stopImmediatePropagation?.();
+          window.dispatchEvent(
+            new CustomEvent('antask:open-task-details', {
+              detail: {
+                shapeId: shape.id,
+                taskId: taskId || shape.props?.taskId || shape.id,
+              },
+            })
+          );
+        }}
         className={`group/card w-full h-full rounded-md bg-[var(--surface-container)] border transition-all duration-120 select-none flex flex-col justify-between p-2.5 relative ${
           isConnectingSource
             ? 'border-[var(--primary)] ring-2 ring-[var(--primary)] ring-offset-2 ring-offset-[var(--surface)] bg-[var(--primary-container)]/20 shadow-md animate-pulse'

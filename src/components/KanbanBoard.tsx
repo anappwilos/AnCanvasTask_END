@@ -47,6 +47,7 @@ export interface KanbanBoardProps {
   onDeleteTask: (taskId: string, title: string) => void;
   onBatchDeleteTasks?: (taskIds: string[]) => void;
   onSelectTask: (taskId: string) => void;
+  onOpenTaskDetails?: (taskId: string) => void;
   selectedTaskId: string | null;
   onOpenNewTaskModalWithGroup?: (groupOrStatus: string) => void;
   onOpenSampleProject?: () => void;
@@ -89,6 +90,7 @@ export function KanbanBoard({
   onDeleteTask,
   onBatchDeleteTasks,
   onSelectTask,
+  onOpenTaskDetails,
   selectedTaskId,
   onOpenNewTaskModalWithGroup,
   onOpenSampleProject,
@@ -607,6 +609,11 @@ export function KanbanBoard({
                             aria-label={i18n._(msg`Tarea ${task.title}, prioridad ${task.priority}, estado ${task.status}`)}
                             onDragStart={(e) => handleDragStart(e, task.taskId)}
                             onClick={() => onSelectTask(task.taskId)}
+                            onDoubleClick={(e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                              onOpenTaskDetails?.(task.taskId);
+                            }}
                             onKeyDown={(e) => {
                               if (e.key === 'Enter' || e.key === ' ') {
                                 if (e.target === e.currentTarget) {
@@ -734,6 +741,20 @@ export function KanbanBoard({
                                 onClick={(e) => e.stopPropagation()}
                                 className="absolute top-8 right-2 z-30 bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-lg p-1 flex flex-col gap-0.5 min-w-[140px] text-xs font-sans"
                               >
+                                <button
+                                  id={`btn-kanban-menu-details-${task.taskId}`}
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setActiveMenuTaskId(null);
+                                    onOpenTaskDetails?.(task.taskId);
+                                  }}
+                                  className="px-2 py-1 rounded text-left text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] flex items-center gap-2 cursor-pointer"
+                                >
+                                  <span className="material-symbols-outlined text-[14px]">info</span>
+                                  <span>{i18n._(msg`Ver detalles`)}</span>
+                                </button>
+
                                 <button
                                   id={`btn-kanban-menu-edit-${task.taskId}`}
                                   type="button"
@@ -949,6 +970,11 @@ export function KanbanBoard({
                             aria-label={i18n._(msg`Tarea ${task.title}, sección ${sec}, prioridad ${task.priority}`)}
                             onDragStart={(e) => handleDragStart(e, task.taskId)}
                             onClick={() => onSelectTask(task.taskId)}
+                            onDoubleClick={(e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                              onOpenTaskDetails?.(task.taskId);
+                            }}
                             onKeyDown={(e) => {
                               if (e.key === 'Enter' || e.key === ' ') {
                                 if (e.target === e.currentTarget) {

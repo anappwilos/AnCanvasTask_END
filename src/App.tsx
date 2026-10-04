@@ -217,6 +217,7 @@ export default function App() {
   });
   const [activeView, setActiveView] = useState<'canvas' | 'kanban' | 'split' | 'studio'>(() => userSettings.defaultView || 'canvas');
   const [selectedTaskShapeId, setSelectedTaskShapeId] = useState<string | null>(null);
+  const [isTaskDetailsOpen, setIsTaskDetailsOpen] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   useEffect(() => {
@@ -1624,8 +1625,24 @@ export default function App() {
     };
 
     window.addEventListener('antask-request-delete-task', handleDeleteRequest);
+
+    const handleOpenTaskDetails = (e: Event) => {
+      const customEvent = e as CustomEvent<{
+        shapeId?: string;
+        taskId?: string;
+      }>;
+      const { shapeId, taskId } = customEvent.detail || {};
+      const targetId = shapeId || taskId;
+      if (targetId) {
+        setSelectedTaskShapeId(targetId);
+        setIsTaskDetailsOpen(true);
+      }
+    };
+
+    window.addEventListener('antask:open-task-details', handleOpenTaskDetails);
     return () => {
       window.removeEventListener('antask-request-delete-task', handleDeleteRequest);
+      window.removeEventListener('antask:open-task-details', handleOpenTaskDetails);
     };
   }, []);
 
@@ -1666,6 +1683,7 @@ export default function App() {
             setSelectedTaskShapeId((prev) => (prev !== taskShapes[0].id ? taskShapes[0].id : prev));
           } else if (taskShapes.length === 0 && activeView === 'canvas') {
             setSelectedTaskShapeId((prev) => (prev !== null ? null : prev));
+            setIsTaskDetailsOpen(false);
           }
         } catch {
           // ignore
@@ -1692,6 +1710,18 @@ export default function App() {
     (editorInstance: Editor) => {
       setEditor(editorInstance);
       editorInstance.user.updateUserPreferences({ colorScheme: effectiveTheme === 'dark' ? 'dark' : 'light' });
+
+      // Prevent tldraw from automatically creating loose text/note shapes on canvas double click
+      try {
+        (editorInstance as any).sideEffects?.registerBeforeCreateHandler?.('shape', (shape: any) => {
+          if (shape?.type === 'text' || shape?.type === 'note') {
+            return false;
+          }
+          return shape;
+        });
+      } catch {
+        // ignore
+      }
 
       // Async initialization of visual state
       const initVisualState = async () => {
@@ -4146,6 +4176,10 @@ export default function App() {
                       }}
                       onBatchDeleteTasks={handleBatchDeleteTasksFromKanban}
                       onSelectTask={(id) => setSelectedTaskShapeId(id)}
+                      onOpenTaskDetails={(id) => {
+                        setSelectedTaskShapeId(id);
+                        setIsTaskDetailsOpen(true);
+                      }}
                       selectedTaskId={selectedTaskShapeId}
                       onOpenNewTaskModalWithGroup={(groupOrStatus) => {
                         if (existingSections.includes(groupOrStatus)) {
@@ -4323,7 +4357,7 @@ export default function App() {
         </main>
 
         {/* Details Panel (DESIGN.md Section 16 & Fase 4: Modular Details & Multi-Selection Panel) */}
-        {(selectedTaskData || selectedTaskIdsOnCanvas.length > 1) && (
+        {((isTaskDetailsOpen && selectedTaskData) || selectedTaskIdsOnCanvas.length > 1) && (
           <TaskDetailsPanel
             task={selectedTaskData}
             selectedTaskIds={selectedTaskIdsOnCanvas}
@@ -4362,6 +4396,7 @@ export default function App() {
               }, 100);
             }}
             onClose={() => {
+              setIsTaskDetailsOpen(false);
               setSelectedTaskShapeId(null);
               if (editor) {
                 editor.selectNone();
