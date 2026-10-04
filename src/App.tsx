@@ -279,6 +279,8 @@ export default function App() {
   const [isAutoLayoutConfirmOpen, setIsAutoLayoutConfirmOpen] = useState<boolean>(false);
   const [isProblemsModalOpen, setIsProblemsModalOpen] = useState<boolean>(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
+  const [isHeaderMenuOpen, setIsHeaderMenuOpen] = useState<boolean>(false);
+  const headerMenuRef = useRef<HTMLDivElement>(null);
   const [isQuickGuideOpen, setIsQuickGuideOpen] = useState<boolean>(false);
   const [isSafeNormalizerOpen, setIsSafeNormalizerOpen] = useState<boolean>(false);
   const [deleteWarningState, setDeleteWarningState] = useState<DeleteWarningInfo | null>(null);
@@ -338,6 +340,27 @@ export default function App() {
       window.removeEventListener('offline', handleOffline);
     };
   }, [pushToast]);
+
+  // Close header more menu on outside click or Escape key
+  useEffect(() => {
+    if (!isHeaderMenuOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (headerMenuRef.current && !headerMenuRef.current.contains(e.target as Node)) {
+        setIsHeaderMenuOpen(false);
+      }
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsHeaderMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isHeaderMenuOpen]);
 
   // New task form state
   const [newTaskTitle, setNewTaskTitle] = useState<string>('');
@@ -2895,43 +2918,121 @@ export default function App() {
             </button>
           )}
 
-          {/* Quick Guide Button */}
-          <button
-            id="btn-quick-guide-top"
-            type="button"
-            onClick={() => setIsQuickGuideOpen(true)}
-            className="btn-m3-icon shrink-0 cursor-pointer hidden sm:inline-flex"
-            title={i18n._(msg`Atajos de teclado y ayuda (?)`)}
-            aria-label={i18n._(msg`Atajos de teclado y ayuda (?)`)}
-          >
-            <span className="material-symbols-outlined text-[18px]">help</span>
-          </button>
-
-          {/* Settings Button */}
-          <button
-            id="btn-settings-top"
-            type="button"
-            onClick={() => setIsSettingsOpen(true)}
-            className="btn-m3-icon shrink-0 cursor-pointer hidden sm:inline-flex"
-            title={i18n._(msg`Configuración (⌘,)`)}
-            aria-label={i18n._(msg`Configuración (⌘,)`)}
-          >
-            <span className="material-symbols-outlined text-[18px]">settings</span>
-          </button>
-
           {/* Language Selector */}
           <LanguageSelector className="hidden sm:inline-block shrink-0" onLanguageChange={(lang) => handleUpdateSettings({ ...userSettings, language: lang })} />
 
-          {/* Mobile Menu Trigger */}
-          <button
-            id="btn-mobile-menu-trigger"
-            type="button"
-            onClick={() => setIsMobileMenuOpen(true)}
-            className="btn-m3-icon sm:hidden shrink-0 cursor-pointer"
-            aria-label={i18n._(msg`Abrir menú`)}
-          >
-            <span className="material-symbols-outlined text-[20px]">more_vert</span>
-          </button>
+          {/* Three Dots Menu Container: Configuración, el ? y el tema */}
+          <div id="div-header-more-menu-container" className="relative shrink-0" ref={headerMenuRef}>
+            <button
+              id="btn-mobile-menu-trigger"
+              type="button"
+              onClick={() => setIsHeaderMenuOpen((prev) => !prev)}
+              className={`btn-m3-icon shrink-0 cursor-pointer ${
+                isHeaderMenuOpen ? 'bg-[var(--surface-container-high)] text-[var(--on-surface)]' : ''
+              }`}
+              title={i18n._(msg`Más opciones`)}
+              aria-label={i18n._(msg`Más opciones`)}
+              aria-haspopup="menu"
+              aria-expanded={isHeaderMenuOpen}
+            >
+              <span className="material-symbols-outlined text-[20px]">more_vert</span>
+            </button>
+
+            {isHeaderMenuOpen && (
+              <div
+                id="div-header-more-menu-dropdown"
+                role="menu"
+                aria-label={i18n._(msg`Menú de opciones`)}
+                className="absolute right-0 top-full mt-1.5 w-56 bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-xl py-1 z-50 animate-fade-in select-none text-xs"
+              >
+                {/* 1. Tema */}
+                <button
+                  id="btn-header-more-menu-theme"
+                  role="menuitem"
+                  type="button"
+                  onClick={() => {
+                    handleUpdateSettings({
+                      ...userSettings,
+                      theme: effectiveTheme === 'dark' ? 'light' : 'dark',
+                    });
+                  }}
+                  className="w-full px-3 py-2 flex items-center justify-between text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] transition-colors cursor-pointer"
+                  title={effectiveTheme === 'dark' ? i18n._(msg`Cambiar a tema claro`) : i18n._(msg`Cambiar a tema oscuro`)}
+                >
+                  <div id="div-header-more-menu-theme-content" className="flex items-center gap-2.5">
+                    <span className="material-symbols-outlined text-[18px] text-[var(--primary)]">
+                      {effectiveTheme === 'dark' ? 'light_mode' : 'dark_mode'}
+                    </span>
+                    <span className="font-medium">{i18n._(msg`Tema`)}</span>
+                  </div>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[var(--on-surface-variant)] capitalize">
+                    {effectiveTheme === 'dark' ? i18n._(msg`Oscuro`) : i18n._(msg`Claro`)}
+                  </span>
+                </button>
+
+                {/* 2. Configuración */}
+                <button
+                  id="btn-header-more-menu-settings"
+                  role="menuitem"
+                  type="button"
+                  onClick={() => {
+                    setIsHeaderMenuOpen(false);
+                    setIsSettingsOpen(true);
+                  }}
+                  className="w-full px-3 py-2 flex items-center justify-between text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] transition-colors cursor-pointer"
+                  title={i18n._(msg`Configuración (⌘,)`)}
+                >
+                  <div id="div-header-more-menu-settings-content" className="flex items-center gap-2.5">
+                    <span className="material-symbols-outlined text-[18px] text-[var(--on-surface-variant)]">settings</span>
+                    <span className="font-medium">{i18n._(msg`Configuración`)}</span>
+                  </div>
+                  <kbd className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[var(--on-surface-variant)]">
+                    ⌘,
+                  </kbd>
+                </button>
+
+                {/* 3. El ? (Atajos y ayuda) */}
+                <button
+                  id="btn-header-more-menu-help"
+                  role="menuitem"
+                  type="button"
+                  onClick={() => {
+                    setIsHeaderMenuOpen(false);
+                    setIsQuickGuideOpen(true);
+                  }}
+                  className="w-full px-3 py-2 flex items-center justify-between text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] transition-colors cursor-pointer"
+                  title={i18n._(msg`Atajos de teclado y ayuda (?)`)}
+                >
+                  <div id="div-header-more-menu-help-content" className="flex items-center gap-2.5">
+                    <span className="material-symbols-outlined text-[18px] text-[var(--on-surface-variant)]">help</span>
+                    <span className="font-medium">{i18n._(msg`Atajos y ayuda`)}</span>
+                  </div>
+                  <kbd className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[var(--on-surface-variant)]">
+                    ?
+                  </kbd>
+                </button>
+
+                {/* En pantallas móviles: acceso rápido al panel de herramientas completo */}
+                <div id="div-header-more-menu-mobile-divider" className="sm:hidden my-1 border-t border-[var(--outline)]" />
+                <button
+                  id="btn-header-more-menu-mobile-drawer"
+                  role="menuitem"
+                  type="button"
+                  onClick={() => {
+                    setIsHeaderMenuOpen(false);
+                    setIsMobileMenuOpen(true);
+                  }}
+                  className="w-full px-3 py-2 flex items-center justify-between text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] transition-colors cursor-pointer sm:hidden"
+                >
+                  <div id="div-header-more-menu-mobile-drawer-content" className="flex items-center gap-2.5">
+                    <span className="material-symbols-outlined text-[18px] text-[var(--primary)]">widgets</span>
+                    <span>{i18n._(msg`Todas las herramientas`)}</span>
+                  </div>
+                  <span className="text-[10px] text-[var(--on-surface-variant)]">➔</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
@@ -2949,7 +3050,7 @@ export default function App() {
 
         {/* Collapsible Sidebar (Offcanvas on mobile/tablet, Static Column on desktop) */}
         {isSidebarOpen && (
-          <aside className="fixed inset-y-0 left-0 z-50 w-72 lg:static lg:z-10 lg:w-64 bg-[var(--surface-container)] border-r border-[var(--outline)] flex flex-col justify-between p-3 select-none flex-shrink-0 transition-transform duration-200 shadow-2xl lg:shadow-none animate-slide-right lg:animate-none">
+          <aside className="fixed inset-y-0 left-0 z-50 w-72 lg:static lg:z-10 lg:w-64 bg-[var(--surface-container)] border-r border-[var(--outline)] flex flex-col p-3 select-none flex-shrink-0 transition-transform duration-200 shadow-2xl lg:shadow-none animate-slide-right lg:animate-none">
             {/* Mobile Sidebar Header with Close Button */}
             <div id="div-app-9" className="flex items-center justify-between lg:hidden pb-2 border-b border-[var(--outline)] mb-1">
               <div id="div-app-10" className="flex items-center gap-1.5">
@@ -2967,7 +3068,7 @@ export default function App() {
               </button>
             </div>
 
-            <div id="div-app-11" className="flex flex-col gap-3 overflow-y-auto">
+            <div id="div-app-11" className="flex-1 flex flex-col gap-3 overflow-y-auto">
               {/* Task MD Documents Explorer (1 to N Task MD files in Root, Frontend, Backend, etc.) */}
               <div id="div-app-12" className="rounded-lg bg-[var(--surface)] border border-[var(--outline)] shadow-2xs">
                 <TaskDocumentExplorer
@@ -3203,36 +3304,6 @@ export default function App() {
                   })}
                 </div>
               </div>
-            </div>
-
-            {/* Sidebar Footer: Essential settings & theme */}
-            <div id="div-app-23" className="flex flex-col gap-1 pt-2.5 border-t border-[var(--outline)]">
-              <button
-                id="btn-sidebar-settings"
-                type="button"
-                onClick={() => setIsSettingsOpen(true)}
-                className="btn-m3-text w-full py-1 text-xs justify-start px-2 cursor-pointer text-[var(--on-surface)]"
-              >
-                <span className="material-symbols-outlined text-[16px] text-[var(--primary)]">settings</span>
-                <span>{i18n._(msg`Configuración & Preferencias`)}</span>
-              </button>
-
-              <button
-                id="btn-sidebar-theme-toggle"
-                type="button"
-                onClick={() =>
-                  handleUpdateSettings({
-                    ...userSettings,
-                    theme: effectiveTheme === 'dark' ? 'light' : 'dark',
-                  })
-                }
-                className="btn-m3-text w-full py-1 text-xs justify-start px-2 cursor-pointer text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]"
-              >
-                <span className="material-symbols-outlined text-[16px]">
-                  {effectiveTheme === 'dark' ? 'light_mode' : 'dark_mode'}
-                </span>
-                <span>{i18n._(msg`Tema de color`)}</span>
-              </button>
             </div>
           </aside>
         )}
