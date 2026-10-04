@@ -238,6 +238,8 @@ function TaskCardComponent({
     }
   };
 
+  const [isConnectionPointsVisible, setIsConnectionPointsVisible] = useState(false);
+
   const priorityConfig: Record<TaskPriority, { label: string; dot: string; text: string }> = {
     P0: { label: _(msg`P0 · Crítica`), dot: 'bg-rose-500', text: 'text-rose-400' },
     P1: { label: _(msg`P1 · Alta`), dot: 'bg-amber-500', text: 'text-amber-400' },
@@ -327,6 +329,7 @@ function TaskCardComponent({
       <div
         id={`task-card-container-${shape.id}`}
         onClick={handleCardClick}
+        onDoubleClick={() => setIsConnectionPointsVisible(!isConnectionPointsVisible)}
         className={`group/card w-full h-full rounded-md bg-[var(--surface-container)] border transition-all duration-120 select-none flex flex-col justify-between p-2.5 relative ${
           isConnectingSource
             ? 'border-[var(--primary)] ring-2 ring-[var(--primary)] ring-offset-2 ring-offset-[var(--surface)] bg-[var(--primary-container)]/20 shadow-md animate-pulse'
@@ -365,7 +368,7 @@ function TaskCardComponent({
               ? 'bg-[var(--primary)] border-white scale-110 shadow-md ring-2 ring-[var(--primary)]'
               : isAnyConnecting
               ? 'bg-[var(--primary-container)] border-[var(--primary)] ring-2 ring-[var(--primary)]/60 scale-110 animate-bounce'
-              : 'opacity-0 group-hover/card:opacity-100 hover:opacity-100 bg-[var(--surface-container-high)] border-[var(--primary)] hover:scale-125 hover:bg-[var(--primary)]'
+              : `${isConnectionPointsVisible ? 'opacity-100' : 'opacity-0'} bg-[var(--surface-container-high)] border-[var(--primary)] hover:scale-125 hover:bg-[var(--primary)]`
           }`}
           title={_(msg`Punto central superior: Clic para unir tareas`)}
           aria-label={_(msg`Punto central superior`)}
@@ -386,7 +389,7 @@ function TaskCardComponent({
               ? 'bg-[var(--primary)] border-white scale-110 shadow-md ring-2 ring-[var(--primary)]'
               : isAnyConnecting
               ? 'bg-[var(--primary-container)] border-[var(--primary)] ring-2 ring-[var(--primary)]/60 scale-110 animate-bounce'
-              : 'opacity-0 group-hover/card:opacity-100 hover:opacity-100 bg-[var(--surface-container-high)] border-[var(--primary)] hover:scale-125 hover:bg-[var(--primary)]'
+              : `${isConnectionPointsVisible ? 'opacity-100' : 'opacity-0'} bg-[var(--surface-container-high)] border-[var(--primary)] hover:scale-125 hover:bg-[var(--primary)]`
           }`}
           title={_(msg`Punto central inferior: Clic para unir tareas`)}
           aria-label={_(msg`Punto central inferior`)}
@@ -407,7 +410,7 @@ function TaskCardComponent({
               ? 'bg-[var(--primary)] border-white scale-110 shadow-md ring-2 ring-[var(--primary)]'
               : isAnyConnecting
               ? 'bg-[var(--primary-container)] border-[var(--primary)] ring-2 ring-[var(--primary)]/60 scale-110 animate-bounce'
-              : 'opacity-0 group-hover/card:opacity-100 hover:opacity-100 bg-[var(--surface-container-high)] border-[var(--primary)] hover:scale-125 hover:bg-[var(--primary)]'
+              : `${isConnectionPointsVisible ? 'opacity-100' : 'opacity-0'} bg-[var(--surface-container-high)] border-[var(--primary)] hover:scale-125 hover:bg-[var(--primary)]`
           }`}
           title={_(msg`Punto central izquierdo: Clic para unir tareas`)}
           aria-label={_(msg`Punto central izquierdo`)}
@@ -428,7 +431,7 @@ function TaskCardComponent({
               ? 'bg-[var(--primary)] border-white scale-110 shadow-md ring-2 ring-[var(--primary)]'
               : isAnyConnecting
               ? 'bg-[var(--primary-container)] border-[var(--primary)] ring-2 ring-[var(--primary)]/60 scale-110 animate-bounce'
-              : 'opacity-0 group-hover/card:opacity-100 hover:opacity-100 bg-[var(--surface-container-high)] border-[var(--primary)] hover:scale-125 hover:bg-[var(--primary)]'
+              : `${isConnectionPointsVisible ? 'opacity-100' : 'opacity-0'} bg-[var(--surface-container-high)] border-[var(--primary)] hover:scale-125 hover:bg-[var(--primary)]`
           }`}
           title={_(msg`Punto central derecho: Clic para unir tareas`)}
           aria-label={_(msg`Punto central derecho`)}
