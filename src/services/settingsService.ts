@@ -13,7 +13,7 @@ export interface AppUserSettings {
   theme: ThemeMode;
   density: DensityMode;
   language: LanguageMode;
-  defaultView: 'canvas' | 'kanban';
+  defaultView: 'canvas' | 'kanban' | 'split' | 'studio';
   confirmDeleteWithDependents: boolean;
   canvasShowGrid: boolean;
   canvasSnapToGrid: boolean;

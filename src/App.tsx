@@ -212,7 +212,7 @@ export default function App() {
     }
     return false;
   });
-  const [activeView, setActiveView] = useState<'canvas' | 'kanban' | 'studio'>(() => userSettings.defaultView || 'canvas');
+  const [activeView, setActiveView] = useState<'canvas' | 'kanban' | 'split' | 'studio'>(() => userSettings.defaultView || 'canvas');
   const [selectedTaskShapeId, setSelectedTaskShapeId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
 
@@ -686,6 +686,48 @@ export default function App() {
     },
     [splitRatio]
   );
+
+  // Dual View (Canvas + Kanban) Resizer State
+  const [dualRatio, setDualRatio] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem('antask_dual_ratio');
+      return saved ? Number(saved) : 50;
+    } catch {
+      return 50;
+    }
+  });
+  const isDraggingDualSplitterRef = useRef(false);
+
+  const handleDualSplitterMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    isDraggingDualSplitterRef.current = true;
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      if (!isDraggingDualSplitterRef.current) return;
+      const container = document.getElementById('antask-dual-view-container');
+      if (!container) return;
+      const rect = container.getBoundingClientRect();
+      const currentX = moveEvent.clientX - rect.left;
+      const percentage = Math.max(20, Math.min(80, (currentX / rect.width) * 100));
+      setDualRatio(percentage);
+      try {
+        localStorage.setItem('antask_dual_ratio', String(percentage));
+      } catch {}
+    };
+
+    const handleMouseUp = () => {
+      isDraggingDualSplitterRef.current = false;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+  }, []);
 
   const triggerDebouncedVisualSave = useCallback((editorInstance: Editor) => {
     if (debouncedSaveRef.current) {
@@ -2735,6 +2777,16 @@ export default function App() {
         },
       },
       {
+        id: 'view-split-canvas-kanban',
+        title: 'Cambiar a vista Dual (Canvas + Kanban)',
+        shortcut: 'D',
+        icon: 'vertical_split',
+        category: 'view',
+        perform: () => {
+          setActiveView('split');
+        },
+      },
+      {
         id: 'view-sanity-studio',
         title: 'Cambiar a vista Sanity Studio (Nativo / SDK)',
         shortcut: 'S',
@@ -3135,6 +3187,21 @@ export default function App() {
             >
               <span className="material-symbols-outlined text-[16px]">view_kanban</span>
               <span className="hidden xl:inline">{i18n._(msg`Kanban`)}</span>
+            </button>
+
+            <button
+              id="btn-view-split"
+              type="button"
+              onClick={() => setActiveView('split')}
+              className={`px-2.5 py-1 rounded text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer ${
+                activeView === 'split'
+                  ? 'bg-[var(--primary)] text-[var(--on-primary)]'
+                  : 'text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]'
+              }`}
+              title={i18n._(msg`Vista Dual (Canvas y Kanban en dos)`)}
+            >
+              <span className="material-symbols-outlined text-[16px]">vertical_split</span>
+              <span className="hidden xl:inline">{i18n._(msg`Dual`)}</span>
             </button>
 
             <button
@@ -3680,7 +3747,7 @@ export default function App() {
             id="antask-split-container"
             className="flex-1 relative overflow-hidden w-full h-full flex flex-col md:flex-row"
           >
-            {/* Visual View Pane (Canvas / Kanban / Studio) */}
+            {/* Visual View Pane (Canvas / Kanban / Dual Split / Studio) */}
             <div
               id="div-visual-view-pane"
               style={{
@@ -3692,304 +3759,372 @@ export default function App() {
               }}
               className="relative overflow-hidden flex flex-col min-w-0 md:min-w-[280px] transition-all duration-75"
             >
-              {activeView === 'canvas' ? (
-                <>
-                  <Tldraw
-                    hideUi={true}
-                    shapeUtils={customShapeUtils}
-                    onMount={handleMount}
-                    autoFocus
-                  />
+              {(() => {
+                const canvasViewNode = (
+                  <div className="relative w-full h-full overflow-hidden flex flex-col">
+                    <Tldraw
+                      hideUi={true}
+                      shapeUtils={customShapeUtils}
+                      onMount={handleMount}
+                      autoFocus
+                    />
 
-                  {/* Floating Canvas Navigation Controls (DESIGN.md Section 3 & 14) */}
-                  <div id="div-app-24" className="absolute bottom-3 left-3 z-10 flex items-center gap-0.5 sm:gap-1 bg-[var(--surface-container)]/95 backdrop-blur-md border border-[var(--outline)] rounded-full p-1 shadow-md select-none">
-                    <button
-                      id="btn-canvas-zoom-out"
-                      type="button"
-                      onClick={handleZoomOut}
-                      className="btn-m3-icon w-7 h-7 cursor-pointer"
-                      title={i18n._(msg`Alejar zoom (Zoom Out)`)}
-                      aria-label={i18n._(msg`Alejar zoom`)}
-                    >
-                      <span className="material-symbols-outlined text-[16px]">remove</span>
-                    </button>
-
-                    <button
-                      id="btn-canvas-zoom-reset"
-                      type="button"
-                      onClick={handleResetZoom}
-                      className="px-2 py-0.5 text-xs font-mono font-medium text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] rounded-full transition-colors cursor-pointer"
-                      title={i18n._(msg`Clic para restablecer zoom al 100%`)}
-                    >
-                      {canvasZoom}%
-                    </button>
-
-                    <button
-                      id="btn-canvas-zoom-in"
-                      type="button"
-                      onClick={handleZoomIn}
-                      className="btn-m3-icon w-7 h-7 cursor-pointer"
-                      title={i18n._(msg`Acercar zoom (Zoom In)`)}
-                      aria-label={i18n._(msg`Acercar zoom`)}
-                    >
-                      <span className="material-symbols-outlined text-[16px]">add</span>
-                    </button>
-
-                    <div id="div-app-25" className="w-px h-4 bg-[var(--outline)] my-auto mx-0.5" />
-
-                    <button
-                      id="btn-canvas-zoom-fit"
-                      type="button"
-                      onClick={handleZoomToFit}
-                      className="btn-m3-icon w-7 h-7 cursor-pointer"
-                      title={i18n._(msg`Ajustar zoom al contenido (Zoom to Fit)`)}
-                      aria-label={i18n._(msg`Ajustar zoom`)}
-                    >
-                      <span className="material-symbols-outlined text-[16px]">fit_screen</span>
-                    </button>
-
-                    <div id="div-app-25-tools" className="w-px h-4 bg-[var(--outline)] my-auto mx-0.5" />
-
-                    {/* Mode: Selection Tool (V) */}
-                    <button
-                      id="btn-canvas-tool-select"
-                      type="button"
-                      onClick={() => handleSelectCanvasTool('select')}
-                      className={`btn-m3-icon w-7 h-7 cursor-pointer transition-colors ${
-                        currentCanvasTool === 'select'
-                          ? 'bg-[var(--primary)] text-[var(--on-primary)] shadow-xs'
-                          : 'text-[var(--on-surface-variant)] hover:bg-[var(--surface-container-high)] hover:text-[var(--on-surface)]'
-                      }`}
-                      title={i18n._(msg`Modo Selección (V)`)}
-                      aria-label={i18n._(msg`Modo Selección`)}
-                    >
-                      <span className="material-symbols-outlined text-[16px]">near_me</span>
-                    </button>
-
-                    {/* Mode: Arrow Tool for Joining Tasks at Central Points (A) */}
-                    <button
-                      id="btn-canvas-tool-arrow"
-                      type="button"
-                      onClick={() => handleSelectCanvasTool('arrow')}
-                      className={`btn-m3-icon w-7 h-7 cursor-pointer transition-colors ${
-                        currentCanvasTool === 'arrow'
-                          ? 'bg-[var(--primary)] text-[var(--on-primary)] shadow-xs'
-                          : 'text-[var(--on-surface-variant)] hover:bg-[var(--surface-container-high)] hover:text-[var(--on-surface)]'
-                      }`}
-                      title={i18n._(msg`Unir tareas con flechas en puntos centrales (A)`)}
-                      aria-label={i18n._(msg`Unir tareas con flechas`)}
-                    >
-                      <span className="material-symbols-outlined text-[16px]">timeline</span>
-                    </button>
-                  </div>
-
-                  {/* Active Connection Source Helper Banner */}
-                  {activeConnectionSource && (
-                    <div
-                      id="canvas-active-connection-banner"
-                      className="absolute top-4 left-1/2 -translate-x-1/2 z-30 bg-[var(--surface-container-high)] border border-[var(--primary)] text-[var(--on-surface)] rounded-full px-4 py-1.5 shadow-xl flex items-center gap-3 text-xs select-none backdrop-blur-md"
-                    >
-                      <span className="w-2 h-2 rounded-full bg-[var(--primary)] animate-ping" />
-                      <span className="font-medium">
-                        {i18n._(msg`Uniendo desde #${activeConnectionSource.taskId || 'tarea'}`)} ·{' '}
-                        <span className="text-[var(--on-surface-variant)] font-normal">
-                          {i18n._(msg`Haz clic en el punto central de otra tarea para unirlas`)}
-                        </span>
-                      </span>
+                    {/* Floating Canvas Navigation Controls (DESIGN.md Section 3 & 14) */}
+                    <div id="div-app-24" className="absolute bottom-3 left-3 z-10 flex items-center gap-0.5 sm:gap-1 bg-[var(--surface-container)]/95 backdrop-blur-md border border-[var(--outline)] rounded-full p-1 shadow-md select-none">
                       <button
-                        id="btn-cancel-task-connection"
+                        id="btn-canvas-zoom-out"
                         type="button"
-                        onClick={() => setActiveConnectionSource(null)}
-                        className="px-2 py-0.5 rounded bg-[var(--surface)] hover:bg-[var(--surface-container)] text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] text-[11px] font-mono border border-[var(--outline)] cursor-pointer transition-colors"
+                        onClick={handleZoomOut}
+                        className="btn-m3-icon w-7 h-7 cursor-pointer"
+                        title={i18n._(msg`Alejar zoom (Zoom Out)`)}
+                        aria-label={i18n._(msg`Alejar zoom`)}
                       >
-                        {i18n._(msg`Cancelar (Esc)`)}
+                        <span className="material-symbols-outlined text-[16px]">remove</span>
+                      </button>
+
+                      <button
+                        id="btn-canvas-zoom-reset"
+                        type="button"
+                        onClick={handleResetZoom}
+                        className="px-2 py-0.5 text-xs font-mono font-medium text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] rounded-full transition-colors cursor-pointer"
+                        title={i18n._(msg`Clic para restablecer zoom al 100%`)}
+                      >
+                        {canvasZoom}%
+                      </button>
+
+                      <button
+                        id="btn-canvas-zoom-in"
+                        type="button"
+                        onClick={handleZoomIn}
+                        className="btn-m3-icon w-7 h-7 cursor-pointer"
+                        title={i18n._(msg`Acercar zoom (Zoom In)`)}
+                        aria-label={i18n._(msg`Acercar zoom`)}
+                      >
+                        <span className="material-symbols-outlined text-[16px]">add</span>
+                      </button>
+
+                      <div id="div-app-25" className="w-px h-4 bg-[var(--outline)] my-auto mx-0.5" />
+
+                      <button
+                        id="btn-canvas-zoom-fit"
+                        type="button"
+                        onClick={handleZoomToFit}
+                        className="btn-m3-icon w-7 h-7 cursor-pointer"
+                        title={i18n._(msg`Ajustar zoom al contenido (Zoom to Fit)`)}
+                        aria-label={i18n._(msg`Ajustar zoom`)}
+                      >
+                        <span className="material-symbols-outlined text-[16px]">fit_screen</span>
+                      </button>
+
+                      <div id="div-app-25-tools" className="w-px h-4 bg-[var(--outline)] my-auto mx-0.5" />
+
+                      {/* Mode: Selection Tool (V) */}
+                      <button
+                        id="btn-canvas-tool-select"
+                        type="button"
+                        onClick={() => handleSelectCanvasTool('select')}
+                        className={`btn-m3-icon w-7 h-7 cursor-pointer transition-colors ${
+                          currentCanvasTool === 'select'
+                            ? 'bg-[var(--primary)] text-[var(--on-primary)] shadow-xs'
+                            : 'text-[var(--on-surface-variant)] hover:bg-[var(--surface-container-high)] hover:text-[var(--on-surface)]'
+                        }`}
+                        title={i18n._(msg`Modo Selección (V)`)}
+                        aria-label={i18n._(msg`Modo Selección`)}
+                      >
+                        <span className="material-symbols-outlined text-[16px]">near_me</span>
+                      </button>
+
+                      {/* Mode: Arrow Tool for Joining Tasks at Central Points (A) */}
+                      <button
+                        id="btn-canvas-tool-arrow"
+                        type="button"
+                        onClick={() => handleSelectCanvasTool('arrow')}
+                        className={`btn-m3-icon w-7 h-7 cursor-pointer transition-colors ${
+                          currentCanvasTool === 'arrow'
+                            ? 'bg-[var(--primary)] text-[var(--on-primary)] shadow-xs'
+                            : 'text-[var(--on-surface-variant)] hover:bg-[var(--surface-container-high)] hover:text-[var(--on-surface)]'
+                        }`}
+                        title={i18n._(msg`Unir tareas con flechas en puntos centrales (A)`)}
+                        aria-label={i18n._(msg`Unir tareas con flechas`)}
+                      >
+                        <span className="material-symbols-outlined text-[16px]">timeline</span>
                       </button>
                     </div>
-                  )}
 
-                  {/* Canvas Empty State Overlay */}
-                  {allParsedTasks.length === 0 && (
-                    <div id="div-app-26" className="absolute inset-0 pointer-events-none flex items-center justify-center p-6 z-10">
-                      <div id="div-app-27" className="pointer-events-auto bg-[var(--surface-container)] border border-[var(--outline)] rounded-lg p-6 max-w-md text-center shadow-lg flex flex-col items-center">
-                        <div id="div-app-28" className="w-10 h-10 rounded bg-[var(--primary-container)]/30 border border-[var(--primary)]/30 flex items-center justify-center text-[var(--primary)] mb-3">
-                          <span className="material-symbols-outlined text-[22px]">grid_view</span>
-                        </div>
-                        <h3 className="text-sm font-semibold text-[var(--on-surface)] font-sans mb-1">
-                          {i18n._(msg`Lienzo vacío`)}
-                        </h3>
-                        <p className="text-xs text-[var(--on-surface-variant)] mb-4 leading-relaxed">
-                          {i18n._(msg`No hay tareas en este archivo TASKS.md. Comienza añadiendo una tarea o carga un proyecto de ejemplo.`)}
-                        </p>
-                        <div id="div-app-29" className="flex items-center gap-2 flex-wrap justify-center">
-                          <button
-                            id="btn-empty-create-task"
-                            type="button"
-                            onClick={() => {
-                              if (existingSections.length > 0 && !isCustomGroup) {
-                                setNewTaskGroup(existingSections[0]);
-                              }
-                              setIsNewTaskModalOpen(true);
-                            }}
-                            className="btn-m3-primary px-3.5 py-1.5 text-xs cursor-pointer shadow-sm"
-                          >
-                            <span className="material-symbols-outlined text-[15px]">add</span>
-                            <span>{i18n._(msg`Crear primera tarea`)}</span>
-                          </button>
-                          <button
-                            id="btn-empty-load-sample"
-                            type="button"
-                            onClick={handleLoadSampleProject}
-                            className="btn-m3-secondary px-3.5 py-1.5 text-xs cursor-pointer"
-                          >
-                            <span className="material-symbols-outlined text-[15px]">refresh</span>
-                            <span>{i18n._(msg`Cargar ejemplo`)}</span>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Floating Canvas Multi-Selection Action Bar (DESIGN.md Section 14) */}
-                  {selectedTaskIdsOnCanvas.length > 1 && (
-                    <div id="div-app-30" className="absolute bottom-12 left-1/2 -translate-x-1/2 z-20 bg-[var(--surface-container-high)] border border-[var(--outline)] rounded-lg px-2.5 sm:px-3 py-1.5 shadow-xl flex items-center gap-1.5 sm:gap-2 select-none max-w-[96vw] overflow-x-auto">
-                      <div id="div-app-31" className="flex items-center gap-1.5 pr-2 border-r border-[var(--outline)] shrink-0">
-                        <span className="w-2 h-2 rounded bg-[var(--primary)]" />
-                        <span className="text-xs font-mono font-medium text-[var(--on-surface)]">
-                          {selectedTaskIdsOnCanvas.length} {i18n._(msg`seleccionadas`)}
+                    {/* Active Connection Source Helper Banner */}
+                    {activeConnectionSource && (
+                      <div
+                        id="canvas-active-connection-banner"
+                        className="absolute top-4 left-1/2 -translate-x-1/2 z-30 bg-[var(--surface-container-high)] border border-[var(--primary)] text-[var(--on-surface)] rounded-full px-4 py-1.5 shadow-xl flex items-center gap-3 text-xs select-none backdrop-blur-md"
+                      >
+                        <span className="w-2 h-2 rounded-full bg-[var(--primary)] animate-ping" />
+                        <span className="font-medium">
+                          {i18n._(msg`Uniendo desde #${activeConnectionSource.taskId || 'tarea'}`)} ·{' '}
+                          <span className="text-[var(--on-surface-variant)] font-normal">
+                            {i18n._(msg`Haz clic en el punto central de otra tarea para unirlas`)}
+                          </span>
                         </span>
+                        <button
+                          id="btn-cancel-task-connection"
+                          type="button"
+                          onClick={() => setActiveConnectionSource(null)}
+                          className="px-2 py-0.5 rounded bg-[var(--surface)] hover:bg-[var(--surface-container)] text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] text-[11px] font-mono border border-[var(--outline)] cursor-pointer transition-colors"
+                        >
+                          {i18n._(msg`Cancelar (Esc)`)}
+                        </button>
                       </div>
+                    )}
 
-                      <button
-                        id="btn-selection-batch-complete"
-                        type="button"
-                        onClick={() =>
-                          handleBatchUpdateTasksFromKanban(selectedTaskIdsOnCanvas, {
-                            completed: true,
-                            status: 'done',
-                          })
-                        }
-                        className="btn-m3-secondary px-2 py-1 text-xs text-emerald-400 border-emerald-800/60 bg-emerald-950/30 cursor-pointer shrink-0"
-                        title={i18n._(msg`Marcar seleccionadas como completadas`)}
-                      >
-                        <span className="material-symbols-outlined text-[15px]">check_circle</span>
-                        <span className="hidden sm:inline">{i18n._(msg`Completar`)}</span>
-                      </button>
-
-                      <button
-                        id="btn-selection-batch-pending"
-                        type="button"
-                        onClick={() =>
-                          handleBatchUpdateTasksFromKanban(selectedTaskIdsOnCanvas, {
-                            completed: false,
-                            status: 'todo',
-                          })
-                        }
-                        className="btn-m3-secondary px-2 py-1 text-xs text-amber-400 border-amber-800/60 bg-amber-950/30 cursor-pointer shrink-0"
-                        title={i18n._(msg`Marcar seleccionadas como pendientes`)}
-                      >
-                        <span className="material-symbols-outlined text-[15px]">pending</span>
-                        <span className="hidden sm:inline">{i18n._(msg`Pendiente`)}</span>
-                      </button>
-
-                      {/* Quick Priorities */}
-                      <div id="div-app-32" className="flex items-center gap-1 shrink-0 border-l border-r border-[var(--outline)] px-1.5">
-                        {(['P0', 'P1', 'P2', 'P3'] as TaskPriority[]).map((p) => (
-                          <button
-                            id={`btn-selection-priority-${p}`}
-                            key={p}
-                            type="button"
-                            onClick={() =>
-                              handleBatchUpdateTasksFromKanban(selectedTaskIdsOnCanvas, { priority: p })
-                            }
-                            className="px-1.5 py-0.5 text-[10px] font-mono font-medium rounded border border-[var(--outline)] text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer"
-                            title={i18n._(msg`Establecer prioridad ${p}`)}
-                          >
-                            {p}
-                          </button>
-                        ))}
+                    {/* Canvas Empty State Overlay */}
+                    {allParsedTasks.length === 0 && (
+                      <div id="div-app-26" className="absolute inset-0 pointer-events-none flex items-center justify-center p-6 z-10">
+                        <div id="div-app-27" className="pointer-events-auto bg-[var(--surface-container)] border border-[var(--outline)] rounded-lg p-6 max-w-md text-center shadow-lg flex flex-col items-center">
+                          <div id="div-app-28" className="w-10 h-10 rounded bg-[var(--primary-container)]/30 border border-[var(--primary)]/30 flex items-center justify-center text-[var(--primary)] mb-3">
+                            <span className="material-symbols-outlined text-[22px]">grid_view</span>
+                          </div>
+                          <h3 className="text-sm font-semibold text-[var(--on-surface)] font-sans mb-1">
+                            {i18n._(msg`Lienzo vacío`)}
+                          </h3>
+                          <p className="text-xs text-[var(--on-surface-variant)] mb-4 leading-relaxed">
+                            {i18n._(msg`No hay tareas en este archivo TASKS.md. Comienza añadiendo una tarea o carga un proyecto de ejemplo.`)}
+                          </p>
+                          <div id="div-app-29" className="flex items-center gap-2 flex-wrap justify-center">
+                            <button
+                              id="btn-empty-create-task"
+                              type="button"
+                              onClick={() => {
+                                if (existingSections.length > 0 && !isCustomGroup) {
+                                  setNewTaskGroup(existingSections[0]);
+                                }
+                                setIsNewTaskModalOpen(true);
+                              }}
+                              className="btn-m3-primary px-3.5 py-1.5 text-xs cursor-pointer shadow-sm"
+                            >
+                              <span className="material-symbols-outlined text-[15px]">add</span>
+                              <span>{i18n._(msg`Crear primera tarea`)}</span>
+                            </button>
+                            <button
+                              id="btn-empty-load-sample"
+                              type="button"
+                              onClick={handleLoadSampleProject}
+                              className="btn-m3-secondary px-3.5 py-1.5 text-xs cursor-pointer"
+                            >
+                              <span className="material-symbols-outlined text-[15px]">refresh</span>
+                              <span>{i18n._(msg`Cargar ejemplo`)}</span>
+                            </button>
+                          </div>
+                        </div>
                       </div>
+                    )}
 
-                      <button
-                        id="btn-selection-batch-delete"
-                        type="button"
-                        onClick={() => {
-                          handleBatchDeleteTasksFromKanban(selectedTaskIdsOnCanvas);
-                        }}
-                        className="btn-m3-secondary px-2 py-1 text-xs text-[var(--error)] border-rose-800/60 bg-rose-950/30 cursor-pointer shrink-0"
-                        title={i18n._(msg`Eliminar tareas seleccionadas`)}
-                      >
-                        <span className="material-symbols-outlined text-[15px]">delete</span>
-                        <span className="hidden sm:inline">{i18n._(msg`Eliminar`)}</span>
-                      </button>
+                    {/* Floating Canvas Multi-Selection Action Bar (DESIGN.md Section 14) */}
+                    {selectedTaskIdsOnCanvas.length > 1 && (
+                      <div id="div-app-30" className="absolute bottom-12 left-1/2 -translate-x-1/2 z-20 bg-[var(--surface-container-high)] border border-[var(--outline)] rounded-lg px-2.5 sm:px-3 py-1.5 shadow-xl flex items-center gap-1.5 sm:gap-2 select-none max-w-[96vw] overflow-x-auto">
+                        <div id="div-app-31" className="flex items-center gap-1.5 pr-2 border-r border-[var(--outline)] shrink-0">
+                          <span className="w-2 h-2 rounded bg-[var(--primary)]" />
+                          <span className="text-xs font-mono font-medium text-[var(--on-surface)]">
+                            {selectedTaskIdsOnCanvas.length} {i18n._(msg`seleccionadas`)}
+                          </span>
+                        </div>
 
-                      <button
-                        id="btn-selection-deselect"
-                        type="button"
-                        onClick={() => {
-                          if (editor) {
-                            editor.selectNone();
+                        <button
+                          id="btn-selection-batch-complete"
+                          type="button"
+                          onClick={() =>
+                            handleBatchUpdateTasksFromKanban(selectedTaskIdsOnCanvas, {
+                              completed: true,
+                              status: 'done',
+                            })
                           }
-                          setSelectedTaskIdsOnCanvas([]);
-                          setSelectedTaskShapeId(null);
+                          className="btn-m3-secondary px-2 py-1 text-xs text-emerald-400 border-emerald-800/60 bg-emerald-950/30 cursor-pointer shrink-0"
+                          title={i18n._(msg`Marcar seleccionadas como completadas`)}
+                        >
+                          <span className="material-symbols-outlined text-[15px]">check_circle</span>
+                          <span className="hidden sm:inline">{i18n._(msg`Completar`)}</span>
+                        </button>
+
+                        <button
+                          id="btn-selection-batch-pending"
+                          type="button"
+                          onClick={() =>
+                            handleBatchUpdateTasksFromKanban(selectedTaskIdsOnCanvas, {
+                              completed: false,
+                              status: 'todo',
+                            })
+                          }
+                          className="btn-m3-secondary px-2 py-1 text-xs text-amber-400 border-amber-800/60 bg-amber-950/30 cursor-pointer shrink-0"
+                          title={i18n._(msg`Marcar seleccionadas como pendientes`)}
+                        >
+                          <span className="material-symbols-outlined text-[15px]">pending</span>
+                          <span className="hidden sm:inline">{i18n._(msg`Pendiente`)}</span>
+                        </button>
+
+                        {/* Quick Priorities */}
+                        <div id="div-app-32" className="flex items-center gap-1 shrink-0 border-l border-r border-[var(--outline)] px-1.5">
+                          {(['P0', 'P1', 'P2', 'P3'] as TaskPriority[]).map((p) => (
+                            <button
+                              id={`btn-selection-priority-${p}`}
+                              key={p}
+                              type="button"
+                              onClick={() =>
+                                handleBatchUpdateTasksFromKanban(selectedTaskIdsOnCanvas, { priority: p })
+                              }
+                              className="px-1.5 py-0.5 text-[10px] font-mono font-medium rounded border border-[var(--outline)] text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer"
+                              title={i18n._(msg`Establecer prioridad ${p}`)}
+                            >
+                              {p}
+                            </button>
+                          ))}
+                        </div>
+
+                        <button
+                          id="btn-selection-batch-delete"
+                          type="button"
+                          onClick={() => {
+                            handleBatchDeleteTasksFromKanban(selectedTaskIdsOnCanvas);
+                          }}
+                          className="btn-m3-secondary px-2 py-1 text-xs text-[var(--error)] border-rose-800/60 bg-rose-950/30 cursor-pointer shrink-0"
+                          title={i18n._(msg`Eliminar tareas seleccionadas`)}
+                        >
+                          <span className="material-symbols-outlined text-[15px]">delete</span>
+                          <span className="hidden sm:inline">{i18n._(msg`Eliminar`)}</span>
+                        </button>
+
+                        <button
+                          id="btn-selection-deselect"
+                          type="button"
+                          onClick={() => {
+                            if (editor) {
+                              editor.selectNone();
+                            }
+                            setSelectedTaskIdsOnCanvas([]);
+                            setSelectedTaskShapeId(null);
+                          }}
+                          className="btn-m3-icon w-6 h-6 shrink-0 cursor-pointer"
+                          title={i18n._(msg`Deseleccionar`)}
+                        >
+                          <span className="material-symbols-outlined text-[14px]">close</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+
+                const kanbanViewNode = (
+                  <div className="relative w-full h-full overflow-hidden flex flex-col">
+                    <KanbanBoard
+                      markdown={markdownInput}
+                      isLoading={isLoadingDocument}
+                      onOpenSampleProject={handleLoadSampleProject}
+                      onUpdateTask={handleUpdateTaskFromKanban}
+                      onBatchUpdateTasks={handleBatchUpdateTasksFromKanban}
+                      onDeleteTask={(taskId, title) => {
+                        const dependents = findDependentTasks(markdownInput, taskId);
+                        setDeleteWarningState({
+                          shapeId: taskId,
+                          taskId,
+                          title,
+                          dependents,
+                        });
+                      }}
+                      onBatchDeleteTasks={handleBatchDeleteTasksFromKanban}
+                      onSelectTask={(id) => setSelectedTaskShapeId(id)}
+                      selectedTaskId={selectedTaskShapeId}
+                      onOpenNewTaskModalWithGroup={(groupOrStatus) => {
+                        if (existingSections.includes(groupOrStatus)) {
+                          setNewTaskGroup(groupOrStatus);
+                        }
+                        setIsNewTaskModalOpen(true);
+                      }}
+                      searchQuery={searchQuery}
+                      activeFilter={activeFilter}
+                      filters={taskFilters}
+                      onResetFilters={() => {
+                        setSearchQuery('');
+                        setTaskFilters({
+                          status: 'all',
+                          priority: 'all',
+                          section: 'all',
+                          tag: 'all',
+                          onlyBlocked: false,
+                          sortBy: 'default',
+                        });
+                        resetGlobalTaskFilters();
+                        setActiveFilter('all');
+                      }}
+                    />
+                  </div>
+                );
+
+                if (activeView === 'canvas') {
+                  return canvasViewNode;
+                }
+
+                if (activeView === 'kanban') {
+                  return kanbanViewNode;
+                }
+
+                if (activeView === 'split') {
+                  return (
+                    <div
+                      id="antask-dual-view-container"
+                      className="relative w-full h-full overflow-hidden flex flex-col md:flex-row bg-[var(--surface)]"
+                    >
+                      {/* Left Pane: Canvas View */}
+                      <div
+                        id="antask-dual-canvas-pane"
+                        style={{
+                          width: isMobileScreen ? '100%' : `${dualRatio}%`,
+                          height: isMobileScreen ? '50%' : '100%',
+                          flex: isMobileScreen ? '0 0 50%' : `0 0 ${dualRatio}%`,
                         }}
-                        className="btn-m3-icon w-6 h-6 shrink-0 cursor-pointer"
-                        title={i18n._(msg`Deseleccionar`)}
+                        className="relative overflow-hidden min-w-0 md:min-w-[200px] flex flex-col"
                       >
-                        <span className="material-symbols-outlined text-[14px]">close</span>
-                      </button>
+                        {canvasViewNode}
+                      </div>
+
+                      {/* Dual View Splitter Divider */}
+                      <div
+                        id="antask-dual-splitter"
+                        onMouseDown={handleDualSplitterMouseDown}
+                        onDoubleClick={() => {
+                          setDualRatio(50);
+                          try {
+                            localStorage.setItem('antask_dual_ratio', '50');
+                          } catch {}
+                        }}
+                        className="hidden md:flex w-2 hover:w-2.5 bg-[var(--surface-container-high)] hover:bg-[var(--primary)] transition-all cursor-col-resize items-center justify-center relative group select-none shrink-0 z-20 border-x border-[var(--outline)]"
+                        title={i18n._(msg`Arrastrar para ajustar proporción Canvas / Kanban (Doble clic para 50/50)`)}
+                      >
+                        <div className="w-0.5 h-6 rounded-full bg-[var(--outline)] group-hover:bg-white" />
+                      </div>
+
+                      {/* Right Pane: Kanban View */}
+                      <div
+                        id="antask-dual-kanban-pane"
+                        style={{
+                          width: isMobileScreen ? '100%' : `${100 - dualRatio}%`,
+                          height: isMobileScreen ? '50%' : '100%',
+                          flex: isMobileScreen ? '0 0 50%' : `0 0 ${100 - dualRatio}%`,
+                        }}
+                        className="relative overflow-hidden min-w-0 md:min-w-[200px] border-t md:border-t-0 md:border-l border-[var(--outline)] flex flex-col"
+                      >
+                        {kanbanViewNode}
+                      </div>
                     </div>
-                  )}
-                </>
-              ) : activeView === 'kanban' ? (
-                <KanbanBoard
-                  markdown={markdownInput}
-                  isLoading={isLoadingDocument}
-                  onOpenSampleProject={handleLoadSampleProject}
-                  onUpdateTask={handleUpdateTaskFromKanban}
-                  onBatchUpdateTasks={handleBatchUpdateTasksFromKanban}
-                  onDeleteTask={(taskId, title) => {
-                    const dependents = findDependentTasks(markdownInput, taskId);
-                    setDeleteWarningState({
-                      shapeId: taskId,
-                      taskId,
-                      title,
-                      dependents,
-                    });
-                  }}
-                  onBatchDeleteTasks={handleBatchDeleteTasksFromKanban}
-                  onSelectTask={(id) => setSelectedTaskShapeId(id)}
-                  selectedTaskId={selectedTaskShapeId}
-                  onOpenNewTaskModalWithGroup={(groupOrStatus) => {
-                    if (existingSections.includes(groupOrStatus)) {
-                      setNewTaskGroup(groupOrStatus);
-                    }
-                    setIsNewTaskModalOpen(true);
-                  }}
-                  searchQuery={searchQuery}
-                  activeFilter={activeFilter}
-                  filters={taskFilters}
-                  onResetFilters={() => {
-                    setSearchQuery('');
-                    setTaskFilters({
-                      status: 'all',
-                      priority: 'all',
-                      section: 'all',
-                      tag: 'all',
-                      onlyBlocked: false,
-                      sortBy: 'default',
-                    });
-                    setActiveFilter('all');
-                  }}
-                />
-              ) : (
-                <SanityStudio
-                  onOpenSanityConfig={() => setIsSanityModalOpen(true)}
-                  onImportTaskToMarkdown={handleImportTaskFromSanity}
-                  onActivateWorkspace={handleActivateWorkspaceFromSanity}
-                  onOpenSyncDiffModal={() => setIsSyncOverrideModalOpen(true)}
-                  onShowToast={pushToast}
-                />
-              )}
+                  );
+                }
+
+                return (
+                  <SanityStudio
+                    onOpenSanityConfig={() => setIsSanityModalOpen(true)}
+                    onImportTaskToMarkdown={handleImportTaskFromSanity}
+                    onActivateWorkspace={handleActivateWorkspaceFromSanity}
+                    onOpenSyncDiffModal={() => setIsSyncOverrideModalOpen(true)}
+                    onShowToast={pushToast}
+                  />
+                );
+              })()}
 
               {/* Drag & Drop Discrete Overlay */}
               {isDraggingOver && (

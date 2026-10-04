@@ -241,11 +241,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   </div>
                   <select
                     value={settings.defaultView}
-                    onChange={(e) => handleUpdate('defaultView', e.target.value as 'canvas' | 'kanban')}
+                    onChange={(e) => handleUpdate('defaultView', e.target.value as 'canvas' | 'kanban' | 'split' | 'studio')}
                     className="bg-[var(--surface-container)] text-[var(--on-surface)] border border-[var(--outline)] rounded px-2.5 py-1 text-xs focus:outline-none focus:border-[var(--primary)] cursor-pointer"
                   >
                     <option value="canvas">{i18n._(msg`Lienzo (Canvas)`)}</option>
                     <option value="kanban">{i18n._(msg`Tablero Kanban`)}</option>
+                    <option value="split">{i18n._(msg`Vista Dual (Canvas + Kanban)`)}</option>
+                    <option value="studio">{i18n._(msg`Sanity Studio`)}</option>
                   </select>
                 </div>
 
