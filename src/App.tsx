@@ -2882,18 +2882,6 @@ export default function App() {
             </span>
           </button>
 
-          {/* Mobile Quick Search Button */}
-          <button
-            id="btn-mobile-open-search"
-            type="button"
-            onClick={() => setIsCommandPaletteOpen(true)}
-            className="btn-m3-icon w-8 h-8 sm:hidden shrink-0 cursor-pointer"
-            title={i18n._(msg`Buscar...`)}
-            aria-label={i18n._(msg`Buscar...`)}
-          >
-            <span className="material-symbols-outlined text-[18px]">search</span>
-          </button>
-
           {/* Validation Issues Alert Chip (if any) */}
           {validationReport.issues.length > 0 && (
             <button
@@ -2911,9 +2899,6 @@ export default function App() {
               <span>{validationReport.issues.length}</span>
             </button>
           )}
-
-          {/* Language Selector */}
-          <LanguageSelector className="hidden sm:inline-block shrink-0" onLanguageChange={(lang) => handleUpdateSettings({ ...userSettings, language: lang })} />
 
           {/* Three Dots Menu Container: Configuración, el ? y el tema */}
           <div id="div-header-more-menu-container" className="relative shrink-0" ref={headerMenuRef}>
@@ -2940,6 +2925,9 @@ export default function App() {
                 className="absolute right-0 top-full mt-1.5 w-56 bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-xl py-1 z-50 animate-fade-in select-none text-xs"
               >
                 {/* 1. Tema */}
+                <div className="px-3 py-2 border-b border-[var(--outline)]">
+                  <LanguageSelector onLanguageChange={(lang) => handleUpdateSettings({ ...userSettings, language: lang })} />
+                </div>
                 <button
                   id="btn-header-more-menu-theme"
                   role="menuitem"
