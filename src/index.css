@@ -355,4 +355,21 @@ textarea:focus-visible,
   opacity: 0 !important;
 }
 
+/* Suction / Magnetic snap effect styling for task-group containers */
+[data-suction-active="true"] {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 40%, transparent) !important;
+  background-color: color-mix(in srgb, var(--primary) 8%, var(--surface-container)) !important;
+  transition: all 120ms ease-out !important;
+}
+
+.suction-indicator {
+  display: none;
+}
+
+[data-suction-active="true"] .suction-indicator {
+  display: inline-flex;
+}
+
+
 

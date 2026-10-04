@@ -12,6 +12,7 @@ import {
   ShapeUtil,
   T,
   TLBaseShape,
+  TLShapePartial,
 } from 'tldraw';
 import { CanvasVisualDocument } from '../services/sanityService';
 import { scanTaskBlocks, validateMarkdownDocument } from '../utils/markdownSync';
@@ -845,8 +846,222 @@ export class TaskShapeUtil extends ShapeUtil<any> {
     return undefined;
   }
 
+  override onTranslate(initial: any, current: any): any {
+    const cardW = current.props?.w || 320;
+    const cardH = current.props?.h || 110;
+    const cardCenterX = current.x + cardW / 2;
+    const cardCenterY = current.y + cardH / 2;
+
+    const groupShapes = this.editor
+      .getCurrentPageShapes()
+      .filter((s) => (s as any).type === 'task-group') as any[];
+
+    let capturedGroup: any = null;
+    const MAGNETIC_MARGIN = 50;
+
+    for (const g of groupShapes) {
+      const gW = g.props?.w || 360;
+      const gH = g.props?.h || 240;
+      const inZone =
+        cardCenterX >= g.x - MAGNETIC_MARGIN &&
+        cardCenterX <= g.x + gW + MAGNETIC_MARGIN &&
+        cardCenterY >= g.y - MAGNETIC_MARGIN &&
+        cardCenterY <= g.y + gH + MAGNETIC_MARGIN;
+
+      if (inZone) {
+        capturedGroup = g;
+        break;
+      }
+    }
+
+    // Toggle suction DOM state on all group containers
+    groupShapes.forEach((g) => {
+      const el = document.getElementById(`task-group-container-${g.id}`);
+      if (el) {
+        if (capturedGroup && g.id === capturedGroup.id) {
+          el.setAttribute('data-suction-active', 'true');
+        } else {
+          el.removeAttribute('data-suction-active');
+        }
+      }
+    });
+  }
+
+  override onTranslateEnd(initial: any, current: any): any {
+    const groupShapes = this.editor
+      .getCurrentPageShapes()
+      .filter((s) => (s as any).type === 'task-group') as any[];
+
+    // Clean up suction feedback
+    groupShapes.forEach((g) => {
+      const el = document.getElementById(`task-group-container-${g.id}`);
+      if (el) {
+        el.removeAttribute('data-suction-active');
+      }
+    });
+
+    const cardW = current.props?.w || 320;
+    const cardH = current.props?.h || 110;
+    const cardCenterX = current.x + cardW / 2;
+    const cardCenterY = current.y + cardH / 2;
+
+    let targetGroup: any = null;
+    const MAGNETIC_MARGIN = 50;
+
+    for (const g of groupShapes) {
+      const gW = g.props?.w || 360;
+      const gH = g.props?.h || 240;
+      const inZone =
+        cardCenterX >= g.x - MAGNETIC_MARGIN &&
+        cardCenterX <= g.x + gW + MAGNETIC_MARGIN &&
+        cardCenterY >= g.y - MAGNETIC_MARGIN &&
+        cardCenterY <= g.y + gH + MAGNETIC_MARGIN;
+
+      if (inZone) {
+        targetGroup = g;
+        break;
+      }
+    }
+
+    const taskId = current.props?.taskId || current.props?.title;
+
+    if (targetGroup) {
+      // Ventosa snap: align directly into section column
+      const targetGroupTitle = targetGroup.props.title;
+      const snappedX = targetGroup.x + 20;
+
+      // Find other tasks in target group
+      const otherTasks = (this.editor
+        .getCurrentPageShapes()
+        .filter(
+          (s) =>
+            (s as any).type === 'task' &&
+            s.id !== current.id &&
+            ((s as any).props?.groupTitle || '').trim().toLowerCase() === targetGroupTitle.trim().toLowerCase()
+        ) as any[]).sort((a, b) => a.y - b.y);
+
+      let snappedY = targetGroup.y + 72;
+      if (otherTasks.length > 0) {
+        const lastTask = otherTasks[otherTasks.length - 1];
+        if (current.y >= lastTask.y) {
+          snappedY = lastTask.y + (lastTask.props?.h || 110) + 16;
+        } else {
+          let insertIdx = 0;
+          for (let i = 0; i < otherTasks.length; i++) {
+            if (current.y > otherTasks[i].y + (otherTasks[i].props?.h || 110) / 2) {
+              insertIdx = i + 1;
+            }
+          }
+          if (insertIdx === 0) {
+            snappedY = targetGroup.y + 72;
+          } else {
+            const prev = otherTasks[insertIdx - 1];
+            snappedY = prev.y + (prev.props?.h || 110) + 16;
+          }
+        }
+      }
+
+      // Check if group height needs expanding to fully contain the snapped card
+      const neededHeight = (snappedY - targetGroup.y) + cardH + 24;
+      if (neededHeight > (targetGroup.props?.h || 240)) {
+        (this.editor.updateShape as any)({
+          id: targetGroup.id,
+          type: 'task-group',
+          props: {
+            ...targetGroup.props,
+            h: Math.ceil(neededHeight),
+          },
+        });
+      }
+
+      // Dispatch event to update Markdown
+      if (taskId) {
+        window.dispatchEvent(
+          new CustomEvent('antask:task-moved-group', {
+            detail: { taskId, targetGroupTitle },
+          })
+        );
+      }
+
+      return {
+        id: current.id,
+        type: 'task' as const,
+        x: snappedX,
+        y: snappedY,
+        props: {
+          ...current.props,
+          groupTitle: targetGroupTitle,
+        },
+      };
+    } else {
+      // Separated from its section into open canvas!
+      // In Markdown, it must be assigned to ## Out
+      if (taskId) {
+        window.dispatchEvent(
+          new CustomEvent('antask:task-moved-group', {
+            detail: { taskId, targetGroupTitle: 'Out' },
+          })
+        );
+      }
+
+      return {
+        id: current.id,
+        type: 'task' as const,
+        props: {
+          ...current.props,
+          groupTitle: 'Out',
+        },
+      };
+    }
+  }
+
+  override onTranslateCancel(initial: any, current: any): void {
+    const groupShapes = this.editor
+      .getCurrentPageShapes()
+      .filter((s) => (s as any).type === 'task-group') as any[];
+
+    groupShapes.forEach((g) => {
+      const el = document.getElementById(`task-group-container-${g.id}`);
+      if (el) {
+        el.removeAttribute('data-suction-active');
+      }
+    });
+  }
+
   component(shape: ITaskShape) {
     return <TaskCardComponent shape={shape} editor={this.editor} />;
+  }
+}
+
+export function updateAllGroupCounts(editor: Editor) {
+  const shapes = editor.getCurrentPageShapes();
+  const groupShapes = shapes.filter((s) => (s as any).type === 'task-group') as any[];
+  const taskShapes = shapes.filter((s) => (s as any).type === 'task') as any[];
+
+  const updates: any[] = [];
+  for (const g of groupShapes) {
+    const gTitle = (g.props?.title || '').trim().toLowerCase();
+    const tasksInGroup = taskShapes.filter(
+      (t) => (t.props?.groupTitle || '').trim().toLowerCase() === gTitle
+    );
+    const count = tasksInGroup.length;
+    const completedCount = tasksInGroup.filter((t) => t.props?.completed).length;
+
+    if (g.props?.count !== count || g.props?.completedCount !== completedCount) {
+      updates.push({
+        id: g.id,
+        type: 'task-group',
+        props: {
+          ...g.props,
+          count,
+          completedCount,
+        },
+      });
+    }
+  }
+
+  if (updates.length > 0) {
+    editor.updateShapes(updates);
   }
 }
 
@@ -903,9 +1118,13 @@ function TaskGroupComponent({ shape }: { shape: ITaskGroupShape }) {
         <div id={`task-group-header-${shape.id}`} className="flex items-center justify-between border-b border-[var(--outline)] pb-2">
           <div id={`task-group-title-group-${shape.id}`} className="flex items-center gap-1.5">
             <span className="text-[var(--on-surface-variant)] font-mono text-xs font-semibold">##</span>
-            <h2 className="text-xs font-semibold text-[var(--on-surface)] font-sans tracking-tight truncate max-w-[220px]">
+            <h2 className="text-xs font-semibold text-[var(--on-surface)] font-sans tracking-tight truncate max-w-[200px]">
               {title}
             </h2>
+            <span className="suction-indicator items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono font-medium text-[var(--primary)] bg-[var(--primary)]/10 border border-[var(--primary)]/30 animate-pulse">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--primary)]" />
+              {i18n._(msg`Ventosa`)}
+            </span>
           </div>
           {count > 0 && (
             <span className="text-[11px] font-mono text-[var(--on-surface-variant)] tabular-nums">
@@ -1290,8 +1509,9 @@ export function populateCanvasWithGroups(
           title: task.title,
           completed: task.completed,
           priority: task.priority || 'P1',
-          taskId: task.taskId,
+          taskId: resolvedTaskId,
           status: task.status,
+          groupTitle: group.title,
           tags: task.tags,
           subtasks: task.subtasks,
           blockedBy: task.blockedBy,

@@ -740,7 +740,8 @@ export function moveTaskToGroupInMarkdown(
   const targetBlock = taskBlocks.find(
     (b) =>
       (b.detectedId && b.detectedId.toLowerCase() === normalizedTargetId) ||
-      b.temporaryId.toLowerCase() === normalizedTargetId
+      b.temporaryId.toLowerCase() === normalizedTargetId ||
+      (b.detectedTitle && b.detectedTitle.trim().toLowerCase() === normalizedTargetId)
   );
 
   if (!targetBlock || targetBlock.groupTitle.toLowerCase() === cleanTargetGroup.toLowerCase()) {

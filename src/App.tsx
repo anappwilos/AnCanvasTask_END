@@ -31,6 +31,7 @@ import {
   TaskPriority,
   TaskShapeUtil,
   TaskStatus,
+  updateAllGroupCounts,
 } from './shapes/TaskShapeUtil';
 import { applyAutoLayout } from './utils/autoLayout';
 import { KanbanBoard } from './components/KanbanBoard';
@@ -401,6 +402,23 @@ export default function App() {
     window.addEventListener('antask:dependency-created', handleDepCreated);
     return () => window.removeEventListener('antask:dependency-created', handleDepCreated);
   }, [pushToast]);
+
+  // Handle task card moved to another group or separated to Out
+  useEffect(() => {
+    const handleTaskMovedGroup = (e: any) => {
+      const { taskId, targetGroupTitle } = e.detail || {};
+      if (taskId && targetGroupTitle) {
+        setMarkdownInput((curr) => {
+          return moveTaskToGroupInMarkdown(curr, taskId, targetGroupTitle);
+        });
+        if (editor) {
+          updateAllGroupCounts(editor);
+        }
+      }
+    };
+    window.addEventListener('antask:task-moved-group', handleTaskMovedGroup);
+    return () => window.removeEventListener('antask:task-moved-group', handleTaskMovedGroup);
+  }, [editor]);
 
   // Online / Offline network status listener
   useEffect(() => {
@@ -1675,9 +1693,9 @@ export default function App() {
                     }
                   }
 
-                  // 2. Detect moving task into another group bounding box
+                  // 2. Detect moving task into another group bounding box (for non-interactive programmatic moves)
                   const isPositionChanged = to.x !== from.x || to.y !== from.y;
-                  if (isPositionChanged) {
+                  if (isPositionChanged && !editorInstance.isIn('select.translating')) {
                     const taskId = toProps.taskId || fromProps.taskId;
                     if (taskId) {
                       const taskCenterX = to.x + (toProps.w || 320) / 2;
@@ -1688,6 +1706,7 @@ export default function App() {
                         .getCurrentPageShapes()
                         .filter((s) => (s as any).type === 'task-group');
 
+                      let foundGroupTitle: string | null = null;
                       for (const gShape of groupShapes) {
                         const g = gShape as any;
                         const gW = g.props?.w || 360;
@@ -1699,20 +1718,52 @@ export default function App() {
                           taskCenterY >= g.y &&
                           taskCenterY <= g.y + gH
                         ) {
-                          const targetGroupTitle = g.props?.title;
-                          if (targetGroupTitle) {
-                            setMarkdownInput((curr) => {
-                              const updated = moveTaskToGroupInMarkdown(
-                                curr,
-                                taskId,
-                                targetGroupTitle
-                              );
-                              return updated;
-                            });
-                          }
+                          foundGroupTitle = g.props?.title || null;
                           break;
                         }
                       }
+
+                      const targetGroupTitle = foundGroupTitle || 'Out';
+                      const currentGroup = toProps.groupTitle || fromProps.groupTitle;
+                      if (currentGroup !== targetGroupTitle) {
+                        setMarkdownInput((curr) =>
+                          moveTaskToGroupInMarkdown(curr, taskId, targetGroupTitle)
+                        );
+                        updateAllGroupCounts(editorInstance);
+                      }
+                    }
+                  }
+                }
+
+                // 3. Detect moving task-group shape -> move associated tasks together as a group
+                if (to?.type === 'task-group' && from?.type === 'task-group') {
+                  const dx = to.x - from.x;
+                  const dy = to.y - from.y;
+                  if (dx !== 0 || dy !== 0) {
+                    const selectedIds = new Set(editorInstance.getSelectedShapeIds());
+                    const groupTitle = (to.props?.title || '').trim().toLowerCase();
+
+                    const tasksInGroup = (editorInstance
+                      .getCurrentPageShapes()
+                      .filter((s) => {
+                        if ((s as any).type !== 'task') return false;
+                        const taskGroup = ((s as any).props?.groupTitle || '').trim().toLowerCase();
+                        return taskGroup === groupTitle;
+                      }) as any[]);
+
+                    const updates: any[] = [];
+                    for (const t of tasksInGroup) {
+                      if (!selectedIds.has(t.id)) {
+                        updates.push({
+                          id: t.id,
+                          type: 'task',
+                          x: t.x + dx,
+                          y: t.y + dy,
+                        });
+                      }
+                    }
+                    if (updates.length > 0) {
+                      editorInstance.updateShapes(updates);
                     }
                   }
                 }

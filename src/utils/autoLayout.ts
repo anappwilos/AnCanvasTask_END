@@ -207,6 +207,7 @@ export function applyAutoLayout(editor: Editor, markdown: string): AutoLayoutRes
           y: taskY,
           props: {
             ...shape.props,
+            groupTitle: groupTitle,
             w: CARD_WIDTH,
             h: CARD_HEIGHT,
           },
