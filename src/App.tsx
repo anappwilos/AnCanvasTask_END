@@ -4416,18 +4416,7 @@ export default function App() {
           <span className="capitalize truncate w-full text-center leading-none mt-0.5">{activeView}</span>
         </button>
 
-        {activeView === 'canvas' ? (
-          <button
-            id="btn-mobile-nav-auto-order"
-            type="button"
-            onClick={() => setIsAutoLayoutConfirmOpen(true)}
-            className="flex flex-col items-center justify-center py-1 px-0.5 rounded-lg text-[10px] text-sky-400 hover:text-sky-300 transition-colors cursor-pointer overflow-hidden"
-            title={i18n._(msg`Auto organizar tareas`)}
-          >
-            <span className="material-symbols-outlined text-[18px]">account_tree</span>
-            <span className="truncate w-full text-center leading-none mt-0.5">{i18n._(msg`Auto-ordenar`)}</span>
-          </button>
-        ) : activeView === 'kanban' ? (
+        {activeView === 'kanban' ? (
           <button
             id="btn-mobile-nav-filters"
             type="button"
@@ -4438,7 +4427,7 @@ export default function App() {
             <span className="material-symbols-outlined text-[18px]">filter_list</span>
             <span className="truncate w-full text-center leading-none mt-0.5">{i18n._(msg`Filtros`)}</span>
           </button>
-        ) : (
+        ) : activeView !== 'canvas' ? (
           <button
             id="btn-mobile-nav-sync-sanity"
             type="button"
@@ -4449,7 +4438,7 @@ export default function App() {
             <span className="material-symbols-outlined text-[18px]">sync_problem</span>
             <span className="truncate w-full text-center leading-none mt-0.5">{i18n._(msg`Sincronizar`)}</span>
           </button>
-        )}
+        ) : null}
 
         <button
           id="btn-mobile-nav-split-view"
