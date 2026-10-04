@@ -3423,17 +3423,6 @@ export default function App() {
                     >
                       <span className="material-symbols-outlined text-[16px]">fit_screen</span>
                     </button>
-
-                    <button
-                      id="btn-canvas-autolayout-nav"
-                      type="button"
-                      onClick={() => setIsAutoLayoutConfirmOpen(true)}
-                      className="btn-m3-icon w-7 h-7 cursor-pointer text-sky-400"
-                      title={i18n._(msg`Auto organizar canvas jerárquicamente (DAG)`)}
-                      aria-label={i18n._(msg`Auto organizar`)}
-                    >
-                      <span className="material-symbols-outlined text-[16px]">account_tree</span>
-                    </button>
                   </div>
 
                   {/* Canvas Empty State Overlay */}

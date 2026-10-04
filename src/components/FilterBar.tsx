@@ -329,29 +329,6 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                   ⌘K
                 </kbd>
               </button>
-
-              {/* Auto Organizar Button */}
-              {onAutoOrganize && (
-                <button
-                  id="btn-auto-organize-filterbar"
-                  type="button"
-                  disabled={isAutoOrganizing}
-                  onClick={onAutoOrganize}
-                  className="btn-m3-secondary hidden md:inline-flex px-2.5 py-1 text-xs cursor-pointer text-sky-400 border-sky-800/60 bg-sky-950/30 shrink-0"
-                  title={i18n._(msg`Organizar automáticamente dependencias y grupos jerárquicamente (DAG)`)}
-                >
-                  <span
-                    className={`material-symbols-outlined text-[15px] ${
-                      isAutoOrganizing ? 'animate-spin' : ''
-                    }`}
-                  >
-                    {isAutoOrganizing ? 'progress_activity' : 'account_tree'}
-                  </span>
-                  <span className="hidden lg:inline">
-                    {isAutoOrganizing ? i18n._(msg`Organizando...`) : i18n._(msg`Auto organizar`)}
-                  </span>
-                </button>
-              )}
             </>
           )}
 
