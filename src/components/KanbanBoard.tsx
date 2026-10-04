@@ -6,6 +6,7 @@ import { scanTaskBlocks, TaskBlockInfo } from '../utils/markdownSync';
 import { TaskFilterState } from './FilterBar';
 import { SkeletonKanbanColumn } from './Skeletons';
 import { HighlightText, checkTaskMatchesQuery } from '../utils/searchHighlight';
+import { isTaskMatchingFilters } from '../utils/filterStore';
 
 export interface KanbanTask {
   taskId: string;
@@ -150,44 +151,34 @@ export function KanbanBoard({
 
   // Filter & Sort tasks according to search, filters & sort state
   const filteredTasks = useMemo(() => {
+    const effectiveFilters: TaskFilterState | null =
+      filters ||
+      (activeFilter !== 'all'
+        ? {
+            status: activeFilter === 'todo' ? 'todo' : activeFilter === 'done' ? 'done' : 'all',
+            priority: activeFilter === 'critical' ? 'P0' : 'all',
+            section: 'all',
+            tag: 'all',
+            onlyBlocked: activeFilter === 'blocked',
+            sortBy: 'default',
+          }
+        : null);
+
     let result = allTasks.filter((t) => {
-      // 1. Search Query
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        const cleanTag = q.replace(/^#/, '');
-        const matchesTitle = t.title.toLowerCase().includes(q);
-        const matchesId = t.taskId.toLowerCase().includes(q);
-        const matchesGroup = t.groupTitle.toLowerCase().includes(q);
-        const matchesTags = t.tags?.some(
-          (tag) => tag.toLowerCase().includes(q) || tag.toLowerCase().includes(cleanTag)
-        );
-        const matchesPriority = t.priority.toLowerCase() === q;
-        const matchesStatus =
-          t.status.toLowerCase().includes(q) ||
-          (q === 'done' || q === 'hecho' || q === 'completado' || q === 'completada' ? t.completed : false) ||
-          (q === 'todo' || q === 'pendiente' || q === 'por hacer' ? !t.completed : false);
-        if (!matchesTitle && !matchesId && !matchesGroup && !matchesTags && !matchesPriority && !matchesStatus) return false;
-      }
-
-      // 2. Comprehensive Filters
-      if (filters) {
-        if (filters.status !== 'all') {
-          if (filters.status === 'done' && !t.completed) return false;
-          if (filters.status !== 'done' && (t.completed || t.status !== filters.status)) return false;
-        }
-        if (filters.priority !== 'all' && t.priority !== filters.priority) return false;
-        if (filters.section !== 'all' && t.groupTitle.toLowerCase() !== filters.section.toLowerCase()) return false;
-        if (filters.tag !== 'all' && (!t.tags || !t.tags.some((tag) => tag.toLowerCase() === filters.tag.toLowerCase()))) return false;
-        if (filters.onlyBlocked && (!t.blockedBy || t.completed)) return false;
-      } else {
-        // Fallback to activeFilter
-        if (activeFilter === 'todo' && t.completed) return false;
-        if (activeFilter === 'done' && !t.completed) return false;
-        if (activeFilter === 'critical' && t.priority !== 'P0') return false;
-        if (activeFilter === 'blocked' && (!t.blockedBy || t.completed)) return false;
-      }
-
-      return true;
+      return isTaskMatchingFilters(
+        {
+          title: t.title,
+          taskId: t.taskId,
+          completed: t.completed,
+          priority: t.priority,
+          status: t.status,
+          groupTitle: t.groupTitle,
+          tags: t.tags,
+          blockedBy: t.blockedBy,
+        },
+        effectiveFilters,
+        searchQuery
+      );
     });
 
     // 3. Sorting

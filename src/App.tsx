@@ -3,6 +3,7 @@ import {
   createShapeId,
   Editor,
   Tldraw,
+  TLShapeId,
 } from 'tldraw';
 import {
   CanvasVisualDocument,
@@ -36,6 +37,12 @@ import { KanbanBoard } from './components/KanbanBoard';
 import { TaskDetailsPanel } from './components/TaskDetailsPanel';
 import { CommandPalette, CommandPaletteAction, CommandPaletteTask } from './components/CommandPalette';
 import { FilterBar, TaskFilterState } from './components/FilterBar';
+import {
+  setGlobalTaskFilters,
+  resetGlobalTaskFilters,
+  isTaskMatchingFilters,
+  hasActiveFilters,
+} from './utils/filterStore';
 import { ToastContainer, ToastItem, ToastType } from './components/ToastSystem';
 import { QuickGuideModal } from './components/QuickGuideModal';
 import {
@@ -224,6 +231,11 @@ export default function App() {
     onlyBlocked: false,
     sortBy: 'default',
   });
+
+  // Sync React taskFilters state into global filter store for canvas shapes & listeners
+  useEffect(() => {
+    setGlobalTaskFilters(taskFilters);
+  }, [taskFilters]);
 
   // Command Palette & Recent Tasks State (DESIGN.md Section 12 & 15)
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState<boolean>(false);
@@ -482,6 +494,123 @@ export default function App() {
   const debouncedSanityTasksRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const markdownRef = useRef<string>(markdownInput);
   markdownRef.current = markdownInput;
+
+  // Synchronize canvas shape visibility (cards, groups, and connector arrows) with active filters & search query
+  useEffect(() => {
+    if (!editor) return;
+
+    const isFilterActive = hasActiveFilters(taskFilters, searchQuery);
+
+    // 1. Deselect any currently selected shape that doesn't match active filters
+    const selectedIds = editor.getSelectedShapeIds();
+    const shapesToDeselect: TLShapeId[] = [];
+
+    const allShapes = editor.getCurrentPageShapes();
+    const hiddenTaskIds = new Set<string>();
+
+    for (const shape of allShapes) {
+      const s = shape as any;
+      if (s.type === 'task') {
+        const taskShape = s as ITaskShape;
+        const p = taskShape.props;
+        const normalizedStatus = p.completed ? 'done' : p.status || 'todo';
+        const matches = !isFilterActive || isTaskMatchingFilters(
+          {
+            title: p.title,
+            taskId: p.taskId,
+            completed: p.completed,
+            priority: p.priority,
+            status: normalizedStatus,
+            groupTitle: p.groupTitle,
+            tags: p.tags,
+            blockedBy: p.blockedBy,
+          },
+          taskFilters,
+          searchQuery
+        );
+
+        if (!matches) {
+          hiddenTaskIds.add(s.id);
+          if (selectedIds.includes(s.id)) {
+            shapesToDeselect.push(s.id);
+          }
+        }
+
+        // Synchronize DOM container visibility
+        const el = document.querySelector(`[data-shape-id="${s.id}"]`) as HTMLElement | null;
+        if (el) {
+          if (!matches) {
+            el.style.display = 'none';
+            el.style.pointerEvents = 'none';
+            el.setAttribute('data-task-hidden', 'true');
+          } else {
+            el.style.display = '';
+            el.style.pointerEvents = '';
+            el.removeAttribute('data-task-hidden');
+          }
+        }
+      } else if (s.type === 'task-group') {
+        const groupShape = s as ITaskGroupShape;
+        const isSectionFilteredOut =
+          taskFilters.section !== 'all' &&
+          groupShape.props.title.trim().toLowerCase() !== taskFilters.section.trim().toLowerCase();
+
+        if (isSectionFilteredOut) {
+          if (selectedIds.includes(s.id)) {
+            shapesToDeselect.push(s.id);
+          }
+        }
+
+        const el = document.querySelector(`[data-shape-id="${s.id}"]`) as HTMLElement | null;
+        if (el) {
+          if (isSectionFilteredOut) {
+            el.style.display = 'none';
+            el.style.pointerEvents = 'none';
+            el.setAttribute('data-task-hidden', 'true');
+          } else {
+            el.style.display = '';
+            el.style.pointerEvents = '';
+            el.removeAttribute('data-task-hidden');
+          }
+        }
+      }
+    }
+
+    // 2. Hide any dependency arrow connecting to or from a hidden task card
+    for (const shape of allShapes) {
+      const s = shape as any;
+      if (s.type === 'arrow') {
+        const bindings = editor.getBindingsFromShape(s, 'arrow') as any[];
+        let shouldHideArrow = false;
+        if (isFilterActive && bindings && bindings.length > 0) {
+          for (const b of bindings) {
+            if (b?.toId && hiddenTaskIds.has(b.toId)) {
+              shouldHideArrow = true;
+              break;
+            }
+          }
+        }
+
+        const arrowEl = document.querySelector(`[data-shape-id="${s.id}"]`) as HTMLElement | null;
+        if (arrowEl) {
+          if (shouldHideArrow) {
+            arrowEl.style.display = 'none';
+            arrowEl.style.pointerEvents = 'none';
+            arrowEl.setAttribute('data-task-hidden', 'true');
+          } else {
+            arrowEl.style.display = '';
+            arrowEl.style.pointerEvents = '';
+            arrowEl.removeAttribute('data-task-hidden');
+          }
+        }
+      }
+    }
+
+    if (shapesToDeselect.length > 0) {
+      const remaining = selectedIds.filter((id) => !shapesToDeselect.includes(id));
+      editor.setSelectedShapes(remaining);
+    }
+  }, [editor, taskFilters, searchQuery, markdownInput]);
 
   // Split View State: Live bidirectional split between Canvas/Kanban and Markdown Editor
   const [isSplitViewOpen, setIsSplitViewOpen] = useState<boolean>(() => {
@@ -2754,6 +2883,7 @@ export default function App() {
             onlyBlocked: false,
             sortBy: 'default',
           });
+          resetGlobalTaskFilters();
           setActiveFilter('all');
         },
       },
@@ -2764,34 +2894,20 @@ export default function App() {
   // Filtered tasks count computed
   const filteredTasksCount = useMemo(() => {
     return allParsedTasks.filter((t) => {
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        const cleanTag = q.replace(/^#/, '');
-        const matchTitle = t.title.toLowerCase().includes(q);
-        const matchId = t.taskId.toLowerCase().includes(q);
-        const matchGroup = t.groupTitle.toLowerCase().includes(q);
-        const matchTags = t.tags?.some(
-          (tag) => tag.toLowerCase().includes(q) || tag.toLowerCase().includes(cleanTag)
-        );
-        const matchPriority = t.priority.toLowerCase() === q;
-        const matchStatus =
-          t.status.toLowerCase().includes(q) ||
-          (q === 'done' || q === 'hecho' || q === 'completado' || q === 'completada' ? t.completed : false) ||
-          (q === 'todo' || q === 'pendiente' || q === 'por hacer' ? !t.completed : false);
-        if (!matchTitle && !matchId && !matchGroup && !matchTags && !matchPriority && !matchStatus) return false;
-      }
-
-      if (taskFilters.status !== 'all') {
-        if (taskFilters.status === 'done' && !t.completed) return false;
-        if (taskFilters.status !== 'done' && (t.completed || t.status !== taskFilters.status)) return false;
-      }
-
-      if (taskFilters.priority !== 'all' && t.priority !== taskFilters.priority) return false;
-      if (taskFilters.section !== 'all' && t.groupTitle.toLowerCase() !== taskFilters.section.toLowerCase()) return false;
-      if (taskFilters.tag !== 'all' && (!t.tags || !t.tags.some((tag) => tag.toLowerCase() === taskFilters.tag.toLowerCase()))) return false;
-      if (taskFilters.onlyBlocked && (!t.blockedBy || t.completed)) return false;
-
-      return true;
+      return isTaskMatchingFilters(
+        {
+          title: t.title,
+          taskId: t.taskId,
+          completed: t.completed,
+          priority: t.priority,
+          status: t.status,
+          groupTitle: t.groupTitle,
+          tags: t.tags,
+          blockedBy: t.blockedBy,
+        },
+        taskFilters,
+        searchQuery
+      );
     }).length;
   }, [allParsedTasks, searchQuery, taskFilters]);
 

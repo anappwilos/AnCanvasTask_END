@@ -344,4 +344,15 @@ textarea:focus-visible,
   display: none !important;
 }
 
+/* Ensure filtered-out shapes and their background wrappers are completely hidden and ignore all pointer events */
+.tl-shape[data-task-hidden="true"],
+.tl-shape-background[data-task-hidden="true"],
+.tl-shape:has([data-task-hidden="true"]),
+.tl-shape-background:has([data-task-hidden="true"]) {
+  display: none !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
 

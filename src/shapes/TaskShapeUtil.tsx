@@ -1,7 +1,7 @@
 import { useLingui } from '@lingui/react';
 import { msg } from '@lingui/core/macro';
 import { i18n, formatTaskCount } from '../i18n';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import {
   createShapeId,
   Editor,
@@ -28,6 +28,42 @@ import {
   setActiveConnectionSource,
   subscribeToConnectionSource,
 } from '../utils/taskConnectionManager';
+import {
+  useGlobalTaskFilters,
+  getGlobalTaskFilters,
+  hasActiveFilters,
+  isTaskMatchingFilters,
+} from '../utils/filterStore';
+import { getGlobalSearchQuery } from '../utils/searchHighlight';
+import { TaskFilterState } from '../components/FilterBar';
+
+export function isShapeFilteredOut(
+  shape: ITaskShape,
+  filters?: TaskFilterState,
+  query?: string
+): boolean {
+  const globalFilters = filters || getGlobalTaskFilters();
+  const searchQuery = query !== undefined ? query : getGlobalSearchQuery();
+  if (!hasActiveFilters(globalFilters, searchQuery)) return false;
+
+  const p = shape.props;
+  const normalizedStatus = p.completed ? 'done' : p.status || 'todo';
+  const matches = isTaskMatchingFilters(
+    {
+      title: p.title,
+      taskId: p.taskId,
+      completed: p.completed,
+      priority: p.priority,
+      status: normalizedStatus,
+      groupTitle: p.groupTitle,
+      tags: p.tags,
+      blockedBy: p.blockedBy,
+    },
+    globalFilters,
+    searchQuery
+  );
+  return !matches;
+}
 
 export type TaskPriority = 'P0' | 'P1' | 'P2' | 'P3';
 export type TaskStatus = 'backlog' | 'todo' | 'in_progress' | 'review' | 'done' | 'blocked';
@@ -40,6 +76,7 @@ export type TaskShapeProps = {
   priority: TaskPriority;
   taskId?: string;
   status?: TaskStatus;
+  groupTitle?: string;
   tags?: string[];
   subtasks?: { total: number; completed: number };
   blockedBy?: string;
@@ -223,17 +260,60 @@ function TaskCardComponent({
   const currentStatus = statusConfig[normalizedStatus] || statusConfig.todo;
 
   const searchQuery = useGlobalSearchQuery();
-  const hasActiveSearch = Boolean(searchQuery.trim());
-  const isSearchMatch = hasActiveSearch && checkTaskMatchesQuery(
+  const globalFilters = useGlobalTaskFilters();
+  const isFilterActive = hasActiveFilters(globalFilters, searchQuery);
+  const isMatch = isTaskMatchingFilters(
     {
       title,
       taskId,
-      tags,
+      completed,
       priority,
       status: normalizedStatus,
+      groupTitle: shape.props.groupTitle,
+      tags,
+      blockedBy,
     },
+    globalFilters,
     searchQuery
   );
+
+  const isHidden = isFilterActive && !isMatch;
+
+  useLayoutEffect(() => {
+    const container = document.querySelector(`[data-shape-id="${shape.id}"]`) as HTMLElement | null;
+    if (container) {
+      if (isHidden) {
+        container.style.display = 'none';
+        container.style.pointerEvents = 'none';
+        container.setAttribute('data-task-hidden', 'true');
+      } else {
+        container.style.display = '';
+        container.style.pointerEvents = '';
+        container.removeAttribute('data-task-hidden');
+      }
+    }
+  }, [isHidden, shape.id]);
+
+  // If any filter or search is active and this task does NOT match, hide the card completely
+  if (isHidden) {
+    return (
+      <HTMLContainer
+        id={shape.id}
+        data-task-hidden="true"
+        style={{
+          width: w,
+          height: h,
+          pointerEvents: 'none',
+          display: 'none',
+          visibility: 'hidden',
+          opacity: 0,
+        }}
+      />
+    );
+  }
+
+  const hasActiveSearch = Boolean(searchQuery.trim());
+  const isSearchMatch = hasActiveSearch && isMatch;
 
   return (
     <HTMLContainer
@@ -260,8 +340,6 @@ function TaskCardComponent({
             ? 'border-amber-400 ring-2 ring-amber-400/60 bg-amber-500/10 shadow-sm'
             : completed
             ? 'border-[var(--outline)] bg-[var(--surface)] opacity-75'
-            : hasActiveSearch
-            ? 'border-[var(--outline)] opacity-40 hover:opacity-100 transition-opacity'
             : 'border-[var(--outline)] hover:border-[var(--on-surface-variant)]'
         }`}
       >
@@ -680,6 +758,7 @@ export class TaskShapeUtil extends ShapeUtil<any> {
     priority: T.string,
     taskId: T.string.optional(),
     status: T.string.optional(),
+    groupTitle: T.string.optional(),
     tags: T.arrayOf(T.string).optional(),
     subtasks: T.object({ total: T.number, completed: T.number }).optional(),
     blockedBy: T.string.optional(),
@@ -707,7 +786,19 @@ export class TaskShapeUtil extends ShapeUtil<any> {
     });
   }
 
-  override canBind() {
+  override hideSelectionBoundsBg(shape: ITaskShape): boolean {
+    return isShapeFilteredOut(shape);
+  }
+
+  override hideSelectionBoundsFg(shape: ITaskShape): boolean {
+    return isShapeFilteredOut(shape);
+  }
+
+  override canBind(opts?: any) {
+    const targetShape = (opts?.toShape || opts?.fromShape) as ITaskShape;
+    if (targetShape?.type === 'task' && isShapeFilteredOut(targetShape)) {
+      return false;
+    }
     return true;
   }
 
@@ -716,6 +807,9 @@ export class TaskShapeUtil extends ShapeUtil<any> {
   }
 
   override getHandleSnapGeometry(shape: ITaskShape): HandleSnapGeometry {
+    if (isShapeFilteredOut(shape)) {
+      return { points: [] };
+    }
     const { w, h } = shape.props;
     const geom = this.getGeometry(shape);
     return {
@@ -732,6 +826,10 @@ export class TaskShapeUtil extends ShapeUtil<any> {
   }
 
   getIndicatorPath(shape: ITaskShape) {
+    if (isShapeFilteredOut(shape)) {
+      return undefined;
+    }
+
     if (typeof Path2D !== 'undefined') {
       const path = new Path2D();
       if (typeof path.roundRect === 'function') {
@@ -747,6 +845,76 @@ export class TaskShapeUtil extends ShapeUtil<any> {
   component(shape: ITaskShape) {
     return <TaskCardComponent shape={shape} editor={this.editor} />;
   }
+}
+
+function TaskGroupComponent({ shape }: { shape: ITaskGroupShape }) {
+  const { title, count, completedCount, w, h } = shape.props;
+  const globalFilters = useGlobalTaskFilters();
+  const isSectionFilteredOut =
+    globalFilters.section !== 'all' &&
+    title.trim().toLowerCase() !== globalFilters.section.trim().toLowerCase();
+
+  useLayoutEffect(() => {
+    const container = document.querySelector(`[data-shape-id="${shape.id}"]`) as HTMLElement | null;
+    if (container) {
+      if (isSectionFilteredOut) {
+        container.style.display = 'none';
+        container.style.pointerEvents = 'none';
+        container.setAttribute('data-task-hidden', 'true');
+      } else {
+        container.style.display = '';
+        container.style.pointerEvents = '';
+        container.removeAttribute('data-task-hidden');
+      }
+    }
+  }, [isSectionFilteredOut, shape.id]);
+
+  if (isSectionFilteredOut) {
+    return (
+      <HTMLContainer
+        id={shape.id}
+        data-task-hidden="true"
+        style={{
+          width: w,
+          height: h,
+          pointerEvents: 'none',
+          display: 'none',
+          visibility: 'hidden',
+          opacity: 0,
+        }}
+      />
+    );
+  }
+
+  return (
+    <HTMLContainer
+      id={shape.id}
+      style={{
+        width: w,
+        height: h,
+        pointerEvents: 'none',
+      }}
+    >
+      <div id={`task-group-container-${shape.id}`} className="w-full h-full rounded-md bg-[var(--surface-container)]/30 border border-[var(--outline)] p-3 flex flex-col justify-start select-none transition-colors">
+        {/* Header */}
+        <div id={`task-group-header-${shape.id}`} className="flex items-center justify-between border-b border-[var(--outline)] pb-2">
+          <div id={`task-group-title-group-${shape.id}`} className="flex items-center gap-1.5">
+            <span className="text-[var(--on-surface-variant)] font-mono text-xs font-semibold">##</span>
+            <h2 className="text-xs font-semibold text-[var(--on-surface)] font-sans tracking-tight truncate max-w-[220px]">
+              {title}
+            </h2>
+          </div>
+          {count > 0 && (
+            <span className="text-[11px] font-mono text-[var(--on-surface-variant)] tabular-nums">
+              {completedCount > 0
+                ? i18n._(msg`${completedCount}/${count} completadas`)
+                : formatTaskCount(count)}
+            </span>
+          )}
+        </div>
+      </div>
+    </HTMLContainer>
+  );
 }
 
 export type GroupShapeProps = {
@@ -788,7 +956,33 @@ export class TaskGroupShapeUtil extends ShapeUtil<any> {
     });
   }
 
-  override canBind() {
+  override hideSelectionBoundsBg(shape: ITaskGroupShape): boolean {
+    const globalFilters = getGlobalTaskFilters();
+    return (
+      globalFilters.section !== 'all' &&
+      shape.props.title.trim().toLowerCase() !== globalFilters.section.trim().toLowerCase()
+    );
+  }
+
+  override hideSelectionBoundsFg(shape: ITaskGroupShape): boolean {
+    const globalFilters = getGlobalTaskFilters();
+    return (
+      globalFilters.section !== 'all' &&
+      shape.props.title.trim().toLowerCase() !== globalFilters.section.trim().toLowerCase()
+    );
+  }
+
+  override canBind(opts?: any) {
+    const globalFilters = getGlobalTaskFilters();
+    if (globalFilters.section !== 'all') {
+      const targetShape = (opts?.toShape || opts?.fromShape) as ITaskGroupShape;
+      if (
+        targetShape?.type === 'task-group' &&
+        targetShape.props.title.trim().toLowerCase() !== globalFilters.section.trim().toLowerCase()
+      ) {
+        return false;
+      }
+    }
     return true;
   }
 
@@ -797,6 +991,13 @@ export class TaskGroupShapeUtil extends ShapeUtil<any> {
   }
 
   override getHandleSnapGeometry(shape: ITaskGroupShape): HandleSnapGeometry {
+    const globalFilters = getGlobalTaskFilters();
+    if (
+      globalFilters.section !== 'all' &&
+      shape.props.title.trim().toLowerCase() !== globalFilters.section.trim().toLowerCase()
+    ) {
+      return { points: [] };
+    }
     const { w, h } = shape.props;
     const geom = this.getGeometry(shape);
     return {
@@ -813,6 +1014,13 @@ export class TaskGroupShapeUtil extends ShapeUtil<any> {
   }
 
   getIndicatorPath(shape: ITaskGroupShape) {
+    const globalFilters = getGlobalTaskFilters();
+    if (
+      globalFilters.section !== 'all' &&
+      shape.props.title.trim().toLowerCase() !== globalFilters.section.trim().toLowerCase()
+    ) {
+      return undefined;
+    }
     if (typeof Path2D !== 'undefined') {
       const path = new Path2D();
       if (typeof path.roundRect === 'function') {
@@ -826,37 +1034,7 @@ export class TaskGroupShapeUtil extends ShapeUtil<any> {
   }
 
   component(shape: ITaskGroupShape) {
-    const { title, count, completedCount, w, h } = shape.props;
-
-    return (
-      <HTMLContainer
-        id={shape.id}
-        style={{
-          width: w,
-          height: h,
-          pointerEvents: 'none',
-        }}
-      >
-        <div id={`task-group-container-${shape.id}`} className="w-full h-full rounded-md bg-[var(--surface-container)]/30 border border-[var(--outline)] p-3 flex flex-col justify-start select-none transition-colors">
-          {/* Header */}
-          <div id={`task-group-header-${shape.id}`} className="flex items-center justify-between border-b border-[var(--outline)] pb-2">
-            <div id={`task-group-title-group-${shape.id}`} className="flex items-center gap-1.5">
-              <span className="text-[var(--on-surface-variant)] font-mono text-xs font-semibold">##</span>
-              <h2 className="text-xs font-semibold text-[var(--on-surface)] font-sans tracking-tight truncate max-w-[220px]">
-                {title}
-              </h2>
-            </div>
-            {count > 0 && (
-              <span className="text-[11px] font-mono text-[var(--on-surface-variant)] tabular-nums">
-                {completedCount > 0
-                  ? i18n._(msg`${completedCount}/${count} completadas`)
-                  : formatTaskCount(count)}
-              </span>
-            )}
-          </div>
-        </div>
-      </HTMLContainer>
-    );
+    return <TaskGroupComponent shape={shape} />;
   }
 }
 
