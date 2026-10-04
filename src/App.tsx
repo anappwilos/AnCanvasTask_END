@@ -3270,10 +3270,10 @@ export default function App() {
         aria-hidden="true"
       />
 
-      {/* Top App Bar (DESIGN.md Section 3: Lightweight, global actions, clean M3 surface) */}
-      <header className="h-14 bg-[var(--surface-container)] border-b border-[var(--outline)] px-3 sm:px-4 flex items-center justify-between z-20 select-none flex-shrink-0 gap-2 sm:gap-4 transition-colors">
+      {/* Top App Bar (Lightweight, global actions, clean professional tool surface) */}
+      <header className="h-11 bg-[var(--surface-container)] border-b border-[var(--outline)] px-3 sm:px-4 flex items-center justify-between z-20 select-none flex-shrink-0 gap-2 sm:gap-3 transition-colors">
         {/* Left Section: Sidebar Toggle, Brand & Workspace / Branch Picker */}
-        <div id="div-app-1" className="flex items-center gap-2 sm:gap-3 min-w-0">
+        <div id="div-app-1" className="flex items-center gap-2 sm:gap-2.5 min-w-0">
           <button
             id="btn-toggle-sidebar"
             type="button"
@@ -3485,7 +3485,7 @@ export default function App() {
                 id="div-header-more-menu-dropdown"
                 role="menu"
                 aria-label={i18n._(msg`Menú de opciones`)}
-                className="absolute right-0 top-full mt-1.5 w-56 bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-xl py-1 z-50 animate-fade-in select-none text-xs"
+                className="absolute right-0 top-full mt-1.5 w-56 bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-md py-1 z-50 animate-fade-in select-none text-xs"
               >
                 {/* 1. Tema */}
                 <div id="div-header-more-menu-lang" className="px-3 py-2 border-b border-[var(--outline)]">
@@ -3587,7 +3587,7 @@ export default function App() {
         {isSidebarOpen && (
           <div
             id="modal-sidebar-backdrop"
-            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs lg:hidden animate-fade-in"
+            className="fixed inset-0 z-40 bg-black/60 lg:hidden animate-fade-in"
             onClick={() => setIsSidebarOpen(false)}
             aria-hidden="true"
           />
@@ -3595,7 +3595,7 @@ export default function App() {
 
         {/* Collapsible Sidebar (Offcanvas on mobile/tablet, Static Column on desktop) */}
         {isSidebarOpen && (
-          <aside className="fixed inset-y-0 left-0 z-50 w-72 lg:static lg:z-10 lg:w-64 bg-[var(--surface-container)] border-r border-[var(--outline)] flex flex-col p-3 select-none flex-shrink-0 transition-transform duration-200 shadow-2xl lg:shadow-none animate-slide-right lg:animate-none">
+          <aside className="fixed inset-y-0 left-0 z-50 w-72 lg:static lg:z-10 lg:w-64 bg-[var(--surface-container)] border-r border-[var(--outline)] flex flex-col p-3 select-none flex-shrink-0 transition-transform duration-200 shadow-md lg:shadow-none animate-slide-right lg:animate-none">
             {/* Mobile Sidebar Header with Close Button */}
             <div id="div-app-9" className="flex items-center justify-between lg:hidden pb-2 border-b border-[var(--outline)] mb-1">
               <div id="div-app-10" className="flex items-center gap-1.5">
@@ -3615,7 +3615,7 @@ export default function App() {
 
             <div id="div-app-11" className="flex-1 flex flex-col gap-3 overflow-y-auto">
               {/* Task MD Documents Explorer (1 to N Task MD files in Root, Frontend, Backend, etc.) */}
-              <div id="div-app-12" className="rounded-lg bg-[var(--surface)] border border-[var(--outline)] shadow-2xs">
+              <div id="div-app-12" className="rounded-md bg-[var(--surface)] border border-[var(--outline)]">
                 <TaskDocumentExplorer
                   workspace={activeWorkspace}
                   allWorkspaces={workspaceStore.workspaces}
@@ -3694,17 +3694,17 @@ export default function App() {
                     setActiveFilter('all');
                     setTaskFilters((prev) => ({ ...prev, status: 'all', priority: 'all', onlyBlocked: false }));
                   }}
-                  className={`w-full px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center justify-between transition-colors cursor-pointer ${
+                  className={`w-full px-2.5 py-1.5 rounded-md text-xs font-medium flex items-center justify-between transition-colors cursor-pointer ${
                     activeFilter === 'all' && taskFilters.status === 'all' && taskFilters.priority === 'all' && !taskFilters.onlyBlocked
                       ? 'bg-[var(--surface-container-highest)] text-[var(--on-surface)]'
                       : 'text-[var(--on-surface-variant)] hover:bg-[var(--surface-container-high)]'
                   }`}
                 >
                   <div id="div-app-15" className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[16px] text-sky-400">inbox</span>
+                    <span className="material-symbols-outlined text-[16px] text-[var(--on-surface-variant)]">inbox</span>
                     <span>{i18n._(msg`Todas las tareas`)}</span>
                   </div>
-                  <span className="text-[11px] font-mono px-1.5 py-0.2 rounded-full bg-[var(--surface)] text-[var(--on-surface-variant)]">
+                  <span className="text-[11px] font-mono px-1.5 py-0.2 rounded bg-[var(--surface)] text-[var(--on-surface-variant)]">
                     {parsedStats.taskCount}
                   </span>
                 </button>
@@ -3716,17 +3716,17 @@ export default function App() {
                     setActiveFilter('todo');
                     setTaskFilters((prev) => ({ ...prev, status: 'todo', priority: 'all', onlyBlocked: false }));
                   }}
-                  className={`w-full px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center justify-between transition-colors cursor-pointer ${
+                  className={`w-full px-2.5 py-1.5 rounded-md text-xs font-medium flex items-center justify-between transition-colors cursor-pointer ${
                     activeFilter === 'todo' || taskFilters.status === 'todo'
                       ? 'bg-[var(--surface-container-highest)] text-[var(--on-surface)]'
                       : 'text-[var(--on-surface-variant)] hover:bg-[var(--surface-container-high)]'
                   }`}
                 >
                   <div id="div-app-16" className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[16px] text-amber-400">pending</span>
+                    <span className="material-symbols-outlined text-[16px] text-[var(--on-surface-variant)]">pending</span>
                     <span>{i18n._(msg`Por Hacer`)}</span>
                   </div>
-                  <span className="text-[11px] font-mono px-1.5 py-0.2 rounded-full bg-[var(--surface)] text-[var(--on-surface-variant)]">
+                  <span className="text-[11px] font-mono px-1.5 py-0.2 rounded bg-[var(--surface)] text-[var(--on-surface-variant)]">
                     {parsedStats.taskCount - parsedStats.completedCount}
                   </span>
                 </button>
@@ -3738,17 +3738,17 @@ export default function App() {
                     setActiveFilter('done');
                     setTaskFilters((prev) => ({ ...prev, status: 'done', priority: 'all', onlyBlocked: false }));
                   }}
-                  className={`w-full px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center justify-between transition-colors cursor-pointer ${
+                  className={`w-full px-2.5 py-1.5 rounded-md text-xs font-medium flex items-center justify-between transition-colors cursor-pointer ${
                     activeFilter === 'done' || taskFilters.status === 'done'
                       ? 'bg-[var(--surface-container-highest)] text-[var(--on-surface)]'
                       : 'text-[var(--on-surface-variant)] hover:bg-[var(--surface-container-high)]'
                   }`}
                 >
                   <div id="div-app-17" className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[16px] text-emerald-400">check_circle</span>
+                    <span className="material-symbols-outlined text-[16px] text-[var(--on-surface-variant)]">check_circle</span>
                     <span>{i18n._(msg`Completada`)}</span>
                   </div>
-                  <span className="text-[11px] font-mono px-1.5 py-0.2 rounded-full bg-[var(--surface)] text-[var(--on-surface-variant)]">
+                  <span className="text-[11px] font-mono px-1.5 py-0.2 rounded bg-[var(--surface)] text-[var(--on-surface-variant)]">
                     {parsedStats.completedCount}
                   </span>
                 </button>
@@ -3760,17 +3760,17 @@ export default function App() {
                     setActiveFilter('critical');
                     setTaskFilters((prev) => ({ ...prev, priority: 'P0', onlyBlocked: false }));
                   }}
-                  className={`w-full px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center justify-between transition-colors cursor-pointer ${
+                  className={`w-full px-2.5 py-1.5 rounded-md text-xs font-medium flex items-center justify-between transition-colors cursor-pointer ${
                     activeFilter === 'critical' || taskFilters.priority === 'P0'
                       ? 'bg-[var(--surface-container-highest)] text-[var(--on-surface)]'
                       : 'text-[var(--on-surface-variant)] hover:bg-[var(--surface-container-high)]'
                   }`}
                 >
                   <div id="div-app-18" className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[16px] text-rose-400">priority_high</span>
+                    <span className="material-symbols-outlined text-[16px] text-[var(--on-surface-variant)]">priority_high</span>
                     <span>{i18n._(msg`Críticas (P0)`)}</span>
                   </div>
-                  <span className="text-[11px] font-mono px-1.5 py-0.2 rounded-full bg-[var(--surface)] text-[var(--on-surface-variant)]">
+                  <span className="text-[11px] font-mono px-1.5 py-0.2 rounded bg-[var(--surface)] text-[var(--on-surface-variant)]">
                     {parsedStats.criticalCount}
                   </span>
                 </button>
@@ -3782,17 +3782,17 @@ export default function App() {
                     setActiveFilter('blocked');
                     setTaskFilters((prev) => ({ ...prev, onlyBlocked: true }));
                   }}
-                  className={`w-full px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center justify-between transition-colors cursor-pointer ${
+                  className={`w-full px-2.5 py-1.5 rounded-md text-xs font-medium flex items-center justify-between transition-colors cursor-pointer ${
                     activeFilter === 'blocked' || taskFilters.onlyBlocked
                       ? 'bg-[var(--surface-container-highest)] text-[var(--on-surface)]'
                       : 'text-[var(--on-surface-variant)] hover:bg-[var(--surface-container-high)]'
                   }`}
                 >
                   <div id="div-app-19" className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[16px] text-amber-500">lock</span>
+                    <span className="material-symbols-outlined text-[16px] text-[var(--on-surface-variant)]">lock</span>
                     <span>{i18n._(msg`Bloqueadas`)}</span>
                   </div>
-                  <span className="text-[11px] font-mono px-1.5 py-0.2 rounded-full bg-[var(--surface)] text-[var(--on-surface-variant)]">
+                  <span className="text-[11px] font-mono px-1.5 py-0.2 rounded bg-[var(--surface)] text-[var(--on-surface-variant)]">
                     {parsedStats.blockedCount}
                   </span>
                 </button>
@@ -3834,7 +3834,7 @@ export default function App() {
                             handleFocusSectionOnCanvas(grp.title);
                           }
                         }}
-                        className={`w-full px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center justify-between text-left transition-colors cursor-pointer group ${
+                        className={`w-full px-2.5 py-1.5 rounded-md text-xs font-medium flex items-center justify-between text-left transition-colors cursor-pointer group ${
                           isSectionActive
                             ? 'bg-[var(--primary-container)]/30 text-[var(--primary)] font-semibold'
                             : 'text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--surface-container-high)]'
@@ -4287,7 +4287,7 @@ export default function App() {
               {/* Drag & Drop Discrete Overlay */}
               {isDraggingOver && (
                 <div id="div-app-33" className="absolute inset-0 z-50 pointer-events-none bg-black/80 backdrop-blur-xs flex flex-col items-center justify-center animate-fade-in p-6">
-                  <div id="div-app-34" className="w-16 h-16 rounded-2xl bg-sky-950/80 border border-sky-600 flex items-center justify-center text-sky-400 mb-4 shadow-xl">
+                  <div id="div-app-34" className="w-16 h-16 rounded-md bg-sky-950/80 border border-sky-600 flex items-center justify-center text-sky-400 mb-4 shadow-xl">
                     <span className="material-symbols-outlined text-[32px]">upload_file</span>
                   </div>
                   <h3 className="text-base font-semibold text-white font-sans mb-1">

@@ -499,7 +499,7 @@ function TaskCardComponent({
                     setEditedTitle(title);
                   }
                 }}
-                className="w-full text-xs font-medium bg-[var(--surface)] border border-[var(--primary)] rounded px-1.5 py-0.5 text-[var(--on-surface)] focus:outline-none -mt-0.5"
+                className="w-full text-xs font-medium input-seamless text-[var(--on-surface)] -mt-0.5 leading-snug"
               />
             ) : (
               <div
@@ -545,7 +545,7 @@ function TaskCardComponent({
               onPointerDown={(e) => e.stopPropagation()}
               onClick={cyclePriority}
               title={_(msg`Clic para cambiar prioridad (P0-P3)`)}
-              className={`px-1.5 py-0.5 text-[11px] font-mono font-medium rounded border border-[var(--outline)] bg-[var(--surface)] hover:border-[var(--on-surface-variant)] cursor-pointer shrink-0 transition-colors flex items-center gap-1 ${currentPriority.text}`}
+              className={`px-1 py-0.5 text-[11px] font-mono font-medium hover:opacity-100 cursor-pointer shrink-0 transition-opacity flex items-center gap-1 ${currentPriority.text}`}
             >
               <span className={`w-1.5 h-1.5 rounded-full ${currentPriority.dot}`} />
               <span><HighlightText text={priority} query={searchQuery} /></span>
@@ -567,8 +567,8 @@ function TaskCardComponent({
               aria-label={_(msg`Punto central para unir tareas`)}
               className={`w-5 h-5 flex items-center justify-center rounded transition-colors cursor-pointer ${
                 isConnectingSource
-                  ? 'bg-[var(--primary)] text-[var(--on-primary)] ring-2 ring-[var(--primary)]'
-                  : 'text-[var(--on-surface-variant)] hover:text-[var(--primary)] hover:bg-[var(--surface-container-high)]'
+                  ? 'bg-[var(--primary)] text-[var(--on-primary)]'
+                  : 'text-[var(--on-surface-variant)] hover:text-[var(--primary)]'
               }`}
             >
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
@@ -585,7 +585,7 @@ function TaskCardComponent({
                 e.stopPropagation();
                 setIsMenuOpen(!isMenuOpen);
               }}
-              className="w-5 h-5 flex items-center justify-center text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] rounded hover:bg-[var(--surface-container-high)] cursor-pointer"
+              className="w-5 h-5 flex items-center justify-center text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] rounded cursor-pointer"
               title={_(msg`Más acciones`)}
             >
               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
@@ -742,7 +742,7 @@ function TaskCardComponent({
                     })
                   );
                 }}
-                className="flex items-center gap-1 px-1.5 py-0.2 rounded bg-amber-500/10 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 font-mono text-[10px] font-medium transition-colors cursor-pointer"
+                className="flex items-center gap-1 text-amber-400 hover:text-amber-300 font-mono text-[10px] font-medium transition-colors cursor-pointer"
                 title={_(msg`Tarea sin ID explícito. Clic para generar ID automático en Markdown.`)}
               >
                 <span>+ ID</span>
@@ -752,7 +752,7 @@ function TaskCardComponent({
 
             {isDuplicateId && (
               <span
-                className="px-1 py-0.2 text-[10px] font-semibold text-rose-400 border border-rose-800/80 rounded"
+                className="text-[10px] font-semibold text-rose-400 font-mono"
                 title={_(msg`ID duplicado en TASKS.md`)}
               >
                 dup
@@ -771,7 +771,7 @@ function TaskCardComponent({
                     })
                   );
                 }}
-                className="px-1.5 py-0.2 text-[10px] font-semibold text-amber-300 hover:text-amber-100 bg-amber-950/40 hover:bg-amber-900/60 border border-amber-600/80 rounded flex items-center gap-0.5 cursor-pointer transition-colors"
+                className="text-[10px] font-semibold text-amber-400 hover:text-amber-300 flex items-center gap-0.5 cursor-pointer transition-colors font-mono"
                 title={_(msg`Tarea sin ID explícito en TASKS.md. Clic para generar ID automático.`)}
               >
                 <span>sin-id</span>
@@ -781,7 +781,7 @@ function TaskCardComponent({
 
             {unresolvedBlockers && unresolvedBlockers.length > 0 && (
               <span
-                className="px-1 py-0.2 text-[10px] font-semibold text-amber-400 border border-amber-800/80 rounded"
+                className="text-[10px] font-semibold text-amber-400 font-mono"
                 title={_(msg`Dependencia no resuelta: #${unresolvedBlockers.join(', #')}`)}
               >
                 dep?

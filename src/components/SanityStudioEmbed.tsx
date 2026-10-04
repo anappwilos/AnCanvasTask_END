@@ -81,7 +81,7 @@ export const SanityStudioEmbed: React.FC<SanityStudioEmbedProps> = ({
   if (!isConfigured) {
     return (
       <div id="div-sanitystudioembed-1" className="flex-1 h-full flex flex-col items-center justify-center p-8 text-center bg-neutral-950 text-neutral-200">
-        <div id="div-sanitystudioembed-2" className="w-14 h-14 rounded-2xl bg-rose-950/80 border border-rose-800/60 flex items-center justify-center text-rose-400 mb-3 shadow-md">
+        <div id="div-sanitystudioembed-2" className="w-14 h-14 rounded-md bg-rose-950/80 border border-rose-800/60 flex items-center justify-center text-rose-400 mb-3 shadow-md">
           <Database className="w-7 h-7" />
         </div>
         <h2 className="text-base font-semibold text-neutral-100 mb-1">

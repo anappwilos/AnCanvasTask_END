@@ -411,7 +411,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
   if (!isConfigured) {
     return (
       <div id="div-sanitystudio-1" className="flex-1 h-full flex flex-col items-center justify-center p-6 text-center bg-[var(--surface)] select-none">
-        <div id="div-sanitystudio-2" className="w-14 h-14 rounded-2xl bg-sky-950/80 border border-sky-600/50 flex items-center justify-center text-sky-400 mb-3 shadow-md">
+        <div id="div-sanitystudio-2" className="w-14 h-14 rounded-md bg-sky-950/80 border border-sky-600/50 flex items-center justify-center text-sky-400 mb-3 shadow-md">
           <span className="material-symbols-outlined text-[30px]">cloud_off</span>
         </div>
         <h2 className="text-base font-semibold text-[var(--on-surface)] mb-1">

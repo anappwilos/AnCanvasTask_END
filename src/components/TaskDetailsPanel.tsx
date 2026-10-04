@@ -620,7 +620,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
                 }
               }}
               rows={2}
-              className="w-full bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--primary)] rounded p-2 text-xs font-sans focus:outline-none resize-none font-medium leading-relaxed"
+              className="w-full bg-transparent text-[var(--on-surface)] border-0 border-b border-[var(--primary)] rounded-none px-1 py-1 text-xs font-semibold font-sans focus:outline-none resize-none leading-relaxed"
             />
           ) : (
             <div
@@ -628,10 +628,10 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
               onDoubleClick={() => setIsEditingTitle(true)}
               onClick={() => setIsEditingTitle(true)}
               title={i18n._(msg`Clic o doble clic para editar`)}
-              className="group/title p-2 rounded bg-[var(--surface)] border border-[var(--outline)] hover:border-[var(--on-surface-variant)] cursor-text transition-colors flex items-start justify-between gap-2"
+              className="group/title px-1.5 py-1 rounded hover:bg-[var(--surface-container-high)]/50 border border-transparent hover:border-[var(--outline)] cursor-text transition-colors flex items-start justify-between gap-2"
             >
               <p
-                className={`text-xs font-medium leading-relaxed ${
+                className={`text-xs font-semibold leading-relaxed ${
                   task.completed ? 'text-[var(--on-surface-variant)] line-through' : 'text-[var(--on-surface)]'
                 }`}
               >
@@ -655,7 +655,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
               onChange={(e) => {
                 onUpdateTask(task.taskId, { groupTitle: e.target.value });
               }}
-              className="w-full bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--outline)] rounded px-2.5 py-1.5 text-xs font-sans focus:outline-none focus:border-[var(--primary)] cursor-pointer"
+              className="w-full select-integrated font-sans text-xs cursor-pointer"
             >
               {allSections.map((sec) => (
                 <option key={sec} value={sec}>

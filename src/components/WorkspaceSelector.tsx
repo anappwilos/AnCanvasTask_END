@@ -76,7 +76,7 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
 
         {/* Workspace Dropdown Menu */}
         {isWorkspaceMenuOpen && (
-          <div id="div-workspaceselector-3" className="absolute left-0 top-full mt-1 w-64 sm:w-72 max-w-[calc(100vw-1.5rem)] bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-xl py-1 z-50 animate-fade-in select-none">
+          <div id="div-workspaceselector-3" className="absolute left-0 top-full mt-1 w-64 sm:w-72 max-w-[calc(100vw-1.5rem)] bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-md py-1 z-50 animate-fade-in select-none">
             <div id="div-workspaceselector-4" className="px-3 py-1.5 border-b border-[var(--outline)] flex items-center justify-between">
               <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--on-surface-variant)]">
                 {i18n._(msg`Workspaces`)}
@@ -190,7 +190,7 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
 
         {/* Branch Dropdown Menu */}
         {isBranchMenuOpen && (
-          <div id="div-workspaceselector-11" className="absolute left-0 top-full mt-1 w-64 sm:w-72 max-w-[calc(100vw-1.5rem)] bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-xl py-1 z-50 animate-fade-in select-none">
+          <div id="div-workspaceselector-11" className="absolute left-0 top-full mt-1 w-64 sm:w-72 max-w-[calc(100vw-1.5rem)] bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-md py-1 z-50 animate-fade-in select-none">
             <div id="div-workspaceselector-12" className="px-3 py-1.5 border-b border-[var(--outline)] flex items-center justify-between">
               <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--on-surface-variant)]">
                 {i18n._(msg`Ramas`)} ({(workspace?.branches || []).length})
@@ -202,7 +202,7 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
                   setIsBranchMenuOpen(false);
                   onOpenGitHubSync();
                 }}
-                className="text-[10px] text-sky-400 hover:underline cursor-pointer font-medium flex items-center gap-0.5"
+                className="text-[10px] text-[var(--primary)] hover:underline cursor-pointer font-medium flex items-center gap-0.5"
               >
                 <span className="material-symbols-outlined text-[12px]">sync</span>
                 <span>{i18n._(msg`Sincronizar con GitHub`)}</span>

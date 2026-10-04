@@ -115,7 +115,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   ];
 
   return (
-    <div id="div-filterbar-1" className="w-full bg-[var(--surface-container)] border-b border-[var(--outline)] px-3 sm:px-4 py-2 flex flex-col gap-2 select-none shrink-0 z-10">
+    <div id="div-filterbar-1" className="w-full bg-[var(--surface-container)] border-b border-[var(--outline)] px-3 sm:px-4 py-1.5 flex flex-col gap-1.5 select-none shrink-0 z-10">
       {/* Top row of FilterBar: Filter popover toggle + Search trigger + Quick view summary */}
       <div id="div-filterbar-2" className="flex items-center justify-between gap-1.5 sm:gap-2">
         <div id="div-filterbar-3" className="flex items-center gap-1.5 sm:gap-2 flex-1 min-w-0">
@@ -140,7 +140,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                   <span className="material-symbols-outlined text-[16px]">tune</span>
                   <span className="hidden xs:inline">{i18n._(msg`Filtros`)}</span>
                   {activeFiltersCount > 0 && (
-                    <span className="w-4 h-4 rounded-full bg-[var(--primary)] text-[var(--on-primary)] text-[10px] font-bold flex items-center justify-center font-mono">
+                    <span className="w-4 h-4 rounded bg-[var(--primary)] text-[var(--on-primary)] text-[10px] font-bold flex items-center justify-center font-mono">
                       {activeFiltersCount}
                     </span>
                   )}
@@ -151,11 +151,11 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                   <div
                     id="div-filter-popover-content"
                     onPointerDown={(e) => e.stopPropagation()}
-                    className="absolute left-0 top-9 z-40 w-72 sm:w-80 max-w-[calc(100vw-2rem)] bg-[var(--surface-container-high)] border border-[var(--outline)] rounded-lg shadow-lg p-3 flex flex-col gap-2.5 text-xs"
+                    className="absolute left-0 top-9 z-40 w-72 sm:w-80 max-w-[calc(100vw-2rem)] bg-[var(--surface-container-high)] border border-[var(--outline)] rounded-md shadow-md p-3 flex flex-col gap-2.5 text-xs"
                   >
                     <div id="div-filterbar-5" className="flex items-center justify-between border-b border-[var(--outline)] pb-2">
                       <span className="font-semibold text-[var(--on-surface)] flex items-center gap-1.5">
-                        <span className="material-symbols-outlined text-[16px] text-sky-400">filter_list</span>
+                        <span className="material-symbols-outlined text-[16px] text-[var(--on-surface-variant)]">filter_list</span>
                         <span>{i18n._(msg`Filtros avanzados`)}</span>
                       </span>
                       <button
@@ -324,7 +324,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                 className="btn-m3-secondary px-3 py-1.5 text-xs cursor-pointer hidden sm:flex items-center gap-1.5 shrink-0"
                 title={i18n._(msg`Abrir paleta de comandos y búsqueda global (Ctrl/Cmd + K)`)}
               >
-                <span className="material-symbols-outlined text-[16px] text-sky-400">terminal</span>
+                <span className="material-symbols-outlined text-[16px] text-[var(--on-surface-variant)]">terminal</span>
                 <span>{i18n._(msg`Comandos`)}</span>
                 <kbd className="px-1.5 py-0.2 rounded bg-[var(--surface)] border border-[var(--outline)] font-mono text-[10px] text-[var(--on-surface-variant)]">
                   ⌘K
@@ -373,7 +373,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                   id="btn-sanity-status-filterbar"
                   type="button"
                   onClick={onOpenSanityModal}
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-mono border transition-colors cursor-pointer bg-[var(--surface)] border-[var(--outline)] text-[var(--on-surface)] hover:bg-[var(--surface-container-high)]"
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-mono border transition-colors cursor-pointer bg-[var(--surface)] border-[var(--outline)] text-[var(--on-surface)] hover:bg-[var(--surface-container-high)]"
                   title={i18n._(msg`Estado y configuración de Sanity`)}
                 >
                   <span
@@ -400,7 +400,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                   id="btn-sync-override-filterbar"
                   type="button"
                   onClick={onOpenSyncOverrideModal}
-                  className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--outline)] hover:border-[var(--primary)] hover:bg-[var(--surface-container-high)] transition-colors cursor-pointer shadow-xs"
+                  className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded bg-[var(--surface)] text-[var(--on-surface)] border border-[var(--outline)] hover:border-[var(--primary)] hover:bg-[var(--surface-container-high)] transition-colors cursor-pointer"
                   title={i18n._(msg`Sincronizar y detectar diferencias, overrides y conflictos con Sanity Cloud`)}
                 >
                   <span className="material-symbols-outlined text-[15px] text-amber-400">
@@ -415,11 +415,11 @@ export const FilterBar: React.FC<FilterBarProps> = ({
               {currentFileName && onRenameDocument && (
                 <div
                   id="div-current-document-indicator"
-                  className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] font-mono truncate shadow-xs cursor-pointer hover:bg-[var(--surface-container-high)] transition-colors"
+                  className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] font-mono truncate cursor-pointer hover:bg-[var(--surface-container-high)] transition-colors"
                   onClick={onRenameDocument}
                   title={i18n._(msg`Documento activo: ${currentFileName} (Clic para renombrar/mover)`)}
                 >
-                  <span className="material-symbols-outlined text-[14px] text-sky-400">
+                  <span className="material-symbols-outlined text-[14px] text-[var(--on-surface-variant)]">
                     description
                   </span>
                   <span className="font-medium text-[var(--on-surface)] truncate max-w-[120px] lg:max-w-[160px]">

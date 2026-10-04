@@ -63,19 +63,19 @@ class RootErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState
   render() {
     if (this.state.hasError) {
       return (
-        <div id="root-error-boundary" className="min-h-screen w-full flex items-center justify-center p-6 bg-[#0d1117] text-[#e6edf3] font-sans antialiased">
-          <div id="root-error-card" className="max-w-md w-full bg-[#161b22] border border-[#30363d] rounded-lg p-6 shadow-xl flex flex-col gap-4">
+        <div id="root-error-boundary" className="min-h-screen w-full flex items-center justify-center p-6 bg-[#000000] text-[#f4f4f5] font-sans antialiased">
+          <div id="root-error-card" className="max-w-md w-full bg-[#0a0a0a] border border-[#27272a] rounded-lg p-6 shadow-xl flex flex-col gap-4">
             <div id="root-error-header" className="flex items-center gap-3">
               <div id="root-error-icon-wrapper" className="w-10 h-10 rounded-md bg-red-950/80 border border-red-700/60 flex items-center justify-center text-red-400 shrink-0">
                 <span className="material-symbols-outlined text-[22px]">warning</span>
               </div>
               <div id="root-error-header-text" className="min-w-0">
-                <h2 className="text-sm font-semibold text-[#e6edf3]">{i18n._(msg`Error de inicialización`)}</h2>
+                <h2 className="text-sm font-semibold text-[#f4f4f5]">{i18n._(msg`Error de inicialización`)}</h2>
                 <p className="text-xs text-[#8b949e]">{i18n._(msg`Se evitó una pantalla en blanco inesperada`)}</p>
               </div>
             </div>
 
-            <div id="root-error-details" className="p-3 bg-[#0d1117] border border-[#30363d] rounded text-[11px] font-mono text-red-300 break-words max-h-36 overflow-y-auto">
+            <div id="root-error-details" className="p-3 bg-[#000000] border border-[#27272a] rounded text-[11px] font-mono text-red-300 break-words max-h-36 overflow-y-auto">
               {this.state.error?.message || i18n._(msg`Error desconocido al cargar los componentes.`)}
             </div>
 
@@ -92,7 +92,7 @@ class RootErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState
                 id="btn-root-error-reset"
                 type="button"
                 onClick={this.handleResetState}
-                className="py-1.5 px-3 bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] text-[#e6edf3] rounded text-xs font-medium transition cursor-pointer"
+                className="py-1.5 px-3 bg-[#141414] hover:bg-[#1f1f1f] border border-[#27272a] text-[#f4f4f5] rounded text-xs font-medium transition cursor-pointer"
                 title={i18n._(msg`Limpia la memoria local guardada y reinicia la aplicación`)}
               >
                 {i18n._(msg`Restablecer datos`)}
