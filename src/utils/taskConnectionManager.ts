@@ -91,8 +91,8 @@ export function connectTasksWithArrow(
       props: {
         terminal: 'start',
         normalizedAnchor: { x: source.anchor.x, y: source.anchor.y },
-        isExact: false,
-        isPrecise: false,
+        isExact: true,
+        isPrecise: true,
       },
     },
     {
@@ -102,8 +102,8 @@ export function connectTasksWithArrow(
       props: {
         terminal: 'end',
         normalizedAnchor: { x: target.anchor.x, y: target.anchor.y },
-        isExact: false,
-        isPrecise: false,
+        isExact: true,
+        isPrecise: true,
       },
     },
   ]);
