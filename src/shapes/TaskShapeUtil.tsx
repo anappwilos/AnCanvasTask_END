@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react';
 import {
   createShapeId,
   Editor,
+  HandleSnapGeometry,
   HTMLContainer,
   RecordProps,
   Rectangle2d,
@@ -19,6 +20,14 @@ import {
   HighlightText,
   checkTaskMatchesQuery,
 } from '../utils/searchHighlight';
+import {
+  ActiveConnectionSource,
+  ConnectionPointAnchor,
+  connectTasksWithArrow,
+  getActiveConnectionSource,
+  setActiveConnectionSource,
+  subscribeToConnectionSource,
+} from '../utils/taskConnectionManager';
 
 export type TaskPriority = 'P0' | 'P1' | 'P2' | 'P3';
 export type TaskStatus = 'backlog' | 'todo' | 'in_progress' | 'review' | 'done' | 'blocked';
@@ -93,6 +102,63 @@ function TaskCardComponent({
       unsub();
     };
   }, [editor, shape.id]);
+
+  const [connectingSource, setConnectingSource] = useState<ActiveConnectionSource | null>(null);
+
+  useEffect(() => {
+    setConnectingSource(getActiveConnectionSource());
+    return subscribeToConnectionSource((source) => {
+      setConnectingSource(source);
+    });
+  }, []);
+
+  const isConnectingSource = connectingSource?.shapeId === shape.id;
+  const isAnyConnecting = Boolean(connectingSource);
+
+  const handleConnectionPointClick = (
+    e: React.MouseEvent,
+    anchor: ConnectionPointAnchor
+  ) => {
+    e.stopPropagation();
+    if (isConnectingSource) {
+      setActiveConnectionSource(null);
+      return;
+    }
+
+    if (connectingSource) {
+      connectTasksWithArrow(
+        editor,
+        connectingSource,
+        {
+          shapeId: shape.id,
+          taskId,
+          anchor,
+        },
+        (blockerId, blockedId) => {
+          window.dispatchEvent(
+            new CustomEvent('antask:dependency-created', {
+              detail: { blockerTaskId: blockerId, blockedTaskId: blockedId },
+            })
+          );
+        }
+      );
+      setActiveConnectionSource(null);
+    } else {
+      setActiveConnectionSource({
+        shapeId: shape.id,
+        taskId: taskId || 'task',
+        title,
+        anchor,
+      });
+    }
+  };
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    if (isAnyConnecting && !isConnectingSource) {
+      e.stopPropagation();
+      handleConnectionPointClick(e, { x: 0.5, y: 0.5, positionName: 'center' });
+    }
+  };
 
   const toggleCompleted = (e: React.MouseEvent | React.PointerEvent) => {
     e.stopPropagation();
@@ -180,8 +246,13 @@ function TaskCardComponent({
     >
       <div
         id={`task-card-container-${shape.id}`}
-        className={`w-full h-full rounded-md bg-[var(--surface-container)] border transition-all duration-120 select-none flex flex-col justify-between p-2.5 relative ${
-          isSelected
+        onClick={handleCardClick}
+        className={`group/card w-full h-full rounded-md bg-[var(--surface-container)] border transition-all duration-120 select-none flex flex-col justify-between p-2.5 relative ${
+          isConnectingSource
+            ? 'border-[var(--primary)] ring-2 ring-[var(--primary)] ring-offset-2 ring-offset-[var(--surface)] bg-[var(--primary-container)]/20 shadow-md animate-pulse'
+            : isAnyConnecting
+            ? 'border-[var(--primary)]/70 hover:border-[var(--primary)] hover:ring-2 hover:ring-[var(--primary)]/60 cursor-pointer shadow-xs'
+            : isSelected
             ? 'border-[var(--primary)] ring-2 ring-[var(--primary)] bg-[var(--surface-container-high)] shadow-sm'
             : isDuplicateId
             ? 'border-rose-600/80 bg-rose-950/20'
@@ -194,6 +265,98 @@ function TaskCardComponent({
             : 'border-[var(--outline)] hover:border-[var(--on-surface-variant)]'
         }`}
       >
+        {/* Floating Indicator when this task is the active connection source */}
+        {isConnectingSource && (
+          <div className="absolute -top-6 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded bg-[var(--primary)] text-[var(--on-primary)] text-[9px] font-medium whitespace-nowrap shadow-md flex items-center gap-1 z-30 pointer-events-none">
+            <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
+            <span>{_(msg`Punto central activo · Elige tarea a unir`)}</span>
+          </div>
+        )}
+
+        {/* Central Connection Points (Puntos Centrales para unir tareas) */}
+        {/* Top Center Point */}
+        <button
+          id={`btn-task-connect-top-${shape.id}`}
+          type="button"
+          onClick={(e) =>
+            handleConnectionPointClick(e, { x: 0.5, y: 0, positionName: 'top' })
+          }
+          onPointerDown={(e) => e.stopPropagation()}
+          className={`absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 w-3.5 h-3.5 rounded-full border flex items-center justify-center cursor-crosshair transition-all duration-150 ${
+            isConnectingSource
+              ? 'bg-[var(--primary)] border-white scale-110 shadow-md ring-2 ring-[var(--primary)]'
+              : isAnyConnecting
+              ? 'bg-[var(--primary-container)] border-[var(--primary)] ring-2 ring-[var(--primary)]/60 scale-110 animate-bounce'
+              : 'opacity-0 group-hover/card:opacity-100 hover:opacity-100 bg-[var(--surface-container-high)] border-[var(--primary)] hover:scale-125 hover:bg-[var(--primary)]'
+          }`}
+          title={_(msg`Punto central superior: Clic para unir tareas`)}
+          aria-label={_(msg`Punto central superior`)}
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-[var(--primary)] group-hover/card:bg-white" />
+        </button>
+
+        {/* Bottom Center Point */}
+        <button
+          id={`btn-task-connect-bottom-${shape.id}`}
+          type="button"
+          onClick={(e) =>
+            handleConnectionPointClick(e, { x: 0.5, y: 1, positionName: 'bottom' })
+          }
+          onPointerDown={(e) => e.stopPropagation()}
+          className={`absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 z-20 w-3.5 h-3.5 rounded-full border flex items-center justify-center cursor-crosshair transition-all duration-150 ${
+            isConnectingSource
+              ? 'bg-[var(--primary)] border-white scale-110 shadow-md ring-2 ring-[var(--primary)]'
+              : isAnyConnecting
+              ? 'bg-[var(--primary-container)] border-[var(--primary)] ring-2 ring-[var(--primary)]/60 scale-110 animate-bounce'
+              : 'opacity-0 group-hover/card:opacity-100 hover:opacity-100 bg-[var(--surface-container-high)] border-[var(--primary)] hover:scale-125 hover:bg-[var(--primary)]'
+          }`}
+          title={_(msg`Punto central inferior: Clic para unir tareas`)}
+          aria-label={_(msg`Punto central inferior`)}
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-[var(--primary)] group-hover/card:bg-white" />
+        </button>
+
+        {/* Left Center Point */}
+        <button
+          id={`btn-task-connect-left-${shape.id}`}
+          type="button"
+          onClick={(e) =>
+            handleConnectionPointClick(e, { x: 0, y: 0.5, positionName: 'left' })
+          }
+          onPointerDown={(e) => e.stopPropagation()}
+          className={`absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2 z-20 w-3.5 h-3.5 rounded-full border flex items-center justify-center cursor-crosshair transition-all duration-150 ${
+            isConnectingSource
+              ? 'bg-[var(--primary)] border-white scale-110 shadow-md ring-2 ring-[var(--primary)]'
+              : isAnyConnecting
+              ? 'bg-[var(--primary-container)] border-[var(--primary)] ring-2 ring-[var(--primary)]/60 scale-110 animate-bounce'
+              : 'opacity-0 group-hover/card:opacity-100 hover:opacity-100 bg-[var(--surface-container-high)] border-[var(--primary)] hover:scale-125 hover:bg-[var(--primary)]'
+          }`}
+          title={_(msg`Punto central izquierdo: Clic para unir tareas`)}
+          aria-label={_(msg`Punto central izquierdo`)}
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-[var(--primary)] group-hover/card:bg-white" />
+        </button>
+
+        {/* Right Center Point */}
+        <button
+          id={`btn-task-connect-right-${shape.id}`}
+          type="button"
+          onClick={(e) =>
+            handleConnectionPointClick(e, { x: 1, y: 0.5, positionName: 'right' })
+          }
+          onPointerDown={(e) => e.stopPropagation()}
+          className={`absolute top-1/2 right-0 translate-x-1/2 -translate-y-1/2 z-20 w-3.5 h-3.5 rounded-full border flex items-center justify-center cursor-crosshair transition-all duration-150 ${
+            isConnectingSource
+              ? 'bg-[var(--primary)] border-white scale-110 shadow-md ring-2 ring-[var(--primary)]'
+              : isAnyConnecting
+              ? 'bg-[var(--primary-container)] border-[var(--primary)] ring-2 ring-[var(--primary)]/60 scale-110 animate-bounce'
+              : 'opacity-0 group-hover/card:opacity-100 hover:opacity-100 bg-[var(--surface-container-high)] border-[var(--primary)] hover:scale-125 hover:bg-[var(--primary)]'
+          }`}
+          title={_(msg`Punto central derecho: Clic para unir tareas`)}
+          aria-label={_(msg`Punto central derecho`)}
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-[var(--primary)] group-hover/card:bg-white" />
+        </button>
         {/* Top Row: Checkbox + Title / Inline Edit + Context Menu + Priority */}
         <div id={`task-card-header-${shape.id}`} className="flex items-start justify-between gap-2">
           <div id={`task-card-title-group-${shape.id}`} className="flex items-start gap-2 flex-1 min-w-0">
@@ -294,6 +457,31 @@ function TaskCardComponent({
               <span><HighlightText text={priority} query={searchQuery} /></span>
             </button>
 
+            {/* Quick Central Connector Button */}
+            <button
+              id={`btn-task-card-connect-${shape.id}`}
+              type="button"
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) =>
+                handleConnectionPointClick(e, { x: 0.5, y: 0.5, positionName: 'center' })
+              }
+              title={
+                isConnectingSource
+                  ? _(msg`Cancelar unión de tareas`)
+                  : _(msg`Unir tarea (Punto Central)`)
+              }
+              aria-label={_(msg`Punto central para unir tareas`)}
+              className={`w-5 h-5 flex items-center justify-center rounded transition-colors cursor-pointer ${
+                isConnectingSource
+                  ? 'bg-[var(--primary)] text-[var(--on-primary)] ring-2 ring-[var(--primary)]'
+                  : 'text-[var(--on-surface-variant)] hover:text-[var(--primary)] hover:bg-[var(--surface-container-high)]'
+              }`}
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+              </svg>
+            </button>
+
             {/* Contextual Action Menu Trigger ⋮ */}
             <button
               id={`btn-task-card-menu-${shape.id}`}
@@ -333,6 +521,19 @@ function TaskCardComponent({
               className="px-2 py-1 rounded text-left text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] flex items-center gap-2 cursor-pointer"
             >
               <span>{completed ? _(msg`↺ Marcar pendiente`) : _(msg`✓ Marcar completada`)}</span>
+            </button>
+
+            <button
+              id={`btn-task-card-menu-connect-${shape.id}`}
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsMenuOpen(false);
+                handleConnectionPointClick(e, { x: 0.5, y: 0.5, positionName: 'center' });
+              }}
+              className="px-2 py-1 rounded text-left text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] flex items-center gap-2 cursor-pointer"
+            >
+              <span>{_(msg`🔗 Unir tarea (Punto Central)`)}</span>
             </button>
 
             <button
@@ -506,6 +707,30 @@ export class TaskShapeUtil extends ShapeUtil<any> {
     });
   }
 
+  override canBind() {
+    return true;
+  }
+
+  override canSnap() {
+    return true;
+  }
+
+  override getHandleSnapGeometry(shape: ITaskShape): HandleSnapGeometry {
+    const { w, h } = shape.props;
+    const geom = this.getGeometry(shape);
+    return {
+      outline: geom,
+      points: [
+        { x: w / 2, y: h / 2 }, // Punto central exacto (centro)
+        { x: w / 2, y: 0 },     // Punto central superior
+        { x: w / 2, y: h },     // Punto central inferior
+        { x: 0, y: h / 2 },     // Punto central izquierdo
+        { x: w, y: h / 2 },     // Punto central derecho
+        ...geom.bounds.corners,
+      ],
+    };
+  }
+
   getIndicatorPath(shape: ITaskShape) {
     if (typeof Path2D !== 'undefined') {
       const path = new Path2D();
@@ -561,6 +786,30 @@ export class TaskGroupShapeUtil extends ShapeUtil<any> {
       height: shape.props.h,
       isFilled: true,
     });
+  }
+
+  override canBind() {
+    return true;
+  }
+
+  override canSnap() {
+    return true;
+  }
+
+  override getHandleSnapGeometry(shape: ITaskGroupShape): HandleSnapGeometry {
+    const { w, h } = shape.props;
+    const geom = this.getGeometry(shape);
+    return {
+      outline: geom,
+      points: [
+        { x: w / 2, y: h / 2 },
+        { x: w / 2, y: 0 },
+        { x: w / 2, y: h },
+        { x: 0, y: h / 2 },
+        { x: w, y: h / 2 },
+        ...geom.bounds.corners,
+      ],
+    };
   }
 
   getIndicatorPath(shape: ITaskGroupShape) {
@@ -897,6 +1146,35 @@ export function populateCanvasWithGroups(
           },
         });
 
+        const blockerShape = taskShapesToCreate.find((s) => s.id === blockerShapeId);
+        const blockedShape = taskShapesToCreate.find((s) => s.id === blockedShapeId);
+
+        let startAnchor = { x: 0.5, y: 1 };
+        let endAnchor = { x: 0.5, y: 0 };
+
+        if (blockerShape && blockedShape) {
+          const dx = blockedShape.x - blockerShape.x;
+          const dy = blockedShape.y - blockerShape.y;
+
+          if (Math.abs(dx) > Math.abs(dy) * 1.2) {
+            if (dx > 0) {
+              startAnchor = { x: 1, y: 0.5 }; // Right center
+              endAnchor = { x: 0, y: 0.5 };   // Left center
+            } else {
+              startAnchor = { x: 0, y: 0.5 }; // Left center
+              endAnchor = { x: 1, y: 0.5 };   // Right center
+            }
+          } else {
+            if (dy > 0) {
+              startAnchor = { x: 0.5, y: 1 }; // Bottom center
+              endAnchor = { x: 0.5, y: 0 };   // Top center
+            } else {
+              startAnchor = { x: 0.5, y: 0 }; // Top center
+              endAnchor = { x: 0.5, y: 1 };   // Bottom center
+            }
+          }
+        }
+
         bindingsToCreate.push(
           {
             fromId: arrowId,
@@ -904,7 +1182,7 @@ export function populateCanvasWithGroups(
             type: 'arrow',
             props: {
               terminal: 'start',
-              normalizedAnchor: { x: 0.5, y: 1 },
+              normalizedAnchor: startAnchor,
               isExact: false,
               isPrecise: false,
             },
@@ -915,7 +1193,7 @@ export function populateCanvasWithGroups(
             type: 'arrow',
             props: {
               terminal: 'end',
-              normalizedAnchor: { x: 0.5, y: 0 },
+              normalizedAnchor: endAnchor,
               isExact: false,
               isPrecise: false,
             },

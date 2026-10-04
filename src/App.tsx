@@ -38,6 +38,12 @@ import { CommandPalette, CommandPaletteAction, CommandPaletteTask } from './comp
 import { FilterBar, TaskFilterState } from './components/FilterBar';
 import { ToastContainer, ToastItem, ToastType } from './components/ToastSystem';
 import { QuickGuideModal } from './components/QuickGuideModal';
+import {
+  ActiveConnectionSource,
+  getActiveConnectionSource,
+  setActiveConnectionSource,
+  subscribeToConnectionSource,
+} from './utils/taskConnectionManager';
 import { SettingsModal } from './components/SettingsModal';
 import { ImportExportModal } from './components/ImportExportModal';
 import { SanityConfigModal } from './components/SanityConfigModal';
@@ -269,12 +275,36 @@ export default function App() {
       if (e.key === '?' && !isInput && !e.metaKey && !e.ctrlKey && !e.altKey) {
         e.preventDefault();
         setIsQuickGuideOpen((prev) => !prev);
+        return;
+      }
+
+      if (e.key === 'Escape') {
+        if (getActiveConnectionSource()) {
+          setActiveConnectionSource(null);
+        }
       }
     };
 
     window.addEventListener('keydown', handleGlobalKeyDown);
     return () => window.removeEventListener('keydown', handleGlobalKeyDown);
   }, []);
+
+  // Canvas interactive tool state & active connection source for central points
+  const [currentCanvasTool, setCurrentCanvasTool] = useState<'select' | 'arrow'>('select');
+  const [activeConnectionSource, setActiveConnectionSourceState] = useState<ActiveConnectionSource | null>(null);
+
+  useEffect(() => {
+    return subscribeToConnectionSource((src) => {
+      setActiveConnectionSourceState(src);
+    });
+  }, []);
+
+  const handleSelectCanvasTool = useCallback((tool: 'select' | 'arrow') => {
+    if (editor) {
+      editor.setCurrentTool(tool);
+      setCurrentCanvasTool(tool);
+    }
+  }, [editor]);
 
   // Modals state
   const [isNewTaskModalOpen, setIsNewTaskModalOpen] = useState<boolean>(false);
@@ -327,6 +357,38 @@ export default function App() {
     },
     [pushToast]
   );
+
+  // Handle dependency creation from central connection points
+  useEffect(() => {
+    const handleDepCreated = (e: any) => {
+      const { blockerTaskId, blockedTaskId } = e.detail || {};
+      if (blockerTaskId && blockedTaskId) {
+        setMarkdownInput((curr) => {
+          const blocks = scanTaskBlocks(curr).taskBlocks;
+          const targetBlock = blocks.find((b) => b.detectedId === blockedTaskId);
+          if (!targetBlock) return curr;
+          const currentBlockedBy = targetBlock.detectedBlockedBy || '';
+          const list = currentBlockedBy
+            .split(',')
+            .map((s) => s.trim().toLowerCase())
+            .filter(Boolean);
+          if (!list.includes(blockerTaskId.toLowerCase())) {
+            const nextBlocked = currentBlockedBy
+              ? `${currentBlockedBy}, ${blockerTaskId}`
+              : blockerTaskId;
+            return updateTaskInMarkdown(curr, blockedTaskId, { blockedBy: nextBlocked });
+          }
+          return curr;
+        });
+        pushToast(
+          i18n._(msg`Tareas unidas: #${blockerTaskId} bloquea a #${blockedTaskId}`),
+          'success'
+        );
+      }
+    };
+    window.addEventListener('antask:dependency-created', handleDepCreated);
+    return () => window.removeEventListener('antask:dependency-created', handleDepCreated);
+  }, [pushToast]);
 
   // Online / Offline network status listener
   useEffect(() => {
@@ -1494,6 +1556,46 @@ export default function App() {
                 break;
               }
             }
+          }
+
+          // Detect new arrow bindings to synchronize task dependencies (Blocked by)
+          if (changes.added) {
+            for (const id of Object.keys(changes.added)) {
+              const item = changes.added[id];
+              if (item?.typeName === 'binding' && item?.type === 'arrow') {
+                hasVisualChange = true;
+                const arrow = editorInstance.getShape(item.fromId);
+                if (arrow && (arrow as any).type === 'arrow') {
+                  const bindings = (editorInstance.getBindingsFromShape(arrow, 'arrow') as any[]) || [];
+                  const startB = bindings.find((b) => b.props?.terminal === 'start');
+                  const endB = bindings.find((b) => b.props?.terminal === 'end');
+                  if (startB && endB) {
+                    const startShape = editorInstance.getShape(startB.toId) as any;
+                    const endShape = editorInstance.getShape(endB.toId) as any;
+                    if (startShape?.type === 'task' && endShape?.type === 'task') {
+                      const blockerId = startShape.props?.taskId;
+                      const blockedId = endShape.props?.taskId;
+                      if (blockerId && blockedId && blockerId !== blockedId) {
+                        window.dispatchEvent(
+                          new CustomEvent('antask:dependency-created', {
+                            detail: { blockerTaskId: blockerId, blockedTaskId: blockedId },
+                          })
+                        );
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+
+          try {
+            const toolId = (editorInstance as any).getCurrentToolId?.();
+            if (toolId === 'select' || toolId === 'arrow') {
+              setCurrentCanvasTool((prev) => (prev !== toolId ? (toolId as any) : prev));
+            }
+          } catch {
+            // ignore
           }
 
           if (!hasVisualChange && changes.removed) {
@@ -3529,7 +3631,65 @@ export default function App() {
                     >
                       <span className="material-symbols-outlined text-[16px]">fit_screen</span>
                     </button>
+
+                    <div id="div-app-25-tools" className="w-px h-4 bg-[var(--outline)] my-auto mx-0.5" />
+
+                    {/* Mode: Selection Tool (V) */}
+                    <button
+                      id="btn-canvas-tool-select"
+                      type="button"
+                      onClick={() => handleSelectCanvasTool('select')}
+                      className={`btn-m3-icon w-7 h-7 cursor-pointer transition-colors ${
+                        currentCanvasTool === 'select'
+                          ? 'bg-[var(--primary)] text-[var(--on-primary)] shadow-xs'
+                          : 'text-[var(--on-surface-variant)] hover:bg-[var(--surface-container-high)] hover:text-[var(--on-surface)]'
+                      }`}
+                      title={i18n._(msg`Modo Selección (V)`)}
+                      aria-label={i18n._(msg`Modo Selección`)}
+                    >
+                      <span className="material-symbols-outlined text-[16px]">near_me</span>
+                    </button>
+
+                    {/* Mode: Arrow Tool for Joining Tasks at Central Points (A) */}
+                    <button
+                      id="btn-canvas-tool-arrow"
+                      type="button"
+                      onClick={() => handleSelectCanvasTool('arrow')}
+                      className={`btn-m3-icon w-7 h-7 cursor-pointer transition-colors ${
+                        currentCanvasTool === 'arrow'
+                          ? 'bg-[var(--primary)] text-[var(--on-primary)] shadow-xs'
+                          : 'text-[var(--on-surface-variant)] hover:bg-[var(--surface-container-high)] hover:text-[var(--on-surface)]'
+                      }`}
+                      title={i18n._(msg`Unir tareas con flechas en puntos centrales (A)`)}
+                      aria-label={i18n._(msg`Unir tareas con flechas`)}
+                    >
+                      <span className="material-symbols-outlined text-[16px]">timeline</span>
+                    </button>
                   </div>
+
+                  {/* Active Connection Source Helper Banner */}
+                  {activeConnectionSource && (
+                    <div
+                      id="canvas-active-connection-banner"
+                      className="absolute top-4 left-1/2 -translate-x-1/2 z-30 bg-[var(--surface-container-high)] border border-[var(--primary)] text-[var(--on-surface)] rounded-full px-4 py-1.5 shadow-xl flex items-center gap-3 text-xs select-none backdrop-blur-md"
+                    >
+                      <span className="w-2 h-2 rounded-full bg-[var(--primary)] animate-ping" />
+                      <span className="font-medium">
+                        {i18n._(msg`Uniendo desde #${activeConnectionSource.taskId || 'tarea'}`)} ·{' '}
+                        <span className="text-[var(--on-surface-variant)] font-normal">
+                          {i18n._(msg`Haz clic en el punto central de otra tarea para unirlas`)}
+                        </span>
+                      </span>
+                      <button
+                        id="btn-cancel-task-connection"
+                        type="button"
+                        onClick={() => setActiveConnectionSource(null)}
+                        className="px-2 py-0.5 rounded bg-[var(--surface)] hover:bg-[var(--surface-container)] text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] text-[11px] font-mono border border-[var(--outline)] cursor-pointer transition-colors"
+                      >
+                        {i18n._(msg`Cancelar (Esc)`)}
+                      </button>
+                    </div>
+                  )}
 
                   {/* Canvas Empty State Overlay */}
                   {allParsedTasks.length === 0 && (
