@@ -14,6 +14,11 @@ import {
 } from 'tldraw';
 import { CanvasVisualDocument } from '../services/sanityService';
 import { scanTaskBlocks, validateMarkdownDocument } from '../utils/markdownSync';
+import {
+  useGlobalSearchQuery,
+  HighlightText,
+  checkTaskMatchesQuery,
+} from '../utils/searchHighlight';
 
 export type TaskPriority = 'P0' | 'P1' | 'P2' | 'P3';
 export type TaskStatus = 'backlog' | 'todo' | 'in_progress' | 'review' | 'done' | 'blocked';
@@ -151,6 +156,19 @@ function TaskCardComponent({
   const normalizedStatus = completed ? 'done' : status || 'todo';
   const currentStatus = statusConfig[normalizedStatus] || statusConfig.todo;
 
+  const searchQuery = useGlobalSearchQuery();
+  const hasActiveSearch = Boolean(searchQuery.trim());
+  const isSearchMatch = hasActiveSearch && checkTaskMatchesQuery(
+    {
+      title,
+      taskId,
+      tags,
+      priority,
+      status: normalizedStatus,
+    },
+    searchQuery
+  );
+
   return (
     <HTMLContainer
       id={shape.id}
@@ -162,13 +180,17 @@ function TaskCardComponent({
     >
       <div
         id={`task-card-container-${shape.id}`}
-        className={`w-full h-full rounded-md bg-[var(--surface-container)] border transition-colors duration-120 select-none flex flex-col justify-between p-2.5 relative ${
+        className={`w-full h-full rounded-md bg-[var(--surface-container)] border transition-all duration-120 select-none flex flex-col justify-between p-2.5 relative ${
           isSelected
-            ? 'border-[var(--primary)] ring-1 ring-[var(--primary)] bg-[var(--surface-container-high)]'
+            ? 'border-[var(--primary)] ring-2 ring-[var(--primary)] bg-[var(--surface-container-high)] shadow-sm'
             : isDuplicateId
             ? 'border-rose-600/80 bg-rose-950/20'
+            : isSearchMatch
+            ? 'border-amber-400 ring-2 ring-amber-400/60 bg-amber-500/10 shadow-sm'
             : completed
             ? 'border-[var(--outline)] bg-[var(--surface)] opacity-75'
+            : hasActiveSearch
+            ? 'border-[var(--outline)] opacity-40 hover:opacity-100 transition-opacity'
             : 'border-[var(--outline)] hover:border-[var(--on-surface-variant)]'
         }`}
       >
@@ -237,7 +259,7 @@ function TaskCardComponent({
                     completed ? 'text-[var(--on-surface-variant)] line-through' : 'text-[var(--on-surface)]'
                   }`}
                 >
-                  {title}
+                  <HighlightText text={title} query={searchQuery} />
                 </span>
                 <button
                   id={`btn-task-card-edit-${shape.id}`}
@@ -269,7 +291,7 @@ function TaskCardComponent({
               className={`px-1.5 py-0.5 text-[11px] font-mono font-medium rounded border border-[var(--outline)] bg-[var(--surface)] hover:border-[var(--on-surface-variant)] cursor-pointer shrink-0 transition-colors flex items-center gap-1 ${currentPriority.text}`}
             >
               <span className={`w-1.5 h-1.5 rounded-full ${currentPriority.dot}`} />
-              <span>{priority}</span>
+              <span><HighlightText text={priority} query={searchQuery} /></span>
             </button>
 
             {/* Contextual Action Menu Trigger ⋮ */}
@@ -369,7 +391,7 @@ function TaskCardComponent({
           <div id={`task-card-tags-${shape.id}`} className="flex items-center gap-1.5 flex-wrap py-0.5 text-[10px] text-[var(--on-surface-variant)]">
             {tags?.slice(0, 3).map((t) => (
               <span key={t} className="font-mono text-[var(--on-surface-variant)]">
-                #{t}
+                #<HighlightText text={t} query={searchQuery} />
               </span>
             ))}
             {tags && tags.length > 3 && (
@@ -391,7 +413,7 @@ function TaskCardComponent({
           <div id={`task-card-footer-meta-${shape.id}`} className="flex items-center gap-1.5 truncate max-w-[200px]">
             {taskId ? (
               <span className="text-[var(--on-surface-variant)] font-mono text-[11px] truncate tracking-tight" title={`ID: ${taskId}`}>
-                #{taskId}
+                #<HighlightText text={taskId} query={searchQuery} />
               </span>
             ) : (
               <span className="text-[var(--on-surface-variant)] font-mono text-[11px] italic">sin-id</span>

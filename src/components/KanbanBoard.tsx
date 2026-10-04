@@ -5,6 +5,7 @@ import { TaskPriority, TaskStatus } from '../shapes/TaskShapeUtil';
 import { scanTaskBlocks, TaskBlockInfo } from '../utils/markdownSync';
 import { TaskFilterState } from './FilterBar';
 import { SkeletonKanbanColumn } from './Skeletons';
+import { HighlightText, checkTaskMatchesQuery } from '../utils/searchHighlight';
 
 export interface KanbanTask {
   taskId: string;
@@ -153,11 +154,19 @@ export function KanbanBoard({
       // 1. Search Query
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
+        const cleanTag = q.replace(/^#/, '');
         const matchesTitle = t.title.toLowerCase().includes(q);
         const matchesId = t.taskId.toLowerCase().includes(q);
         const matchesGroup = t.groupTitle.toLowerCase().includes(q);
-        const matchesTags = t.tags?.some((tag) => tag.toLowerCase().includes(q));
-        if (!matchesTitle && !matchesId && !matchesGroup && !matchesTags) return false;
+        const matchesTags = t.tags?.some(
+          (tag) => tag.toLowerCase().includes(q) || tag.toLowerCase().includes(cleanTag)
+        );
+        const matchesPriority = t.priority.toLowerCase() === q;
+        const matchesStatus =
+          t.status.toLowerCase().includes(q) ||
+          (q === 'done' || q === 'hecho' || q === 'completado' || q === 'completada' ? t.completed : false) ||
+          (q === 'todo' || q === 'pendiente' || q === 'por hacer' ? !t.completed : false);
+        if (!matchesTitle && !matchesId && !matchesGroup && !matchesTags && !matchesPriority && !matchesStatus) return false;
       }
 
       // 2. Comprehensive Filters
@@ -594,6 +603,7 @@ export function KanbanBoard({
                           selectedTaskId === task.taskId || selectedTaskIds.has(task.taskId);
                         const isDragging = draggedTaskId === task.taskId;
                         const prio = PRIORITY_CONFIG[task.priority] || PRIORITY_CONFIG.P1;
+                        const isSearchMatch = Boolean(searchQuery.trim()) && checkTaskMatchesQuery(task, searchQuery);
 
                         return (
                           <div
@@ -616,6 +626,8 @@ export function KanbanBoard({
                             className={`rounded-md bg-[var(--surface)] border p-2.5 flex flex-col gap-1.5 cursor-grab active:cursor-grabbing transition-all duration-120 relative select-none group hover:border-[var(--on-surface-variant)] ${
                               isSelected
                                 ? 'border-[var(--primary)] ring-1 ring-[var(--primary)] bg-[var(--surface-container-high)]'
+                                : isSearchMatch
+                                ? 'border-amber-400 ring-1 ring-amber-400/50 bg-amber-500/5'
                                 : 'border-[var(--outline)]'
                             } ${isDragging ? 'opacity-40' : 'opacity-100'} ${
                               task.completed ? 'opacity-70 bg-[var(--surface)]/80' : ''
@@ -691,7 +703,7 @@ export function KanbanBoard({
                                           : 'text-[var(--on-surface)]'
                                       }`}
                                     >
-                                      {task.title}
+                                      <HighlightText text={task.title} query={searchQuery} />
                                     </span>
                                   </div>
                                 )}
@@ -782,7 +794,7 @@ export function KanbanBoard({
                               <div id="div-kanbanboard-20" className="flex items-center gap-1.5 flex-wrap text-[10px] text-[var(--on-surface-variant)]">
                                 {task.tags?.slice(0, 3).map((t) => (
                                   <span key={t} className="font-mono text-[var(--on-surface-variant)]">
-                                    #{t}
+                                    #<HighlightText text={t} query={searchQuery} />
                                   </span>
                                 ))}
                                 {task.tags && task.tags.length > 3 && (
@@ -803,7 +815,7 @@ export function KanbanBoard({
                             <div id="div-kanbanboard-21" className="flex items-center justify-between text-xs pt-1 border-t border-[var(--outline)] mt-0.5">
                               <div id="div-kanbanboard-22" className="flex items-center gap-1.5 truncate max-w-[160px]">
                                 <span className="font-mono text-[11px] text-[var(--on-surface-variant)] truncate">
-                                  #{task.taskId}
+                                  #<HighlightText text={task.taskId} query={searchQuery} />
                                 </span>
                                 {task.blockedBy && !task.completed && (
                                   <span
@@ -817,7 +829,7 @@ export function KanbanBoard({
                               </div>
 
                               <span className="text-[10px] font-mono text-[var(--on-surface-variant)] truncate max-w-[90px]">
-                                {task.groupTitle}
+                                <HighlightText text={task.groupTitle} query={searchQuery} />
                               </span>
                             </div>
                           </div>
@@ -893,6 +905,7 @@ export function KanbanBoard({
                           selectedTaskId === task.taskId || selectedTaskIds.has(task.taskId);
                         const isDragging = draggedTaskId === task.taskId;
                         const prio = PRIORITY_CONFIG[task.priority] || PRIORITY_CONFIG.P1;
+                        const isSearchMatch = Boolean(searchQuery.trim()) && checkTaskMatchesQuery(task, searchQuery);
 
                         return (
                           <div
@@ -915,6 +928,8 @@ export function KanbanBoard({
                             className={`rounded-md bg-[var(--surface)] border p-2.5 flex flex-col gap-1.5 cursor-grab active:cursor-grabbing transition-all duration-120 relative select-none group hover:border-[var(--on-surface-variant)] ${
                               isSelected
                                 ? 'border-[var(--primary)] ring-1 ring-[var(--primary)] bg-[var(--surface-container-high)]'
+                                : isSearchMatch
+                                ? 'border-amber-400 ring-1 ring-amber-400/50 bg-amber-500/5'
                                 : 'border-[var(--outline)]'
                             } ${isDragging ? 'opacity-40' : 'opacity-100'} ${
                               task.completed ? 'opacity-70 bg-[var(--surface)]/80' : ''
@@ -962,7 +977,7 @@ export function KanbanBoard({
                                       : 'text-[var(--on-surface)]'
                                   }`}
                                 >
-                                  {task.title}
+                                  <HighlightText text={task.title} query={searchQuery} />
                                 </span>
                               </div>
 
@@ -979,7 +994,7 @@ export function KanbanBoard({
 
                             <div id="div-kanbanboard-29" className="flex items-center justify-between text-xs pt-1 border-t border-[var(--outline)] mt-0.5">
                               <span className="font-mono text-[11px] text-[var(--on-surface-variant)] truncate">
-                                #{task.taskId}
+                                #<HighlightText text={task.taskId} query={searchQuery} />
                               </span>
                               <span className="text-[10px] font-mono text-[var(--on-surface-variant)] uppercase">
                                 {task.completed ? 'DONE' : task.status}

@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useLingui } from '@lingui/react';
 import { msg, plural } from '@lingui/core/macro';
 import { TaskPriority, TaskStatus } from '../shapes/TaskShapeUtil';
+import { HighlightText } from '../utils/searchHighlight';
 
 export interface CommandPaletteTask {
   taskId: string;
@@ -42,41 +43,6 @@ type ResultItem =
   | { type: 'task'; item: CommandPaletteTask; groupHeader?: string }
   | { type: 'section'; item: string; groupHeader?: string }
   | { type: 'tag'; item: string; groupHeader?: string };
-
-// Highlight helper component
-const HighlightText: React.FC<{ text: string; query: string; className?: string }> = ({
-  text,
-  query,
-  className = '',
-}) => {
-  if (!query.trim()) {
-    return <span className={className}>{text}</span>;
-  }
-
-  const cleanQuery = query.trim().replace(/^[#@]/, '');
-  if (!cleanQuery) return <span className={className}>{text}</span>;
-
-  const escaped = cleanQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const regex = new RegExp(`(${escaped})`, 'gi');
-  const parts = text.split(regex);
-
-  return (
-    <span className={className}>
-      {parts.map((part, i) =>
-        regex.test(part) ? (
-          <mark
-            key={i}
-            className="bg-[var(--primary)]/30 text-[var(--primary)] rounded-xs px-0.5 font-semibold not-italic"
-          >
-            {part}
-          </mark>
-        ) : (
-          <span key={i}>{part}</span>
-        )
-      )}
-    </span>
-  );
-};
 
 export const CommandPalette: React.FC<CommandPaletteProps> = ({
   isOpen,

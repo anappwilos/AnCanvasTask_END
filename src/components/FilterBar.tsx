@@ -333,8 +333,8 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             </>
           )}
 
-          {/* Mobile Quick Search Input */}
-          <div id="div-filterbar-12" className="relative flex-1 sm:hidden min-w-[110px] max-w-[200px]">
+          {/* Mobile & Tablet Quick Search Input */}
+          <div id="div-filterbar-12" className="relative flex-1 md:hidden min-w-[110px] max-w-[220px]">
             <span className="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-[14px] text-[var(--on-surface-variant)] pointer-events-none">
               search
             </span>
@@ -342,6 +342,11 @@ export const FilterBar: React.FC<FilterBarProps> = ({
               type="text"
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') {
+                  onSearchChange('');
+                }
+              }}
               placeholder={i18n._(msg`Buscar...`)}
               className="w-full bg-[var(--surface)] text-[var(--on-surface)] placeholder:text-[var(--on-surface-variant)] border border-[var(--outline)] rounded pl-6 pr-5 py-1 text-xs font-sans focus:outline-none focus:border-[var(--primary)]"
             />
@@ -351,6 +356,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                 type="button"
                 onClick={() => onSearchChange('')}
                 className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] cursor-pointer"
+                title={i18n._(msg`Limpiar búsqueda`)}
               >
                 <span className="material-symbols-outlined text-[13px]">close</span>
               </button>
@@ -455,7 +461,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
 
           {searchQuery.trim() && (
             <span className="px-2 py-0.5 rounded bg-[var(--surface)] border border-[var(--primary)]/60 text-[11px] text-[var(--primary)] font-medium flex items-center gap-1">
-              <span>{i18n._(msg`Búsqueda: “\$\${query}”`)}</span>
+              <span>{i18n._(msg`Búsqueda:`)} “{searchQuery}”</span>
               <button
                 id="btn-chip-remove-query"
                 type="button"
@@ -470,7 +476,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
 
           {filters.status !== 'all' && (
             <span className="px-2 py-0.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] text-[var(--on-surface)] font-medium flex items-center gap-1">
-              <span>{i18n._(msg`Estado: \$\${status}`)}</span>
+              <span>{i18n._(msg`Estado:`)} {filters.status}</span>
               <button
                 id="btn-chip-remove-status"
                 type="button"
@@ -484,7 +490,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
 
           {filters.priority !== 'all' && (
             <span className="px-2 py-0.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] text-[var(--on-surface)] font-mono font-medium flex items-center gap-1">
-              <span>{i18n._(msg`Prioridad: \$\${priority}`)}</span>
+              <span>{i18n._(msg`Prioridad:`)} {filters.priority}</span>
               <button
                 id="btn-chip-remove-priority"
                 type="button"
@@ -498,7 +504,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
 
           {filters.section !== 'all' && (
             <span className="px-2 py-0.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] text-[var(--on-surface)] font-medium flex items-center gap-1">
-              <span>{i18n._(msg`Sección: ## \$\${section}`)}</span>
+              <span>{i18n._(msg`Sección:`)} ## {filters.section}</span>
               <button
                 id="btn-chip-remove-section"
                 type="button"
@@ -512,7 +518,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
 
           {filters.tag !== 'all' && (
             <span className="px-2 py-0.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] text-[var(--on-surface)] font-mono flex items-center gap-1">
-              <span>{i18n._(msg`Etiqueta: #\$\${tag}`)}</span>
+              <span>{i18n._(msg`Etiqueta:`)} #{filters.tag}</span>
               <button
                 id="btn-chip-remove-tag"
                 type="button"
@@ -540,7 +546,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
 
           {filters.sortBy !== 'default' && (
             <span className="px-2 py-0.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] text-[var(--on-surface-variant)] font-medium flex items-center gap-1">
-              <span>{i18n._(msg`Orden: \$\${sort}`)}</span>
+              <span>{i18n._(msg`Orden:`)} {filters.sortBy}</span>
               <button
                 id="btn-chip-remove-sort"
                 type="button"

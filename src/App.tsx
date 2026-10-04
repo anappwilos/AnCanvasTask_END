@@ -43,6 +43,7 @@ import { ImportExportModal } from './components/ImportExportModal';
 import { SanityConfigModal } from './components/SanityConfigModal';
 import { SanityStudio } from './components/SanityStudio';
 import { SanityStudioEmbed } from './components/SanityStudioEmbed';
+import { setGlobalSearchQuery } from './utils/searchHighlight';
 import { WorkspaceSelector } from './components/WorkspaceSelector';
 import { TaskDocumentExplorer } from './components/TaskDocumentExplorer';
 import { WorkspaceManagerModal } from './components/WorkspaceManagerModal';
@@ -201,6 +202,11 @@ export default function App() {
   const [activeView, setActiveView] = useState<'canvas' | 'kanban' | 'studio'>(() => userSettings.defaultView || 'canvas');
   const [selectedTaskShapeId, setSelectedTaskShapeId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
+
+  useEffect(() => {
+    setGlobalSearchQuery(searchQuery);
+  }, [searchQuery]);
+
   const [activeFilter, setActiveFilter] = useState<'all' | 'todo' | 'done' | 'critical' | 'blocked'>('all');
 
   // Advanced Filters State (DESIGN.md Section 6 & 7)
@@ -928,7 +934,7 @@ export default function App() {
         saveWorkspaceStore(nextStore);
         return nextStore;
       });
-      pushToast(i18n._(msg`Rama "\$\${branchName}" activada`), 'info');
+      pushToast(i18n._(msg`Rama "${branchName}" activada`), 'info');
     },
     [pushToast]
   );
@@ -973,7 +979,7 @@ export default function App() {
         saveWorkspaceStore(nextStore);
         return nextStore;
       });
-      pushToast(i18n._(msg`Rama "\$\${branchName}" creada y activada`), 'success');
+      pushToast(i18n._(msg`Rama "${branchName}" creada y activada`), 'success');
     },
     [pushToast]
   );
@@ -1110,7 +1116,7 @@ export default function App() {
           triggerDebouncedVisualSave(editor);
         }
 
-        pushToast(i18n._(msg`Documento duplicado como "\$\${copyPath}"`), 'success');
+        pushToast(i18n._(msg`Documento duplicado como "${copyPath}"`), 'success');
         return nextStore;
       });
     },
@@ -1157,7 +1163,7 @@ export default function App() {
           triggerDebouncedVisualSave(editor);
         }
 
-        pushToast(i18n._(msg`Archivo "\$\${docPath}" eliminado`), 'info');
+        pushToast(i18n._(msg`Archivo "${docPath}" eliminado`), 'info');
         return nextStore;
       });
     },
@@ -1584,15 +1590,15 @@ export default function App() {
 
           if (taskCount > 0 || groupCount > 0) {
             triggerDebouncedVisualSave(editor);
-            pushToast(i18n._(msg`"\$\${fileName}" cargado (\$\${taskCount} tareas en \$\${groupCount} secciones)`), 'success');
+            pushToast(i18n._(msg`"${file.name}" cargado (${taskCount} tareas en ${groupCount} secciones)`), 'success');
           } else {
-            pushToast(i18n._(msg`"\$\${fileName}" cargado, pero no contiene tareas válidas (- [ ] ...)`), 'warning');
+            pushToast(i18n._(msg`"${file.name}" cargado, pero no contiene tareas válidas (- [ ] ...)`), 'warning');
           }
         } else {
-          pushToast(i18n._(msg`"\$\${fileName}" cargado en memoria`), 'info');
+          pushToast(i18n._(msg`"${file.name}" cargado en memoria`), 'info');
         }
       } catch (err) {
-        pushToast(i18n._(msg`Error al leer "\$\${fileName}"`), 'error');
+        pushToast(i18n._(msg`Error al leer "${file.name}"`), 'error');
       }
     },
     [editor, triggerDebouncedVisualSave, pushToast]
@@ -1649,7 +1655,7 @@ export default function App() {
         URL.revokeObjectURL(url);
 
         setLastSavedMarkdown(markdownInput);
-        pushToast(i18n._(msg`Archivo "\$\${fileName}" descargado con éxito`), 'success');
+        pushToast(i18n._(msg`Archivo "${fileName}" descargado con éxito`), 'success');
       } catch (err) {
         pushToast(i18n._(msg`Error al exportar archivo`), 'error');
       }
@@ -1684,7 +1690,7 @@ export default function App() {
       URL.revokeObjectURL(url);
 
       setLastSavedMarkdown(markdownInput);
-      pushToast(i18n._(msg`Archivo "\$\${fileName}" guardado`), 'success');
+      pushToast(i18n._(msg`Archivo "${currentFileName || 'TASKS.md'}" guardado`), 'success');
     } catch (err) {
       pushToast(i18n._(msg`Error al exportar archivo`), 'error');
     }
@@ -1738,7 +1744,7 @@ export default function App() {
     if (taskCount > 0 || groupCount > 0) {
       setIsImportExportOpen(false);
       setLastSavedMarkdown(markdownInput);
-      showToast(i18n._(msg`\$\${taskCount} tareas aplicadas al canvas`));
+      showToast(i18n._(msg`${taskCount} tareas aplicadas al canvas`));
       triggerDebouncedVisualSave(editor);
     } else {
       showToast(i18n._(msg`No se detectaron tareas válidas`));
@@ -1764,9 +1770,10 @@ export default function App() {
       editor.select(taskShape.id);
       setSelectedTaskShapeId(taskShape.id);
       editor.zoomToSelection({ animation: { duration: 300 } });
-      showToast(i18n._(msg`Enfocado: "\$\${title}"`));
+      const focusedLabel = targetTitle || targetTaskId;
+      showToast(i18n._(msg`Enfocado: "${focusedLabel}"`));
     } else {
-      showToast(i18n._(msg`No se encontró la tarjeta #\$\${taskId} en el canvas`));
+      showToast(i18n._(msg`No se encontró la tarjeta #${targetTaskId} en el canvas`));
     }
   };
 
@@ -1783,7 +1790,7 @@ export default function App() {
     if (groupShape) {
       editor.select(groupShape.id);
       editor.zoomToSelection({ animation: { duration: 300 } });
-      showToast(i18n._(msg`Sección: "\$\${sectionTitle}"`));
+      showToast(i18n._(msg`Sección: "${sectionTitle}"`));
     }
   };
 
@@ -1880,7 +1887,7 @@ export default function App() {
     setNewTaskTitle('');
     setNewTaskPriority('P1');
     setIsNewTaskModalOpen(false);
-    showToast(i18n._(msg`Tarea #\$\${taskId} creada en "\$\${groupTitle}"`));
+    showToast(i18n._(msg`Tarea #${taskId} creada en "${groupTitle}"`));
   };
 
   // Load Sample Project Helper
@@ -1937,7 +1944,7 @@ export default function App() {
     setDeleteWarningState(null);
     triggerDebouncedVisualSave(editor);
 
-    pushToast(i18n._(msg`Tarea #\$\${taskId} eliminada`), 'info', {
+    pushToast(i18n._(msg`Tarea #${taskId} eliminada`), 'info', {
       label: 'Deshacer',
       onClick: async () => {
         setMarkdownInput(priorMarkdown);
@@ -1946,7 +1953,7 @@ export default function App() {
           loadTasksFromMarkdown(editor, priorMarkdown, visual);
           triggerDebouncedVisualSave(editor);
         }
-        pushToast(i18n._(msg`Tarea "\$\${title}" restaurada`), 'success');
+        pushToast(i18n._(msg`Tarea "${title}" restaurada`), 'success');
       },
     });
   };
@@ -1962,7 +1969,7 @@ export default function App() {
         const { taskCount, groupCount } = applyAutoLayout(editor, markdownInput);
         if (taskCount > 0 || groupCount > 0) {
           triggerDebouncedVisualSave(editor);
-          pushToast(i18n._(msg`Canvas organizado (\$\${taskCount} tareas en \$\${groupCount} secciones)`), 'success');
+          pushToast(i18n._(msg`Canvas organizado (${taskCount} tareas en ${groupCount} secciones)`), 'success');
         } else {
           pushToast(i18n._(msg`No hay tareas para organizar`), 'info');
         }
@@ -2006,7 +2013,7 @@ export default function App() {
           });
           syncAllTasksToSanity(tasksToSync, newConfig).then((res) => {
             if (res.ok) {
-              pushToast(i18n._(msg`Sincronización activa: \$\${count} tareas registradas en Sanity`), 'success');
+              pushToast(i18n._(msg`Sincronización activa: ${tasksToSync.length} tareas registradas en Sanity`), 'success');
             }
           });
         } else {
@@ -2148,7 +2155,7 @@ export default function App() {
             });
             setMarkdownInput(updated);
             setSyncStatus('synced');
-            pushToast(i18n._(msg`Sanity: Tarea #\$\${targetId} sincronizada en vivo`), 'info');
+            pushToast(i18n._(msg`Sanity: Tarea #${targetId} sincronizada en vivo`), 'info');
             setTimeout(() => {
               isRemoteMutationInProgressRef.current = false;
             }, 1800);
@@ -2186,7 +2193,7 @@ export default function App() {
         subtasks: taskDoc.subtasks,
       });
       setMarkdownInput(updatedMarkdown);
-      pushToast(i18n._(msg`Tarea #\$\${taskId} importada de Sanity al lienzo`), 'success');
+      pushToast(i18n._(msg`Tarea #${taskId} importada de Sanity al lienzo`), 'success');
     },
     [markdownInput, pushToast]
   );
@@ -2296,7 +2303,7 @@ export default function App() {
           }
         }
       }
-      showToast(i18n._(msg`\$\${count} tareas actualizadas`));
+      showToast(i18n._(msg`${taskIds.length} tareas actualizadas`));
     },
     [editor]
   );
@@ -2332,7 +2339,7 @@ export default function App() {
         triggerDebouncedVisualSave(editor);
       }
 
-      pushToast(i18n._(msg`\$\${count} tareas eliminadas`), 'info', {
+      pushToast(i18n._(msg`${taskIds.length} tareas eliminadas`), 'info', {
         label: 'Deshacer',
         onClick: async () => {
           setMarkdownInput(priorMarkdown);
@@ -2341,7 +2348,7 @@ export default function App() {
             loadTasksFromMarkdown(editor, priorMarkdown, visual);
             triggerDebouncedVisualSave(editor);
           }
-          pushToast(i18n._(msg`\$\${count} tareas restauradas`), 'success');
+          pushToast(i18n._(msg`${taskIds.length} tareas restauradas`), 'success');
         },
       });
     },
@@ -2610,11 +2617,19 @@ export default function App() {
     return allParsedTasks.filter((t) => {
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
+        const cleanTag = q.replace(/^#/, '');
         const matchTitle = t.title.toLowerCase().includes(q);
         const matchId = t.taskId.toLowerCase().includes(q);
         const matchGroup = t.groupTitle.toLowerCase().includes(q);
-        const matchTags = t.tags?.some((tag) => tag.toLowerCase().includes(q));
-        if (!matchTitle && !matchId && !matchGroup && !matchTags) return false;
+        const matchTags = t.tags?.some(
+          (tag) => tag.toLowerCase().includes(q) || tag.toLowerCase().includes(cleanTag)
+        );
+        const matchPriority = t.priority.toLowerCase() === q;
+        const matchStatus =
+          t.status.toLowerCase().includes(q) ||
+          (q === 'done' || q === 'hecho' || q === 'completado' || q === 'completada' ? t.completed : false) ||
+          (q === 'todo' || q === 'pendiente' || q === 'por hacer' ? !t.completed : false);
+        if (!matchTitle && !matchId && !matchGroup && !matchTags && !matchPriority && !matchStatus) return false;
       }
 
       if (taskFilters.status !== 'all') {
@@ -2631,6 +2646,53 @@ export default function App() {
     }).length;
   }, [allParsedTasks, searchQuery, taskFilters]);
 
+  // Index for cycling through search matches with Enter
+  const [searchMatchIndex, setSearchMatchIndex] = useState<number>(0);
+
+  useEffect(() => {
+    setSearchMatchIndex(0);
+  }, [searchQuery]);
+
+  const handleSearchNextMatch = useCallback(() => {
+    if (!searchQuery.trim()) return;
+    const q = searchQuery.toLowerCase();
+    const cleanTag = q.replace(/^#/, '');
+    const matches = allParsedTasks.filter((t) => {
+      const matchTitle = t.title.toLowerCase().includes(q);
+      const matchId = t.taskId.toLowerCase().includes(q);
+      const matchGroup = t.groupTitle.toLowerCase().includes(q);
+      const matchTags = t.tags?.some(
+        (tag) => tag.toLowerCase().includes(q) || tag.toLowerCase().includes(cleanTag)
+      );
+      const matchPriority = t.priority.toLowerCase() === q;
+      const matchStatus =
+        t.status.toLowerCase().includes(q) ||
+        (q === 'done' || q === 'hecho' || q === 'completado' || q === 'completada' ? t.completed : false) ||
+        (q === 'todo' || q === 'pendiente' || q === 'por hacer' ? !t.completed : false);
+      return matchTitle || matchId || matchGroup || matchTags || matchPriority || matchStatus;
+    });
+
+    if (matches.length === 0) {
+      showToast(i18n._(msg`No se encontraron resultados para "${searchQuery}"`));
+      return;
+    }
+
+    const nextIdx = searchMatchIndex % matches.length;
+    const target = matches[nextIdx];
+    setSearchMatchIndex(nextIdx + 1);
+
+    if (activeView === 'canvas') {
+      handleFocusTaskOnCanvas(target.taskId, target.title);
+    } else if (activeView === 'kanban') {
+      const el = document.getElementById(`div-kanban-card-${target.taskId}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.classList.add('ring-2', 'ring-[var(--primary)]');
+        setTimeout(() => el.classList.remove('ring-2', 'ring-[var(--primary)]'), 2000);
+      }
+    }
+  }, [searchQuery, allParsedTasks, searchMatchIndex, activeView, handleFocusTaskOnCanvas, showToast, i18n]);
+
   // Navigate to task from Command Palette or search
   const handleSelectTaskFromPalette = useCallback(
     (taskId: string) => {
@@ -2642,6 +2704,13 @@ export default function App() {
       if (found) {
         if (activeView === 'canvas') {
           handleFocusTaskOnCanvas(found.taskId, found.title);
+        } else if (activeView === 'kanban') {
+          const el = document.getElementById(`div-kanban-card-${found.taskId}`);
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            el.classList.add('ring-2', 'ring-[var(--primary)]');
+            setTimeout(() => el.classList.remove('ring-2', 'ring-[var(--primary)]'), 2000);
+          }
         }
       }
     },
@@ -2818,7 +2887,7 @@ export default function App() {
             </button>
           </div>
 
-          <div id="div-app-6" className="relative w-full hidden lg:block max-w-[180px] xl:max-w-[220px]">
+          <div id="div-app-6" className="relative w-full hidden md:block max-w-[180px] xl:max-w-[240px]">
             <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[16px] text-[var(--on-surface-variant)] pointer-events-none">
               search
             </span>
@@ -2826,7 +2895,15 @@ export default function App() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSearchNextMatch();
+                } else if (e.key === 'Escape') {
+                  setSearchQuery('');
+                }
+              }}
               placeholder={i18n._(msg`Buscar...`)}
+              title={searchQuery ? i18n._(msg`Presiona Enter para saltar entre resultados, Esc para limpiar`) : i18n._(msg`Buscar...`)}
               className="w-full bg-[var(--surface)] text-[var(--on-surface)] placeholder:text-[var(--on-surface-variant)] border border-[var(--outline)] rounded pl-8 pr-10 py-1 text-xs font-sans focus:outline-none focus:border-[var(--primary)] transition-all"
             />
             {searchQuery ? (
@@ -2925,7 +3002,7 @@ export default function App() {
                 className="absolute right-0 top-full mt-1.5 w-56 bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-xl py-1 z-50 animate-fade-in select-none text-xs"
               >
                 {/* 1. Tema */}
-                <div className="px-3 py-2 border-b border-[var(--outline)]">
+                <div id="div-header-more-menu-lang" className="px-3 py-2 border-b border-[var(--outline)]">
                   <LanguageSelector onLanguageChange={(lang) => handleUpdateSettings({ ...userSettings, language: lang })} />
                 </div>
                 <button
