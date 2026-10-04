@@ -1711,13 +1711,20 @@ export default function App() {
       setEditor(editorInstance);
       editorInstance.user.updateUserPreferences({ colorScheme: effectiveTheme === 'dark' ? 'dark' : 'light' });
 
-      // Prevent tldraw from automatically creating loose text/note shapes on canvas double click
+      // Prevent tldraw from retaining accidental text/note shapes on canvas double click
       try {
-        (editorInstance as any).sideEffects?.registerBeforeCreateHandler?.('shape', (shape: any) => {
+        (editorInstance as any).sideEffects?.registerAfterCreateHandler?.('shape', (shape: any) => {
           if (shape?.type === 'text' || shape?.type === 'note') {
-            return false;
+            queueMicrotask(() => {
+              try {
+                if (editorInstance.getShape(shape.id)) {
+                  editorInstance.deleteShapes([shape.id]);
+                }
+              } catch {
+                // ignore
+              }
+            });
           }
-          return shape;
         });
       } catch {
         // ignore
