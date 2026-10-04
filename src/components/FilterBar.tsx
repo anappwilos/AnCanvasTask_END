@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useLingui } from '@lingui/react';
 import { msg } from '@lingui/core/macro';
 import { Trans } from '@lingui/react/macro';
+import { formatTaskCount } from '../i18n';
 import { TaskPriority, TaskStatus } from '../shapes/TaskShapeUtil';
 
 export type TaskSortOption = 'default' | 'priority' | 'status' | 'title';
@@ -432,9 +433,13 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                 </div>
               )}
 
-              <span className="px-2 py-0.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px]">
-                <span className="sm:hidden">{filteredTasksCount}/{totalTasksCount}</span>
-                <span className="hidden sm:inline">{i18n._(msg`\$\${filtered} de \$\${total} tareas`)}</span>
+              <span id="span-filterbar-task-counter" className="px-2 py-0.5 rounded bg-[var(--surface)] border border-[var(--outline)] text-[11px] font-mono">
+                <span id="span-filterbar-counter-mobile" className="sm:hidden">{filteredTasksCount}/{totalTasksCount}</span>
+                <span id="span-filterbar-counter-desktop" className="hidden sm:inline">
+                  {filteredTasksCount === totalTasksCount
+                    ? formatTaskCount(totalTasksCount)
+                    : `${filteredTasksCount} de ${formatTaskCount(totalTasksCount)}`}
+                </span>
               </span>
             </>
           )}
