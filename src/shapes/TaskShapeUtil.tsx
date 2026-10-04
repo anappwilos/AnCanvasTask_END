@@ -1405,7 +1405,7 @@ export function populateCanvasWithGroups(
   }> = [];
 
   // Index saved visual state for rapid retrieval
-  const savedTaskMap = new Map<string, { x: number; y: number; width: number; height: number }>();
+  const savedTaskMap = new Map<string, { x: number; y: number; width: number; height: number; groupTitle?: string }>();
   if (savedVisualState?.tasks) {
     for (const t of savedVisualState.tasks) {
       if (t.taskId) {
@@ -1423,13 +1423,62 @@ export function populateCanvasWithGroups(
     }
   }
 
-  let totalTasks = 0;
+  interface PlacedGroup {
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+  }
+  const isRectOverlapping = (
+    r1: { x: number; y: number; w: number; h: number },
+    r2: { x: number; y: number; w: number; h: number },
+    margin = 20
+  ) => {
+    return (
+      r1.x < r2.x + r2.w + margin &&
+      r1.x + r1.w + margin > r2.x &&
+      r1.y < r2.y + r2.h + margin &&
+      r1.y + r1.h + margin > r2.y
+    );
+  };
 
-  groups.forEach((group, groupIndex) => {
+  const groupPlacements = new Map<number, PlacedGroup>();
+  const placedRects: PlacedGroup[] = [];
+
+  // Pass 1: Place groups that already have saved positions in savedGroupMap
+  groups.forEach((group, index) => {
+    const saved = savedGroupMap.get(group.title.toLowerCase());
+    if (saved) {
+      const taskCount = group.tasks.length;
+      const defaultCalculatedHeight = Math.max(
+        180,
+        groupHeaderHeight +
+          groupPaddingTop +
+          taskCount * cardHeight +
+          Math.max(0, taskCount - 1) * cardGap +
+          groupPaddingBottom
+      );
+      const w = saved.width || groupWidth;
+      const h = saved.height || defaultCalculatedHeight;
+      let x = saved.x;
+      let y = saved.y;
+
+      while (placedRects.some((p) => isRectOverlapping({ x, y, w, h }, p))) {
+        const maxRight = Math.max(...placedRects.map((p) => p.x + p.w));
+        x = maxRight + 40;
+      }
+
+      const placed = { x, y, w, h };
+      groupPlacements.set(index, placed);
+      placedRects.push(placed);
+    }
+  });
+
+  // Pass 2: Place new groups (not present in savedGroupMap), avoiding any overlap
+  groups.forEach((group, index) => {
+    if (groupPlacements.has(index)) return;
+
     const taskCount = group.tasks.length;
-    totalTasks += taskCount;
-    const completedCount = group.tasks.filter((t) => t.completed).length;
-
     const defaultCalculatedHeight = Math.max(
       180,
       groupHeaderHeight +
@@ -1438,15 +1487,44 @@ export function populateCanvasWithGroups(
         Math.max(0, taskCount - 1) * cardGap +
         groupPaddingBottom
     );
+    const w = groupWidth;
+    const h = defaultCalculatedHeight;
 
-    const defaultGroupX = 80 + groupIndex * groupSpacingX;
-    const defaultGroupY = 80;
+    let x: number;
+    let y: number;
 
-    const savedGroup = savedGroupMap.get(group.title.toLowerCase());
-    const groupX = savedGroup ? savedGroup.x : defaultGroupX;
-    const groupY = savedGroup ? savedGroup.y : defaultGroupY;
-    const groupW = savedGroup && savedGroup.width ? savedGroup.width : groupWidth;
-    const groupH = savedGroup && savedGroup.height ? savedGroup.height : defaultCalculatedHeight;
+    if (placedRects.length > 0) {
+      const maxRight = Math.max(...placedRects.map((p) => p.x + p.w));
+      const minY = Math.min(...placedRects.map((p) => p.y));
+      x = maxRight + 40;
+      y = minY;
+    } else {
+      x = 80;
+      y = 80;
+    }
+
+    while (placedRects.some((p) => isRectOverlapping({ x, y, w, h }, p))) {
+      x += 40;
+    }
+
+    const placed = { x, y, w, h };
+    groupPlacements.set(index, placed);
+    placedRects.push(placed);
+  });
+
+  let totalTasks = 0;
+
+  groups.forEach((group, groupIndex) => {
+    const taskCount = group.tasks.length;
+    totalTasks += taskCount;
+    const completedCount = group.tasks.filter((t) => t.completed).length;
+
+    const placed = groupPlacements.get(groupIndex)!;
+    const groupX = placed.x;
+    const groupY = placed.y;
+    const groupW = placed.w;
+    const groupH = placed.h;
+    const isNewGroup = !savedGroupMap.has(group.title.toLowerCase());
 
     // Create Group container shape
     groupShapesToCreate.push({
@@ -1493,8 +1571,11 @@ export function populateCanvasWithGroups(
       }
 
       const savedTask = savedTaskMap.get(normalizedId);
-      const taskX = savedTask ? savedTask.x : defaultTaskX;
-      const taskY = savedTask ? savedTask.y : defaultTaskY;
+      const belongsToCurrentGroup = !isNewGroup && (savedTask?.groupTitle
+        ? savedTask.groupTitle.toLowerCase() === group.title.toLowerCase()
+        : true);
+      const taskX = savedTask && belongsToCurrentGroup ? savedTask.x : defaultTaskX;
+      const taskY = savedTask && belongsToCurrentGroup ? savedTask.y : defaultTaskY;
       const taskW = savedTask && savedTask.width ? savedTask.width : cardWidth;
       const taskH = savedTask && savedTask.height ? savedTask.height : cardHeight;
 

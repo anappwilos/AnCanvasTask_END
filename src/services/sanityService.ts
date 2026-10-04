@@ -7,6 +7,7 @@ export interface TaskVisualState {
   y: number;
   width: number;
   height: number;
+  groupTitle?: string;
 }
 
 export interface GroupVisualState {
@@ -768,6 +769,7 @@ export function extractVisualStateFromEditor(editor: Editor): {
           y: s.y,
           width: s.props?.w || 320,
           height: s.props?.h || 110,
+          groupTitle: s.props?.groupTitle,
         });
       }
     } else if (s.type === 'task-group') {

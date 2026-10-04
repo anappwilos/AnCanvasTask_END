@@ -2205,9 +2205,15 @@ export default function App() {
           } as any);
         }
       } else {
-        const groupCount = allShapes.filter((s) => (s as any).type === 'task-group').length;
-        const newGroupX = 80 + groupCount * 400;
-        const newGroupY = 80;
+        const existingGroupShapes = allShapes.filter((s) => (s as any).type === 'task-group') as any[];
+        let newGroupX = 80;
+        let newGroupY = 80;
+        if (existingGroupShapes.length > 0) {
+          const maxRight = Math.max(...existingGroupShapes.map((g) => (g.x ?? 0) + (g.props?.w ?? 360)));
+          const refY = Math.min(...existingGroupShapes.map((g) => g.y ?? 80));
+          newGroupX = maxRight + 40;
+          newGroupY = refY;
+        }
 
         editor.createShape({
           id: createShapeId(),
