@@ -856,10 +856,15 @@ export default function App() {
       markdownEditorDebounceRef.current = setTimeout(() => {
         if (editor) {
           const currentVisual = extractVisualStateFromEditor(editor);
-          loadTasksFromMarkdown(editor, newMarkdown, {
-            ...currentVisual,
-            updatedAt: new Date().toISOString(),
-          });
+          loadTasksFromMarkdown(
+            editor,
+            newMarkdown,
+            {
+              ...currentVisual,
+              updatedAt: new Date().toISOString(),
+            },
+            { shouldZoomToFit: false }
+          );
           triggerDebouncedVisualSave(editor);
         }
       }, 250);
@@ -1773,7 +1778,7 @@ export default function App() {
 
                       const targetGroupTitle = foundGroupTitle || 'Out';
                       const currentGroup = toProps.groupTitle || fromProps.groupTitle;
-                      if (currentGroup !== targetGroupTitle) {
+                      if (currentGroup?.trim().toLowerCase() !== targetGroupTitle.trim().toLowerCase()) {
                         setMarkdownInput((curr) =>
                           moveTaskToGroupInMarkdown(curr, taskId, targetGroupTitle)
                         );
@@ -1886,6 +1891,7 @@ export default function App() {
       return () => {
         isMounted = false;
         unsubscribe();
+        setEditor((curr) => (curr === editorInstance ? null : curr));
       };
     },
     [effectiveTheme, triggerDebouncedVisualSave]
@@ -2373,7 +2379,7 @@ export default function App() {
         setMarkdownInput(priorMarkdown);
         if (editor) {
           const visual = await loadCanvasVisualState(activeDocument.id || 'default');
-          loadTasksFromMarkdown(editor, priorMarkdown, visual);
+          loadTasksFromMarkdown(editor, priorMarkdown, visual, { shouldZoomToFit: false });
           triggerDebouncedVisualSave(editor);
         }
         pushToast(i18n._(msg`Tarea "${title}" restaurada`), 'success');
@@ -2708,6 +2714,7 @@ export default function App() {
 
       if (editor) {
         const shapes = editor.getCurrentPageShapes();
+        const batchShapeUpdates: any[] = [];
         for (const taskId of taskIds) {
           const taskShape = shapes.find((s) => {
             if ((s as any).type !== 'task') return false;
@@ -2715,7 +2722,7 @@ export default function App() {
             return (p.taskId && p.taskId.toLowerCase() === taskId.toLowerCase()) || s.id === taskId;
           });
           if (taskShape) {
-            editor.updateShape({
+            batchShapeUpdates.push({
               id: taskShape.id,
               type: 'task',
               props: {
@@ -2723,8 +2730,11 @@ export default function App() {
                 ...(updates.priority !== undefined ? { priority: updates.priority } : {}),
                 ...(updates.status !== undefined ? { status: updates.status } : {}),
               },
-            } as any);
+            });
           }
+        }
+        if (batchShapeUpdates.length > 0) {
+          editor.updateShapes(batchShapeUpdates as any);
         }
         triggerDebouncedVisualSave(editor);
       }
@@ -2770,7 +2780,7 @@ export default function App() {
           setMarkdownInput(priorMarkdown);
           if (editor) {
             const visual = await loadCanvasVisualState();
-            loadTasksFromMarkdown(editor, priorMarkdown, visual);
+            loadTasksFromMarkdown(editor, priorMarkdown, visual, { shouldZoomToFit: false });
             triggerDebouncedVisualSave(editor);
           }
           pushToast(i18n._(msg`${taskIds.length} tareas restauradas`), 'success');

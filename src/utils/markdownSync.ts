@@ -1,6 +1,7 @@
 import { TaskPriority } from '../shapes/TaskShapeUtil';
 
 export interface TaskUpdatePayload {
+  id?: string;
   title?: string;
   completed?: boolean;
   priority?: TaskPriority;
@@ -617,6 +618,27 @@ export function updateTaskInMarkdown(
       const baseIndent = targetBlock.indentation ? `${targetBlock.indentation}  ` : '  ';
       const newBlockedLine = `${baseIndent}- Blocked by: ${updates.blockedBy.trim()}`;
       resultLines.splice(targetBlock.taskLineIndex + 1, 0, newBlockedLine);
+    }
+  }
+
+  // 6. Update or insert ID line if given
+  if (updates.id !== undefined && updates.id.trim().length > 0) {
+    let foundId = false;
+    for (let i = targetBlock.taskLineIndex + 1; i <= targetBlock.endLineIndex; i++) {
+      if (resultLines[i] && resultLines[i].match(/^(?:[-*]\s*)?ID\s*:\s*(.+)$/i)) {
+        resultLines[i] = resultLines[i].replace(
+          /(ID\s*:\s*)(.+)$/i,
+          `$1${updates.id.trim()}`
+        );
+        foundId = true;
+        break;
+      }
+    }
+
+    if (!foundId) {
+      const baseIndent = targetBlock.indentation ? `${targetBlock.indentation}  ` : '  ';
+      const newIdLine = `${baseIndent}- ID: ${updates.id.trim()}`;
+      resultLines.splice(targetBlock.taskLineIndex + 1, 0, newIdLine);
     }
   }
 

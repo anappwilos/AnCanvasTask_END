@@ -829,6 +829,8 @@ export class TaskShapeUtil extends ShapeUtil<any> {
     };
   }
 
+  private activeSuctionGroupId: string | null = null;
+
   getGeometry(shape: ITaskShape) {
     return new Rectangle2d({
       width: shape.props.w,
@@ -921,31 +923,30 @@ export class TaskShapeUtil extends ShapeUtil<any> {
       }
     }
 
-    // Toggle suction DOM state on all group containers
-    groupShapes.forEach((g) => {
-      const el = document.getElementById(`task-group-container-${g.id}`);
-      if (el) {
-        if (capturedGroup && g.id === capturedGroup.id) {
-          el.setAttribute('data-suction-active', 'true');
-        } else {
-          el.removeAttribute('data-suction-active');
-        }
+    const capturedId = capturedGroup ? capturedGroup.id : null;
+    if (this.activeSuctionGroupId !== capturedId) {
+      if (this.activeSuctionGroupId) {
+        const prevEl = document.getElementById(`task-group-container-${this.activeSuctionGroupId}`);
+        if (prevEl) prevEl.removeAttribute('data-suction-active');
       }
-    });
+      if (capturedId) {
+        const nextEl = document.getElementById(`task-group-container-${capturedId}`);
+        if (nextEl) nextEl.setAttribute('data-suction-active', 'true');
+      }
+      this.activeSuctionGroupId = capturedId;
+    }
   }
 
   override onTranslateEnd(initial: any, current: any): any {
+    if (this.activeSuctionGroupId) {
+      const el = document.getElementById(`task-group-container-${this.activeSuctionGroupId}`);
+      if (el) el.removeAttribute('data-suction-active');
+      this.activeSuctionGroupId = null;
+    }
+
     const groupShapes = this.editor
       .getCurrentPageShapes()
       .filter((s) => (s as any).type === 'task-group') as any[];
-
-    // Clean up suction feedback
-    groupShapes.forEach((g) => {
-      const el = document.getElementById(`task-group-container-${g.id}`);
-      if (el) {
-        el.removeAttribute('data-suction-active');
-      }
-    });
 
     const cardW = current.props?.w || 320;
     const cardH = current.props?.h || 110;
@@ -1005,6 +1006,20 @@ export class TaskShapeUtil extends ShapeUtil<any> {
             const prev = otherTasks[insertIdx - 1];
             snappedY = prev.y + (prev.props?.h || 110) + 16;
           }
+
+          // Shift subsequent tasks down to make room and prevent overlap
+          const shiftUpdates: any[] = [];
+          for (let i = insertIdx; i < otherTasks.length; i++) {
+            const shiftTask = otherTasks[i];
+            shiftUpdates.push({
+              id: shiftTask.id,
+              type: 'task',
+              y: shiftTask.y + cardH + 16,
+            });
+          }
+          if (shiftUpdates.length > 0) {
+            (this.editor.updateShapes as any)(shiftUpdates);
+          }
         }
       }
 
@@ -1063,16 +1078,11 @@ export class TaskShapeUtil extends ShapeUtil<any> {
   }
 
   override onTranslateCancel(initial: any, current: any): void {
-    const groupShapes = this.editor
-      .getCurrentPageShapes()
-      .filter((s) => (s as any).type === 'task-group') as any[];
-
-    groupShapes.forEach((g) => {
-      const el = document.getElementById(`task-group-container-${g.id}`);
-      if (el) {
-        el.removeAttribute('data-suction-active');
-      }
-    });
+    if (this.activeSuctionGroupId) {
+      const el = document.getElementById(`task-group-container-${this.activeSuctionGroupId}`);
+      if (el) el.removeAttribute('data-suction-active');
+      this.activeSuctionGroupId = null;
+    }
   }
 
   component(shape: ITaskShape) {
@@ -1407,7 +1417,8 @@ export function populateCanvasWithGroups(
   editor: Editor,
   groups: ParsedGroup[],
   savedVisualState?: CanvasVisualDocument | null,
-  rawMarkdown?: string
+  rawMarkdown?: string,
+  options?: { shouldZoomToFit?: boolean }
 ): { taskCount: number; groupCount: number } {
   // Clear existing task, group, and arrow shapes on canvas
   const existingShapes = editor
@@ -1745,7 +1756,9 @@ export function populateCanvasWithGroups(
     (editor.createBindings as any)(bindingsToCreate);
   }
 
-  editor.zoomToFit({ animation: { duration: 250 } });
+  if (options?.shouldZoomToFit ?? true) {
+    editor.zoomToFit({ animation: { duration: 250 } });
+  }
   return { taskCount: totalTasks, groupCount: groups.length };
 }
 
@@ -1765,9 +1778,10 @@ export function seedMockTasks(
 export function loadTasksFromMarkdown(
   editor: Editor,
   markdown: string,
-  savedVisualState?: CanvasVisualDocument | null
+  savedVisualState?: CanvasVisualDocument | null,
+  options?: { shouldZoomToFit?: boolean }
 ): { taskCount: number; groupCount: number } {
   const parsedGroups = parseTasksMarkdown(markdown);
   if (parsedGroups.length === 0) return { taskCount: 0, groupCount: 0 };
-  return populateCanvasWithGroups(editor, parsedGroups, savedVisualState, markdown);
+  return populateCanvasWithGroups(editor, parsedGroups, savedVisualState, markdown, options);
 }

@@ -47,6 +47,10 @@ export interface SanityConnectionTestResult {
 
 const LOCAL_STORAGE_KEY_VISUAL_STATE = 'antaskcanvas_visual_state_v1';
 const LOCAL_STORAGE_KEY_SANITY_CONFIG = 'antaskcanvas_sanity_config';
+// Sanitizes strings to valid Sanity document ID format (only a-z, A-Z, 0-9, _, ., -)
+export function sanitizeSanityDocId(id: string): string {
+  return String(id || '').replace(/[^a-zA-Z0-9_.-]/g, '_');
+}
 
 // Identifiable Trace Logger for Sanity Integration
 export const logSanityTrace = (action: string, details?: any) => {
@@ -389,33 +393,39 @@ export async function syncAllTasksToSanity(
 
   try {
     const now = new Date().toISOString();
-    let tx = client.transaction();
+    const BATCH_SIZE = 50;
 
-    for (const t of tasks) {
-      const docId = `task-${t.id}`;
-      const doc: SanityTestingTaskDocument = {
-        _id: docId,
-        _type: 'task',
-        taskId: t.id,
-        title: t.title,
-        completed: Boolean(t.completed),
-        status: (t.status as any) || (t.completed ? 'done' : 'todo'),
-        priority: (t.priority as any) || 'P1',
-        groupTitle: t.groupTitle || 'General',
-        blockedBy: t.blockedBy || '',
-        tags: t.tags || [],
-        subtasks: (t.subtasks || []).map((s) => ({
-          title: s.title,
-          completed: Boolean(s.completed),
-        })),
-        description: t.description || '',
-        updatedAt: now,
-      };
+    for (let i = 0; i < tasks.length; i += BATCH_SIZE) {
+      const chunk = tasks.slice(i, i + BATCH_SIZE);
+      let tx = client.transaction();
 
-      tx = tx.createOrReplace(doc as any);
+      for (const t of chunk) {
+        const safeId = sanitizeSanityDocId(t.id);
+        const docId = `task-${safeId}`;
+        const doc: SanityTestingTaskDocument = {
+          _id: docId,
+          _type: 'task',
+          taskId: t.id,
+          title: t.title,
+          completed: Boolean(t.completed),
+          status: (t.status as any) || (t.completed ? 'done' : 'todo'),
+          priority: (t.priority as any) || 'P1',
+          groupTitle: t.groupTitle || 'General',
+          blockedBy: t.blockedBy || '',
+          tags: t.tags || [],
+          subtasks: (t.subtasks || []).map((s) => ({
+            title: s.title,
+            completed: Boolean(s.completed),
+          })),
+          description: t.description || '',
+          updatedAt: now,
+        };
+
+        tx = tx.createOrReplace(doc as any);
+      }
+
+      await tx.commit();
     }
-
-    await tx.commit();
 
     return {
       ok: true,
@@ -1043,48 +1053,54 @@ export async function syncAllWorkspacesToSanity(
 
   try {
     const now = new Date().toISOString();
-    let tx = client.transaction();
+    const BATCH_SIZE = 25;
 
-    for (const ws of workspaces) {
-      const docId = `workspace-${ws.id}`;
-      const docData: SanityWorkspaceDocument = {
-        _id: docId,
-        _type: 'workspace',
-        workspaceId: ws.id,
-        name: ws.name,
-        githubRepo: {
-          owner: ws.githubRepo?.owner || 'owner',
-          repo: ws.githubRepo?.repo || 'repo',
-          fullName: ws.githubRepo?.fullName || `${ws.githubRepo?.owner || 'owner'}/${ws.githubRepo?.repo || 'repo'}`,
-          url: ws.githubRepo?.url || `https://github.com/${ws.githubRepo?.fullName || 'repo'}`,
-          defaultBranch: ws.githubRepo?.defaultBranch || 'main',
-          isPrivate: Boolean(ws.githubRepo?.isPrivate),
-          description: ws.githubRepo?.description || '',
-        },
-        activeBranchName: ws.activeBranchName || 'main',
-        branches: (ws.branches || []).map((b: any) => ({
-          name: b.name,
-          isProtected: Boolean(b.isProtected),
-          activeDocumentId: b.activeDocumentId,
-          lastCommit: b.lastCommit,
-          taskDocuments: (b.taskDocuments || []).map((d: any) => ({
-            id: d.id,
-            name: d.name,
-            folder: d.folder || '',
-            path: d.path,
-            content: d.content || '',
-            lastSavedContent: d.lastSavedContent || d.content || '',
-            updatedAt: d.updatedAt || now,
+    for (let i = 0; i < workspaces.length; i += BATCH_SIZE) {
+      const chunk = workspaces.slice(i, i + BATCH_SIZE);
+      let tx = client.transaction();
+
+      for (const ws of chunk) {
+        const cleanId = sanitizeSanityDocId(String(ws.id).replace(/^workspace-/, ''));
+        const docId = `workspace-${cleanId}`;
+        const docData: SanityWorkspaceDocument = {
+          _id: docId,
+          _type: 'workspace',
+          workspaceId: cleanId,
+          name: ws.name,
+          githubRepo: {
+            owner: ws.githubRepo?.owner || 'owner',
+            repo: ws.githubRepo?.repo || 'repo',
+            fullName: ws.githubRepo?.fullName || `${ws.githubRepo?.owner || 'owner'}/${ws.githubRepo?.repo || 'repo'}`,
+            url: ws.githubRepo?.url || `https://github.com/${ws.githubRepo?.fullName || 'repo'}`,
+            defaultBranch: ws.githubRepo?.defaultBranch || 'main',
+            isPrivate: Boolean(ws.githubRepo?.isPrivate),
+            description: ws.githubRepo?.description || '',
+          },
+          activeBranchName: ws.activeBranchName || 'main',
+          branches: (ws.branches || []).map((b: any) => ({
+            name: b.name,
+            isProtected: Boolean(b.isProtected),
+            activeDocumentId: b.activeDocumentId,
+            lastCommit: b.lastCommit,
+            taskDocuments: (b.taskDocuments || []).map((d: any) => ({
+              id: d.id,
+              name: d.name,
+              folder: d.folder || '',
+              path: d.path,
+              content: d.content || '',
+              lastSavedContent: d.lastSavedContent || d.content || '',
+              updatedAt: d.updatedAt || now,
+            })),
           })),
-        })),
-        createdAt: ws.createdAt || now,
-        updatedAt: now,
-      };
+          createdAt: ws.createdAt || now,
+          updatedAt: now,
+        };
 
-      tx = tx.createOrReplace(docData as any);
+        tx = tx.createOrReplace(docData as any);
+      }
+
+      await tx.commit();
     }
-
-    await tx.commit();
 
     return {
       ok: true,
@@ -1108,7 +1124,8 @@ export async function deleteWorkspaceFromSanity(
   workspaceId: string,
   configOverride?: Partial<SanityConfig>
 ): Promise<{ ok: boolean; message: string }> {
-  const docId = `workspace-${workspaceId}`;
+  const cleanId = sanitizeSanityDocId(String(workspaceId).replace(/^workspace-/, ''));
+  const docId = `workspace-${cleanId}`;
   return deleteDocumentFromSanity(docId, configOverride);
 }
 
