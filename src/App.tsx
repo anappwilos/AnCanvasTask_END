@@ -2768,12 +2768,6 @@ export default function App() {
               onOpenCreateBranch={() => setIsNewBranchModalOpen(true)}
               onOpenGitHubSync={() => setIsGitHubSyncOpen(true)}
             />
-
-            <span className="text-[var(--outline)] hidden lg:inline">/</span>
-            <span className="text-xs text-[var(--on-surface-variant)] truncate max-w-[100px] sm:max-w-[140px] hidden lg:flex items-center gap-1" title={`${activeWorkspace.name} · ${activeBranch.name} · ${activeDocument.name}`}>
-              <span className="material-symbols-outlined text-[14px]">description</span>
-              <span className="truncate font-mono">{activeDocument.name}</span>
-            </span>
           </div>
         </div>
 
