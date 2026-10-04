@@ -4390,7 +4390,7 @@ export default function App() {
               setIsNewTaskModalOpen(true);
             }
           }}
-          className="btn-m3-primary py-1 px-1 rounded-lg flex flex-col items-center justify-center text-[10px] cursor-pointer shadow-xs overflow-hidden"
+          className="btn-m3-primary py-1 px-1 rounded-lg flex flex-col items-center justify-center text-[10px] cursor-pointer shadow-xs overflow-hidden active:scale-95"
         >
           <span className="material-symbols-outlined text-[18px]">add</span>
           <span className="font-semibold truncate w-full text-center leading-none mt-0.5">{activeView === 'studio' ? i18n._(msg`Crear`) : i18n._(msg`Nueva Tarea`)}</span>
@@ -4404,10 +4404,10 @@ export default function App() {
             else if (activeView === 'kanban') setActiveView('studio');
             else setActiveView('canvas');
           }}
-          className={`flex flex-col items-center justify-center py-1 px-0.5 rounded-lg text-[10px] transition-colors cursor-pointer overflow-hidden ${
+          className={`flex flex-col items-center justify-center py-1 px-0.5 rounded-lg text-[10px] transition-all cursor-pointer overflow-hidden border active:scale-95 ${
             activeView === 'canvas' || activeView === 'kanban' || activeView === 'studio'
-              ? 'text-[var(--primary)] font-semibold bg-[var(--primary-container)]/20'
-              : 'text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]'
+              ? 'text-[var(--primary)] font-semibold bg-[var(--primary-container)]/40 border-[var(--primary)]/50'
+              : 'text-[var(--on-surface-variant)] bg-[var(--surface-container-high)]/60 border-[var(--outline)] hover:text-[var(--on-surface)]'
           }`}
         >
           <span className="material-symbols-outlined text-[18px]">
@@ -4421,7 +4421,7 @@ export default function App() {
             id="btn-mobile-nav-filters"
             type="button"
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="flex flex-col items-center justify-center py-1 px-0.5 rounded-lg text-[10px] text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] transition-colors cursor-pointer overflow-hidden"
+            className="flex flex-col items-center justify-center py-1 px-0.5 rounded-lg text-[10px] text-[var(--on-surface-variant)] bg-[var(--surface-container-high)]/60 border border-[var(--outline)] hover:text-[var(--on-surface)] transition-all cursor-pointer overflow-hidden active:scale-95"
             title={i18n._(msg`Filtros y documentos`)}
           >
             <span className="material-symbols-outlined text-[18px]">filter_list</span>
@@ -4432,7 +4432,7 @@ export default function App() {
             id="btn-mobile-nav-sync-sanity"
             type="button"
             onClick={() => setIsSyncOverrideModalOpen(true)}
-            className="flex flex-col items-center justify-center py-1 px-0.5 rounded-lg text-[10px] text-amber-400 hover:text-amber-300 transition-colors cursor-pointer overflow-hidden"
+            className="flex flex-col items-center justify-center py-1 px-0.5 rounded-lg text-[10px] text-amber-400 bg-amber-950/30 border border-amber-800/60 hover:text-amber-300 transition-all cursor-pointer overflow-hidden active:scale-95"
             title={i18n._(msg`Sincronizar con Sanity`)}
           >
             <span className="material-symbols-outlined text-[18px]">sync_problem</span>
@@ -4444,10 +4444,10 @@ export default function App() {
           id="btn-mobile-nav-split-view"
           type="button"
           onClick={handleToggleSplitView}
-          className={`flex flex-col items-center justify-center py-1 px-0.5 rounded-lg text-[10px] transition-colors cursor-pointer overflow-hidden ${
+          className={`flex flex-col items-center justify-center py-1 px-0.5 rounded-lg text-[10px] transition-all cursor-pointer overflow-hidden border active:scale-95 ${
             isSplitViewOpen
-              ? 'text-sky-400 font-bold bg-sky-950/30 border border-sky-800/60'
-              : 'text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]'
+              ? 'text-sky-400 font-bold bg-sky-950/40 border-sky-700/80'
+              : 'text-[var(--on-surface-variant)] bg-[var(--surface-container-high)]/60 border-[var(--outline)] hover:text-[var(--on-surface)]'
           }`}
         >
           <span className="material-symbols-outlined text-[18px]">
@@ -4460,7 +4460,7 @@ export default function App() {
           id="btn-mobile-nav-menu"
           type="button"
           onClick={() => setIsMobileMenuOpen(true)}
-          className="flex flex-col items-center justify-center py-1 px-0.5 rounded-lg text-[10px] text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] transition-colors cursor-pointer relative overflow-hidden"
+          className="flex flex-col items-center justify-center py-1 px-0.5 rounded-lg text-[10px] text-[var(--on-surface-variant)] bg-[var(--surface-container-high)]/60 border border-[var(--outline)] hover:text-[var(--on-surface)] transition-all cursor-pointer relative overflow-hidden active:scale-95"
         >
           {validationReport.issues.length > 0 && (
             <span className="absolute top-1 right-2 w-2 h-2 rounded-full bg-rose-500 animate-pulse" />

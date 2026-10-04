@@ -57,7 +57,7 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
             setIsWorkspaceMenuOpen((prev) => !prev);
             setIsBranchMenuOpen(false);
           }}
-          className="flex items-center gap-1.5 px-2 py-1 rounded bg-[var(--surface)] hover:bg-[var(--surface-container-high)] border border-[var(--outline)] text-xs font-sans text-[var(--on-surface)] transition-colors cursor-pointer"
+          className="btn-m3-secondary flex items-center gap-1.5 px-2 sm:px-2.5 py-1 text-xs font-sans font-medium cursor-pointer shrink-0"
           title={`Workspace: ${workspace?.name || 'Principal'} (GitHub: ${workspace?.githubRepo?.fullName || 'GitHub'})`}
         >
           {/* GitHub Icon */}
@@ -174,7 +174,7 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
             setIsBranchMenuOpen((prev) => !prev);
             setIsWorkspaceMenuOpen(false);
           }}
-          className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded bg-[var(--surface)] hover:bg-[var(--surface-container-high)] border border-[var(--outline)] text-xs font-mono text-[var(--on-surface)] transition-colors cursor-pointer"
+          className="btn-m3-secondary flex items-center gap-1.5 px-2 sm:px-2.5 py-1 text-xs font-mono font-medium cursor-pointer shrink-0"
           title={`${i18n._(msg`Rama actual`)}: ${activeBranch?.name || 'main'}`}
         >
           <span className="material-symbols-outlined text-[14px] text-sky-400 shrink-0">
