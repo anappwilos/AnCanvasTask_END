@@ -223,15 +223,17 @@ export async function loadCanvasVisualState(
 ): Promise<CanvasVisualDocument | null> {
   const docId = `canvasVisualState-${projectId}`;
 
-  // 1. Try Sanity remote
+  // 1. Try Sanity remote with timeout to prevent blocking when offline or without studio connection
   const client = getSanityClient();
   if (client) {
     try {
       const query = `*[_type == "canvasVisualState" && (_id == $id || projectId == $projectId)][0]`;
-      const result = await client.fetch<CanvasVisualDocument>(query, {
+      const fetchPromise = client.fetch<CanvasVisualDocument>(query, {
         id: docId,
         projectId,
       });
+      const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 1800));
+      const result = await Promise.race([fetchPromise, timeoutPromise]);
 
       if (result && Array.isArray(result.tasks)) {
         // Cache locally for fast fallback
@@ -248,9 +250,12 @@ export async function loadCanvasVisualState(
     }
   }
 
-  // 2. Fallback to local storage cache
+  // 2. Fallback to local storage cache (checking specific doc id, default, or root)
   try {
-    const local = localStorage.getItem(`${LOCAL_STORAGE_KEY_VISUAL_STATE}_${projectId}`);
+    const local =
+      localStorage.getItem(`${LOCAL_STORAGE_KEY_VISUAL_STATE}_${projectId}`) ||
+      localStorage.getItem(`${LOCAL_STORAGE_KEY_VISUAL_STATE}_default`) ||
+      localStorage.getItem(LOCAL_STORAGE_KEY_VISUAL_STATE);
     if (local) {
       return JSON.parse(local);
     }
@@ -292,10 +297,14 @@ export async function saveCanvasVisualState(
     updatedAt: new Date().toISOString(),
   };
 
-  // 1. Always save to local visual cache
+  // 1. Always save to local visual cache (both under projectId and default)
   try {
     localStorage.setItem(
       `${LOCAL_STORAGE_KEY_VISUAL_STATE}_${projectId}`,
+      JSON.stringify(docData)
+    );
+    localStorage.setItem(
+      `${LOCAL_STORAGE_KEY_VISUAL_STATE}_default`,
       JSON.stringify(docData)
     );
   } catch (e) {

@@ -504,13 +504,47 @@ export default function App() {
     debouncedSaveRef.current = setTimeout(async () => {
       const visualState = extractVisualStateFromEditor(editorInstance);
       if (visualState.tasks.length > 0 || visualState.groups.length > 0) {
-        const res = await saveCanvasVisualState(visualState);
+        // 1. Immediately persist visualState to workspaceStore in localStorage
+        setWorkspaceStore((prevStore) => {
+          let hasChanges = false;
+          const nextWs = prevStore.workspaces.map((ws) => {
+            if (ws.id !== prevStore.activeWorkspaceId) return ws;
+            const nextBranches = ws.branches.map((b) => {
+              if (b.name !== ws.activeBranchName) return b;
+              const nextDocs = b.taskDocuments.map((d) => {
+                if (d.id !== b.activeDocumentId) return d;
+                hasChanges = true;
+                return {
+                  ...d,
+                  visualState: {
+                    _id: `canvasVisualState-${d.id}`,
+                    _type: 'canvasVisualState' as const,
+                    projectId: d.id,
+                    tasks: visualState.tasks,
+                    groups: visualState.groups,
+                    updatedAt: new Date().toISOString(),
+                  },
+                  updatedAt: new Date().toISOString(),
+                };
+              });
+              return { ...b, taskDocuments: nextDocs };
+            });
+            return { ...ws, branches: nextBranches, updatedAt: new Date().toISOString() };
+          });
+          if (!hasChanges) return prevStore;
+          const nextStore = { ...prevStore, workspaces: nextWs };
+          saveWorkspaceStore(nextStore);
+          return nextStore;
+        });
+
+        // 2. Persist to canvas visual state cache and remote if configured
+        const res = await saveCanvasVisualState(visualState, activeDocument.id || 'default');
         setSyncStatus(res.remote ? 'synced' : 'local');
       } else {
-        setSyncStatus('idle');
+        setSyncStatus('local');
       }
     }, 700);
-  }, []);
+  }, [activeDocument.id]);
 
   const handleMarkdownEditorChange = useCallback(
     (newMarkdown: string) => {
@@ -1358,15 +1392,17 @@ export default function App() {
       // Async initialization of visual state
       const initVisualState = async () => {
         setSyncStatus('loading');
-        const savedVisualState = await loadCanvasVisualState();
+        const savedVisualState = await loadCanvasVisualState(activeDocument.id || 'default');
         if (savedVisualState) {
           setSyncStatus(getSanityConfig().token ? 'synced' : 'local');
         } else {
-          setSyncStatus('idle');
+          setSyncStatus('local');
         }
 
-        // Reconstruct tasks from TASKS.md using visual state positions
-        seedMockTasks(editorInstance, savedVisualState);
+        // Reconstruct tasks from current active document / markdown with saved visual positions
+        const contentToLoad = activeDocument?.content || markdownRef.current || SAMPLE_MARKDOWN;
+        const visualToLoad = activeDocument?.visualState || savedVisualState;
+        loadTasksFromMarkdown(editorInstance, contentToLoad, visualToLoad);
       };
 
       initVisualState();
@@ -1520,11 +1556,11 @@ export default function App() {
       if (currentShapes.length > 0) {
         editor.deleteShapes(currentShapes.map((s) => s.id));
       }
-      seedMockTasks(editor, null);
+      loadTasksFromMarkdown(editor, markdownInput, null);
       triggerDebouncedVisualSave(editor);
       showToast(i18n._(msg`Canvas reiniciado al estado inicial`));
     }
-  }, [editor, triggerDebouncedVisualSave]);
+  }, [editor, markdownInput, triggerDebouncedVisualSave]);
 
   const parsedStats = useMemo(() => {
     const groups = parseTasksMarkdown(markdownInput);
@@ -1797,7 +1833,7 @@ export default function App() {
   // Create New Task Handler
   const handleCreateTask = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newTaskTitle.trim() || !editor) return;
+    if (!newTaskTitle.trim()) return;
 
     const groupTitle = isCustomGroup
       ? customGroupInput.trim() || 'General'
@@ -1811,78 +1847,80 @@ export default function App() {
 
     setMarkdownInput(updatedMarkdown);
 
-    const allShapes = editor.getCurrentPageShapes();
-    const targetGroupShape = allShapes.find(
-      (s) =>
-        (s as any).type === 'task-group' &&
-        (s as any).props?.title?.toLowerCase() === groupTitle.toLowerCase()
-    ) as any;
-
-    let targetX = 80;
-    let targetY = 160;
-
-    if (targetGroupShape) {
-      const tasksInGroup = allShapes.filter(
+    if (editor) {
+      const allShapes = editor.getCurrentPageShapes();
+      const targetGroupShape = allShapes.find(
         (s) =>
-          (s as any).type === 'task' &&
-          s.x >= targetGroupShape.x &&
-          s.x <= targetGroupShape.x + (targetGroupShape.props?.w || 360)
-      );
+          (s as any).type === 'task-group' &&
+          (s as any).props?.title?.toLowerCase() === groupTitle.toLowerCase()
+      ) as any;
 
-      targetX = targetGroupShape.x + 20;
-      targetY = targetGroupShape.y + 70 + tasksInGroup.length * 126;
+      let targetX = 80;
+      let targetY = 160;
 
-      const neededHeight = 80 + (tasksInGroup.length + 1) * 126 + 20;
-      if (neededHeight > (targetGroupShape.props?.h || 240)) {
-        editor.updateShape({
-          id: targetGroupShape.id,
-          type: 'task-group',
+      if (targetGroupShape) {
+        const tasksInGroup = allShapes.filter(
+          (s) =>
+            (s as any).type === 'task' &&
+            s.x >= targetGroupShape.x &&
+            s.x <= targetGroupShape.x + (targetGroupShape.props?.w || 360)
+        );
+
+        targetX = targetGroupShape.x + 20;
+        targetY = targetGroupShape.y + 70 + tasksInGroup.length * 126;
+
+        const neededHeight = 80 + (tasksInGroup.length + 1) * 126 + 20;
+        if (neededHeight > (targetGroupShape.props?.h || 240)) {
+          editor.updateShape({
+            id: targetGroupShape.id,
+            type: 'task-group',
+            props: {
+              h: neededHeight,
+              count: (targetGroupShape.props?.count || 0) + 1,
+            },
+          } as any);
+        }
+      } else {
+        const groupCount = allShapes.filter((s) => (s as any).type === 'task-group').length;
+        const newGroupX = 80 + groupCount * 400;
+        const newGroupY = 80;
+
+        editor.createShape({
+          id: createShapeId(),
+          type: 'task-group' as const,
+          x: newGroupX,
+          y: newGroupY,
           props: {
-            h: neededHeight,
-            count: (targetGroupShape.props?.count || 0) + 1,
+            w: 360,
+            h: 240,
+            title: groupTitle,
+            count: 1,
+            completedCount: 0,
           },
         } as any);
-      }
-    } else {
-      const groupCount = allShapes.filter((s) => (s as any).type === 'task-group').length;
-      const newGroupX = 80 + groupCount * 400;
-      const newGroupY = 80;
 
+        targetX = newGroupX + 20;
+        targetY = newGroupY + 70;
+      }
+
+      const newShapeId = createShapeId();
       editor.createShape({
-        id: createShapeId(),
-        type: 'task-group' as const,
-        x: newGroupX,
-        y: newGroupY,
+        id: newShapeId,
+        type: 'task' as const,
+        x: targetX,
+        y: targetY,
         props: {
-          w: 360,
-          h: 240,
-          title: groupTitle,
-          count: 1,
-          completedCount: 0,
+          w: 320,
+          h: 110,
+          title: newTaskTitle.trim(),
+          completed: false,
+          priority: newTaskPriority,
+          taskId,
         },
       } as any);
 
-      targetX = newGroupX + 20;
-      targetY = newGroupY + 70;
+      triggerDebouncedVisualSave(editor);
     }
-
-    const newShapeId = createShapeId();
-    editor.createShape({
-      id: newShapeId,
-      type: 'task' as const,
-      x: targetX,
-      y: targetY,
-      props: {
-        w: 320,
-        h: 110,
-        title: newTaskTitle.trim(),
-        completed: false,
-        priority: newTaskPriority,
-        taskId,
-      },
-    } as any);
-
-    triggerDebouncedVisualSave(editor);
 
     setNewTaskTitle('');
     setNewTaskPriority('P1');
@@ -1918,38 +1956,45 @@ export default function App() {
 
   // Confirm Delete Task Handler with Undo Action (DESIGN.md Section 9)
   const handleConfirmDeleteTask = () => {
-    if (!deleteWarningState || !editor) return;
+    if (!deleteWarningState) return;
     const { shapeId, taskId, title } = deleteWarningState;
     const priorMarkdown = markdownInput;
 
     const updatedMarkdown = deleteTaskFromMarkdown(markdownInput, taskId);
     setMarkdownInput(updatedMarkdown);
 
-    const allShapes = editor.getCurrentPageShapes();
-    const arrowShapesToDelete = allShapes.filter((s) => {
-      if ((s as any).type !== 'arrow') return false;
-      const bindings = (editor.getBindingsInvolvingShape?.(s) as any[]) || [];
-      return bindings.some(
-        (b) => b.toId === shapeId || b.fromId === shapeId
-      );
-    });
+    if (editor) {
+      const allShapes = editor.getCurrentPageShapes();
+      const arrowShapesToDelete = allShapes.filter((s) => {
+        if ((s as any).type !== 'arrow') return false;
+        const bindings = (editor.getBindingsInvolvingShape?.(s) as any[]) || [];
+        return bindings.some(
+          (b) => b.toId === shapeId || b.fromId === shapeId
+        );
+      });
 
-    const shapesToDelete = [shapeId, ...arrowShapesToDelete.map((a) => a.id)];
-    editor.deleteShapes(shapesToDelete as any);
+      const shapesToDelete = [shapeId, ...arrowShapesToDelete.map((a) => a.id)];
+      editor.deleteShapes(shapesToDelete as any);
 
-    if (selectedTaskShapeId === shapeId) {
-      setSelectedTaskShapeId(null);
+      if (selectedTaskShapeId === shapeId) {
+        setSelectedTaskShapeId(null);
+      }
+
+      triggerDebouncedVisualSave(editor);
+    } else {
+      if (selectedTaskShapeId === taskId || selectedTaskShapeId === shapeId) {
+        setSelectedTaskShapeId(null);
+      }
     }
 
     setDeleteWarningState(null);
-    triggerDebouncedVisualSave(editor);
 
     pushToast(i18n._(msg`Tarea #${taskId} eliminada`), 'info', {
       label: 'Deshacer',
       onClick: async () => {
         setMarkdownInput(priorMarkdown);
         if (editor) {
-          const visual = await loadCanvasVisualState();
+          const visual = await loadCanvasVisualState(activeDocument.id || 'default');
           loadTasksFromMarkdown(editor, priorMarkdown, visual);
           triggerDebouncedVisualSave(editor);
         }
@@ -2259,10 +2304,11 @@ export default function App() {
               ...(updates.status !== undefined ? { status: updates.status } : {}),
             },
           } as any);
+          triggerDebouncedVisualSave(editor);
         }
       }
     },
-    [editor]
+    [editor, triggerDebouncedVisualSave]
   );
 
   const handleBatchUpdateTasksFromKanban = useCallback(
@@ -2302,10 +2348,11 @@ export default function App() {
             } as any);
           }
         }
+        triggerDebouncedVisualSave(editor);
       }
       showToast(i18n._(msg`${taskIds.length} tareas actualizadas`));
     },
-    [editor]
+    [editor, triggerDebouncedVisualSave]
   );
 
   const handleBatchDeleteTasksFromKanban = useCallback(
