@@ -97,6 +97,8 @@ import {
 } from './services/settingsService';
 import {
   addTaskToMarkdown,
+  assignTaskIdToTask,
+  autoAssignAllMissingTaskIds,
   deleteTaskFromMarkdown,
   findDependentTasks,
   moveTaskToGroupInMarkdown,
@@ -419,6 +421,52 @@ export default function App() {
     window.addEventListener('antask:task-moved-group', handleTaskMovedGroup);
     return () => window.removeEventListener('antask:task-moved-group', handleTaskMovedGroup);
   }, [editor]);
+
+  // Handle auto-assigning IDs to tasks without them
+  const handleAssignSingleTaskId = useCallback(
+    (targetIdOrLine: string | number, taskTitle?: string) => {
+      setMarkdownInput((curr) => {
+        const { updatedMarkdown, taskId } = assignTaskIdToTask(curr, targetIdOrLine);
+        if (taskId) {
+          pushToast(i18n._(msg`ID #${taskId} asignado a "${taskTitle || taskId}"`), 'success');
+        }
+        return updatedMarkdown;
+      });
+    },
+    [pushToast]
+  );
+
+  const handleAutoAssignAllTaskIds = useCallback(() => {
+    setMarkdownInput((curr) => {
+      const { updatedMarkdown, assignedCount } = autoAssignAllMissingTaskIds(curr);
+      if (assignedCount > 0) {
+        pushToast(i18n._(msg`Se asignaron IDs automáticos a ${assignedCount} tareas`), 'success');
+      } else {
+        pushToast(i18n._(msg`Todas las tareas ya cuentan con ID`), 'info');
+      }
+      return updatedMarkdown;
+    });
+  }, [pushToast]);
+
+  useEffect(() => {
+    const handleAssignEvent = (e: any) => {
+      const { taskId, taskTitle } = e.detail || {};
+      if (taskId !== undefined) {
+        handleAssignSingleTaskId(taskId, taskTitle);
+      }
+    };
+    const handleBatchAssignEvent = () => {
+      handleAutoAssignAllTaskIds();
+    };
+
+    window.addEventListener('antask:assign-task-id', handleAssignEvent);
+    window.addEventListener('antask:auto-assign-all-ids', handleBatchAssignEvent);
+
+    return () => {
+      window.removeEventListener('antask:assign-task-id', handleAssignEvent);
+      window.removeEventListener('antask:auto-assign-all-ids', handleBatchAssignEvent);
+    };
+  }, [handleAssignSingleTaskId, handleAutoAssignAllTaskIds]);
 
   // Online / Offline network status listener
   useEffect(() => {
@@ -3125,6 +3173,7 @@ export default function App() {
           subtasks: tProps.subtasks || matchedBlock?.detectedSubtasks,
           blockedBy: tProps.blockedBy || matchedBlock?.detectedBlockedBy || '',
           groupTitle: matchedBlock?.groupTitle || 'General',
+          hasMissingId: !matchedBlock?.detectedId,
         };
       }
     }
@@ -3148,6 +3197,7 @@ export default function App() {
         subtasks: block.detectedSubtasks,
         blockedBy: block.detectedBlockedBy || '',
         groupTitle: block.groupTitle || 'General',
+        hasMissingId: !block.detectedId,
       };
     }
 
@@ -4268,6 +4318,7 @@ export default function App() {
             allTasks={allParsedTasks}
             allSections={existingSections}
             onUpdateTask={handleUpdateTaskFromKanban}
+            onAssignId={handleAssignSingleTaskId}
             onBatchUpdateTasks={handleBatchUpdateTasksFromKanban}
             onDeleteTask={(taskId, title) => {
               const dependents = findDependentTasks(markdownInput, taskId);
@@ -4707,10 +4758,24 @@ export default function App() {
               </button>
             </div>
 
-            <div id="div-app-54" className="px-4 py-2 bg-[var(--surface)] border-b border-[var(--outline)] flex items-center gap-4 text-xs font-mono overflow-x-auto">
-              <span>{i18n._(msg`Total:`)} <strong className="text-[var(--on-surface)]">{validationReport.issues.length}</strong></span>
-              <span className="text-rose-400">{i18n._(msg`Errores`)}: <strong>{validationReport.errorCount}</strong></span>
-              <span className="text-amber-400">{i18n._(msg`Avisos`)}: <strong>{validationReport.warningCount}</strong></span>
+            <div id="div-app-54" className="px-4 py-2 bg-[var(--surface)] border-b border-[var(--outline)] flex items-center justify-between text-xs font-mono overflow-x-auto">
+              <div className="flex items-center gap-4">
+                <span>{i18n._(msg`Total:`)} <strong className="text-[var(--on-surface)]">{validationReport.issues.length}</strong></span>
+                <span className="text-rose-400">{i18n._(msg`Errores`)}: <strong>{validationReport.errorCount}</strong></span>
+                <span className="text-amber-400">{i18n._(msg`Avisos`)}: <strong>{validationReport.warningCount}</strong></span>
+              </div>
+              {validationReport.missingIdTaskIds.size > 0 && (
+                <button
+                  id="btn-problems-auto-assign-all-ids"
+                  type="button"
+                  onClick={handleAutoAssignAllTaskIds}
+                  className="flex items-center gap-1 px-2.5 py-1 rounded text-xs font-sans font-medium bg-amber-500/15 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 cursor-pointer transition-colors"
+                  title={i18n._(msg`Generar y asignar IDs a todas las tareas sin ID`)}
+                >
+                  <span className="material-symbols-outlined text-[13px]">auto_fix_high</span>
+                  <span>{i18n._(msg`Generar IDs a todas (${validationReport.missingIdTaskIds.size})`)}</span>
+                </button>
+              )}
             </div>
 
             <div id="div-app-55" className="p-4 overflow-auto max-h-[50vh] flex flex-col gap-2">
@@ -4737,16 +4802,29 @@ export default function App() {
                         )}
                       </div>
                     </div>
-                    {issue.taskId && (
-                      <button
-                        id={`btn-problems-locate-${issue.id}`}
-                        type="button"
-                        onClick={() => handleFocusTaskOnCanvas(issue.taskId, issue.taskTitle)}
-                        className="btn-m3-secondary px-2.5 py-1 text-[11px] cursor-pointer"
-                      >
-                        {i18n._(msg`Localizar`)}
-                      </button>
-                    )}
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {issue.type === 'missing_id' && (
+                        <button
+                          id={`btn-problems-assign-id-${issue.id}`}
+                          type="button"
+                          onClick={() => handleAssignSingleTaskId(issue.taskId ?? issue.lineIndex ?? '', issue.taskTitle)}
+                          className="px-2.5 py-1 rounded text-[11px] font-medium bg-amber-500/15 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 cursor-pointer transition-colors flex items-center gap-1"
+                        >
+                          <span className="material-symbols-outlined text-[12px]">auto_fix_high</span>
+                          <span>{i18n._(msg`Generar ID`)}</span>
+                        </button>
+                      )}
+                      {issue.taskId && (
+                        <button
+                          id={`btn-problems-locate-${issue.id}`}
+                          type="button"
+                          onClick={() => handleFocusTaskOnCanvas(issue.taskId, issue.taskTitle)}
+                          className="btn-m3-secondary px-2.5 py-1 text-[11px] cursor-pointer"
+                        >
+                          {i18n._(msg`Localizar`)}
+                        </button>
+                      )}
+                    </div>
                   </div>
                 ))
               )}

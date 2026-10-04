@@ -781,3 +781,97 @@ export function moveTaskToGroupInMarkdown(
 
   return lines.join('\n').replace(/\n{3,}/g, '\n\n');
 }
+
+/**
+ * Assigns an explicit ID to a specific task block in Markdown that currently lacks one.
+ */
+export function assignTaskIdToTask(
+  markdown: string,
+  targetIdOrLine: string | number,
+  customId?: string
+): { updatedMarkdown: string; taskId: string | null } {
+  const { taskBlocks } = scanTaskBlocks(markdown);
+  const normalizedTarget = typeof targetIdOrLine === 'string' ? targetIdOrLine.trim().toLowerCase() : '';
+
+  const targetBlock = taskBlocks.find((b) => {
+    if (typeof targetIdOrLine === 'number') {
+      return b.taskLineIndex === targetIdOrLine;
+    }
+    return (
+      (b.detectedId && b.detectedId.toLowerCase() === normalizedTarget) ||
+      (b.temporaryId && b.temporaryId.toLowerCase() === normalizedTarget) ||
+      (b.detectedTitle && b.detectedTitle.trim().toLowerCase() === normalizedTarget)
+    );
+  });
+
+  if (!targetBlock) {
+    return { updatedMarkdown: markdown, taskId: null };
+  }
+
+  // If it already has an explicit ID, return it
+  if (targetBlock.detectedId) {
+    return { updatedMarkdown: markdown, taskId: targetBlock.detectedId };
+  }
+
+  const lines = markdown.split(/\r?\n/);
+  const finalId = customId?.trim() || generateUniqueTaskId(targetBlock.detectedTitle, markdown);
+  const baseIndent = targetBlock.indentation ? `${targetBlock.indentation}  ` : '  ';
+  const newIdLine = `${baseIndent}- ID: ${finalId}`;
+
+  lines.splice(targetBlock.taskLineIndex + 1, 0, newIdLine);
+
+  return {
+    updatedMarkdown: lines.join('\n'),
+    taskId: finalId,
+  };
+}
+
+/**
+ * Automatically generates and assigns unique IDs to all tasks in Markdown that do not have an ID.
+ */
+export function autoAssignAllMissingTaskIds(markdown: string): {
+  updatedMarkdown: string;
+  assignedCount: number;
+  assignedTasks: Array<{ taskId: string; title: string }>;
+} {
+  const { taskBlocks } = scanTaskBlocks(markdown);
+  const missingBlocks = taskBlocks.filter((b) => !b.detectedId);
+
+  if (missingBlocks.length === 0) {
+    return { updatedMarkdown: markdown, assignedCount: 0, assignedTasks: [] };
+  }
+
+  // Collect all already used IDs in lower-case
+  const existingIdSet = new Set<string>(
+    taskBlocks.map((b) => (b.detectedId || '').toLowerCase()).filter(Boolean)
+  );
+
+  const lines = markdown.split(/\r?\n/);
+  const assignedTasks: Array<{ taskId: string; title: string }> = [];
+
+  // Sort blocks in reverse line order (highest lineIndex first) to prevent index shifting on insertion
+  const sortedBlocks = [...missingBlocks].sort((a, b) => b.taskLineIndex - a.taskLineIndex);
+
+  for (const block of sortedBlocks) {
+    const baseSlug = slugify(block.detectedTitle);
+    let candidate = baseSlug;
+    let counter = 2;
+    while (existingIdSet.has(candidate.toLowerCase())) {
+      candidate = `${baseSlug}-${counter}`;
+      counter++;
+    }
+
+    existingIdSet.add(candidate.toLowerCase());
+    assignedTasks.unshift({ taskId: candidate, title: block.detectedTitle });
+
+    const baseIndent = block.indentation ? `${block.indentation}  ` : '  ';
+    const newIdLine = `${baseIndent}- ID: ${candidate}`;
+    lines.splice(block.taskLineIndex + 1, 0, newIdLine);
+  }
+
+  return {
+    updatedMarkdown: lines.join('\n'),
+    assignedCount: assignedTasks.length,
+    assignedTasks,
+  };
+}

@@ -381,20 +381,37 @@ export function MarkdownSplitEditor({
 
         {/* Problems Indicator Toggle */}
         {validationReport.issues.length > 0 && (
-          <button
-            id="btn-markdown-toggle-issues"
-            type="button"
-            onClick={() => setShowIssuesPanel((prev) => !prev)}
-            className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold border flex items-center gap-1 cursor-pointer shrink-0 transition-colors ${
-              validationReport.hasErrors
-                ? 'bg-rose-950/80 text-rose-300 border-rose-700 animate-pulse'
-                : 'bg-amber-950/80 text-amber-300 border-amber-700'
-            }`}
-            title={i18n._(msg`Ver/Ocultar problemas detectados en el Markdown`)}
-          >
-            <span>⚠</span>
-            <span>{plural(validationReport.issues.length, { one: '# problema', other: '# problemas' })}</span>
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              id="btn-markdown-toggle-issues"
+              type="button"
+              onClick={() => setShowIssuesPanel((prev) => !prev)}
+              className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold border flex items-center gap-1 cursor-pointer shrink-0 transition-colors ${
+                validationReport.hasErrors
+                  ? 'bg-rose-950/80 text-rose-300 border-rose-700 animate-pulse'
+                  : 'bg-amber-950/80 text-amber-300 border-amber-700'
+              }`}
+              title={i18n._(msg`Ver/Ocultar problemas detectados en el Markdown`)}
+            >
+              <span>⚠</span>
+              <span>{plural(validationReport.issues.length, { one: '# problema', other: '# problemas' })}</span>
+            </button>
+
+            {validationReport.missingIdTaskIds.size > 0 && (
+              <button
+                id="btn-markdown-auto-assign-all-ids"
+                type="button"
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent('antask:auto-assign-all-ids'));
+                }}
+                className="px-2 py-0.5 rounded text-[10px] font-sans font-medium bg-amber-500/15 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 flex items-center gap-1 cursor-pointer transition-colors shrink-0"
+                title={i18n._(msg`Generar y asignar IDs automáticos a todas las tareas sin ID`)}
+              >
+                <span className="material-symbols-outlined text-[11px]">auto_fix_high</span>
+                <span>{i18n._(msg`Generar IDs (${validationReport.missingIdTaskIds.size})`)}</span>
+              </button>
+            )}
+          </div>
         )}
       </div>
 
@@ -442,11 +459,31 @@ export function MarkdownSplitEditor({
                   {issue.message}
                 </span>
               </div>
-              {issue.lineIndex !== undefined && (
-                <span className="text-[10px] text-[var(--on-surface-variant)] shrink-0 px-1 py-0.2 rounded bg-[var(--surface-container)]">
-                  L{issue.lineIndex + 1}
-                </span>
-              )}
+              <div className="flex items-center gap-1.5 shrink-0">
+                {issue.type === 'missing_id' && (
+                  <button
+                    id={`btn-issue-assign-id-${issue.id}`}
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.dispatchEvent(
+                        new CustomEvent('antask:assign-task-id', {
+                          detail: { taskId: issue.taskId || issue.lineIndex, taskTitle: issue.taskTitle },
+                        })
+                      );
+                    }}
+                    className="px-1.5 py-0.2 rounded text-[10px] font-sans font-medium bg-amber-500/20 hover:bg-amber-500/35 text-amber-200 border border-amber-500/50 cursor-pointer transition-colors flex items-center gap-0.5"
+                    title={i18n._(msg`Asignar ID automático a esta tarea`)}
+                  >
+                    <span>+ ID</span>
+                  </button>
+                )}
+                {issue.lineIndex !== undefined && (
+                  <span className="text-[10px] text-[var(--on-surface-variant)] shrink-0 px-1 py-0.2 rounded bg-[var(--surface-container)]">
+                    L{issue.lineIndex + 1}
+                  </span>
+                )}
+              </div>
             </div>
           ))}
         </div>

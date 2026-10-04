@@ -143,6 +143,7 @@ export function KanbanBoard({
         tags: b.detectedTags,
         subtasks: b.detectedSubtasks,
         blockedBy: b.detectedBlockedBy,
+        hasMissingId: !b.detectedId,
       };
     });
 
@@ -762,6 +763,26 @@ export function KanbanBoard({
                                   <span>{selectedTaskIds.has(task.taskId) ? i18n._(msg`Deseleccionar`) : i18n._(msg`Seleccionar`)}</span>
                                 </button>
 
+                                {task.hasMissingId && (
+                                  <button
+                                    id={`btn-kanban-menu-generate-id-${task.taskId}`}
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setActiveMenuTaskId(null);
+                                      window.dispatchEvent(
+                                        new CustomEvent('antask:assign-task-id', {
+                                          detail: { taskId: task.taskId, taskTitle: task.title },
+                                        })
+                                      );
+                                    }}
+                                    className="px-2 py-1 rounded text-left text-amber-300 hover:bg-[var(--surface-container-high)] flex items-center gap-2 cursor-pointer font-medium"
+                                  >
+                                    <span className="material-symbols-outlined text-[14px]">auto_fix_high</span>
+                                    <span>{i18n._(msg`Generar ID automático`)}</span>
+                                  </button>
+                                )}
+
                                 <div id="div-kanbanboard-19" className="h-px bg-[var(--outline)] my-0.5" />
 
                                 <button
@@ -805,9 +826,29 @@ export function KanbanBoard({
                             {/* Bottom Row: #ID & Section / Blockers */}
                             <div id="div-kanbanboard-21" className="flex items-center justify-between text-xs pt-1 border-t border-[var(--outline)] mt-0.5">
                               <div id="div-kanbanboard-22" className="flex items-center gap-1.5 truncate max-w-[160px]">
-                                <span className="font-mono text-[11px] text-[var(--on-surface-variant)] truncate">
-                                  #<HighlightText text={task.taskId} query={searchQuery} />
-                                </span>
+                                {task.hasMissingId ? (
+                                  <button
+                                    id={`btn-kanban-generate-id-${task.taskId}`}
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      window.dispatchEvent(
+                                        new CustomEvent('antask:assign-task-id', {
+                                          detail: { taskId: task.taskId, taskTitle: task.title },
+                                        })
+                                      );
+                                    }}
+                                    className="flex items-center gap-1 px-1.5 py-0.2 rounded bg-amber-500/10 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 font-mono text-[10px] font-medium transition-colors cursor-pointer"
+                                    title={i18n._(msg`Tarea sin ID explícito. Clic para generar ID automático en Markdown.`)}
+                                  >
+                                    <span>+ ID</span>
+                                    <span className="material-symbols-outlined text-[10px]">auto_fix_high</span>
+                                  </button>
+                                ) : (
+                                  <span className="font-mono text-[11px] text-[var(--on-surface-variant)] truncate">
+                                    #<HighlightText text={task.taskId} query={searchQuery} />
+                                  </span>
+                                )}
                                 {task.blockedBy && !task.completed && (
                                   <span
                                     className="text-[10px] font-mono text-amber-400 flex items-center gap-0.5"

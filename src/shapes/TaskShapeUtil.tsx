@@ -605,6 +605,26 @@ function TaskCardComponent({
               <span>{completed ? _(msg`↺ Marcar pendiente`) : _(msg`✓ Marcar completada`)}</span>
             </button>
 
+            {hasMissingId && (
+              <button
+                id={`btn-task-card-menu-generate-id-${shape.id}`}
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsMenuOpen(false);
+                  window.dispatchEvent(
+                    new CustomEvent('antask:assign-task-id', {
+                      detail: { taskId: taskId || title, taskTitle: title },
+                    })
+                  );
+                }}
+                className="px-2 py-1 rounded text-left text-amber-300 hover:bg-[var(--surface-container-high)] flex items-center gap-2 cursor-pointer font-medium"
+              >
+                <span className="material-symbols-outlined text-[14px]">auto_fix_high</span>
+                <span>{_(msg`Generar ID automático`)}</span>
+              </button>
+            )}
+
             <button
               id={`btn-task-card-menu-connect-${shape.id}`}
               type="button"
@@ -694,12 +714,28 @@ function TaskCardComponent({
         {/* Bottom Row: Metadata & Status */}
         <div id={`task-card-footer-${shape.id}`} className="flex items-center justify-between text-xs text-[var(--on-surface-variant)] pt-1.5 border-t border-[var(--outline)] mt-0.5">
           <div id={`task-card-footer-meta-${shape.id}`} className="flex items-center gap-1.5 truncate max-w-[200px]">
-            {taskId ? (
+            {taskId && !hasMissingId ? (
               <span className="text-[var(--on-surface-variant)] font-mono text-[11px] truncate tracking-tight" title={`ID: ${taskId}`}>
                 #<HighlightText text={taskId} query={searchQuery} />
               </span>
             ) : (
-              <span className="text-[var(--on-surface-variant)] font-mono text-[11px] italic">sin-id</span>
+              <button
+                id={`btn-task-card-generate-id-${shape.id}`}
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.dispatchEvent(
+                    new CustomEvent('antask:assign-task-id', {
+                      detail: { taskId: taskId || title, taskTitle: title },
+                    })
+                  );
+                }}
+                className="flex items-center gap-1 px-1.5 py-0.2 rounded bg-amber-500/10 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 font-mono text-[10px] font-medium transition-colors cursor-pointer"
+                title={_(msg`Tarea sin ID explícito. Clic para generar ID automático en Markdown.`)}
+              >
+                <span>+ ID</span>
+                <span className="material-symbols-outlined text-[10px]">auto_fix_high</span>
+              </button>
             )}
 
             {isDuplicateId && (
@@ -712,12 +748,23 @@ function TaskCardComponent({
             )}
 
             {hasMissingId && (
-              <span
-                className="px-1 py-0.2 text-[10px] font-semibold text-amber-400 border border-amber-800/80 rounded"
-                title={_(msg`Tarea sin ID explícito en TASKS.md`)}
+              <button
+                id={`btn-task-badge-generate-id-${shape.id}`}
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.dispatchEvent(
+                    new CustomEvent('antask:assign-task-id', {
+                      detail: { taskId: taskId || title, taskTitle: title },
+                    })
+                  );
+                }}
+                className="px-1.5 py-0.2 text-[10px] font-semibold text-amber-300 hover:text-amber-100 bg-amber-950/40 hover:bg-amber-900/60 border border-amber-600/80 rounded flex items-center gap-0.5 cursor-pointer transition-colors"
+                title={_(msg`Tarea sin ID explícito en TASKS.md. Clic para generar ID automático.`)}
               >
-                sin-id
-              </span>
+                <span>sin-id</span>
+                <span className="material-symbols-outlined text-[10px]">auto_fix_high</span>
+              </button>
             )}
 
             {unresolvedBlockers && unresolvedBlockers.length > 0 && (

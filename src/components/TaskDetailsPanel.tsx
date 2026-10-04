@@ -14,6 +14,7 @@ export interface TaskDetailsData {
   subtasks?: { total: number; completed: number };
   blockedBy?: string;
   groupTitle?: string;
+  hasMissingId?: boolean;
 }
 
 export interface MinimalTaskInfo {
@@ -56,6 +57,7 @@ interface TaskDetailsPanelProps {
   onBatchDeleteTasks: (taskIds: string[]) => void;
   onSelectTask: (taskId: string | null) => void;
   onFocusOnCanvas?: (taskId: string, title: string) => void;
+  onAssignId?: (taskId: string, title?: string) => void;
   onClose: () => void;
 }
 
@@ -70,6 +72,7 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
   onBatchDeleteTasks,
   onSelectTask,
   onFocusOnCanvas,
+  onAssignId,
   onClose,
 }) => {
   const { i18n } = useLingui();
@@ -407,19 +410,42 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
         {/* 1. Header: #ID + Navigation + Menu + Close */}
         <div id="div-taskdetailspanel-13" className="flex items-center justify-between border-b border-[var(--outline)] pb-2.5">
           <div id="div-taskdetailspanel-14" className="flex items-center gap-1.5">
-            <button
-              id="btn-task-copy-id"
-              type="button"
-              onClick={handleCopyId}
-              className="group/id flex items-center gap-1 text-xs font-mono font-medium px-1.5 py-0.5 rounded bg-[var(--surface)] border border-[var(--outline)] hover:border-[var(--primary)] text-[var(--primary)] cursor-pointer transition-colors"
-              title={i18n._(msg`Clic para copiar ID`)}
-            >
-              <span className="text-[var(--on-surface-variant)]">#</span>
-              <span>{task.taskId}</span>
-              <span className="material-symbols-outlined text-[12px] opacity-0 group-hover/id:opacity-100 transition-opacity">
-                {copiedId ? 'check' : 'content_copy'}
-              </span>
-            </button>
+            {task.hasMissingId ? (
+              <button
+                id="btn-task-generate-id"
+                type="button"
+                onClick={() => {
+                  if (onAssignId) {
+                    onAssignId(task.taskId, task.title);
+                  } else {
+                    window.dispatchEvent(
+                      new CustomEvent('antask:assign-task-id', {
+                        detail: { taskId: task.taskId, taskTitle: task.title },
+                      })
+                    );
+                  }
+                }}
+                className="flex items-center gap-1 text-xs font-mono font-medium px-2 py-0.5 rounded bg-amber-500/15 border border-amber-500/50 text-amber-300 hover:bg-amber-500/25 cursor-pointer transition-colors"
+                title={i18n._(msg`Generar ID automático permanente en Markdown`)}
+              >
+                <span className="material-symbols-outlined text-[13px]">auto_fix_high</span>
+                <span>{i18n._(msg`Generar ID`)}</span>
+              </button>
+            ) : (
+              <button
+                id="btn-task-copy-id"
+                type="button"
+                onClick={handleCopyId}
+                className="group/id flex items-center gap-1 text-xs font-mono font-medium px-1.5 py-0.5 rounded bg-[var(--surface)] border border-[var(--outline)] hover:border-[var(--primary)] text-[var(--primary)] cursor-pointer transition-colors"
+                title={i18n._(msg`Clic para copiar ID`)}
+              >
+                <span className="text-[var(--on-surface-variant)]">#</span>
+                <span>{task.taskId}</span>
+                <span className="material-symbols-outlined text-[12px] opacity-0 group-hover/id:opacity-100 transition-opacity">
+                  {copiedId ? 'check' : 'content_copy'}
+                </span>
+              </button>
+            )}
 
             {copiedId && (
               <span className="text-[10px] font-sans text-emerald-400">
@@ -474,6 +500,29 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
                   onPointerDown={(e) => e.stopPropagation()}
                   className="absolute right-0 top-7 z-50 bg-[var(--surface-container-high)] border border-[var(--outline)] rounded-md shadow-lg p-1 flex flex-col gap-0.5 min-w-[170px] text-xs font-sans"
                 >
+                  {task.hasMissingId && (
+                    <button
+                      id="btn-task-menu-generate-id"
+                      type="button"
+                      onClick={() => {
+                        setIsMenuOpen(false);
+                        if (onAssignId) {
+                          onAssignId(task.taskId, task.title);
+                        } else {
+                          window.dispatchEvent(
+                            new CustomEvent('antask:assign-task-id', {
+                              detail: { taskId: task.taskId, taskTitle: task.title },
+                            })
+                          );
+                        }
+                      }}
+                      className="px-2 py-1 rounded text-left text-amber-300 hover:bg-[var(--surface-container-highest)] flex items-center gap-2 cursor-pointer font-medium"
+                    >
+                      <span className="material-symbols-outlined text-[14px]">auto_fix_high</span>
+                      <span>{i18n._(msg`Generar ID automático`)}</span>
+                    </button>
+                  )}
+
                   <button
                     id="btn-task-menu-copy-id"
                     type="button"
