@@ -125,12 +125,12 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
   return (
     <div
       id="modal-workspace-manager-overlay"
-      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in"
+      className="fixed inset-0 z-50 bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in"
       onClick={onClose}
     >
       <div
         id="modal-workspace-manager-dialog"
-        className="w-full sm:max-w-2xl bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-lg sm:rounded-lg shadow-xl flex flex-col overflow-hidden max-h-[90vh] pb-safe sm:pb-0"
+        className="w-full sm:max-w-2xl bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-md sm:rounded-md shadow-md flex flex-col overflow-hidden max-h-[90vh] pb-safe sm:pb-0"
         role="dialog"
         aria-modal="true"
         aria-labelledby="ws-manager-title"
@@ -184,7 +184,7 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
           {activeTab === 'list' ? (
             <div id="div-workspacemanagermodal-5" className="flex flex-col gap-3">
               {/* Sanity Cloud Persistence Bar */}
-              <div id="div-workspacemanagermodal-6" className="p-3 rounded-lg bg-[var(--surface)] border border-[var(--outline)] flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+              <div id="div-workspacemanagermodal-6" className="p-3 rounded-md bg-[var(--surface)] border border-[var(--outline)] flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                 <div id="div-workspacemanagermodal-7" className="flex items-center gap-2 min-w-0">
                   <div id="div-workspacemanagermodal-8" className="w-6 h-6 rounded bg-rose-600 flex items-center justify-center text-white font-bold text-[10px] shadow-xs shrink-0">
                     S
@@ -283,7 +283,7 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
                   <div
                     key={ws.id}
                     id={`div-workspace-card-${ws.id}`}
-                    className={`p-3 rounded-lg border transition-all ${
+                    className={`p-3 rounded-md border transition-all ${
                       isActive
                         ? 'bg-[var(--primary-container)]/20 border-[var(--primary)]'
                         : 'bg-[var(--surface)] border-[var(--outline)] hover:border-[var(--outline-variant)]'

@@ -73,7 +73,7 @@ export const NewTaskDocumentModal: React.FC<NewTaskDocumentModalProps> = ({
     >
       <div
         id="modal-new-task-doc-dialog"
-        className="w-full sm:max-w-md bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-lg sm:rounded-lg shadow-xl flex flex-col overflow-hidden pb-safe sm:pb-0"
+        className="w-full sm:max-w-md bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-md sm:rounded-md shadow-md flex flex-col overflow-hidden pb-safe sm:pb-0"
         role="dialog"
         aria-modal="true"
         aria-labelledby="new-task-doc-title"
@@ -81,7 +81,7 @@ export const NewTaskDocumentModal: React.FC<NewTaskDocumentModalProps> = ({
       >
         <div id="div-newtaskdocumentmodal-1" className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
           <div id="div-newtaskdocumentmodal-2" className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-[16px] text-sky-400">note_add</span>
+            <span className="material-symbols-outlined text-[16px] text-[var(--primary)]">note_add</span>
             <h2 id="new-task-doc-title" className="text-sm font-semibold text-[var(--on-surface)] font-sans">
               {_(msg`Nuevo Archivo Task MD`)}
             </h2>

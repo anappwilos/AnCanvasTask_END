@@ -634,10 +634,7 @@ function SdkExplorerInner({
       <div id="div-sanitysdkexplorer-30" className="bg-neutral-900 border border-neutral-800 p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div id="div-sanitysdkexplorer-31" className="space-y-1">
           <div id="div-sanitysdkexplorer-32" className="flex items-center gap-2">
-            <span className="flex h-2 w-2 relative">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-            </span>
+            <span className="inline-flex rounded-full h-2 w-2 bg-emerald-500 shrink-0" />
             <span className="text-xs font-semibold uppercase tracking-wider text-emerald-400 font-mono">
               Sanity App SDK Activo
             </span>

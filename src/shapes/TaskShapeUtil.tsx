@@ -345,7 +345,7 @@ function TaskCardComponent({
         }}
         className={`group/card w-full h-full rounded-md bg-[var(--surface-container)] border transition-all duration-120 select-none flex flex-col justify-between p-2.5 relative ${
           isConnectingSource
-            ? 'border-[var(--primary)] ring-2 ring-[var(--primary)] ring-offset-2 ring-offset-[var(--surface)] bg-[var(--primary-container)]/20 shadow-md animate-pulse'
+            ? 'border-[var(--primary)] ring-2 ring-[var(--primary)] ring-offset-2 ring-offset-[var(--surface)] bg-[var(--primary-container)]/20 shadow-sm'
             : isAnyConnecting
             ? 'border-[var(--primary)]/70 hover:border-[var(--primary)] hover:ring-2 hover:ring-[var(--primary)]/60 cursor-pointer shadow-xs'
             : isSelected
@@ -361,8 +361,8 @@ function TaskCardComponent({
       >
         {/* Floating Indicator when this task is the active connection source */}
         {isConnectingSource && (
-          <div className="absolute -top-6 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded bg-[var(--primary)] text-[var(--on-primary)] text-[9px] font-medium whitespace-nowrap shadow-md flex items-center gap-1 z-30 pointer-events-none">
-            <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
+          <div className="absolute -top-6 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded bg-[var(--primary)] text-[var(--on-primary)] text-[9px] font-medium whitespace-nowrap shadow-sm flex items-center gap-1 z-30 pointer-events-none">
+            <span className="w-1.5 h-1.5 rounded-full bg-white" />
             <span>{_(msg`Punto central activo · Elige tarea a unir`)}</span>
           </div>
         )}
@@ -378,10 +378,10 @@ function TaskCardComponent({
           onPointerDown={(e) => e.stopPropagation()}
           className={`absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 w-3.5 h-3.5 rounded-full border flex items-center justify-center cursor-crosshair transition-all duration-150 ${
             isConnectingSource
-              ? 'bg-[var(--primary)] border-white scale-110 shadow-md ring-2 ring-[var(--primary)]'
+              ? 'bg-[var(--primary)] border-white scale-110 shadow-sm ring-2 ring-[var(--primary)]'
               : isAnyConnecting
-              ? 'bg-[var(--primary-container)] border-[var(--primary)] ring-2 ring-[var(--primary)]/60 scale-110 animate-bounce'
-              : `${isConnectionPointsVisible ? 'opacity-100' : 'opacity-0'} bg-[var(--surface-container-high)] border-[var(--primary)] hover:scale-125 hover:bg-[var(--primary)]`
+              ? 'bg-[var(--primary-container)] border-[var(--primary)] ring-2 ring-[var(--primary)]/60 scale-105'
+              : `${isConnectionPointsVisible ? 'opacity-100' : 'opacity-0'} bg-[var(--surface-container-high)] border-[var(--primary)] hover:scale-110 hover:bg-[var(--primary)]`
           }`}
           title={_(msg`Punto central superior: Clic para unir tareas`)}
           aria-label={_(msg`Punto central superior`)}
@@ -399,10 +399,10 @@ function TaskCardComponent({
           onPointerDown={(e) => e.stopPropagation()}
           className={`absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 z-20 w-3.5 h-3.5 rounded-full border flex items-center justify-center cursor-crosshair transition-all duration-150 ${
             isConnectingSource
-              ? 'bg-[var(--primary)] border-white scale-110 shadow-md ring-2 ring-[var(--primary)]'
+              ? 'bg-[var(--primary)] border-white scale-110 shadow-sm ring-2 ring-[var(--primary)]'
               : isAnyConnecting
-              ? 'bg-[var(--primary-container)] border-[var(--primary)] ring-2 ring-[var(--primary)]/60 scale-110 animate-bounce'
-              : `${isConnectionPointsVisible ? 'opacity-100' : 'opacity-0'} bg-[var(--surface-container-high)] border-[var(--primary)] hover:scale-125 hover:bg-[var(--primary)]`
+              ? 'bg-[var(--primary-container)] border-[var(--primary)] ring-2 ring-[var(--primary)]/60 scale-105'
+              : `${isConnectionPointsVisible ? 'opacity-100' : 'opacity-0'} bg-[var(--surface-container-high)] border-[var(--primary)] hover:scale-110 hover:bg-[var(--primary)]`
           }`}
           title={_(msg`Punto central inferior: Clic para unir tareas`)}
           aria-label={_(msg`Punto central inferior`)}
@@ -420,10 +420,10 @@ function TaskCardComponent({
           onPointerDown={(e) => e.stopPropagation()}
           className={`absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2 z-20 w-3.5 h-3.5 rounded-full border flex items-center justify-center cursor-crosshair transition-all duration-150 ${
             isConnectingSource
-              ? 'bg-[var(--primary)] border-white scale-110 shadow-md ring-2 ring-[var(--primary)]'
+              ? 'bg-[var(--primary)] border-white scale-110 shadow-sm ring-2 ring-[var(--primary)]'
               : isAnyConnecting
-              ? 'bg-[var(--primary-container)] border-[var(--primary)] ring-2 ring-[var(--primary)]/60 scale-110 animate-bounce'
-              : `${isConnectionPointsVisible ? 'opacity-100' : 'opacity-0'} bg-[var(--surface-container-high)] border-[var(--primary)] hover:scale-125 hover:bg-[var(--primary)]`
+              ? 'bg-[var(--primary-container)] border-[var(--primary)] ring-2 ring-[var(--primary)]/60 scale-105'
+              : `${isConnectionPointsVisible ? 'opacity-100' : 'opacity-0'} bg-[var(--surface-container-high)] border-[var(--primary)] hover:scale-110 hover:bg-[var(--primary)]`
           }`}
           title={_(msg`Punto central izquierdo: Clic para unir tareas`)}
           aria-label={_(msg`Punto central izquierdo`)}
@@ -441,10 +441,10 @@ function TaskCardComponent({
           onPointerDown={(e) => e.stopPropagation()}
           className={`absolute top-1/2 right-0 translate-x-1/2 -translate-y-1/2 z-20 w-3.5 h-3.5 rounded-full border flex items-center justify-center cursor-crosshair transition-all duration-150 ${
             isConnectingSource
-              ? 'bg-[var(--primary)] border-white scale-110 shadow-md ring-2 ring-[var(--primary)]'
+              ? 'bg-[var(--primary)] border-white scale-110 shadow-sm ring-2 ring-[var(--primary)]'
               : isAnyConnecting
-              ? 'bg-[var(--primary-container)] border-[var(--primary)] ring-2 ring-[var(--primary)]/60 scale-110 animate-bounce'
-              : `${isConnectionPointsVisible ? 'opacity-100' : 'opacity-0'} bg-[var(--surface-container-high)] border-[var(--primary)] hover:scale-125 hover:bg-[var(--primary)]`
+              ? 'bg-[var(--primary-container)] border-[var(--primary)] ring-2 ring-[var(--primary)]/60 scale-105'
+              : `${isConnectionPointsVisible ? 'opacity-100' : 'opacity-0'} bg-[var(--surface-container-high)] border-[var(--primary)] hover:scale-110 hover:bg-[var(--primary)]`
           }`}
           title={_(msg`Punto central derecho: Clic para unir tareas`)}
           aria-label={_(msg`Punto central derecho`)}
@@ -602,7 +602,7 @@ function TaskCardComponent({
           <div
             id={`task-card-menu-dropdown-${shape.id}`}
             onPointerDown={(e) => e.stopPropagation()}
-            className="absolute top-8 right-2 z-50 bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-lg p-1 flex flex-col gap-0.5 min-w-[150px] text-xs font-sans"
+            className="absolute top-8 right-2 z-50 bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-md p-1 flex flex-col gap-0.5 min-w-[150px] text-xs font-sans"
           >
             <button
               id={`btn-task-card-menu-toggle-${shape.id}`}
@@ -1190,7 +1190,7 @@ function TaskGroupComponent({ shape }: { shape: ITaskGroupShape }) {
             <h2 className="text-xs font-semibold text-[var(--on-surface)] font-sans tracking-tight truncate max-w-[200px]">
               {title}
             </h2>
-            <span className="suction-indicator items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono font-medium text-[var(--primary)] bg-[var(--primary)]/10 border border-[var(--primary)]/30 animate-pulse">
+            <span className="suction-indicator items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono font-medium text-[var(--primary)] bg-[var(--primary)]/10 border border-[var(--primary)]/30">
               <span className="w-1.5 h-1.5 rounded-full bg-[var(--primary)]" />
               {i18n._(msg`Ventosa`)}
             </span>

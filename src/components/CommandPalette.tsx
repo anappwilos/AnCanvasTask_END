@@ -258,7 +258,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       <div
         id="modal-command-palette-dialog"
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-xl bg-[var(--surface-container)] border border-[var(--outline)] rounded-lg shadow-xl overflow-hidden flex flex-col max-h-[82vh]"
+        className="w-full max-w-xl bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-md overflow-hidden flex flex-col max-h-[82vh]"
       >
         {/* Search Input Header */}
         <div id="div-commandpalette-1" className="flex items-center gap-2.5 px-3.5 py-2.5 border-b border-[var(--outline)] bg-[var(--surface)]">

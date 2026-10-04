@@ -66,7 +66,7 @@ export const RenameDocumentModal: React.FC<RenameDocumentModalProps> = ({
     >
       <div
         id="modal-rename-doc-dialog"
-        className="w-full sm:max-w-md bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-lg sm:rounded-lg shadow-xl flex flex-col overflow-hidden pb-safe sm:pb-0"
+        className="w-full sm:max-w-md bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-md sm:rounded-md shadow-md flex flex-col overflow-hidden pb-safe sm:pb-0"
         role="dialog"
         aria-modal="true"
         aria-labelledby="rename-doc-title"
@@ -74,7 +74,7 @@ export const RenameDocumentModal: React.FC<RenameDocumentModalProps> = ({
       >
         <div id="div-renamedocumentmodal-1" className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
           <div id="div-renamedocumentmodal-2" className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-[16px] text-sky-400">edit_note</span>
+            <span className="material-symbols-outlined text-[16px] text-[var(--primary)]">edit_note</span>
             <h2 id="rename-doc-title" className="text-sm font-semibold text-[var(--on-surface)] font-sans">
               {_(msg`Renombrar / Mover Archivo Task MD`)}
             </h2>

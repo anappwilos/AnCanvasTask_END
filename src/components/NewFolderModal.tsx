@@ -63,7 +63,7 @@ export const NewFolderModal: React.FC<NewFolderModalProps> = ({
     >
       <div
         id="modal-new-folder-dialog"
-        className="w-full sm:max-w-md bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-lg sm:rounded-lg shadow-xl flex flex-col overflow-hidden pb-safe sm:pb-0"
+        className="w-full sm:max-w-md bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-md sm:rounded-md shadow-md flex flex-col overflow-hidden pb-safe sm:pb-0"
         role="dialog"
         aria-modal="true"
         aria-labelledby="new-folder-modal-title"
@@ -71,7 +71,7 @@ export const NewFolderModal: React.FC<NewFolderModalProps> = ({
       >
         <div id="div-newfoldermodal-1" className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
           <div id="div-newfoldermodal-2" className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-[16px] text-amber-400">create_new_folder</span>
+            <span className="material-symbols-outlined text-[16px] text-[var(--primary)]">create_new_folder</span>
             <h2 id="new-folder-modal-title" className="text-sm font-semibold text-[var(--on-surface)] font-sans">
               <Trans>Nueva Carpeta para Task MD</Trans>
             </h2>

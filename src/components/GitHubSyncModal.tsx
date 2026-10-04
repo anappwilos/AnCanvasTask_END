@@ -74,7 +74,7 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
     >
       <div
         id="modal-github-sync-dialog"
-        className="w-full sm:max-w-xl bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-lg sm:rounded-lg shadow-xl flex flex-col overflow-hidden max-h-[90vh] pb-safe sm:pb-0"
+        className="w-full sm:max-w-xl bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-md sm:rounded-md shadow-md flex flex-col overflow-hidden max-h-[90vh] pb-safe sm:pb-0"
         role="dialog"
         aria-modal="true"
         aria-labelledby="github-sync-title"

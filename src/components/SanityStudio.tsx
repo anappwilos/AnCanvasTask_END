@@ -533,7 +533,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
             <div id="div-sanitystudio-13" className="flex flex-col min-w-0">
               <div id="div-sanitystudio-14" className="flex items-center gap-1.5">
                 <span className="font-bold text-xs text-[var(--on-surface)] tracking-tight truncate">Sanity Studio</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" title="Sincronizado en vivo" />
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--primary)]" title="Sincronizado en vivo" />
               </div>
               <span className="text-[10px] font-mono text-[var(--primary)] truncate">
                 {config.projectId || 'Sanity'} • {config.dataset}
@@ -1067,17 +1067,17 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
                 /* WORKSPACE STRUCTURE FORM INSPECTOR */
                 <div id="div-sanitystudio-48" className="flex flex-col gap-4 max-w-3xl">
                   {/* Workspace Top Banner & App Activation */}
-                  <div id="div-sanitystudio-49" className="p-4 rounded-lg bg-emerald-950/30 border border-emerald-800/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+                  <div id="div-sanitystudio-49" className="p-3 rounded-md bg-[var(--surface-container-high)] border border-[var(--outline)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
                     <div id="div-sanitystudio-50" className="flex items-center gap-3 min-w-0">
-                      <div id="div-sanitystudio-51" className="w-10 h-10 rounded-lg bg-emerald-900/60 border border-emerald-600/70 flex items-center justify-center text-emerald-400 shrink-0">
-                        <span className="material-symbols-outlined text-[24px]">workspaces</span>
+                      <div id="div-sanitystudio-51" className="w-8 h-8 rounded-md bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-center text-[var(--on-surface)] shrink-0">
+                        <span className="material-symbols-outlined text-[20px]">workspaces</span>
                       </div>
                       <div id="div-sanitystudio-52" className="flex flex-col min-w-0">
                         <div id="div-sanitystudio-53" className="flex items-center gap-2">
                           <span className="font-bold text-sm text-[var(--on-surface)] truncate">
                             {formState.name || 'Workspace sin nombre'}
                           </span>
-                          <span className="px-1.5 py-0.2 rounded text-[10px] font-mono bg-emerald-900/40 text-emerald-300 border border-emerald-700/60 shrink-0">
+                          <span className="px-1.5 py-0.2 rounded text-[10px] font-mono bg-[var(--surface)] text-[var(--on-surface-variant)] border border-[var(--outline)] shrink-0">
                             Sanity Workspace
                           </span>
                         </div>
@@ -1101,9 +1101,9 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
                   </div>
 
                   {/* Section 1: General Info */}
-                  <div id="div-sanitystudio-54" className="p-3.5 rounded-lg border border-[var(--outline)] bg-[var(--surface-container)] flex flex-col gap-3">
+                  <div id="div-sanitystudio-54" className="p-3.5 rounded-md border border-[var(--outline)] bg-[var(--surface-container)] flex flex-col gap-3">
                     <div id="div-sanitystudio-55" className="flex items-center gap-2 border-b border-[var(--outline)] pb-2">
-                      <span className="material-symbols-outlined text-[16px] text-sky-400">info</span>
+                      <span className="material-symbols-outlined text-[16px] text-[var(--on-surface-variant)]">info</span>
                       <span className="font-semibold text-xs text-[var(--on-surface)]">Información General</span>
                     </div>
 
@@ -1131,7 +1131,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
                   </div>
 
                   {/* Section 2: GitHub Repository */}
-                  <div id="div-sanitystudio-59" className="p-3.5 rounded-lg border border-[var(--outline)] bg-[var(--surface-container)] flex flex-col gap-3">
+                  <div id="div-sanitystudio-59" className="p-3.5 rounded-md border border-[var(--outline)] bg-[var(--surface-container)] flex flex-col gap-3">
                     <div id="div-sanitystudio-60" className="flex items-center justify-between border-b border-[var(--outline)] pb-2">
                       <div id="div-sanitystudio-61" className="flex items-center gap-2">
                         <svg className="w-4 h-4 fill-current text-[var(--on-surface)] shrink-0" viewBox="0 0 24 24">
@@ -1209,10 +1209,10 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
                   </div>
 
                   {/* Section 3: Branches & Task Documents in Sanity */}
-                  <div id="div-sanitystudio-66" className="p-3.5 rounded-lg border border-[var(--outline)] bg-[var(--surface-container)] flex flex-col gap-3">
+                  <div id="div-sanitystudio-66" className="p-3.5 rounded-md border border-[var(--outline)] bg-[var(--surface-container)] flex flex-col gap-3">
                     <div id="div-sanitystudio-67" className="flex items-center justify-between border-b border-[var(--outline)] pb-2">
                       <div id="div-sanitystudio-68" className="flex items-center gap-2">
-                        <span className="material-symbols-outlined text-[16px] text-amber-400">fork_right</span>
+                        <span className="material-symbols-outlined text-[16px] text-[var(--on-surface-variant)]">fork_right</span>
                         <span className="font-semibold text-xs text-[var(--on-surface)]">
                           Estructura de Ramas & Archivos Task MD ({formState.branches?.length || 0})
                         </span>
@@ -1324,10 +1324,10 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
                     );
 
                     return (
-                      <div id="div-sanitystudio-78" className="p-3.5 rounded-lg border border-[var(--outline)] bg-[var(--surface-container)] flex flex-col gap-3">
+                      <div id="div-sanitystudio-78" className="p-3.5 rounded-md border border-[var(--outline)] bg-[var(--surface-container)] flex flex-col gap-3">
                         <div id="div-sanitystudio-79" className="flex items-center justify-between border-b border-[var(--outline)] pb-2">
                           <div id="div-sanitystudio-80" className="flex items-center gap-2">
-                            <span className="material-symbols-outlined text-[16px] text-sky-400">check_box</span>
+                            <span className="material-symbols-outlined text-[16px] text-[var(--on-surface-variant)]">check_box</span>
                             <span className="font-semibold text-xs text-[var(--on-surface)]">
                               Tareas asociadas a este Workspace ({linkedTasks.length})
                             </span>
@@ -1668,14 +1668,14 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
         >
           <div
             id="modal-sanity-studio-create-ws-dialog"
-            className="w-full max-w-md bg-[var(--surface-container)] border border-[var(--outline)] rounded-lg shadow-xl flex flex-col overflow-hidden"
+            className="w-full max-w-md bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-md flex flex-col overflow-hidden"
             role="dialog"
             aria-modal="true"
             onClick={(e) => e.stopPropagation()}
           >
             <div id="div-sanitystudio-107" className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
               <div id="div-sanitystudio-108" className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-[18px] text-emerald-400">workspaces</span>
+                <span className="material-symbols-outlined text-[18px] text-[var(--primary)]">workspaces</span>
                 <h3 className="text-xs font-semibold text-[var(--on-surface)]">
                   Nuevo Workspace en Sanity Studio
                 </h3>
@@ -1765,14 +1765,14 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
         >
           <div
             id="modal-sanity-studio-create-task-dialog"
-            className="w-full max-w-sm bg-[var(--surface-container)] border border-[var(--outline)] rounded-lg shadow-xl flex flex-col overflow-hidden"
+            className="w-full max-w-sm bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-md flex flex-col overflow-hidden"
             role="dialog"
             aria-modal="true"
             onClick={(e) => e.stopPropagation()}
           >
             <div id="div-sanitystudio-113" className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
               <div id="div-sanitystudio-114" className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-[18px] text-sky-400">check_box</span>
+                <span className="material-symbols-outlined text-[18px] text-[var(--primary)]">check_box</span>
                 <h3 className="text-xs font-semibold text-[var(--on-surface)]">
                   Nuevo Documento de Tarea en Sanity
                 </h3>
@@ -1874,7 +1874,7 @@ export const SanityStudio: React.FC<SanityStudioProps> = ({
         >
           <div
             id="modal-sanity-studio-confirm-delete-dialog"
-            className="w-full max-w-sm bg-[var(--surface-container)] border border-[var(--outline)] rounded-lg shadow-xl flex flex-col overflow-hidden"
+            className="w-full max-w-sm bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-md flex flex-col overflow-hidden"
             role="dialog"
             aria-modal="true"
             onClick={(e) => e.stopPropagation()}

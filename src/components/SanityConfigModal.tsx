@@ -356,7 +356,7 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
   return (
     <div
       id="modal-sanity-config-overlay"
-      className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-xs"
+      className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -364,7 +364,7 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
     >
       <div
         id="modal-sanity-config-dialog"
-        className="w-full sm:max-w-xl bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-lg sm:rounded-lg shadow-xl flex flex-col overflow-hidden animate-slide-up sm:animate-none max-h-[92vh] sm:max-h-[85vh] pb-safe sm:pb-0"
+        className="w-full sm:max-w-xl bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-md sm:rounded-md shadow-md flex flex-col overflow-hidden animate-slide-up sm:animate-none max-h-[92vh] sm:max-h-[85vh] pb-safe sm:pb-0"
         onClick={(e) => e.stopPropagation()}
       >
         <div id="div-sanityconfigmodal-1" className="w-10 h-1 bg-[var(--outline)] rounded mx-auto my-2 sm:hidden" />
@@ -372,7 +372,7 @@ export const schemaTypes = [taskSchema, canvasVisualStateSchema];`,
         {/* Modal Header */}
         <div id="div-sanityconfigmodal-2" className="px-5 py-3 border-b border-[var(--outline)] flex items-center justify-between shrink-0 bg-[var(--surface)]">
           <div id="div-sanityconfigmodal-3" className="flex items-center gap-2.5">
-            <div id="div-sanityconfigmodal-4" className="w-7 h-7 rounded bg-sky-950/80 border border-sky-600/50 flex items-center justify-center text-sky-400">
+            <div id="div-sanityconfigmodal-4" className="w-7 h-7 rounded bg-[var(--surface-container-high)] border border-[var(--outline)] flex items-center justify-center text-[var(--primary)]">
               <span className="material-symbols-outlined text-[17px]">cloud_sync</span>
             </div>
             <div id="div-sanityconfigmodal-header-titles">

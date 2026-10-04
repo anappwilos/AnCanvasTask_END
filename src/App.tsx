@@ -3924,7 +3924,7 @@ export default function App() {
                     />
 
                     {/* Floating Canvas Navigation Controls (DESIGN.md Section 3 & 14) */}
-                    <div id="div-app-24" className="absolute bottom-3 left-3 z-10 flex items-center gap-0.5 sm:gap-1 bg-[var(--surface-container)]/95 backdrop-blur-md border border-[var(--outline)] rounded-full p-1 shadow-md select-none">
+                    <div id="div-app-24" className="absolute bottom-3 left-3 z-10 flex items-center gap-0.5 sm:gap-1 bg-[var(--surface-container)] border border-[var(--outline)] rounded-md p-1 shadow-sm select-none">
                       <button
                         id="btn-canvas-zoom-out"
                         type="button"
@@ -4009,9 +4009,9 @@ export default function App() {
                     {activeConnectionSource && (
                       <div
                         id="canvas-active-connection-banner"
-                        className="absolute top-4 left-1/2 -translate-x-1/2 z-30 bg-[var(--surface-container-high)] border border-[var(--primary)] text-[var(--on-surface)] rounded-full px-4 py-1.5 shadow-xl flex items-center gap-3 text-xs select-none backdrop-blur-md"
+                        className="absolute top-4 left-1/2 -translate-x-1/2 z-30 bg-[var(--surface-container-high)] border border-[var(--primary)] text-[var(--on-surface)] rounded-md px-3 py-1.5 shadow-md flex items-center gap-2.5 text-xs select-none"
                       >
-                        <span className="w-2 h-2 rounded-full bg-[var(--primary)] animate-ping" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-[var(--primary)]" />
                         <span className="font-medium">
                           {i18n._(msg`Uniendo desde #${activeConnectionSource.taskId || 'tarea'}`)} ·{' '}
                           <span className="text-[var(--on-surface-variant)] font-normal">
@@ -4073,7 +4073,7 @@ export default function App() {
 
                     {/* Floating Canvas Multi-Selection Action Bar (DESIGN.md Section 14) */}
                     {selectedTaskIdsOnCanvas.length > 1 && (
-                      <div id="div-app-30" className="absolute bottom-12 left-1/2 -translate-x-1/2 z-20 bg-[var(--surface-container-high)] border border-[var(--outline)] rounded-lg px-2.5 sm:px-3 py-1.5 shadow-xl flex items-center gap-1.5 sm:gap-2 select-none max-w-[96vw] overflow-x-auto">
+                      <div id="div-app-30" className="absolute bottom-12 left-1/2 -translate-x-1/2 z-20 bg-[var(--surface-container-high)] border border-[var(--outline)] rounded-md px-2.5 sm:px-3 py-1 shadow-md flex items-center gap-1.5 sm:gap-2 select-none max-w-[96vw] overflow-x-auto">
                         <div id="div-app-31" className="flex items-center gap-1.5 pr-2 border-r border-[var(--outline)] shrink-0">
                           <span className="w-2 h-2 rounded bg-[var(--primary)]" />
                           <span className="text-xs font-mono font-medium text-[var(--on-surface)]">
@@ -4286,8 +4286,8 @@ export default function App() {
 
               {/* Drag & Drop Discrete Overlay */}
               {isDraggingOver && (
-                <div id="div-app-33" className="absolute inset-0 z-50 pointer-events-none bg-black/80 backdrop-blur-xs flex flex-col items-center justify-center animate-fade-in p-6">
-                  <div id="div-app-34" className="w-16 h-16 rounded-md bg-sky-950/80 border border-sky-600 flex items-center justify-center text-sky-400 mb-4 shadow-xl">
+                <div id="div-app-33" className="absolute inset-0 z-50 pointer-events-none bg-black/80 flex flex-col items-center justify-center animate-fade-in p-6">
+                  <div id="div-app-34" className="w-14 h-14 rounded-md bg-[var(--surface-container-high)] border border-[var(--primary)] flex items-center justify-center text-[var(--primary)] mb-4 shadow-md">
                     <span className="material-symbols-outlined text-[32px]">upload_file</span>
                   </div>
                   <h3 className="text-base font-semibold text-white font-sans mb-1">
@@ -4350,13 +4350,13 @@ export default function App() {
               }
               setIsNewTaskModalOpen(true);
             }}
-            className={`absolute bottom-16 sm:bottom-6 right-6 z-30 w-12 h-12 rounded-full bg-[var(--primary)] text-[var(--on-primary)] shadow-2xl flex items-center justify-center cursor-pointer hover:scale-105 active:scale-95 transition-transform select-none ${
+            className={`absolute bottom-16 sm:bottom-6 right-6 z-30 w-10 h-10 rounded-md bg-[var(--primary)] text-[var(--on-primary)] shadow-md flex items-center justify-center cursor-pointer hover:brightness-110 active:brightness-95 transition-all select-none ${
               isSplitViewOpen && isMobileScreen ? 'hidden' : ''
             }`}
             title={i18n._(msg`Crear nueva tarea (N)`)}
             aria-label={i18n._(msg`Crear nueva tarea`)}
           >
-            <span className="material-symbols-outlined text-[26px]">add</span>
+            <span className="material-symbols-outlined text-[20px]">add</span>
           </button>
 
           {/* Toast notification system */}
@@ -4417,7 +4417,7 @@ export default function App() {
       {/* Mobile Bottom Navigation Bar (Docked, reliable, no button superposition) */}
       <nav
         aria-label={i18n._(msg`Acciones rápidas móviles`)}
-        className="sm:hidden h-14 bg-[var(--surface-container)]/98 border-t border-[var(--outline)] shrink-0 z-30 grid grid-cols-5 gap-1 px-1.5 py-1 pb-[calc(0.25rem+env(safe-area-inset-bottom,0px))] backdrop-blur-md select-none"
+        className="sm:hidden h-14 bg-[var(--surface-container)] border-t border-[var(--outline)] shrink-0 z-30 grid grid-cols-5 gap-1 px-1.5 py-1 pb-[calc(0.25rem+env(safe-area-inset-bottom,0px))] select-none"
       >
         <button
           id="btn-mobile-nav-create"
@@ -4432,7 +4432,7 @@ export default function App() {
               setIsNewTaskModalOpen(true);
             }
           }}
-          className="btn-m3-primary py-1 px-1 rounded-lg flex flex-col items-center justify-center text-[10px] cursor-pointer shadow-xs overflow-hidden active:scale-95"
+          className="btn-m3-primary py-1 px-1 rounded-md flex flex-col items-center justify-center text-[10px] cursor-pointer shadow-xs overflow-hidden active:scale-95"
         >
           <span className="material-symbols-outlined text-[18px]">add</span>
           <span className="font-semibold truncate w-full text-center leading-none mt-0.5">{activeView === 'studio' ? i18n._(msg`Crear`) : i18n._(msg`Nueva Tarea`)}</span>
@@ -4521,7 +4521,7 @@ export default function App() {
         >
           <div
             id="modal-mobile-menu-dialog"
-            className="w-full bg-[var(--surface-container)] border-t border-[var(--outline)] rounded-t-2xl shadow-2xl p-4 flex flex-col gap-3 animate-slide-up max-h-[88vh] overflow-y-auto pb-safe"
+            className="w-full bg-[var(--surface-container)] border-t border-[var(--outline)] rounded-t-md shadow-md p-4 flex flex-col gap-3 animate-slide-up max-h-[88vh] overflow-y-auto pb-safe"
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
@@ -4774,7 +4774,7 @@ export default function App() {
         >
           <div
             id="modal-problems-dialog"
-            className="w-full sm:max-w-2xl bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-lg sm:rounded-lg shadow-xl flex flex-col overflow-hidden animate-slide-up sm:animate-none max-h-[90vh] sm:max-h-[85vh] pb-safe sm:pb-0"
+            className="w-full sm:max-w-2xl bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-md sm:rounded-md shadow-md flex flex-col overflow-hidden animate-slide-up sm:animate-none max-h-[90vh] sm:max-h-[85vh] pb-safe sm:pb-0"
             role="dialog"
             aria-modal="true"
             aria-labelledby="problems-modal-title"
@@ -4896,7 +4896,7 @@ export default function App() {
         >
           <div
             id="modal-autolayout-dialog"
-            className="w-full sm:max-w-md bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-lg sm:rounded-lg shadow-xl flex flex-col overflow-hidden animate-slide-up sm:animate-none pb-safe sm:pb-0"
+            className="w-full sm:max-w-md bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-md sm:rounded-md shadow-md flex flex-col overflow-hidden animate-slide-up sm:animate-none pb-safe sm:pb-0"
             role="dialog"
             aria-modal="true"
             aria-labelledby="autolayout-modal-title"
@@ -4906,7 +4906,7 @@ export default function App() {
 
             <div id="div-app-62" className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
               <h2 id="autolayout-modal-title" className="text-sm font-semibold text-[var(--on-surface)] font-sans flex items-center gap-2">
-                <span className="material-symbols-outlined text-[16px] text-sky-400">account_tree</span>
+                <span className="material-symbols-outlined text-[16px] text-[var(--primary)]">account_tree</span>
                 <span>{i18n._(msg`Auto-ordenar`)}</span>
               </h2>
               <button
@@ -4959,7 +4959,7 @@ export default function App() {
         >
           <div
             id="modal-new-task-dialog"
-            className="w-full sm:max-w-md bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-lg sm:rounded-lg shadow-xl flex flex-col overflow-hidden animate-slide-up sm:animate-none pb-safe sm:pb-0"
+            className="w-full sm:max-w-md bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-md sm:rounded-md shadow-md flex flex-col overflow-hidden animate-slide-up sm:animate-none pb-safe sm:pb-0"
             role="dialog"
             aria-modal="true"
             aria-labelledby="new-task-modal-title"
@@ -4969,7 +4969,7 @@ export default function App() {
 
             <div id="div-app-67" className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
               <h2 id="new-task-modal-title" className="text-sm font-semibold text-[var(--on-surface)] font-sans flex items-center gap-2">
-                <span className="material-symbols-outlined text-[16px] text-sky-400">add_task</span>
+                <span className="material-symbols-outlined text-[16px] text-[var(--primary)]">add_task</span>
                 <span>{i18n._(msg`Nueva Tarea`)}</span>
               </h2>
               <button
@@ -5089,7 +5089,7 @@ export default function App() {
         >
           <div
             id="modal-delete-warning-dialog"
-            className="w-full sm:max-w-md bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-lg sm:rounded-lg shadow-xl flex flex-col overflow-hidden animate-slide-up sm:animate-none pb-safe sm:pb-0"
+            className="w-full sm:max-w-md bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-md sm:rounded-md shadow-md flex flex-col overflow-hidden animate-slide-up sm:animate-none pb-safe sm:pb-0"
             role="dialog"
             aria-modal="true"
             aria-labelledby="delete-warning-title"
@@ -5162,7 +5162,7 @@ export default function App() {
         >
           <div
             id="modal-view-markdown-dialog"
-            className="w-full sm:max-w-2xl bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-lg sm:rounded-lg shadow-xl flex flex-col overflow-hidden animate-slide-up sm:animate-none max-h-[90vh] sm:max-h-[85vh] pb-safe sm:pb-0"
+            className="w-full sm:max-w-2xl bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-md sm:rounded-md shadow-md flex flex-col overflow-hidden animate-slide-up sm:animate-none max-h-[90vh] sm:max-h-[85vh] pb-safe sm:pb-0"
             role="dialog"
             aria-modal="true"
             aria-labelledby="view-markdown-title"
@@ -5242,8 +5242,8 @@ export default function App() {
 
       {/* Modal: Sanity Studio Nativo Embebido (Formularios y Esquemas en vivo) */}
       {isNativeStudioModalOpen && (
-        <div id="div-app-84" className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4">
-          <div id="div-app-85" className="w-full max-w-6xl h-[90vh] bg-neutral-950 border border-neutral-800 rounded-lg shadow-2xl overflow-hidden flex flex-col">
+        <div id="div-app-84" className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-2 sm:p-4">
+          <div id="div-app-85" className="w-full max-w-6xl h-[90vh] bg-neutral-950 border border-neutral-800 rounded-md shadow-md overflow-hidden flex flex-col">
             <SanityStudioEmbed
               isModal={true}
               onClose={() => setIsNativeStudioModalOpen(false)}

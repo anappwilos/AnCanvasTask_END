@@ -246,14 +246,14 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
         {/* Mobile Backdrop Overlay */}
         <div
           id="modal-task-details-batch-backdrop"
-          className="fixed inset-0 bg-black/60 backdrop-blur-xs z-30 sm:hidden animate-fade-in"
+          className="fixed inset-0 bg-black/60 z-30 sm:hidden animate-fade-in"
           onClick={onClose}
           aria-hidden="true"
         />
 
         <aside
           aria-label={i18n._(msg`Panel de edición múltiple`)}
-          className="fixed inset-x-0 bottom-0 max-h-[85vh] sm:static sm:max-h-none sm:w-96 bg-[var(--surface-container)] border-t sm:border-t-0 sm:border-l border-[var(--outline)] rounded-t-xl sm:rounded-none flex flex-col justify-between p-4 z-40 flex-shrink-0 animate-slide-up sm:animate-none overflow-y-auto shadow-2xl sm:shadow-none pb-safe"
+          className="fixed inset-x-0 bottom-0 max-h-[85vh] sm:static sm:max-h-none sm:w-96 bg-[var(--surface-container)] border-t sm:border-t-0 sm:border-l border-[var(--outline)] rounded-t-md sm:rounded-none flex flex-col justify-between p-4 z-40 flex-shrink-0 animate-slide-up sm:animate-none overflow-y-auto shadow-md sm:shadow-none pb-safe"
         >
           <div id="div-taskdetailspanel-1" className="w-10 h-1 bg-[var(--outline)] rounded mx-auto mb-2 sm:hidden shrink-0" />
           <div id="div-taskdetailspanel-2" className="flex flex-col gap-4">
@@ -396,14 +396,14 @@ export const TaskDetailsPanel: React.FC<TaskDetailsPanelProps> = ({
       {/* Mobile Backdrop Overlay */}
       <div
         id="modal-task-details-single-backdrop"
-        className="fixed inset-0 bg-black/60 backdrop-blur-xs z-30 sm:hidden animate-fade-in"
+        className="fixed inset-0 bg-black/60 z-30 sm:hidden animate-fade-in"
         onClick={onClose}
         aria-hidden="true"
       />
 
       <aside
         aria-label={i18n._(msg`Panel de detalles de la tarea`)}
-        className="fixed inset-x-0 bottom-0 max-h-[85vh] sm:static sm:max-h-none sm:w-88 bg-[var(--surface-container)] border-t sm:border-t-0 sm:border-l border-[var(--outline)] rounded-t-xl sm:rounded-none flex flex-col justify-between p-3.5 z-40 flex-shrink-0 animate-slide-up sm:animate-none overflow-y-auto shadow-2xl sm:shadow-none pb-safe"
+        className="fixed inset-x-0 bottom-0 max-h-[85vh] sm:static sm:max-h-none sm:w-88 bg-[var(--surface-container)] border-t sm:border-t-0 sm:border-l border-[var(--outline)] rounded-t-md sm:rounded-none flex flex-col justify-between p-3.5 z-40 flex-shrink-0 animate-slide-up sm:animate-none overflow-y-auto shadow-md sm:shadow-none pb-safe"
       >
         <div id="div-taskdetailspanel-11" className="w-10 h-1 bg-[var(--outline)] rounded mx-auto mb-2 sm:hidden shrink-0" />
         <div id="div-taskdetailspanel-12" className="flex flex-col gap-3.5">

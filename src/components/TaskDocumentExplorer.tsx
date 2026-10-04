@@ -182,7 +182,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
             {activeMenuDocId === doc.id && (
               <div
                 id={`div-doc-dropdown-${doc.id}`}
-                className="absolute right-0 top-full mt-1 w-44 bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-xl py-1 z-50 animate-fade-in"
+                className="absolute right-0 top-full mt-1 w-44 bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-md py-1 z-50 animate-fade-in"
                 onClick={(e) => e.stopPropagation()}
               >
                 <button
@@ -302,7 +302,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
 
         {/* Workspace Dropdown Menu (Full Width of Header to Prevent Any Text Clipping) */}
         {isWorkspaceMenuOpen && (
-          <div id="div-taskdocumentexplorer-10" ref={wsMenuRef} className="absolute left-0 right-0 top-full mt-1.5 bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-2xl py-1 z-50 animate-fade-in select-none">
+          <div id="div-taskdocumentexplorer-10" ref={wsMenuRef} className="absolute left-0 right-0 top-full mt-1.5 bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-md py-1 z-50 animate-fade-in select-none">
             <div id="div-taskdocumentexplorer-11" className="px-3 py-1.5 border-b border-[var(--outline)] flex items-center justify-between">
               <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--on-surface-variant)]">
                 {i18n._(msg`Workspaces`)} ({allWorkspaces.length})
@@ -381,7 +381,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
 
         {/* Branch Dropdown Menu (Full Width of Header to Prevent Any Text Clipping) */}
         {isBranchMenuOpen && (
-          <div id="div-taskdocumentexplorer-15" ref={branchMenuRef} className="absolute left-0 right-0 top-full mt-1.5 bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-2xl py-1 z-50 animate-fade-in select-none">
+          <div id="div-taskdocumentexplorer-15" ref={branchMenuRef} className="absolute left-0 right-0 top-full mt-1.5 bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-md py-1 z-50 animate-fade-in select-none">
             <div id="div-taskdocumentexplorer-16" className="px-3 py-1.5 border-b border-[var(--outline)] flex items-center justify-between">
               <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--on-surface-variant)]">
                 {i18n._(msg`Ramas`)} ({safeBranches.length})
@@ -560,7 +560,7 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
                     {activeMenuFolder === folder && (
                       <div
                         id={`div-explorer-folder-dropdown-${folder}`}
-                        className="absolute right-0 top-full mt-1 w-44 bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-xl py-1 z-50 animate-fade-in"
+                        className="absolute right-0 top-full mt-1 w-44 bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-md py-1 z-50 animate-fade-in"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <button

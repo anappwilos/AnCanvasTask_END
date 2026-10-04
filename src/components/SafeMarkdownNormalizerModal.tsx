@@ -180,13 +180,13 @@ export function SafeMarkdownNormalizerModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="normalizer-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/75 backdrop-blur-xs font-sans text-[var(--on-surface)]"
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/75 font-sans text-[var(--on-surface)]"
     >
-      <div id="div-safemarkdownnormalizermodal-1" className="w-full max-w-[96vw] xl:max-w-7xl h-[92vh] flex flex-col bg-[var(--surface-container)] border border-[var(--outline)] rounded-lg shadow-2xl overflow-hidden">
+      <div id="div-safemarkdownnormalizermodal-1" className="w-full max-w-[96vw] xl:max-w-7xl h-[92vh] flex flex-col bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-md overflow-hidden">
         {/* Compact Header */}
         <header className="h-12 px-3.5 bg-[var(--surface-container-high)] border-b border-[var(--outline)] flex items-center justify-between gap-3 shrink-0">
           <div id="div-safemarkdownnormalizermodal-2" className="flex items-center gap-2 min-w-0">
-            <span className="material-symbols-outlined text-[18px] text-sky-400 shrink-0">
+            <span className="material-symbols-outlined text-[18px] text-[var(--primary)] shrink-0">
               verified
             </span>
             <h2 id="normalizer-title" className="text-xs sm:text-sm font-semibold text-[var(--on-surface)] truncate">

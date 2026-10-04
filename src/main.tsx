@@ -64,7 +64,7 @@ class RootErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState
     if (this.state.hasError) {
       return (
         <div id="root-error-boundary" className="min-h-screen w-full flex items-center justify-center p-6 bg-[#000000] text-[#f4f4f5] font-sans antialiased">
-          <div id="root-error-card" className="max-w-md w-full bg-[#0a0a0a] border border-[#27272a] rounded-lg p-6 shadow-xl flex flex-col gap-4">
+          <div id="root-error-card" className="max-w-md w-full bg-[#0a0a0a] border border-[#27272a] rounded-md p-5 shadow-md flex flex-col gap-4">
             <div id="root-error-header" className="flex items-center gap-3">
               <div id="root-error-icon-wrapper" className="w-10 h-10 rounded-md bg-red-950/80 border border-red-700/60 flex items-center justify-center text-red-400 shrink-0">
                 <span className="material-symbols-outlined text-[22px]">warning</span>

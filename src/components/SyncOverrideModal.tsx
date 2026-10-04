@@ -179,7 +179,7 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
     >
       <div
         id="modal-sync-override-dialog"
-        className="w-full max-w-4xl bg-[var(--surface-container)] border border-[var(--outline)] rounded-lg shadow-2xl flex flex-col overflow-hidden max-h-[92vh]"
+        className="w-full max-w-4xl bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-md flex flex-col overflow-hidden max-h-[92vh]"
         role="dialog"
         aria-modal="true"
         aria-labelledby="sync-modal-title"
@@ -399,7 +399,7 @@ export const SyncOverrideModal: React.FC<SyncOverrideModalProps> = ({
                 <div
                   key={item.id}
                   id={`div-sync-item-${item.id}`}
-                  className={`border rounded-lg transition-all overflow-hidden ${
+                  className={`border rounded-md transition-all overflow-hidden ${
                     item.diffType === 'conflict'
                       ? 'border-rose-800/60 bg-rose-950/10'
                       : item.diffType === 'remote_override'

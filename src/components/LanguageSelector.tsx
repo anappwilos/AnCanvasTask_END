@@ -68,7 +68,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
       {isOpen && (
         <div
           id="menu-language-options"
-          className="absolute right-0 mt-1 w-36 bg-[var(--surface-container)] border border-[var(--outline)] rounded-lg shadow-xl py-1 z-50 animate-fade-in"
+          className="absolute right-0 mt-1 w-36 bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-md py-1 z-50 animate-fade-in"
           role="menu"
           aria-orientation="vertical"
         >

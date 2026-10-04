@@ -95,7 +95,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     >
       <div
         id="modal-settings-dialog"
-        className="w-full sm:max-w-3xl bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-lg sm:rounded-lg shadow-xl flex flex-col overflow-hidden animate-slide-up sm:animate-none h-[88vh] sm:h-[640px] max-h-[90vh] pb-safe sm:pb-0"
+        className="w-full sm:max-w-3xl bg-[var(--surface-container)] border-t sm:border border-[var(--outline)] rounded-t-md sm:rounded-md shadow-md flex flex-col overflow-hidden animate-slide-up sm:animate-none h-[88vh] sm:h-[640px] max-h-[90vh] pb-safe sm:pb-0"
         onClick={(e) => e.stopPropagation()}
       >
         <div id="div-settingsmodal-1" className="w-10 h-1 bg-[var(--outline)] rounded mx-auto my-2 sm:hidden" />
@@ -666,7 +666,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         >
           <div
             id="modal-settings-reset-confirm-dialog"
-            className="w-full max-w-sm bg-[var(--surface-container)] border border-[var(--outline)] rounded-lg shadow-xl p-4 flex flex-col gap-2.5"
+            className="w-full max-w-sm bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-md p-4 flex flex-col gap-2.5"
             onClick={(e) => e.stopPropagation()}
             role="alertdialog"
             aria-modal="true"
