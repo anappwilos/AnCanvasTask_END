@@ -4309,7 +4309,9 @@ export default function App() {
               }
               setIsNewTaskModalOpen(true);
             }}
-            className="absolute bottom-16 sm:bottom-6 right-6 z-30 w-12 h-12 rounded-full bg-[var(--primary)] text-[var(--on-primary)] shadow-2xl flex items-center justify-center cursor-pointer hover:scale-105 active:scale-95 transition-transform select-none"
+            className={`absolute bottom-16 sm:bottom-6 right-6 z-30 w-12 h-12 rounded-full bg-[var(--primary)] text-[var(--on-primary)] shadow-2xl flex items-center justify-center cursor-pointer hover:scale-105 active:scale-95 transition-transform select-none ${
+              isSplitViewOpen && isMobileScreen ? 'hidden' : ''
+            }`}
             title={i18n._(msg`Crear nueva tarea (N)`)}
             aria-label={i18n._(msg`Crear nueva tarea`)}
           >
