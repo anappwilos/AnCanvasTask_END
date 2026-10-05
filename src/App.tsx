@@ -62,7 +62,6 @@ import { SanityConfigModal } from './components/SanityConfigModal';
 import { SanityStudio } from './components/SanityStudio';
 import { SanityStudioEmbed } from './components/SanityStudioEmbed';
 import { setGlobalSearchQuery } from './utils/searchHighlight';
-import { WorkspaceSelector } from './components/WorkspaceSelector';
 import { TaskDocumentExplorer } from './components/TaskDocumentExplorer';
 import { WorkspaceManagerModal } from './components/WorkspaceManagerModal';
 import { SyncOverrideModal } from './components/SyncOverrideModal';
@@ -3573,23 +3572,8 @@ export default function App() {
           <div id="div-app-2" className="flex items-center gap-1.5 sm:gap-2 min-w-0">
             <div id="div-app-3" className="flex items-center gap-1.5 font-semibold text-xs text-[var(--on-surface)] shrink-0">
               <img src="/logo.png" alt="Logo" className="w-5 h-5 rounded-sm object-contain" />
-              <span className="hidden sm:inline">Tasks Canvas</span>
+              <span>Tasks Canvas</span>
             </div>
-            <span className="text-[var(--outline)] hidden sm:inline">/</span>
-
-            {/* Quick Workspace & Branch Switcher in Top Bar */}
-            <WorkspaceSelector
-              workspace={activeWorkspace}
-              allWorkspaces={workspaceStore.workspaces}
-              activeBranch={activeBranch}
-              onSelectWorkspace={handleSelectWorkspace}
-              onSelectBranch={handleSelectBranch}
-              onOpenWorkspaceManager={() => {
-                logWorkspaceTrace('Abriendo WorkspaceManagerModal desde Barra Superior (isWorkspaceManagerOpen -> true)');
-                setIsWorkspaceManagerOpen(true);
-              }}
-              onOpenCreateBranch={() => setIsNewBranchModalOpen(true)}
-            />
           </div>
         </div>
 
