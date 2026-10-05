@@ -1025,6 +1025,27 @@ export default function App() {
       setMarkdownInput(activeDocument.content);
       setLastSavedMarkdown(activeDocument.lastSavedContent);
 
+      // Reconcile document-specific filters (sections, tags) with the newly selected TASK.md
+      const { groupHeadings, taskBlocks } = scanTaskBlocks(activeDocument.content || '');
+      const availableSecs = groupHeadings.map((g) => g.title.toLowerCase());
+      const availableTgs = new Set<string>();
+      taskBlocks.forEach((b) => b.detectedTags?.forEach((tag) => availableTgs.add(tag.toLowerCase().replace(/^#/, ''))));
+
+      setTaskFilters((prev) => {
+        let nextSection = prev.section;
+        if (nextSection !== 'all' && !availableSecs.includes(nextSection.toLowerCase())) {
+          nextSection = 'all';
+        }
+        let nextTag = prev.tag;
+        if (nextTag !== 'all' && !availableTgs.has(nextTag.toLowerCase().replace(/^#/, ''))) {
+          nextTag = 'all';
+        }
+        if (nextSection !== prev.section || nextTag !== prev.tag) {
+          return { ...prev, section: nextSection, tag: nextTag };
+        }
+        return prev;
+      });
+
       if (editor) {
         loadTasksFromMarkdown(
           editor,

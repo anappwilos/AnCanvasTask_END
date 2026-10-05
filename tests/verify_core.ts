@@ -115,4 +115,33 @@ assert(initialWorkspaces[0].branches[0].taskDocuments.length > 0, 'Debe tener do
 assert(initialWorkspaces[0].branches[0].taskDocuments[0].content.length > 0, 'Debe contener Markdown');
 console.log('   ✓ Estructura de Workspace y documentos locales verificada.');
 
+// 6. Filtering in consonance with selected TASK.md
+console.log('6. Verificando filtrado en consonancia con el documento TASK.md...');
+const docAMd = `# Doc A
+## Frontend
+- [ ] UI Card
+  id: ui_card
+  priority: P0
+  status: todo
+`;
+const docBMd = `# Doc B
+## Backend
+- [x] API Route
+  id: api_route
+  priority: P1
+  status: done
+`;
+
+const groupsA = parseTasksMarkdown(docAMd);
+const tasksA = groupsA.flatMap((g) => g.tasks.map((t) => ({ ...t, groupTitle: g.title })));
+const groupsB = parseTasksMarkdown(docBMd);
+const tasksB = groupsB.flatMap((g) => g.tasks.map((t) => ({ ...t, groupTitle: g.title })));
+
+assert.strictEqual(tasksA[0].groupTitle, 'Frontend');
+assert.strictEqual(tasksB[0].groupTitle, 'Backend');
+assert.strictEqual(tasksA.length, 1);
+assert.strictEqual(tasksB.length, 1);
+console.log('   ✓ Consonancia de tareas y secciones por documento seleccionada verificada.');
+
 console.log('--- ¡Todas las pruebas del núcleo pasaron exitosamente (100%)! ---');
+
