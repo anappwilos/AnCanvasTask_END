@@ -14,7 +14,7 @@ interface TaskDocumentExplorerProps {
   onSelectBranch: (branchName: string) => void;
   onOpenWorkspaceManager: () => void;
   onOpenCreateBranch: () => void;
-  onOpenGitHubSync: () => void;
+  onOpenGitHubSync?: () => void;
   onSelectDocument: (docId: string) => void;
   onOpenNewDocumentModal: (presetFolder?: string) => void;
   onOpenNewFolderModal: () => void;
@@ -348,8 +348,8 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
                   >
                     <div id="div-taskdocumentexplorer-13" className="flex flex-col min-w-0">
                       <span className="font-semibold truncate">{ws.name}</span>
-                      <span className="text-[10px] font-mono text-[var(--on-surface-variant)] truncate">
-                        {ws.githubRepo?.fullName || 'GitHub'}
+                      <span className="text-[10px] font-sans text-[var(--on-surface-variant)] truncate">
+                        {ws.githubRepo?.description || `${(ws.branches || []).length} ramas`}
                       </span>
                     </div>
                     {isCurrent && (
@@ -386,20 +386,6 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
               <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--on-surface-variant)]">
                 {i18n._(msg`Ramas`)} ({safeBranches.length})
               </span>
-              <button
-                id="btn-explorer-git-status"
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  logWorkspaceTrace('Clic en Git Status desde Explorador -> abriendo GitHubSyncModal');
-                  setIsBranchMenuOpen(false);
-                  onOpenGitHubSync();
-                }}
-                className="text-[10px] text-sky-400 hover:underline cursor-pointer font-medium flex items-center gap-0.5"
-              >
-                <span className="material-symbols-outlined text-[12px]">sync</span>
-                <span>{i18n._(msg`Estado de Git`)}</span>
-              </button>
             </div>
 
             <div id="div-taskdocumentexplorer-17" className="max-h-52 overflow-y-auto py-1">

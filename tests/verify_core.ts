@@ -1,0 +1,118 @@
+import assert from 'node:assert';
+import {
+  parseTasksMarkdown,
+} from '../src/shapes/TaskShapeUtil';
+import {
+  scanTaskBlocks,
+  updateTaskInMarkdown,
+  addTaskToMarkdown,
+  deleteTaskFromMarkdown,
+  autoAssignAllMissingTaskIds,
+  validateMarkdownDocument,
+} from '../src/utils/markdownSync';
+import {
+  getInitialDefaultWorkspaces,
+} from '../src/services/workspaceService';
+
+console.log('--- Iniciando suite de pruebas de AnTaskCanvas (Core sin GitHub) ---');
+
+// 1. Parsing & Normalization of TASKS.md
+console.log('1. Verificando parsing de TASKS.md...');
+const sampleMd = `# Proyecto Demo
+## Backend
+- [ ] Implementar base de datos
+  id: be_db
+  priority: P0
+- [x] Diseñar esquemas
+  id: be_schema
+  priority: P1
+  blockedBy: be_db
+
+## Frontend
+- [ ] Conectar interfaz
+  id: fe_ui
+  priority: P2
+`;
+
+const parsedGroups = parseTasksMarkdown(sampleMd);
+const allTasks = parsedGroups.flatMap((g) => g.tasks);
+assert.strictEqual(parsedGroups.length, 2, 'Debe parsear 2 grupos');
+assert.strictEqual(allTasks.length, 3, 'Debe parsear 3 tareas');
+
+const beDbTask = allTasks.find((t) => t.title === 'Implementar base de datos');
+assert(beDbTask, 'Debe encontrar la tarea Implementar base de datos');
+assert.strictEqual(beDbTask.completed, false, 'be_db no debe estar completada');
+assert.strictEqual(beDbTask.priority, 'P0', 'be_db debe tener prioridad P0');
+
+const beSchemaTask = allTasks.find((t) => t.title === 'Diseñar esquemas');
+assert(beSchemaTask, 'Debe encontrar Diseñar esquemas');
+assert.strictEqual(beSchemaTask.completed, true, 'be_schema debe estar completada');
+assert.strictEqual(beSchemaTask.blockedBy, 'be_db', 'be_schema debe estar bloqueada por be_db');
+console.log('   ✓ Parsing de grupos, tareas y metadatos correcto.');
+
+// 2. Safe round-trip & metadata preservation
+console.log('2. Verificando actualización y preservación de contenido...');
+const updatedMd = updateTaskInMarkdown(sampleMd, 'be_db', {
+  completed: true,
+  title: 'Implementar base de datos relacional',
+  priority: 'P1',
+});
+
+const reParsedGroups = parseTasksMarkdown(updatedMd);
+const reParsedTasks = reParsedGroups.flatMap((g) => g.tasks);
+const updatedTask = reParsedTasks.find((t) => t.taskId === 'be_db');
+assert(updatedTask, 'La tarea modificada debe existir');
+assert.strictEqual(updatedTask.completed, true, 'El checkbox debe haber cambiado a [x]');
+assert.strictEqual(updatedTask.title, 'Implementar base de datos relacional');
+assert.strictEqual(updatedTask.priority, 'P1');
+
+// Verify that other tasks were completely unharmed
+const untouchedTask = reParsedTasks.find((t) => t.taskId === 'be_schema');
+assert(untouchedTask, 'be_schema debe seguir intacta');
+assert.strictEqual(untouchedTask.blockedBy, 'be_db');
+console.log('   ✓ Round-trip seguro y preservación de atributos verificado.');
+
+// 3. Adding and Deleting tasks
+console.log('3. Verificando adición y borrado de tareas en Markdown...');
+const { updatedMarkdown: addedMd } = addTaskToMarkdown(updatedMd, {
+  title: 'Integrar tests e2e',
+  groupTitle: 'Frontend',
+  customId: 'fe_test',
+  priority: 'P2',
+});
+const withAddedTasks = parseTasksMarkdown(addedMd).flatMap((g) => g.tasks);
+assert.strictEqual(withAddedTasks.length, 4, 'Debe haber 4 tareas tras añadir una');
+assert(withAddedTasks.some((t) => t.taskId === 'fe_test'), 'fe_test debe estar en el markdown');
+
+const deletedMd = deleteTaskFromMarkdown(addedMd, 'fe_test');
+const withDeletedTasks = parseTasksMarkdown(deletedMd).flatMap((g) => g.tasks);
+assert.strictEqual(withDeletedTasks.length, 3, 'Debe haber 3 tareas tras eliminar fe_test');
+assert(!withDeletedTasks.some((t) => t.taskId === 'fe_test'), 'fe_test no debe existir');
+console.log('   ✓ Adición y borrado no destructivo verificado.');
+
+// 4. Sanitization and Missing IDs assignment
+console.log('4. Verificando saneado y asignación automática de IDs...');
+const unnormalizedMd = `# Sin IDs
+## Sección
+- [ ] Tarea sin id 1
+- [ ] Tarea sin id 2
+`;
+const validation = validateMarkdownDocument(unnormalizedMd);
+assert.strictEqual(validation.issues.filter((i) => i.type === 'missing_id').length, 2, 'Debe detectar 2 tareas sin ID');
+
+const { updatedMarkdown: normalizedMd, assignedCount } = autoAssignAllMissingTaskIds(unnormalizedMd);
+assert.strictEqual(assignedCount, 2, 'Debe haber asignado 2 IDs automáticos');
+const postValidation = validateMarkdownDocument(normalizedMd);
+assert.strictEqual(postValidation.issues.filter((i) => i.type === 'missing_id').length, 0, 'No deben quedar tareas sin ID');
+console.log('   ✓ Saneado y normalización conservadora verificada.');
+
+// 5. Workspaces and Local Recovery without GitHub dependency
+console.log('5. Verificando estructura de Workspaces local y desacoplamiento de GitHub...');
+const initialWorkspaces = getInitialDefaultWorkspaces();
+assert(initialWorkspaces.length > 0, 'Debe proveer al menos 1 workspace inicial');
+assert(initialWorkspaces[0].branches.length > 0, 'Debe tener al menos 1 rama');
+assert(initialWorkspaces[0].branches[0].taskDocuments.length > 0, 'Debe tener documentos Task MD');
+assert(initialWorkspaces[0].branches[0].taskDocuments[0].content.length > 0, 'Debe contener Markdown');
+console.log('   ✓ Estructura de Workspace y documentos locales verificada.');
+
+console.log('--- ¡Todas las pruebas del núcleo pasaron exitosamente (100%)! ---');

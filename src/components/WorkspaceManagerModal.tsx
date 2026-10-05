@@ -58,12 +58,13 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !repoInput.trim()) {
-      onShowToast(i18n._(msg`Por favor completa el nombre del workspace y el repositorio de GitHub`), 'warning');
+    if (!name.trim()) {
+      onShowToast(i18n._(msg`Por favor completa el nombre del workspace`), 'warning');
       return;
     }
 
-    const repoInfo = parseGitHubRepoInput(repoInput);
+    const safeRepoInput = `local/${name.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '-') || 'workspace'}`;
+    const repoInfo = parseGitHubRepoInput(safeRepoInput);
     const wsId = 'ws_' + Date.now();
     const branchName = defaultBranch.trim() || 'main';
 
@@ -73,8 +74,8 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
         name: 'TASKS.md',
         folder: '',
         path: 'TASKS.md',
-        content: `# ${name.trim()} - Tareas del Repositorio\n\n## Tareas Iniciales\n- [ ] Configurar entorno y estructura del proyecto\n  id: init_task_1\n  priority: P0\n- [ ] Definir arquitectura y dependencias\n  id: init_task_2\n  priority: P1\n`,
-        lastSavedContent: `# ${name.trim()} - Tareas del Repositorio\n\n## Tareas Iniciales\n- [ ] Configurar entorno y estructura del proyecto\n  id: init_task_1\n  priority: P0\n- [ ] Definir arquitectura y dependencias\n  id: init_task_2\n  priority: P1\n`,
+        content: `# ${name.trim()} - Tareas\n\n## Tareas Iniciales\n- [ ] Configurar entorno y estructura del proyecto\n  id: init_task_1\n  priority: P0\n- [ ] Definir arquitectura y tareas principales\n  id: init_task_2\n  priority: P1\n`,
+        lastSavedContent: `# ${name.trim()} - Tareas\n\n## Tareas Iniciales\n- [ ] Configurar entorno y estructura del proyecto\n  id: init_task_1\n  priority: P0\n- [ ] Definir arquitectura y tareas principales\n  id: init_task_2\n  priority: P1\n`,
         updatedAt: new Date().toISOString(),
       },
     ];
@@ -97,7 +98,7 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
           isProtected: branchName === 'main' || branchName === 'master',
           lastCommit: {
             hash: Math.random().toString(16).substring(2, 9),
-            message: `chore: inicializar workspace ${name.trim()} vinculado a ${repoInfo.fullName}`,
+            message: `chore: inicializar workspace ${name.trim()}`,
             author: 'Developer',
             timestamp: new Date().toISOString(),
           },
@@ -139,11 +140,11 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
         {/* Header */}
         <div id="div-workspacemanagermodal-1" className="px-4 py-3 border-b border-[var(--outline)] flex items-center justify-between">
           <div id="div-workspacemanagermodal-2" className="flex items-center gap-2">
-            <svg className="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
-              <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
-            </svg>
+            <span className="material-symbols-outlined text-[18px] text-[var(--primary)] shrink-0">
+              workspaces
+            </span>
             <h2 id="ws-manager-title" className="text-sm font-semibold text-[var(--on-surface)] font-sans">
-              {i18n._(msg`Gestión de Workspaces & Repositorios GitHub`)}
+              {i18n._(msg`Gestión de Workspaces`)}
             </h2>
           </div>
           <button id="btn-workspacemanagermodal-1" type="button" onClick={onClose} className="btn-m3-icon w-7 h-7 cursor-pointer" aria-label={i18n._(msg`Cerrar`)}>
@@ -175,7 +176,7 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
                 : 'border-transparent text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]'
             }`}
           >
-            + {i18n._(msg`Conectar / Crear Workspace`)}
+            + {i18n._(msg`Nuevo Workspace`)}
           </button>
         </div>
 
@@ -302,23 +303,8 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
                           )}
                         </div>
 
-                        {/* GitHub Repo info */}
-                        <div id="div-workspacemanagermodal-15" className="flex items-center gap-1.5 text-xs font-mono text-[var(--on-surface-variant)] mt-1">
-                          <svg className="w-3.5 h-3.5 fill-current shrink-0 opacity-70" viewBox="0 0 24 24">
-                            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
-                          </svg>
-                          <a
-                            href={ws.githubRepo.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="hover:text-[var(--primary)] hover:underline truncate"
-                          >
-                            {ws.githubRepo.fullName}
-                          </a>
-                        </div>
-
-                        {ws.githubRepo.description && (
-                          <p className="text-xs text-[var(--on-surface-variant)] mt-1 line-clamp-1">
+                        {ws.githubRepo?.description && (
+                          <p className="text-xs text-[var(--on-surface-variant)] mt-1 line-clamp-2">
                             {ws.githubRepo.description}
                           </p>
                         )}
@@ -435,23 +421,9 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
                 />
               </div>
 
-              <div id="div-workspacemanagermodal-22" className="flex flex-col gap-1">
-                <label className="text-xs font-medium text-[var(--on-surface)]">
-                  {i18n._(msg`Repositorio de GitHub (URL o usuario/repo)`)}
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={repoInput}
-                  onChange={(e) => setRepoInput(e.target.value)}
-                  placeholder={i18n._(msg`ej. organizacion/mi-repo o https://github.com/org/repo`)}
-                  className="w-full bg-[var(--surface)] border border-[var(--outline)] focus:border-[var(--primary)] rounded px-2.5 py-1.5 text-xs font-mono text-[var(--on-surface)] focus:outline-none"
-                />
-              </div>
-
               <div id="div-workspacemanagermodal-23" className="flex flex-col gap-1">
                 <label className="text-xs font-medium text-[var(--on-surface)]">
-                  {i18n._(msg`Rama por defecto`)}
+                  {i18n._(msg`Rama inicial`)}
                 </label>
                 <input
                   type="text"
@@ -487,7 +459,7 @@ export const WorkspaceManagerModal: React.FC<WorkspaceManagerModalProps> = ({
                 <button
                   id="btn-ws-create-submit"
                   type="submit"
-                  disabled={!name.trim() || !repoInput.trim()}
+                  disabled={!name.trim()}
                   className="btn-m3-primary px-4 py-1.5 text-xs cursor-pointer shadow-sm"
                 >
                   {i18n._(msg`Crear Workspace`)}

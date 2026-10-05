@@ -12,7 +12,7 @@ interface WorkspaceSelectorProps {
   onSelectBranch: (branchName: string) => void;
   onOpenWorkspaceManager: () => void;
   onOpenCreateBranch: () => void;
-  onOpenGitHubSync: () => void;
+  onOpenGitHubSync?: () => void;
 }
 
 export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
@@ -23,7 +23,6 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
   onSelectBranch,
   onOpenWorkspaceManager,
   onOpenCreateBranch,
-  onOpenGitHubSync,
 }) => {
   const { i18n } = useLingui();
   const [isWorkspaceMenuOpen, setIsWorkspaceMenuOpen] = useState(false);
@@ -48,7 +47,7 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
 
   return (
     <div id="div-workspaceselector-1" className="flex items-center gap-1 sm:gap-1.5 shrink-0">
-      {/* Workspace & GitHub Repo Picker Dropdown */}
+      {/* Workspace Picker Dropdown */}
       <div id="div-workspaceselector-2" className="relative" ref={wsDropdownRef}>
         <button
           id="btn-workspace-selector-trigger"
@@ -58,12 +57,12 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
             setIsBranchMenuOpen(false);
           }}
           className="btn-m3-secondary flex items-center gap-1.5 px-2 sm:px-2.5 py-1 text-xs font-sans font-medium cursor-pointer shrink-0"
-          title={`Workspace: ${workspace?.name || 'Principal'} (GitHub: ${workspace?.githubRepo?.fullName || 'GitHub'})`}
+          title={`Workspace: ${workspace?.name || 'Principal'}`}
         >
-          {/* GitHub Icon */}
-          <svg className="w-3.5 h-3.5 fill-current shrink-0 opacity-80" viewBox="0 0 24 24">
-            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
-          </svg>
+          {/* Workspace Icon */}
+          <span className="material-symbols-outlined text-[15px] text-[var(--primary)] shrink-0">
+            workspaces
+          </span>
 
           <span className="font-semibold truncate max-w-[70px] sm:max-w-[120px]">
             {workspace?.name || 'Principal'}
@@ -131,8 +130,8 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
                           <span className="w-1.5 h-1.5 rounded-full bg-[var(--primary)] shrink-0" />
                         )}
                       </div>
-                      <span className="text-[11px] font-mono text-[var(--on-surface-variant)] truncate">
-                        {ws.githubRepo?.fullName || 'GitHub'}
+                      <span className="text-[11px] font-sans text-[var(--on-surface-variant)] truncate">
+                        {ws.githubRepo?.description || `${(ws.branches || []).length} ramas`}
                       </span>
                     </div>
 
@@ -195,18 +194,6 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
               <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--on-surface-variant)]">
                 {i18n._(msg`Ramas`)} ({(workspace?.branches || []).length})
               </span>
-              <button
-                id="btn-sync-github-branch-header"
-                type="button"
-                onClick={() => {
-                  setIsBranchMenuOpen(false);
-                  onOpenGitHubSync();
-                }}
-                className="text-[10px] text-[var(--primary)] hover:underline cursor-pointer font-medium flex items-center gap-0.5"
-              >
-                <span className="material-symbols-outlined text-[12px]">sync</span>
-                <span>{i18n._(msg`Sincronizar con GitHub`)}</span>
-              </button>
             </div>
 
             <div id="div-workspaceselector-13" className="max-h-56 overflow-y-auto py-1">
@@ -255,7 +242,7 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
               })}
             </div>
 
-            <div id="div-workspaceselector-16" className="pt-1 border-t border-[var(--outline)] px-2 py-1 flex items-center gap-1.5">
+            <div id="div-workspaceselector-16" className="pt-1 border-t border-[var(--outline)] px-2 py-1">
               <button
                 id="btn-new-branch-dropdown"
                 type="button"
@@ -263,41 +250,15 @@ export const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({
                   setIsBranchMenuOpen(false);
                   onOpenCreateBranch();
                 }}
-                className="btn-m3-secondary flex-1 py-1 text-xs justify-center cursor-pointer"
+                className="btn-m3-secondary w-full py-1 text-xs justify-center cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[14px]">add</span>
                 <span>+ {i18n._(msg`Nueva rama`)}</span>
-              </button>
-
-              <button
-                id="btn-commit-sync-branch-dropdown"
-                type="button"
-                onClick={() => {
-                  setIsBranchMenuOpen(false);
-                  onOpenGitHubSync();
-                }}
-                className="btn-m3-secondary px-2.5 py-1 text-xs cursor-pointer text-sky-400"
-                title={i18n._(msg`Sincronizar con GitHub`)}
-              >
-                <span className="material-symbols-outlined text-[14px]">commit</span>
               </button>
             </div>
           </div>
         )}
       </div>
-
-      {/* GitHub Repo Quick External Link */}
-      {workspace.githubRepo.url && (
-        <a
-          href={workspace.githubRepo.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="btn-m3-icon w-6 h-6 hidden lg:inline-flex shrink-0 opacity-70 hover:opacity-100"
-          title={`Abrir ${workspace.githubRepo.fullName} en GitHub`}
-        >
-          <span className="material-symbols-outlined text-[14px]">open_in_new</span>
-        </a>
-      )}
     </div>
   );
 };

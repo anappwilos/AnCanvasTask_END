@@ -397,7 +397,7 @@ export default function App() {
         noteShapes.map((s) => ({
           id: s.id,
           type: 'note',
-          props: { color },
+          props: { color: color as any },
         }))
       );
       setSelectedNoteInfo((prev) => (prev ? { ...prev, color } : null));
@@ -3141,7 +3141,7 @@ export default function App() {
       },
       {
         id: 'workspace-manager',
-        title: 'Administrar Workspaces & Repositorios de GitHub',
+        title: 'Administrar Workspaces',
         shortcut: 'W',
         icon: 'source',
         category: 'action',
@@ -3162,22 +3162,12 @@ export default function App() {
       },
       {
         id: 'new-branch',
-        title: 'Crear nueva rama de Git para este Workspace',
+        title: 'Crear nueva rama de trabajo',
         shortcut: 'B',
         icon: 'fork_right',
         category: 'action',
         perform: () => {
           setIsNewBranchModalOpen(true);
-        },
-      },
-      {
-        id: 'github-sync',
-        title: 'Git Status & Confirmar cambios en rama (Commit)',
-        shortcut: 'G',
-        icon: 'commit',
-        category: 'action',
-        perform: () => {
-          setIsGitHubSyncOpen(true);
         },
       },
       {
@@ -3578,7 +3568,6 @@ export default function App() {
                 setIsWorkspaceManagerOpen(true);
               }}
               onOpenCreateBranch={() => setIsNewBranchModalOpen(true)}
-              onOpenGitHubSync={() => setIsGitHubSyncOpen(true)}
             />
           </div>
         </div>
@@ -3900,7 +3889,6 @@ export default function App() {
                     setIsWorkspaceManagerOpen(true);
                   }}
                   onOpenCreateBranch={() => setIsNewBranchModalOpen(true)}
-                  onOpenGitHubSync={() => setIsGitHubSyncOpen(true)}
                   onSelectDocument={handleSelectDocument}
                   onOpenNewDocumentModal={(folder) => {
                     setNewTaskDocPresetFolder(folder || '');
@@ -4943,13 +4931,13 @@ export default function App() {
                 <span className="text-[10px] font-mono text-[var(--on-surface-variant)]">{activeWorkspace.name} ➔</span>
               </button>
 
-              {/* Branches & Git Sync */}
+              {/* Branches */}
               <button
                 id="btn-mobile-menu-branches"
                 type="button"
                 onClick={() => {
                   setIsMobileMenuOpen(false);
-                  setIsGitHubSyncOpen(true);
+                  setIsNewBranchModalOpen(true);
                 }}
                 className="w-full min-h-[44px] px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--outline)] flex items-center justify-between text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer"
               >

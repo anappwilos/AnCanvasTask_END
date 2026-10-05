@@ -9,7 +9,9 @@
     "preview": "vite preview --host 0.0.0.0",
     "start": "vite preview --host 0.0.0.0 --port 3000",
     "clean": "rm -rf dist server.js",
+    "typecheck": "tsc --noEmit",
     "lint": "tsc --noEmit",
+    "test": "tsx tests/verify_core.ts",
     "i18n:extract": "lingui extract",
     "i18n:compile": "lingui compile",
     "i18n:check": "lingui compile --strict",
@@ -64,6 +66,7 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "autoprefixer": "^10.4.21",
+    "babel-plugin-macros": "^3.1.0",
     "tailwindcss": "^4.3.3",
     "tsx": "^4.21.0",
     "typescript": "^7.0.2"

@@ -533,7 +533,7 @@ export function updateTaskInMarkdown(
   if (updates.priority !== undefined) {
     let foundPriority = false;
     for (let i = targetBlock.taskLineIndex + 1; i <= targetBlock.endLineIndex; i++) {
-      if (resultLines[i].match(/^(?:[-*]\s*)?Priority\s*:\s*(.+)$/i)) {
+      if (resultLines[i].match(/^\s*(?:[-*]\s*)?Priority\s*:\s*(.+)$/i)) {
         resultLines[i] = resultLines[i].replace(
           /(Priority\s*:\s*)(.+)$/i,
           `$1${updates.priority}`
@@ -554,7 +554,7 @@ export function updateTaskInMarkdown(
   if (updates.status !== undefined) {
     let foundStatus = false;
     for (let i = targetBlock.taskLineIndex + 1; i <= targetBlock.endLineIndex; i++) {
-      if (resultLines[i].match(/^(?:[-*]\s*)?Status\s*:\s*(.+)$/i)) {
+      if (resultLines[i].match(/^\s*(?:[-*]\s*)?Status\s*:\s*(.+)$/i)) {
         resultLines[i] = resultLines[i].replace(
           /(Status\s*:\s*)(.+)$/i,
           `$1${updates.status}`
@@ -575,7 +575,7 @@ export function updateTaskInMarkdown(
   if (updates.tags !== undefined) {
     let foundTags = false;
     for (let i = targetBlock.taskLineIndex + 1; i <= targetBlock.endLineIndex; i++) {
-      if (resultLines[i] && resultLines[i].match(/^(?:[-*]\s*)?(?:Tags|Labels)\s*:\s*(.+)$/i)) {
+      if (resultLines[i] && resultLines[i].match(/^\s*(?:[-*]\s*)?(?:Tags|Labels)\s*:\s*(.+)$/i)) {
         if (updates.tags.length > 0) {
           resultLines[i] = resultLines[i].replace(
             /((?:Tags|Labels)\s*:\s*)(.+)$/i,
@@ -600,7 +600,7 @@ export function updateTaskInMarkdown(
   if (updates.blockedBy !== undefined) {
     let foundBlockedBy = false;
     for (let i = targetBlock.taskLineIndex + 1; i <= targetBlock.endLineIndex; i++) {
-      if (resultLines[i] && resultLines[i].match(/^(?:[-*]\s*)?Blocked\s*(?:by|-by)?\s*:\s*(.+)$/i)) {
+      if (resultLines[i] && resultLines[i].match(/^\s*(?:[-*]\s*)?Blocked\s*(?:by|-by)?\s*:\s*(.+)$/i)) {
         if (updates.blockedBy.trim().length > 0) {
           resultLines[i] = resultLines[i].replace(
             /(Blocked\s*(?:by|-by)?\s*:\s*)(.+)$/i,

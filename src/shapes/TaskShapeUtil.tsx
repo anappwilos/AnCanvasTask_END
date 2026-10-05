@@ -42,8 +42,7 @@ export const NOTE_COLOR_OPTIONS = [
  */
 export class CustomNoteShapeUtil extends NoteShapeUtil {
   static override type = 'note' as const;
-  override options = {
-    ...this.options,
+  override options: any = {
     resizeMode: 'scale' as const,
   };
 
@@ -946,7 +945,7 @@ export class TaskShapeUtil extends ShapeUtil<any> {
   override hideResizeHandles = () => true;
 
   override onDoubleClick(shape: ITaskShape) {
-    const targetId = shape.props?.taskId || shape.props?.temporaryId || shape.id;
+    const targetId = shape.props?.taskId || (shape.props as any)?.temporaryId || shape.id;
     window.dispatchEvent(
       new CustomEvent('antask:open-task-details', {
         detail: {
@@ -1348,7 +1347,7 @@ export class TaskGroupShapeUtil extends BaseBoxShapeUtil<any> {
   override canResize = () => true;
   override isAspectRatioLocked = () => false;
   override onResize(shape: ITaskGroupShape, info: any) {
-    return resizeBox(shape, info, { minWidth: 200, minHeight: 120 });
+    return resizeBox(shape as any, info, { minWidth: 200, minHeight: 120 });
   }
 
   override hideSelectionBoundsBg(shape: ITaskGroupShape): boolean {
