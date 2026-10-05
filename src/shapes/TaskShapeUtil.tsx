@@ -17,7 +17,7 @@ import {
   TLShapePartial,
 } from 'tldraw';
 import { CanvasVisualDocument } from '../services/sanityService';
-import { scanTaskBlocks, validateMarkdownDocument } from '../utils/markdownSync';
+import { scanNotesFromMarkdown, scanTaskBlocks, validateMarkdownDocument } from '../utils/markdownSync';
 import {
   useGlobalSearchQuery,
   HighlightText,
@@ -1460,9 +1460,12 @@ export function parseTasksMarkdown(markdown: string): ParsedGroup[] {
   const { taskBlocks, groupHeadings } = scanTaskBlocks(markdown);
   const groupsMap = new Map<string, ParsedMarkdownTask[]>();
 
-  // Ensure headings are preserved in order
+  // Ensure headings are preserved in order, excluding "Notas" / "Notes" sections
   groupHeadings.forEach((gh) => {
-    groupsMap.set(gh.title, []);
+    const lower = gh.title.trim().toLowerCase();
+    if (lower !== 'notas' && lower !== 'notes') {
+      groupsMap.set(gh.title, []);
+    }
   });
 
   taskBlocks.forEach((block) => {
@@ -1492,12 +1495,29 @@ export function parseTasksMarkdown(markdown: string): ParsedGroup[] {
   return parsedGroups;
 }
 
+function toRichTextHelper(text: string) {
+  const lines = text.split('\n');
+  const content = lines.map((line) => {
+    if (!line) {
+      return { type: 'paragraph' };
+    }
+    return {
+      type: 'paragraph',
+      content: [{ type: 'text', text: line }],
+    };
+  });
+  return {
+    type: 'doc',
+    content,
+  };
+}
+
 export function populateCanvasWithGroups(
   editor: Editor,
   groups: ParsedGroup[],
   savedVisualState?: CanvasVisualDocument | null,
   rawMarkdown?: string,
-  options?: { shouldZoomToFit?: boolean }
+  options?: { shouldZoomToFit?: boolean; clearNotes?: boolean }
 ): { taskCount: number; groupCount: number } {
   // Clear existing task, group, and arrow shapes on canvas
   const existingShapes = editor
@@ -1835,6 +1855,41 @@ export function populateCanvasWithGroups(
     (editor.createBindings as any)(bindingsToCreate);
   }
 
+  // Populate note shapes from Markdown "## Notas" section if needed
+  if (rawMarkdown) {
+    const existingNotes = editor
+      .getCurrentPageShapes()
+      .filter((s) => (s as any).type === 'note' || (s as any).type === 'text');
+
+    if (existingNotes.length === 0 || options?.clearNotes) {
+      if (options?.clearNotes && existingNotes.length > 0) {
+        editor.deleteShapes(existingNotes.map((s) => s.id));
+      }
+      const scannedNotes = scanNotesFromMarkdown(rawMarkdown);
+      if (scannedNotes.length > 0) {
+        let maxRight = 40;
+        for (const g of groupShapesToCreate) {
+          const right = (g.x || 0) + (g.props?.w || 360);
+          if (right > maxRight) maxRight = right;
+        }
+
+        const noteShapesToCreate = scannedNotes.map((noteText, idx) => ({
+          id: createShapeId(),
+          type: 'note' as const,
+          x: maxRight + 40,
+          y: 40 + idx * 220,
+          props: {
+            richText: toRichTextHelper(noteText),
+            color: 'yellow',
+            size: 'm',
+          },
+        }));
+
+        (editor.createShapes as any)(noteShapesToCreate);
+      }
+    }
+  }
+
   if (options?.shouldZoomToFit ?? true) {
     editor.zoomToFit({ animation: { duration: 250 } });
   }
@@ -1858,7 +1913,7 @@ export function loadTasksFromMarkdown(
   editor: Editor,
   markdown: string,
   savedVisualState?: CanvasVisualDocument | null,
-  options?: { shouldZoomToFit?: boolean }
+  options?: { shouldZoomToFit?: boolean; clearNotes?: boolean }
 ): { taskCount: number; groupCount: number } {
   const parsedGroups = parseTasksMarkdown(markdown);
   if (parsedGroups.length === 0) return { taskCount: 0, groupCount: 0 };

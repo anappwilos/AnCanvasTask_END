@@ -2,6 +2,8 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   createShapeId,
   Editor,
+  renderPlaintextFromRichText,
+  startEditingShapeWithRichText,
   Tldraw,
   TLShapeId,
 } from 'tldraw';
@@ -102,7 +104,9 @@ import {
   deleteTaskFromMarkdown,
   findDependentTasks,
   moveTaskToGroupInMarkdown,
+  scanNotesFromMarkdown,
   scanTaskBlocks,
+  syncNotesToMarkdown,
   updateTaskInMarkdown,
   validateMarkdownDocument,
 } from './utils/markdownSync';
@@ -135,6 +139,43 @@ interface DeleteWarningInfo {
   taskId: string;
   title: string;
   dependents: Array<{ taskId: string; title: string; groupTitle: string }>;
+}
+
+function toRichTextHelper(text: string) {
+  const lines = text.split('\n');
+  const content = lines.map((line) => {
+    if (!line) {
+      return { type: 'paragraph' };
+    }
+    return {
+      type: 'paragraph',
+      content: [{ type: 'text', text: line }],
+    };
+  });
+  return {
+    type: 'doc',
+    content,
+  };
+}
+
+function extractPlainTextFromShape(editor: any, shape: any): string {
+  if (!shape?.props?.richText) return '';
+  try {
+    if (editor && typeof renderPlaintextFromRichText === 'function') {
+      const rendered = renderPlaintextFromRichText(editor, shape.props.richText);
+      if (typeof rendered === 'string') return rendered;
+    }
+  } catch {
+    // fallback below
+  }
+  const content = shape.props.richText.content;
+  if (!Array.isArray(content)) return '';
+  return content
+    .map((p: any) => {
+      if (!p.content || !Array.isArray(p.content)) return '';
+      return p.content.map((c: any) => c.text || '').join('');
+    })
+    .join('\n');
 }
 
 export default function App() {
@@ -267,6 +308,23 @@ export default function App() {
   }, []);
 
   // Global Keyboard Shortcuts (Cmd/Ctrl + K, Cmd/Ctrl + ,, ?, Escape)
+  // Canvas interactive tool state & active connection source for central points
+  const [currentCanvasTool, setCurrentCanvasTool] = useState<'select' | 'arrow' | 'note' | 'text'>('select');
+  const [activeConnectionSource, setActiveConnectionSourceState] = useState<ActiveConnectionSource | null>(null);
+
+  useEffect(() => {
+    return subscribeToConnectionSource((src) => {
+      setActiveConnectionSourceState(src);
+    });
+  }, []);
+
+  const handleSelectCanvasTool = useCallback((tool: 'select' | 'arrow' | 'note' | 'text') => {
+    if (editor) {
+      editor.setCurrentTool(tool);
+      setCurrentCanvasTool(tool);
+    }
+  }, [editor]);
+
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
@@ -274,7 +332,9 @@ export default function App() {
         target &&
         (target.tagName === 'INPUT' ||
           target.tagName === 'TEXTAREA' ||
-          target.isContentEditable);
+          target.isContentEditable ||
+          target.closest?.('.tl-text-input') ||
+          target.closest?.('.ProseMirror'));
 
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
@@ -299,28 +359,24 @@ export default function App() {
           setActiveConnectionSource(null);
         }
       }
+
+      // Quick canvas tool shortcuts when not editing text
+      if (!isInput && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        if (e.key === 'v' || e.key === 'V') {
+          handleSelectCanvasTool('select');
+        } else if (e.key === 'n' || e.key === 'N') {
+          handleSelectCanvasTool('note');
+        } else if (e.key === 't' || e.key === 'T') {
+          handleSelectCanvasTool('text');
+        } else if (e.key === 'a' || e.key === 'A') {
+          handleSelectCanvasTool('arrow');
+        }
+      }
     };
 
     window.addEventListener('keydown', handleGlobalKeyDown);
     return () => window.removeEventListener('keydown', handleGlobalKeyDown);
-  }, []);
-
-  // Canvas interactive tool state & active connection source for central points
-  const [currentCanvasTool, setCurrentCanvasTool] = useState<'select' | 'arrow'>('select');
-  const [activeConnectionSource, setActiveConnectionSourceState] = useState<ActiveConnectionSource | null>(null);
-
-  useEffect(() => {
-    return subscribeToConnectionSource((src) => {
-      setActiveConnectionSourceState(src);
-    });
-  }, []);
-
-  const handleSelectCanvasTool = useCallback((tool: 'select' | 'arrow') => {
-    if (editor) {
-      editor.setCurrentTool(tool);
-      setCurrentCanvasTool(tool);
-    }
-  }, [editor]);
+  }, [handleSelectCanvasTool]);
 
   // Modals state
   const [isNewTaskModalOpen, setIsNewTaskModalOpen] = useState<boolean>(false);
@@ -1717,12 +1773,21 @@ export default function App() {
     (editorInstance: Editor) => {
       setEditor(editorInstance);
       editorInstance.user.updateUserPreferences({ colorScheme: effectiveTheme === 'dark' ? 'dark' : 'light' });
+      (editorInstance.options as any).createTextOnCanvasDoubleClick = false;
 
-      // Container-level double-click listener to open task details when a task is double-clicked
+      // Container-level double-click listener:
+      // - Double click on task card -> opens task details
+      // - Double click outside cards -> creates text shape and begins editing
       const container = editorInstance.getContainer();
       const handleContainerDblClick = (e: MouseEvent) => {
-        // 1. Check if double-click target is inside a task card element
         const target = e.target as HTMLElement | null;
+
+        // Skip interactive chrome elements (buttons, inputs, dialogs, toolbar)
+        if (target?.closest('button, input, textarea, select, [role="dialog"], #div-app-24, .tl-ui')) {
+          return;
+        }
+
+        // 1. Check if double-click target is inside a task card element
         const taskCardEl = target?.closest('[id^="task-card-container-"]');
         if (taskCardEl) {
           const shapeId = taskCardEl.id.replace('task-card-container-', '');
@@ -1736,6 +1801,7 @@ export default function App() {
             const targetId = shape?.props?.taskId || shape?.props?.temporaryId || shapeId;
             setSelectedTaskShapeId(targetId);
             setIsTaskDetailsOpen(true);
+            e.stopPropagation();
             return;
           }
         }
@@ -1749,48 +1815,61 @@ export default function App() {
           if (targetId) {
             setSelectedTaskShapeId(targetId);
             setIsTaskDetailsOpen(true);
+            e.stopPropagation();
             return;
           }
         }
 
-        // 3. Fallback: check shape at screen coordinate
+        // 3. Check shape at coordinate
+        const pagePoint = editorInstance.screenToPage({ x: e.clientX, y: e.clientY });
+        let hitShape: any = null;
         try {
-          const pagePoint = editorInstance.screenToPage({ x: e.clientX, y: e.clientY });
-          const hitShape = editorInstance.getShapeAtPoint(pagePoint) as any;
-          if (hitShape && hitShape.type === 'task') {
-            try {
-              editorInstance.select(hitShape.id);
-            } catch {
-              // ignore
-            }
-            const targetId = hitShape.props?.taskId || hitShape.props?.temporaryId || hitShape.id;
-            setSelectedTaskShapeId(targetId);
-            setIsTaskDetailsOpen(true);
+          hitShape = editorInstance.getShapeAtPoint(pagePoint) as any;
+        } catch {
+          // ignore
+        }
+
+        if (hitShape && hitShape.type === 'task') {
+          try {
+            editorInstance.select(hitShape.id);
+          } catch {
+            // ignore
           }
+          const targetId = hitShape.props?.taskId || hitShape.props?.temporaryId || hitShape.id;
+          setSelectedTaskShapeId(targetId);
+          setIsTaskDetailsOpen(true);
+          e.stopPropagation();
+          return;
+        }
+
+        // 4. If double-clicked on existing text or note shape, let tldraw handle entering edit mode
+        if (hitShape && (hitShape.type === 'text' || hitShape.type === 'note')) {
+          return;
+        }
+
+        // 5. Double click outside cards (empty canvas or inside group background) -> Create text shape!
+        try {
+          const textId = createShapeId();
+          editorInstance.createShapes([
+            {
+              id: textId,
+              type: 'text',
+              x: pagePoint.x,
+              y: pagePoint.y,
+              props: {
+                richText: toRichTextHelper(''),
+                autoSize: true,
+              },
+            },
+          ]);
+          editorInstance.select(textId);
+          startEditingShapeWithRichText(editorInstance, textId);
+          e.stopPropagation();
         } catch {
           // ignore
         }
       };
       container?.addEventListener('dblclick', handleContainerDblClick, true);
-
-      // Prevent tldraw from retaining accidental text/note shapes on canvas double click
-      try {
-        (editorInstance as any).sideEffects?.registerAfterCreateHandler?.('shape', (shape: any) => {
-          if (shape?.type === 'text' || shape?.type === 'note') {
-            queueMicrotask(() => {
-              try {
-                if (editorInstance.getShape(shape.id)) {
-                  editorInstance.deleteShapes([shape.id]);
-                }
-              } catch {
-                // ignore
-              }
-            });
-          }
-        });
-      } catch {
-        // ignore
-      }
 
       // Async initialization of visual state
       const initVisualState = async () => {
@@ -1810,12 +1889,42 @@ export default function App() {
 
       initVisualState();
 
-      // Set up store listener to sync task content edits, moves between groups, and visual persistence
+      // Debounced note and text synchronization into Markdown (## Notas)
+      let notesDebounceTimer: any = null;
+      const triggerNotesSync = () => {
+        if (notesDebounceTimer) clearTimeout(notesDebounceTimer);
+        notesDebounceTimer = setTimeout(() => {
+          if (!isMounted) return;
+          const noteShapes = editorInstance
+            .getCurrentPageShapes()
+            .filter((s) => (s as any).type === 'note' || (s as any).type === 'text')
+            .sort((a, b) => {
+              if (Math.abs(a.y - b.y) > 20) {
+                return a.y - b.y;
+              }
+              return a.x - b.x;
+            });
+
+          const notes: string[] = [];
+          for (const shape of noteShapes) {
+            const plainText = extractPlainTextFromShape(editorInstance, shape);
+            const trimmed = plainText.trim();
+            if (trimmed) {
+              notes.push(trimmed);
+            }
+          }
+
+          setMarkdownInput((currentMd) => syncNotesToMarkdown(currentMd, notes));
+        }, 150);
+      };
+
+      // Set up store listener to sync task content edits, moves between groups, notes, and visual persistence
       let isMounted = true;
       const unsubscribe = editorInstance.store.listen((entry) => {
         queueMicrotask(() => {
           if (!isMounted) return;
           let hasVisualChange = false;
+          let hasNoteOrTextChange = false;
           const changes = entry.changes as any;
 
           if (changes.updated) {
@@ -1823,6 +1932,16 @@ export default function App() {
               const [from, to] = changes.updated[id] || [];
               if (to?.typeName === 'shape' || from?.typeName === 'shape') {
                 hasVisualChange = true;
+
+                // Detect note or text shape content edits
+                if (
+                  to?.type === 'note' ||
+                  to?.type === 'text' ||
+                  from?.type === 'note' ||
+                  from?.type === 'text'
+                ) {
+                  hasNoteOrTextChange = true;
+                }
 
                 // 1. Detect task attribute changes (title, completed, priority)
                 if (to?.type === 'task' && from?.type === 'task') {
@@ -1928,6 +2047,9 @@ export default function App() {
             for (const id of Object.keys(changes.added)) {
               if (changes.added[id]?.typeName === 'shape') {
                 hasVisualChange = true;
+                if (changes.added[id]?.type === 'note' || changes.added[id]?.type === 'text') {
+                  hasNoteOrTextChange = true;
+                }
                 break;
               }
             }
@@ -1966,7 +2088,7 @@ export default function App() {
 
           try {
             const toolId = (editorInstance as any).getCurrentToolId?.();
-            if (toolId === 'select' || toolId === 'arrow') {
+            if (toolId === 'select' || toolId === 'arrow' || toolId === 'note' || toolId === 'text') {
               setCurrentCanvasTool((prev) => (prev !== toolId ? (toolId as any) : prev));
             }
           } catch {
@@ -1977,9 +2099,16 @@ export default function App() {
             for (const id of Object.keys(changes.removed)) {
               if (changes.removed[id]?.typeName === 'shape') {
                 hasVisualChange = true;
+                if (changes.removed[id]?.type === 'note' || changes.removed[id]?.type === 'text') {
+                  hasNoteOrTextChange = true;
+                }
                 break;
               }
             }
+          }
+
+          if (hasNoteOrTextChange) {
+            triggerNotesSync();
           }
 
           if (hasVisualChange) {
@@ -1990,6 +2119,7 @@ export default function App() {
 
       return () => {
         isMounted = false;
+        if (notesDebounceTimer) clearTimeout(notesDebounceTimer);
         container?.removeEventListener('dblclick', handleContainerDblClick, true);
         unsubscribe();
         setEditor((curr) => (curr === editorInstance ? null : curr));
@@ -4050,6 +4180,38 @@ export default function App() {
                         aria-label={i18n._(msg`Modo Selección`)}
                       >
                         <span className="material-symbols-outlined text-[16px]">near_me</span>
+                      </button>
+
+                      {/* Mode: Sticky Note / Posit Tool (N) */}
+                      <button
+                        id="btn-canvas-tool-note"
+                        type="button"
+                        onClick={() => handleSelectCanvasTool('note')}
+                        className={`btn-m3-icon w-7 h-7 cursor-pointer transition-colors ${
+                          currentCanvasTool === 'note'
+                            ? 'bg-[var(--primary)] text-[var(--on-primary)] shadow-xs'
+                            : 'text-[var(--on-surface-variant)] hover:bg-[var(--surface-container-high)] hover:text-[var(--on-surface)]'
+                        }`}
+                        title={i18n._(msg`Crear posit / nota adhesiva (N)`)}
+                        aria-label={i18n._(msg`Crear posit`)}
+                      >
+                        <span className="material-symbols-outlined text-[16px]">sticky_note_2</span>
+                      </button>
+
+                      {/* Mode: Text Tool (T) */}
+                      <button
+                        id="btn-canvas-tool-text"
+                        type="button"
+                        onClick={() => handleSelectCanvasTool('text')}
+                        className={`btn-m3-icon w-7 h-7 cursor-pointer transition-colors ${
+                          currentCanvasTool === 'text'
+                            ? 'bg-[var(--primary)] text-[var(--on-primary)] shadow-xs'
+                            : 'text-[var(--on-surface-variant)] hover:bg-[var(--surface-container-high)] hover:text-[var(--on-surface)]'
+                        }`}
+                        title={i18n._(msg`Crear texto (T)`)}
+                        aria-label={i18n._(msg`Crear texto`)}
+                      >
+                        <span className="material-symbols-outlined text-[16px]">title</span>
                       </button>
 
                       {/* Mode: Arrow Tool for Joining Tasks at Central Points (A) */}

@@ -897,3 +897,114 @@ export function autoAssignAllMissingTaskIds(markdown: string): {
     assignedTasks,
   };
 }
+
+/**
+ * Scans note items from the "## Notas" or "## Notes" section of the Markdown.
+ */
+export function scanNotesFromMarkdown(markdown: string): string[] {
+  if (!markdown) return [];
+  const lines = markdown.split(/\r?\n/);
+  let inNotesSection = false;
+  const notes: string[] = [];
+  let currentNoteLines: string[] = [];
+
+  const flushCurrent = () => {
+    if (currentNoteLines.length > 0) {
+      const fullNote = currentNoteLines.join('\n').trim();
+      if (fullNote) {
+        notes.push(fullNote);
+      }
+      currentNoteLines = [];
+    }
+  };
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const trimmed = line.trim();
+
+    if (/^##\s+(?:Notas|Notes)\b/i.test(trimmed)) {
+      flushCurrent();
+      inNotesSection = true;
+      continue;
+    } else if (trimmed.startsWith('## ') && inNotesSection) {
+      flushCurrent();
+      inNotesSection = false;
+      continue;
+    }
+
+    if (!inNotesSection) continue;
+
+    // Inside notes section: check for bullet point "- " or "* "
+    const bulletMatch = line.match(/^(\s*)[-*]\s+(.+)$/);
+    if (bulletMatch) {
+      flushCurrent();
+      currentNoteLines.push(bulletMatch[2]);
+    } else if (trimmed.length > 0) {
+      currentNoteLines.push(trimmed);
+    } else {
+      flushCurrent();
+    }
+  }
+
+  flushCurrent();
+  return notes;
+}
+
+/**
+ * Synchronizes canvas notes into the Markdown document under the "## Notas" section.
+ */
+export function syncNotesToMarkdown(markdown: string, notes: string[]): string {
+  const validNotes = notes.map((n) => n.trim()).filter(Boolean);
+  const lines = (markdown || '').split(/\r?\n/);
+
+  let sectionStart = -1;
+  let sectionEnd = -1;
+
+  for (let i = 0; i < lines.length; i++) {
+    const trimmed = lines[i].trim();
+    if (/^##\s+(?:Notas|Notes)\b/i.test(trimmed)) {
+      sectionStart = i;
+      break;
+    }
+  }
+
+  if (sectionStart !== -1) {
+    sectionEnd = lines.length;
+    for (let i = sectionStart + 1; i < lines.length; i++) {
+      if (lines[i].trim().startsWith('## ')) {
+        sectionEnd = i;
+        break;
+      }
+    }
+  }
+
+  const newNotesLines: string[] = [];
+  if (validNotes.length > 0) {
+    newNotesLines.push('## Notas');
+    for (const note of validNotes) {
+      const noteLines = note.split(/\r?\n/);
+      newNotesLines.push(`- ${noteLines[0]}`);
+      for (let j = 1; j < noteLines.length; j++) {
+        newNotesLines.push(`  ${noteLines[j]}`);
+      }
+    }
+  }
+
+  if (sectionStart !== -1) {
+    if (validNotes.length === 0) {
+      // Remove empty section
+      lines.splice(sectionStart, sectionEnd - sectionStart);
+      return lines.join('\n').replace(/\n{3,}/g, '\n\n').trim() + '\n';
+    } else {
+      lines.splice(sectionStart, sectionEnd - sectionStart, ...newNotesLines);
+      return lines.join('\n');
+    }
+  } else {
+    if (validNotes.length === 0) {
+      return markdown;
+    }
+    const trimmedMd = markdown.trimEnd();
+    return `${trimmedMd}\n\n${newNotesLines.join('\n')}\n`;
+  }
+}
+
