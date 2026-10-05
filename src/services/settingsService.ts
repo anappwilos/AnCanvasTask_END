@@ -30,7 +30,7 @@ export interface AppUserSettings {
 export const DEFAULT_USER_SETTINGS: AppUserSettings = {
   theme: 'dark',
   density: 'normal',
-  language: 'es',
+  language: 'en',
   defaultView: 'canvas',
   confirmDeleteWithDependents: true,
   canvasShowGrid: true,

@@ -33,7 +33,7 @@ export type SupportedLanguageCode =
   | 'ru'
   | 'ur';
 
-export const defaultLocale: SupportedLanguageCode = 'es';
+export const defaultLocale: SupportedLanguageCode = 'en';
 
 /**
  * Load messages for the requested locale and activate it in Lingui
@@ -57,14 +57,14 @@ export async function dynamicActivate(locale: string) {
  * Initialize language based on:
  * 1. user explicit persisted preference
  * 2. browser navigator language
- * 3. default locale (es)
+ * 3. default locale (en)
  */
 export async function initI18n() {
   const persisted = typeof localStorage !== 'undefined' ? localStorage.getItem('antask_language') : null;
   let locale = persisted;
 
   if (!locale) {
-    const browserLang = typeof navigator !== 'undefined' ? navigator.language.split('-')[0] : 'es';
+    const browserLang = typeof navigator !== 'undefined' ? navigator.language.split('-')[0] : 'en';
     const isSupported = SUPPORTED_LANGUAGES.some((l) => l.code === browserLang);
     locale = isSupported ? browserLang : defaultLocale;
   }
