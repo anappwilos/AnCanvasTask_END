@@ -3551,7 +3551,7 @@ export default function App() {
 
           <div id="div-app-2" className="flex items-center gap-1.5 sm:gap-2 min-w-0">
             <div id="div-app-3" className="flex items-center gap-1.5 font-semibold text-xs text-[var(--on-surface)] shrink-0">
-              <span className="material-symbols-outlined text-[18px] text-[var(--primary)]">splitscreen_left</span>
+              <img src="/logo.png" alt="Logo" className="w-5 h-5 rounded-sm object-contain" />
               <span className="hidden sm:inline">Tasks Canvas</span>
             </div>
             <span className="text-[var(--outline)] hidden sm:inline">/</span>
