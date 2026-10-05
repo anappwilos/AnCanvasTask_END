@@ -28,6 +28,46 @@ Every action—from dragging a task card to connecting a dependency arrow—is d
 
 ---
 
+## 📸 DEMO
+
+Experience the primary interactive modes of **AnTaskCanvas**:
+
+### 1. Infinite Spatial Canvas (`tldraw` v5)
+> Visual freeform canvas with custom `TaskCard` nodes, section groups, and live Directed Acyclic Graph (DAG) dependency connections (`blockedBy`).
+
+<p align="center">
+  <img src="docs/assets/demo_canvas_view.png" alt="AnTaskCanvas - Infinite Canvas View" width="100%" style="border-radius: 8px; border: 1px solid #334155;" />
+</p>
+
+---
+
+### 2. Interactive Kanban Board
+> High-density column workflow (`Todo`, `In Progress`, `Done`, `Blocked`) with instant drag-and-drop state updates and inline editing.
+
+<p align="center">
+  <img src="docs/assets/demo_kanban_view.png" alt="AnTaskCanvas - Kanban Board View" width="100%" style="border-radius: 8px; border: 1px solid #334155;" />
+</p>
+
+---
+
+### 3. Live Split Markdown Editor
+> Side-by-side CodeMirror Markdown editor with bi-directional AST synchronization—type in Markdown or edit visually with zero data loss.
+
+<p align="center">
+  <img src="docs/assets/demo_split_editor_view.png" alt="AnTaskCanvas - Split Markdown Editor View" width="100%" style="border-radius: 8px; border: 1px solid #334155;" />
+</p>
+
+---
+
+### 4. Monorepo Document Explorer & Context-Aware Filters
+> Manage multi-scope task files (`frontend/TASKS.md`, `backend/TASKS.md`) with filter dropdowns that reactively reconcile with active document tags.
+
+<p align="center">
+  <img src="docs/assets/demo_explorer_filters_view.png" alt="AnTaskCanvas - Document Explorer & Filters" width="100%" style="border-radius: 8px; border: 1px solid #334155;" />
+</p>
+
+---
+
 ## ✨ Key Features
 
 ### 🎨 1. Infinite Spatial Canvas (`tldraw` v5)
