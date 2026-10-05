@@ -523,6 +523,11 @@ textarea:focus-visible,
   border-color: var(--primary) !important;
   background-color: rgba(59, 130, 246, 0.08) !important;
   border-radius: 4px !important;
+  pointer-events: none !important;
+}
+
+.tl-selection__bg {
+  pointer-events: none !important;
 }
 
 .tl-selection__corner,

@@ -1718,6 +1718,22 @@ export default function App() {
       setEditor(editorInstance);
       editorInstance.user.updateUserPreferences({ colorScheme: effectiveTheme === 'dark' ? 'dark' : 'light' });
 
+      // Container-level double-click listener to open task details when a task is double-clicked
+      const container = editorInstance.getContainer();
+      const handleContainerDblClick = () => {
+        const selected = editorInstance.getSelectedShapes();
+        const taskShapes = selected.filter((s) => (s as any).type === 'task');
+        if (taskShapes.length === 1) {
+          const s = taskShapes[0] as any;
+          const targetId = s.props?.taskId || s.props?.temporaryId || s.id;
+          if (targetId) {
+            setSelectedTaskShapeId(targetId);
+            setIsTaskDetailsOpen(true);
+          }
+        }
+      };
+      container?.addEventListener('dblclick', handleContainerDblClick);
+
       // Prevent tldraw from retaining accidental text/note shapes on canvas double click
       try {
         (editorInstance as any).sideEffects?.registerAfterCreateHandler?.('shape', (shape: any) => {
@@ -1935,11 +1951,12 @@ export default function App() {
 
       return () => {
         isMounted = false;
+        container?.removeEventListener('dblclick', handleContainerDblClick);
         unsubscribe();
         setEditor((curr) => (curr === editorInstance ? null : curr));
       };
     },
-    [effectiveTheme, triggerDebouncedVisualSave]
+    [effectiveTheme, triggerDebouncedVisualSave, setSelectedTaskShapeId, setIsTaskDetailsOpen]
   );
 
   const handleZoomToFit = useCallback(() => {

@@ -1,7 +1,7 @@
 import { useLingui } from '@lingui/react';
 import { msg } from '@lingui/core/macro';
 import { i18n, formatTaskCount } from '../i18n';
-import React, { useEffect, useLayoutEffect, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
   BaseBoxShapeUtil,
   createShapeId,
@@ -193,7 +193,38 @@ function TaskCardComponent({
     }
   };
 
+  const lastClickTimeRef = useRef<number>(0);
+
+  const openDetails = (e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+      (e.nativeEvent as any)?.stopImmediatePropagation?.();
+    }
+    try {
+      editor.select(shape.id);
+    } catch {
+      // ignore
+    }
+    window.dispatchEvent(
+      new CustomEvent('antask:open-task-details', {
+        detail: {
+          shapeId: shape.id,
+          taskId: taskId || shape.props?.taskId || shape.id,
+        },
+      })
+    );
+  };
+
   const handleCardClick = (e: React.MouseEvent) => {
+    const now = Date.now();
+    if (now - lastClickTimeRef.current < 350) {
+      openDetails(e);
+      lastClickTimeRef.current = 0;
+      return;
+    }
+    lastClickTimeRef.current = now;
+
     if (isAnyConnecting && !isConnectingSource) {
       e.stopPropagation();
       handleConnectionPointClick(e, { x: 0.5, y: 0.5, positionName: 'center' });
@@ -319,27 +350,6 @@ function TaskCardComponent({
 
   const hasActiveSearch = Boolean(searchQuery.trim());
   const isSearchMatch = hasActiveSearch && isMatch;
-
-  const openDetails = (e?: React.MouseEvent) => {
-    if (e) {
-      e.stopPropagation();
-      e.preventDefault();
-      (e.nativeEvent as any)?.stopImmediatePropagation?.();
-    }
-    try {
-      editor.select(shape.id);
-    } catch {
-      // ignore
-    }
-    window.dispatchEvent(
-      new CustomEvent('antask:open-task-details', {
-        detail: {
-          shapeId: shape.id,
-          taskId: taskId || shape.props?.taskId || shape.id,
-        },
-      })
-    );
-  };
 
   return (
     <HTMLContainer
@@ -859,12 +869,15 @@ export class TaskShapeUtil extends ShapeUtil<any> {
   }
 
   override hideSelectionBoundsBg(shape: ITaskShape): boolean {
-    return isShapeFilteredOut(shape);
+    return true;
   }
 
   override hideSelectionBoundsFg(shape: ITaskShape): boolean {
     return isShapeFilteredOut(shape);
   }
+
+  override hideRotateHandle = () => true;
+  override hideResizeHandles = () => true;
 
   override canBind(opts?: any) {
     const targetShape = (opts?.toShape || opts?.fromShape) as ITaskShape;
