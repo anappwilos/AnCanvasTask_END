@@ -1,71 +1,71 @@
 # AnTaskCanvas
 
-Organizador visual e interactivo de archivos `TASKS.md` para desarrolladores. Integra un lienzo infinito (`tldraw`), tablero Kanban por columnas y editor Markdown sincronizado en tiempo real.
+A visual and interactive organizer for `TASKS.md` files for developers. It integrates an infinite canvas (`tldraw`), a column-based Kanban board, and a real-time synchronized Markdown editor.
 
 ---
 
-## Características principales
+## Key Features
 
-- **Lienzo infinito & Kanban**: visualización bidireccional de tareas con arrastre, conexiones de dependencias (`blockedBy`), estados y prioridades (`P0`-`P3`).
-- **Sincronización Markdown AST**: parseo y serialización determinista con prevención de pérdidas y normalización segura.
-- **Workspaces & Git**: gestión de múltiples ramas y documentos `TASKS.md` por directorio (`frontend/`, `backend/`, `packages/ui/`).
-- **Integración Sanity Studio**: persistencia bidireccional opcional con esquemas nativos y visor embebido.
-- **Internacionalización moderna (i18n)**: arquitectura *compiler-first* basada en LinguiJS con extracción automática, IDs hash autogenerados y catálogos tipados.
+- **Infinite Canvas & Kanban**: Bidirectional visualization of tasks with drag-and-drop, dependency connections (`blockedBy`), statuses, and priorities (`P0`-`P3`).
+- **Markdown AST Synchronization**: Deterministic parsing and serialization with loss prevention and safe normalization.
+- **Workspaces & Git**: Management of multiple branches and `TASKS.md` documents per directory (`frontend/`, `backend/`, `packages/ui/`).
+- **Sanity Studio Integration**: Optional bidirectional persistence with native schemas and an embedded viewer.
+- **Modern Internationalization (i18n)**: Compiler-first architecture based on LinguiJS with automatic extraction, auto-generated hash IDs, and typed catalogs.
 
 ---
 
-## Requisitos previos
+## Prerequisites
 
 - Node.js >= 18
 - npm >= 9
 
 ---
 
-## Instalación y ejecución
+## Installation and Execution
 
 ```bash
-# Instalar dependencias
+# Install dependencies
 npm install
 
-# Iniciar servidor de desarrollo en http://localhost:3000
+# Start development server at http://localhost:3000
 npm run dev
 
-# Compilar para producción
+# Build for production
 npm run build
 
-# Validar tipos TypeScript
+# Validate TypeScript types
 npm run lint
 ```
 
 ---
 
-## Arquitectura de Internacionalización (i18n)
+## Internationalization Architecture (i18n)
 
-El proyecto utiliza un sistema compiler-first con LinguiJS. Los desarrolladores trabajan directamente con texto fuente legible (en español), sin definir claves semánticas manuales (`t("tasks.delete")`) ni editar diccionarios a mano.
+The project uses a compiler-first system with LinguiJS. Developers work directly with readable source text (in Spanish), without manually defining semantic keys (`t("tasks.delete")`) or hand-editing dictionaries.
 
-### Flujo de trabajo
+### Workflow
 
 ```text
-Texto fuente legible en TSX/TS
-  → Extracción automática (npm run i18n:extract)
-  → ID determinista autogenerado (hash de 6 caracteres)
-  → Catálogos generados (src/locales/{locale}/messages.json)
-  → Traducción por locale
-  → Compilación optimizada (npm run i18n:compile)
+Readable source text in TSX/TS
+  → Automatic extraction (npm run i18n:extract)
+  → Auto-generated deterministic ID (6-character hash)
+  → Generated catalogs (src/locales/{locale}/messages.json)
+  → Translation by locale
+  → Optimized compilation (npm run i18n:compile)
 ```
 
-### Comandos i18n
+### i18n Commands
 
-| Comando | Descripción |
+| Command | Description |
 | :--- | :--- |
-| `npm run i18n:extract` | Inspecciona el código fuente, genera IDs deterministas y actualiza los archivos `messages.json`. |
-| `npm run i18n:compile` | Compila los catálogos en bundles JS optimizados para producción. |
-| `npm run i18n:check` | Validación estricta de compilación (`lingui compile --strict`) apta para CI. |
-| `npm run i18n` | Ejecuta extracción y compilación en un solo paso (`extract && compile`). |
+| `npm run i18n:extract` | Inspects source code, generates deterministic IDs, and updates `messages.json` files. |
+| `npm run i18n:compile` | Compiles catalogs into optimized JS bundles for production. |
+| `npm run i18n:check` | Strict compilation validation (`lingui compile --strict`) suitable for CI. |
+| `npm run i18n` | Runs extraction and compilation in a single step (`extract && compile`). |
 
-### Guía para desarrolladores
+### Developer Guide
 
-#### 1. Texto de interfaz estático
+#### 1. Static UI Text
 
 ```tsx
 import { useLingui } from '@lingui/react';
@@ -77,67 +77,67 @@ function MyComponent() {
 
   return (
     <div>
-      {/* Opción A: Macro en JSX */}
+      {/* Option A: Macro in JSX */}
       <button title={_(msg`Guardar cambios`)}>
         <Trans>Guardar</Trans>
       </button>
 
-      {/* Opción B: Helper directo */}
+      {/* Option B: Direct helper */}
       <span>{_(msg`Eliminar tarea`)}</span>
     </div>
   );
 }
 ```
 
-#### 2. Variables e interpolación
+#### 2. Variables and Interpolation
 
 ```tsx
-// Variables dentro de la cadena (el orden se adapta a cada idioma)
+// Variables inside the string (order adapts to each language)
 pushToast(_(msg`Rama "${branchName}" creada con éxito`));
 ```
 
-#### 3. Pluralización ICU
+#### 3. ICU Pluralization
 
 ```tsx
 import { plural } from '@lingui/core/macro';
 
-// Pluralización nativa ICU según el locale activo
+// Native ICU pluralization based on the active locale
 const label = plural(count, {
   one: '# tarea seleccionada',
   other: '# tareas seleccionadas',
 });
 ```
 
-#### 4. Formatos regionales centralizados
+#### 4. Centralized Regional Formats
 
-Importar formateadores desde `src/i18n`:
+Import formatters from `src/i18n`:
 
 ```tsx
 import { formatDate, formatTime, formatDateTime, formatTaskCount } from './i18n';
 
-formatDate(date);              // Respeta el locale activo
-formatTime(date);              // Respeta el locale activo
-formatTaskCount(tasks.length); // "1 tarea" / "5 tareas"
+formatDate(date);              // Respects active locale
+formatTime(date);              // Respects active locale
+formatTaskCount(tasks.length); // "1 task" / "5 tasks"
 ```
 
-### Idiomas configurados
+### Configured Languages
 
-- **Fuente / Fallback**: `es` (Español)
-- **Locales iniciales**: `es`, `en` (English)
-- **Extensibilidad**: soporte preparado para `fr`, `de`, `pt`, `it` en `src/i18n/index.ts` sin alterar componentes.
+- **Source / Fallback**: `es` (Spanish)
+- **Initial Locales**: `es`, `en` (English)
+- **Extensibility**: Ready for `fr`, `de`, `pt`, `it` in `src/i18n/index.ts` without altering components.
 
 ---
 
-## Estructura del proyecto
+## Project Structure
 
 ```text
 src/
-├── components/       # Componentes de UI (Modales, Kanban, SplitEditor, etc.)
-├── i18n/             # Inicialización de Lingui y formateadores regionales Intl
-├── locales/          # Catálogos de mensajes generados (es, en)
-├── services/         # Servicios de sincronización, workspaces y Sanity
-├── shapes/           # Definición de formas de lienzo de tldraw (TaskCard, GroupCard)
-├── utils/            # Parseo y serialización de Markdown AST (remark/unified)
-├── App.tsx           # Contenedor raíz de la aplicación
-└── main.tsx          # Punto de entrada y Error Boundary global
+├── components/       # UI Components (Modals, Kanban, SplitEditor, etc.)
+├── i18n/             # Lingui initialization and Intl regional formatters
+├── locales/          # Generated message catalogs (es, en)
+├── services/         # Sync, workspaces, and Sanity services
+├── shapes/           # tldraw canvas shapes definition (TaskCard, GroupCard)
+├── utils/            # Markdown AST parsing and serialization (remark/unified)
+├── App.tsx           # Root application container
+└── main.tsx          # Entry point and global Error Boundary
 ```
