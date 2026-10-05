@@ -1720,7 +1720,27 @@ export default function App() {
 
       // Container-level double-click listener to open task details when a task is double-clicked
       const container = editorInstance.getContainer();
-      const handleContainerDblClick = () => {
+      const handleContainerDblClick = (e: MouseEvent) => {
+        // 1. Check if double-click target is inside a task card element
+        const target = e.target as HTMLElement | null;
+        const taskCardEl = target?.closest('[id^="task-card-container-"]');
+        if (taskCardEl) {
+          const shapeId = taskCardEl.id.replace('task-card-container-', '');
+          if (shapeId) {
+            try {
+              editorInstance.select(shapeId as any);
+            } catch {
+              // ignore
+            }
+            const shape = editorInstance.getShape(shapeId as any) as any;
+            const targetId = shape?.props?.taskId || shape?.props?.temporaryId || shapeId;
+            setSelectedTaskShapeId(targetId);
+            setIsTaskDetailsOpen(true);
+            return;
+          }
+        }
+
+        // 2. Check if a single task shape is selected
         const selected = editorInstance.getSelectedShapes();
         const taskShapes = selected.filter((s) => (s as any).type === 'task');
         if (taskShapes.length === 1) {
@@ -1729,10 +1749,29 @@ export default function App() {
           if (targetId) {
             setSelectedTaskShapeId(targetId);
             setIsTaskDetailsOpen(true);
+            return;
           }
         }
+
+        // 3. Fallback: check shape at screen coordinate
+        try {
+          const pagePoint = editorInstance.screenToPage({ x: e.clientX, y: e.clientY });
+          const hitShape = editorInstance.getShapeAtPoint(pagePoint) as any;
+          if (hitShape && hitShape.type === 'task') {
+            try {
+              editorInstance.select(hitShape.id);
+            } catch {
+              // ignore
+            }
+            const targetId = hitShape.props?.taskId || hitShape.props?.temporaryId || hitShape.id;
+            setSelectedTaskShapeId(targetId);
+            setIsTaskDetailsOpen(true);
+          }
+        } catch {
+          // ignore
+        }
       };
-      container?.addEventListener('dblclick', handleContainerDblClick);
+      container?.addEventListener('dblclick', handleContainerDblClick, true);
 
       // Prevent tldraw from retaining accidental text/note shapes on canvas double click
       try {
@@ -1951,7 +1990,7 @@ export default function App() {
 
       return () => {
         isMounted = false;
-        container?.removeEventListener('dblclick', handleContainerDblClick);
+        container?.removeEventListener('dblclick', handleContainerDblClick, true);
         unsubscribe();
         setEditor((curr) => (curr === editorInstance ? null : curr));
       };

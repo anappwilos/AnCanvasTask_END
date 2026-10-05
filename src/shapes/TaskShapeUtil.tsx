@@ -216,6 +216,31 @@ function TaskCardComponent({
     );
   };
 
+  const pointerDownPosRef = useRef<{ x: number; y: number; time: number } | null>(null);
+  const lastTapTimeRef = useRef<number>(0);
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    pointerDownPosRef.current = { x: e.clientX, y: e.clientY, time: Date.now() };
+  };
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    if (!pointerDownPosRef.current) return;
+    const dx = e.clientX - pointerDownPosRef.current.x;
+    const dy = e.clientY - pointerDownPosRef.current.y;
+    pointerDownPosRef.current = null;
+
+    // Detect tap/click without significant mouse drag
+    if (Math.hypot(dx, dy) < 8) {
+      const now = Date.now();
+      if (now - lastTapTimeRef.current < 400) {
+        openDetails();
+        lastTapTimeRef.current = 0;
+      } else {
+        lastTapTimeRef.current = now;
+      }
+    }
+  };
+
   const handleCardClick = (e: React.MouseEvent) => {
     const now = Date.now();
     if (now - lastClickTimeRef.current < 350) {
@@ -362,6 +387,8 @@ function TaskCardComponent({
     >
       <div
         id={`task-card-container-${shape.id}`}
+        onPointerDown={handlePointerDown}
+        onPointerUp={handlePointerUp}
         onClick={handleCardClick}
         onDoubleClick={openDetails}
         className={`group/card w-full h-full rounded-md bg-[var(--surface-container)] border transition-all duration-120 select-none flex flex-col justify-between p-2.5 relative ${
@@ -525,6 +552,8 @@ function TaskCardComponent({
             ) : (
               <div
                 id={`task-card-title-view-${shape.id}`}
+                onPointerDown={handlePointerDown}
+                onPointerUp={handlePointerUp}
                 onDoubleClick={openDetails}
                 title={_(msg`Doble clic para ver detalles`)}
                 className="group/title flex items-start gap-1 flex-1 cursor-pointer min-w-0"
@@ -878,6 +907,18 @@ export class TaskShapeUtil extends ShapeUtil<any> {
 
   override hideRotateHandle = () => true;
   override hideResizeHandles = () => true;
+
+  override onDoubleClick(shape: ITaskShape) {
+    const targetId = shape.props?.taskId || shape.props?.temporaryId || shape.id;
+    window.dispatchEvent(
+      new CustomEvent('antask:open-task-details', {
+        detail: {
+          shapeId: shape.id,
+          taskId: targetId,
+        },
+      })
+    );
+  }
 
   override canBind(opts?: any) {
     const targetShape = (opts?.toShape || opts?.fromShape) as ITaskShape;
