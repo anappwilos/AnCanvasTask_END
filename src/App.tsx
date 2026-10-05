@@ -1634,6 +1634,13 @@ export default function App() {
       const { shapeId, taskId } = customEvent.detail || {};
       const targetId = shapeId || taskId;
       if (targetId) {
+        if (editor && shapeId) {
+          try {
+            editor.select(shapeId as any);
+          } catch {
+            // ignore
+          }
+        }
         setSelectedTaskShapeId(targetId);
         setIsTaskDetailsOpen(true);
       }
@@ -1644,7 +1651,7 @@ export default function App() {
       window.removeEventListener('antask-request-delete-task', handleDeleteRequest);
       window.removeEventListener('antask:open-task-details', handleOpenTaskDetails);
     };
-  }, []);
+  }, [editor]);
 
   // Selection and Zoom state for Canvas (DESIGN.md Section 14)
   const [canvasZoom, setCanvasZoom] = useState<number>(100);
@@ -1827,9 +1834,10 @@ export default function App() {
 
                 // 3. Detect moving task-group shape -> move associated tasks together as a group
                 if (to?.type === 'task-group' && from?.type === 'task-group') {
+                  const isResizing = to.props?.w !== from.props?.w || to.props?.h !== from.props?.h;
                   const dx = to.x - from.x;
                   const dy = to.y - from.y;
-                  if (dx !== 0 || dy !== 0) {
+                  if (!isResizing && (dx !== 0 || dy !== 0)) {
                     const selectedIds = new Set(editorInstance.getSelectedShapeIds());
                     const groupTitle = (to.props?.title || '').trim().toLowerCase();
 

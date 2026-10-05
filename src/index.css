@@ -23,25 +23,25 @@
   --sal: env(safe-area-inset-left, 0px);
   --sar: env(safe-area-inset-right, 0px);
 
-  /* Dark Theme (Default - Pure black base, restrained professional contrast) */
+  /* Dark Theme (Default - Sober Slate/Zinc, non-neon, professional contrast) */
   --primary: #3b82f6;
   --on-primary: #ffffff;
   --primary-container: #1e293b;
   --on-primary-container: #93c5fd;
 
   --secondary: #94a3b8;
-  --on-secondary: #000000;
+  --on-secondary: #0f172a;
 
-  --surface: #000000;
-  --surface-container: #0a0a0a;
-  --surface-container-high: #141414;
-  --surface-container-highest: #1f1f1f;
+  --surface: #0d1117;
+  --surface-container: #161b22;
+  --surface-container-high: #21262d;
+  --surface-container-highest: #30363d;
 
-  --on-surface: #f4f4f5;
+  --on-surface: #e6edf3;
   --on-surface-variant: #8b949e;
 
-  --outline: #27272a;
-  --outline-variant: #18181b;
+  --outline: #30363d;
+  --outline-variant: #21262d;
 
   --error: #f85149;
   --on-error: #ffffff;
@@ -99,9 +99,9 @@
   --secondary: #64748b;
   --on-secondary: #ffffff;
 
-  --surface: #ffffff;
+  --surface: #f6f8fa;
   --surface-container: #ffffff;
-  --surface-container-high: #f6f8fa;
+  --surface-container-high: #f3f4f6;
   --surface-container-highest: #e5e7eb;
 
   --on-surface: #1f2328;

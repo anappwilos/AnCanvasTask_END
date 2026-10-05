@@ -461,37 +461,37 @@ export const TaskDocumentExplorer: React.FC<TaskDocumentExplorerProps> = ({
       </div>
 
       {/* 2. Files & Folders Header with Title and Quick Add Buttons */}
-      <div id="div-taskdocumentexplorer-20" className="flex items-center justify-between px-1 py-0.5">
-        <div id="div-taskdocumentexplorer-21" className="flex items-center gap-1.5">
-          <span className="material-symbols-outlined text-[15px] text-[var(--primary)]">
+      <div id="div-taskdocumentexplorer-20" className="flex items-center justify-between px-1 py-1">
+        <div id="div-taskdocumentexplorer-21" className="flex items-center gap-1.5 min-w-0">
+          <span className="material-symbols-outlined text-[15px] text-[var(--primary)] shrink-0">
             folder_special
           </span>
-          <span className="text-[11px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider">
+          <span className="text-[11px] font-semibold text-[var(--on-surface-variant)] uppercase tracking-wider truncate">
             {i18n._(msg`Documentos de Tareas`)} ({safeTaskDocuments.length})
           </span>
         </div>
 
-        <div id="div-taskdocumentexplorer-22" className="flex items-center gap-1.5">
+        <div id="div-taskdocumentexplorer-22" className="flex items-center gap-0.5 shrink-0">
           <button
             id="btn-explorer-new-folder"
             type="button"
             onClick={onOpenNewFolderModal}
-            className="text-[11px] text-amber-400 hover:underline cursor-pointer flex items-center gap-0.5 font-medium"
+            className="w-6 h-6 rounded flex items-center justify-center text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer transition-colors"
             title={i18n._(msg`Crear una nueva carpeta`)}
+            aria-label={i18n._(msg`Crear una nueva carpeta`)}
           >
-            <span className="material-symbols-outlined text-[13px]">create_new_folder</span>
-            <span>+ {i18n._(msg`Nueva carpeta`)}</span>
+            <span className="material-symbols-outlined text-[15px]">create_new_folder</span>
           </button>
 
           <button
             id="btn-explorer-new-doc"
             type="button"
             onClick={() => onOpenNewDocumentModal('')}
-            className="text-[11px] text-[var(--primary)] hover:underline cursor-pointer flex items-center gap-0.5 font-medium"
+            className="w-6 h-6 rounded flex items-center justify-center text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] cursor-pointer transition-colors"
             title={i18n._(msg`Crear un nuevo archivo Task MD`)}
+            aria-label={i18n._(msg`Crear un nuevo archivo Task MD`)}
           >
-            <span className="material-symbols-outlined text-[13px]">note_add</span>
-            <span>+ {i18n._(msg`Nuevo archivo .md`)}</span>
+            <span className="material-symbols-outlined text-[15px]">note_add</span>
           </button>
         </div>
       </div>

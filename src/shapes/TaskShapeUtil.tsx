@@ -3,12 +3,14 @@ import { msg } from '@lingui/core/macro';
 import { i18n, formatTaskCount } from '../i18n';
 import React, { useEffect, useLayoutEffect, useState } from 'react';
 import {
+  BaseBoxShapeUtil,
   createShapeId,
   Editor,
   HandleSnapGeometry,
   HTMLContainer,
   RecordProps,
   Rectangle2d,
+  resizeBox,
   ShapeUtil,
   T,
   TLBaseShape,
@@ -318,6 +320,27 @@ function TaskCardComponent({
   const hasActiveSearch = Boolean(searchQuery.trim());
   const isSearchMatch = hasActiveSearch && isMatch;
 
+  const openDetails = (e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+      (e.nativeEvent as any)?.stopImmediatePropagation?.();
+    }
+    try {
+      editor.select(shape.id);
+    } catch {
+      // ignore
+    }
+    window.dispatchEvent(
+      new CustomEvent('antask:open-task-details', {
+        detail: {
+          shapeId: shape.id,
+          taskId: taskId || shape.props?.taskId || shape.id,
+        },
+      })
+    );
+  };
+
   return (
     <HTMLContainer
       id={shape.id}
@@ -330,19 +353,7 @@ function TaskCardComponent({
       <div
         id={`task-card-container-${shape.id}`}
         onClick={handleCardClick}
-        onDoubleClick={(e) => {
-          e.stopPropagation();
-          e.preventDefault();
-          (e.nativeEvent as any)?.stopImmediatePropagation?.();
-          window.dispatchEvent(
-            new CustomEvent('antask:open-task-details', {
-              detail: {
-                shapeId: shape.id,
-                taskId: taskId || shape.props?.taskId || shape.id,
-              },
-            })
-          );
-        }}
+        onDoubleClick={openDetails}
         className={`group/card w-full h-full rounded-md bg-[var(--surface-container)] border transition-all duration-120 select-none flex flex-col justify-between p-2.5 relative ${
           isConnectingSource
             ? 'border-[var(--primary)] ring-2 ring-[var(--primary)] ring-offset-2 ring-offset-[var(--surface)] bg-[var(--primary-container)]/20 shadow-sm'
@@ -504,12 +515,9 @@ function TaskCardComponent({
             ) : (
               <div
                 id={`task-card-title-view-${shape.id}`}
-                onDoubleClick={(e) => {
-                  e.stopPropagation();
-                  setIsEditingTitle(true);
-                }}
-                title={_(msg`Doble clic para editar título`)}
-                className="group/title flex items-start gap-1 flex-1 cursor-text min-w-0"
+                onDoubleClick={openDetails}
+                title={_(msg`Doble clic para ver detalles`)}
+                className="group/title flex items-start gap-1 flex-1 cursor-pointer min-w-0"
               >
                 <span
                   className={`text-xs font-medium leading-snug transition-colors line-clamp-2 ${
@@ -667,9 +675,8 @@ function TaskCardComponent({
               id={`btn-task-card-menu-details-${shape.id}`}
               type="button"
               onClick={(e) => {
-                e.stopPropagation();
                 setIsMenuOpen(false);
-                editor.setSelectedShapes([shape.id]);
+                openDetails(e);
               }}
               className="px-2 py-1 rounded text-left text-[var(--on-surface)] hover:bg-[var(--surface-container-high)] flex items-center gap-2 cursor-pointer"
             >
@@ -1218,7 +1225,7 @@ export type GroupShapeProps = {
 
 export type ITaskGroupShape = TLBaseShape<'task-group', GroupShapeProps>;
 
-export class TaskGroupShapeUtil extends ShapeUtil<any> {
+export class TaskGroupShapeUtil extends BaseBoxShapeUtil<any> {
   static override type = 'task-group' as const;
 
   static override props: RecordProps<any> = {
@@ -1245,6 +1252,12 @@ export class TaskGroupShapeUtil extends ShapeUtil<any> {
       height: shape.props.h,
       isFilled: true,
     });
+  }
+
+  override canResize = () => true;
+  override isAspectRatioLocked = () => false;
+  override onResize(shape: ITaskGroupShape, info: any) {
+    return resizeBox(shape, info, { minWidth: 200, minHeight: 120 });
   }
 
   override hideSelectionBoundsBg(shape: ITaskGroupShape): boolean {
