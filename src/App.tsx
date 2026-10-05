@@ -23,9 +23,11 @@ import {
   SanityConfig,
 } from './services/sanityService';
 import {
+  CustomNoteShapeUtil,
   ITaskGroupShape,
   ITaskShape,
   loadTasksFromMarkdown,
+  NOTE_COLOR_OPTIONS,
   ParsedGroup,
   parseTasksMarkdown,
   seedMockTasks,
@@ -377,6 +379,54 @@ export default function App() {
     window.addEventListener('keydown', handleGlobalKeyDown);
     return () => window.removeEventListener('keydown', handleGlobalKeyDown);
   }, [handleSelectCanvasTool]);
+
+  // Selected Note state for quick color & size toolbar
+  const [selectedNoteInfo, setSelectedNoteInfo] = useState<{
+    id: string;
+    color: string;
+    size: string;
+    screenX: number;
+    screenY: number;
+  } | null>(null);
+
+  const handleChangeNoteColor = useCallback((color: string) => {
+    if (!editor) return;
+    const noteShapes = editor.getSelectedShapes().filter((s) => (s as any).type === 'note');
+    if (noteShapes.length > 0) {
+      editor.updateShapes(
+        noteShapes.map((s) => ({
+          id: s.id,
+          type: 'note',
+          props: { color },
+        }))
+      );
+      setSelectedNoteInfo((prev) => (prev ? { ...prev, color } : null));
+    }
+  }, [editor]);
+
+  const handleChangeNoteSize = useCallback((size: 's' | 'm' | 'l' | 'xl') => {
+    if (!editor) return;
+    const noteShapes = editor.getSelectedShapes().filter((s) => (s as any).type === 'note');
+    if (noteShapes.length > 0) {
+      editor.updateShapes(
+        noteShapes.map((s) => ({
+          id: s.id,
+          type: 'note',
+          props: { size },
+        }))
+      );
+      setSelectedNoteInfo((prev) => (prev ? { ...prev, size } : null));
+    }
+  }, [editor]);
+
+  const handleDeleteSelectedNotes = useCallback(() => {
+    if (!editor) return;
+    const noteShapes = editor.getSelectedShapes().filter((s) => (s as any).type === 'note');
+    if (noteShapes.length > 0) {
+      editor.deleteShapes(noteShapes.map((s) => s.id));
+      setSelectedNoteInfo(null);
+    }
+  }, [editor]);
 
   // Modals state
   const [isNewTaskModalOpen, setIsNewTaskModalOpen] = useState<boolean>(false);
@@ -1642,7 +1692,7 @@ export default function App() {
     });
   }, []);
 
-  const customShapeUtils = useMemo(() => [TaskGroupShapeUtil, TaskShapeUtil], []);
+  const customShapeUtils = useMemo(() => [TaskGroupShapeUtil, TaskShapeUtil, CustomNoteShapeUtil], []);
 
 
   // Validation Report computed reactively
@@ -1747,6 +1797,34 @@ export default function App() {
           } else if (taskShapes.length === 0 && activeView === 'canvas') {
             setSelectedTaskShapeId((prev) => (prev !== null ? null : prev));
             setIsTaskDetailsOpen(false);
+          }
+
+          // Check for selected note shapes to show color & size quick action toolbar
+          const noteShapes = selected.filter((s) => (s as any).type === 'note');
+          if (noteShapes.length >= 1) {
+            const currentNote = noteShapes[0] as any;
+            try {
+              const pageBounds = editor.getShapePageBounds(currentNote.id);
+              if (pageBounds) {
+                const screenPoint = editor.pageToViewport({
+                  x: pageBounds.midX,
+                  y: pageBounds.minY,
+                });
+                setSelectedNoteInfo({
+                  id: currentNote.id,
+                  color: currentNote.props?.color || 'yellow',
+                  size: currentNote.props?.size || 'm',
+                  screenX: screenPoint.x,
+                  screenY: screenPoint.y - 12,
+                });
+              } else {
+                setSelectedNoteInfo(null);
+              }
+            } catch {
+              setSelectedNoteInfo(null);
+            }
+          } else {
+            setSelectedNoteInfo(null);
           }
         } catch {
           // ignore
@@ -4116,6 +4194,79 @@ export default function App() {
                       onMount={handleMount}
                       autoFocus
                     />
+
+                    {/* Floating Note Action Toolbar (Color & Size) */}
+                    {selectedNoteInfo && (
+                      <div
+                        id="note-floating-actions-toolbar"
+                        className="absolute z-30 pointer-events-auto bg-[var(--surface-container)] border border-[var(--outline)] rounded-md shadow-md px-2 py-1 flex items-center gap-1.5 select-none text-xs transition-all duration-75"
+                        style={{
+                          left: Math.max(160, selectedNoteInfo.screenX),
+                          top: Math.max(16, selectedNoteInfo.screenY),
+                          transform: 'translate(-50%, -100%)',
+                        }}
+                      >
+                        {/* Color swatches */}
+                        <div className="flex items-center gap-1">
+                          {NOTE_COLOR_OPTIONS.map((col) => (
+                            <button
+                              key={col.id}
+                              id={`btn-note-color-${col.id}`}
+                              type="button"
+                              onClick={() => handleChangeNoteColor(col.tldrawColor)}
+                              className={`w-4 h-4 rounded-full cursor-pointer transition-transform hover:scale-110 flex items-center justify-center ${col.bgClass} ${col.borderClass} border ${
+                                selectedNoteInfo.color === col.tldrawColor
+                                  ? 'ring-2 ring-[var(--primary)] ring-offset-1 dark:ring-offset-black scale-105'
+                                  : 'opacity-85 hover:opacity-100'
+                              }`}
+                              title={col.name}
+                              aria-label={col.name}
+                            >
+                              {selectedNoteInfo.color === col.tldrawColor && (
+                                <span className="w-1 h-1 rounded-full bg-[var(--on-surface)]" />
+                              )}
+                            </button>
+                          ))}
+                        </div>
+
+                        <div className="w-px h-3.5 bg-[var(--outline)] my-auto mx-0.5" />
+
+                        {/* Size presets S, M, L, XL */}
+                        <div className="flex items-center gap-0.5">
+                          {(['s', 'm', 'l', 'xl'] as const).map((sz) => (
+                            <button
+                              key={sz}
+                              id={`btn-note-size-${sz}`}
+                              type="button"
+                              onClick={() => handleChangeNoteSize(sz)}
+                              className={`px-1.5 py-0.5 text-[10px] font-mono font-medium rounded transition-colors cursor-pointer ${
+                                selectedNoteInfo.size === sz
+                                  ? 'bg-[var(--primary)] text-[var(--on-primary)] font-semibold'
+                                  : 'text-[var(--on-surface-variant)] hover:bg-[var(--surface-container-high)] hover:text-[var(--on-surface)]'
+                              }`}
+                              title={i18n._(msg`Tamaño ${sz.toUpperCase()}`)}
+                              aria-label={i18n._(msg`Tamaño ${sz.toUpperCase()}`)}
+                            >
+                              {sz.toUpperCase()}
+                            </button>
+                          ))}
+                        </div>
+
+                        <div className="w-px h-3.5 bg-[var(--outline)] my-auto mx-0.5" />
+
+                        {/* Delete note button */}
+                        <button
+                          id="btn-delete-selected-note"
+                          type="button"
+                          onClick={handleDeleteSelectedNotes}
+                          className="btn-m3-icon w-5 h-5 text-[var(--error)] hover:bg-[var(--surface-container-high)] cursor-pointer"
+                          title={i18n._(msg`Eliminar nota`)}
+                          aria-label={i18n._(msg`Eliminar nota`)}
+                        >
+                          <span className="material-symbols-outlined text-[14px]">delete</span>
+                        </button>
+                      </div>
+                    )}
 
                     {/* Floating Canvas Navigation Controls (DESIGN.md Section 3 & 14) */}
                     <div id="div-app-24" className="absolute bottom-3 left-3 z-10 flex items-center gap-0.5 sm:gap-1 bg-[var(--surface-container)] border border-[var(--outline)] rounded-md p-1 shadow-sm select-none">

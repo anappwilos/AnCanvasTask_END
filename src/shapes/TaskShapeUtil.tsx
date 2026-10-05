@@ -8,12 +8,14 @@ import {
   Editor,
   HandleSnapGeometry,
   HTMLContainer,
+  NoteShapeUtil,
   RecordProps,
   Rectangle2d,
   resizeBox,
   ShapeUtil,
   T,
   TLBaseShape,
+  TLNoteShape,
   TLShapePartial,
 } from 'tldraw';
 import { CanvasVisualDocument } from '../services/sanityService';
@@ -23,6 +25,41 @@ import {
   HighlightText,
   checkTaskMatchesQuery,
 } from '../utils/searchHighlight';
+
+export const NOTE_COLOR_OPTIONS = [
+  { id: 'yellow', name: 'Amarillo', tldrawColor: 'yellow', bgClass: 'bg-[#fef08a] dark:bg-[#713f12]', borderClass: 'border-[#ca8a04]' },
+  { id: 'green', name: 'Verde', tldrawColor: 'green', bgClass: 'bg-[#bbf7d0] dark:bg-[#14532d]', borderClass: 'border-[#16a34a]' },
+  { id: 'blue', name: 'Azul', tldrawColor: 'blue', bgClass: 'bg-[#bfdbfe] dark:bg-[#1e3a8a]', borderClass: 'border-[#2563eb]' },
+  { id: 'violet', name: 'Violeta', tldrawColor: 'violet', bgClass: 'bg-[#e9d5ff] dark:bg-[#581c87]', borderClass: 'border-[#9333ea]' },
+  { id: 'orange', name: 'Naranja', tldrawColor: 'orange', bgClass: 'bg-[#fed7aa] dark:bg-[#7c2d12]', borderClass: 'border-[#ea580c]' },
+  { id: 'red', name: 'Rojo', tldrawColor: 'red', bgClass: 'bg-[#fecaca] dark:bg-[#7f1d1d]', borderClass: 'border-[#dc2626]' },
+  { id: 'grey', name: 'Gris', tldrawColor: 'grey', bgClass: 'bg-[#e5e7eb] dark:bg-[#374151]', borderClass: 'border-[#6b7280]' },
+  { id: 'black', name: 'Oscuro', tldrawColor: 'black', bgClass: 'bg-[#18181b] dark:bg-[#09090b]', borderClass: 'border-[#52525b]' },
+];
+
+/**
+ * Enhanced NoteShapeUtil that enables interactive corner scaling and resize handles for sticky notes.
+ */
+export class CustomNoteShapeUtil extends NoteShapeUtil {
+  static override type = 'note' as const;
+  override options = {
+    ...this.options,
+    resizeMode: 'scale' as const,
+  };
+
+  override hideResizeHandles(_shape: TLNoteShape): boolean {
+    return false;
+  }
+
+  override getDefaultProps(): TLNoteShape['props'] {
+    return {
+      ...super.getDefaultProps(),
+      color: 'yellow',
+      size: 'm',
+    };
+  }
+}
+
 import {
   ActiveConnectionSource,
   ConnectionPointAnchor,
